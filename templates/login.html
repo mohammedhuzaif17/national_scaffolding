@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Login - National Scaffolding{% endblock %}
+
+{% block content %}
+<div class="glass-container form-container">
+    <h1 class="page-title">Login</h1>
+    <form method="POST">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required placeholder="Enter your username">
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required placeholder="Enter your password">
+        </div>
+        <div class="form-group">
+            <label for="user_type">Login As</label>
+            <select id="user_type" name="user_type">
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+            </select>
+        </div>
+        <button type="submit" class="btn-primary">Login</button>
+    </form>
+    <p style="text-align: center; margin-top: 1rem;">
+        Don't have an account? <a href="{{ url_for('register') }}" style="color: #ffa500;">Register here</a>
+    </p>
+</div>
+{% endblock %}

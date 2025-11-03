@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Fabrications - Products{% endblock %}
+
+{% block content %}
+<div class="glass-container">
+    <h1 class="page-title">Fabrications</h1>
+    <p class="page-subtitle">Custom fabrication products including furniture and more</p>
+    <p style="text-align: center; color: #ffa500; margin-bottom: 2rem;">
+        For inquiries, contact us at: <strong>+91 1234567890</strong>
+    </p>
+    
+    <div class="product-grid">
+        {% for product in products %}
+        <div class="product-card">
+            <h3>{{ product.name }}</h3>
+            <p>{{ product.description }}</p>
+            <div class="product-price">₹{{ product.price }}</div>
+            
+            {% if current_user.is_authenticated and session.get('user_type') != 'admin' %}
+            <div class="form-group">
+                <label for="quantity_{{ product.id }}">Quantity</label>
+                <input type="number" id="quantity_{{ product.id }}" value="1" min="1" style="width: 100%;">
+            </div>
+            <button class="btn-primary" onclick="addToCart({{ product.id }}, '{{ product.name }}', {{ product.price }})">
+                Add to Cart
+            </button>
+            {% elif not current_user.is_authenticated %}
+            <p style="color: #ff6b6b; text-align: center;">Please login to purchase</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% if current_user.is_authenticated and session.get('user_type') != 'admin' %}
+<button class="view-cart-btn" onclick="window.location.href='{{ url_for('cart') }}'">
+    🛒 View Cart
+</button>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+function addToCart(productId, productName, price) {
+    const quantity = document.getElementById('quantity_' + productId).value;
+    
+    fetch('/add_to_cart', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            product_id: productId,
+            product_name: productName,
+            price: price,
+            quantity: parseInt(quantity)
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Product added to cart!');
+        }
+    });
+}
+{% endblock %}

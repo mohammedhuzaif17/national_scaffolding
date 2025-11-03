@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}National Scaffolding - Products{% endblock %}
+
+{% block content %}
+<div id="welcomePopup" class="welcome-popup">
+    <div class="welcome-content">
+        <h1>Welcome to 'THE NATIONAL SCAFFOLDING'</h1>
+        <p>We don't just build scaffolds — we build confidence. Explore quality that supports every great construction.</p>
+        <button class="btn-explore" onclick="closeWelcome()">Continue to Explore</button>
+    </div>
+</div>
+
+<div class="glass-container">
+    <h1 class="page-title">The National Scaffolding</h1>
+    <p class="page-subtitle">Professional scaffolding services for all your construction needs</p>
+    
+    <div class="category-buttons">
+        <button class="category-btn {% if category == 'all' %}active{% endif %}" 
+                onclick="window.location.href='{{ url_for('national_scaffoldings', category='all') }}'">
+            ALL PRODUCTS ✓
+        </button>
+        <button class="category-btn {% if category == 'aluminium' %}active{% endif %}" 
+                onclick="window.location.href='{{ url_for('national_scaffoldings', category='aluminium') }}'">
+            ALUMINIUM SCAFFOLDINGS
+        </button>
+        <button class="category-btn {% if category == 'h-frames' %}active{% endif %}" 
+                onclick="window.location.href='{{ url_for('national_scaffoldings', category='h-frames') }}'">
+            H FRAMES SCAFFOLDINGS
+        </button>
+        <button class="category-btn {% if category == 'cuplock' %}active{% endif %}" 
+                onclick="window.location.href='{{ url_for('national_scaffoldings', category='cuplock') }}'">
+            CUPLOCK SCAFFOLDINGS
+        </button>
+    </div>
+
+    <h2 style="color: #ffa500; margin-top: 2rem;">Our Products</h2>
+    
+    <div class="product-grid">
+        {% for product in products %}
+        <div class="product-card">
+            <h3>{{ product.name }}</h3>
+            <p>{{ product.description }}</p>
+            {% if product.category %}
+            <p style="color: #ffa500; font-size: 0.9rem;">Category: {{ product.category|title }}</p>
+            {% endif %}
+            <div class="product-price">₹{{ product.price }}</div>
+            {% if product.rent_price %}
+            <p style="color: #4CAF50;">Rent: ₹{{ product.rent_price }}/month</p>
+            {% endif %}
+            
+            {% if current_user.is_authenticated and session.get('user_type') != 'admin' %}
+            <div class="form-group">
+                <label for="quantity_{{ product.id }}">Quantity</label>
+                <input type="number" id="quantity_{{ product.id }}" value="1" min="1" style="width: 100%;">
+            </div>
+            <button class="btn-primary" onclick="addToCart({{ product.id }}, '{{ product.name }}', {{ product.price }})">
+                Add to Cart
+            </button>
+            {% elif not current_user.is_authenticated %}
+            <p style="color: #ff6b6b; text-align: center;">Please login to purchase</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% if current_user.is_authenticated and session.get('user_type') != 'admin' %}
+<button class="view-cart-btn" onclick="window.location.href='{{ url_for('cart') }}'">
+    🛒 View Cart
+</button>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+function closeWelcome() {
+    document.getElementById('welcomePopup').style.display = 'none';
+}
+
+function addToCart(productId, productName, price) {
+    const quantity = document.getElementById('quantity_' + productId).value;
+    
+    fetch('/add_to_cart', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            product_id: productId,
+            product_name: productName,
+            price: price,
+            quantity: parseInt(quantity)
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Product added to cart!');
+        }
+    });
+}
+{% endblock %}

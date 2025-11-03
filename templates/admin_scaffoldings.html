@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Admin - Scaffolding Products{% endblock %}
+
+{% block content %}
+<div class="glass-container">
+    <h1 class="page-title">Admin Panel - Scaffolding Products</h1>
+    
+    <button class="btn-primary" onclick="showAddModal()" style="width: auto; margin-bottom: 2rem;">
+        + Add New Product
+    </button>
+    
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Category</th>
+                <th>Rent Price</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td>{{ product.id }}</td>
+                <td>{{ product.name }}</td>
+                <td>₹{{ product.price }}</td>
+                <td>{{ product.category|title if product.category else 'N/A' }}</td>
+                <td>₹{{ product.rent_price if product.rent_price else 'N/A' }}</td>
+                <td>
+                    <button class="btn-secondary" onclick="editProduct({{ product.id }}, '{{ product.name }}', {{ product.price }}, '{{ product.description }}', '{{ product.category }}', {{ product.rent_price if product.rent_price else 0 }})" style="padding: 0.5rem 1rem; margin-right: 0.5rem;">Edit</button>
+                    <button class="btn-danger" onclick="deleteProduct({{ product.id }})">Delete</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div id="productModal" class="modal">
+    <div class="modal-content">
+        <h2 style="color: #ffa500; margin-bottom: 1.5rem;" id="modalTitle">Add Product</h2>
+        <form id="productForm">
+            <input type="hidden" id="productId">
+            <div class="form-group">
+                <label for="productName">Product Name</label>
+                <input type="text" id="productName" required>
+            </div>
+            <div class="form-group">
+                <label for="productPrice">Price (₹)</label>
+                <input type="number" id="productPrice" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="productRentPrice">Rent Price (₹/month)</label>
+                <input type="number" id="productRentPrice" step="0.01">
+            </div>
+            <div class="form-group">
+                <label for="productCategory">Category</label>
+                <select id="productCategory" required>
+                    <option value="aluminium">Aluminium</option>
+                    <option value="h-frames">H-Frames</option>
+                    <option value="cuplock">Cuplock</option>
+                    <option value="accessories">Accessories</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="productDescription">Description</label>
+                <textarea id="productDescription" rows="4"></textarea>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn-primary">Save</button>
+                <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+let editMode = false;
+
+function showAddModal() {
+    editMode = false;
+    document.getElementById('modalTitle').textContent = 'Add Product';
+    document.getElementById('productForm').reset();
+    document.getElementById('productId').value = '';
+    document.getElementById('productModal').classList.add('show');
+}
+
+function editProduct(id, name, price, description, category, rentPrice) {
+    editMode = true;
+    document.getElementById('modalTitle').textContent = 'Edit Product';
+    document.getElementById('productId').value = id;
+    document.getElementById('productName').value = name;
+    document.getElementById('productPrice').value = price;
+    document.getElementById('productRentPrice').value = rentPrice || '';
+    document.getElementById('productCategory').value = category;
+    document.getElementById('productDescription').value = description;
+    document.getElementById('productModal').classList.add('show');
+}
+
+function closeModal() {
+    document.getElementById('productModal').classList.remove('show');
+}
+
+function deleteProduct(id) {
+    if (confirm('Are you sure you want to delete this product?')) {
+        fetch('/admin_delete_product/' + id, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Product deleted successfully!');
+                location.reload();
+            }
+        });
+    }
+}
+
+document.getElementById('productForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = {
+        name: document.getElementById('productName').value,
+        price: document.getElementById('productPrice').value,
+        rent_price: document.getElementById('productRentPrice').value || null,
+        category: document.getElementById('productCategory').value,
+        description: document.getElementById('productDescription').value,
+        product_type: 'scaffolding'
+    };
+    
+    const url = editMode ? 
+        '/admin_update_product/' + document.getElementById('productId').value :
+        '/admin_add_product';
+    
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(editMode ? 'Product updated successfully!' : 'Product added successfully!');
+            location.reload();
+        }
+    });
+});
+{% endblock %}

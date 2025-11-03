@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Cart - National Scaffolding{% endblock %}
+
+{% block content %}
+<div class="glass-container">
+    <h1 class="page-title">Shopping Cart</h1>
+    
+    {% if cart_items %}
+    <div style="margin-top: 2rem;">
+        {% for item in cart_items %}
+        <div class="cart-item">
+            <div>
+                <h3 style="color: #ffa500;">{{ item.product_name }}</h3>
+                <p>Quantity: {{ item.quantity }}</p>
+                <p style="color: #4CAF50; font-size: 1.2rem;">₹{{ item.price }} x {{ item.quantity }} = ₹{{ item.price * item.quantity }}</p>
+            </div>
+            <div>
+                <button class="btn-danger" onclick="removeItem({{ loop.index0 }})">Remove</button>
+            </div>
+        </div>
+        {% endfor %}
+        
+        <div style="text-align: right; margin-top: 2rem; padding: 1.5rem; background: rgba(255, 255, 255, 0.05); border-radius: 10px;">
+            <h2 style="color: #ffa500;">Total: ₹{{ total }}</h2>
+            <button class="btn-primary" onclick="window.location.href='{{ url_for('qr_scanner') }}'" style="width: auto; margin-top: 1rem;">
+                Proceed to Checkout
+            </button>
+        </div>
+    </div>
+    {% else %}
+    <p style="text-align: center; color: #ccc; margin-top: 2rem;">Your cart is empty</p>
+    <div style="text-align: center; margin-top: 2rem;">
+        <button class="btn-primary" onclick="window.location.href='{{ url_for('dashboard') }}'">
+            Continue Shopping
+        </button>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+function removeItem(index) {
+    window.location.href = '/remove_from_cart/' + index;
+}
+{% endblock %}

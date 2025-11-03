@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}My Orders - National Scaffolding{% endblock %}
+
+{% block content %}
+<div class="glass-container">
+    <h1 class="page-title">My Orders</h1>
+    
+    {% if orders %}
+    <div style="margin-top: 2rem;">
+        {% for order in orders %}
+        <div class="order-card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h3 style="color: #ffa500;">Order #{{ order.id }}</h3>
+                    <p style="color: #ccc;">{{ order.order_date.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                </div>
+                <div>
+                    <p style="color: #4CAF50; font-size: 1.5rem;">₹{{ order.total_price }}</p>
+                    <p style="color: #ccc; text-align: right;">Status: {{ order.status|title }}</p>
+                </div>
+            </div>
+            
+            <div class="order-items">
+                <h4 style="color: #ffa500; margin-bottom: 1rem;">Items:</h4>
+                {% for item in order.order_items %}
+                <div class="order-item">
+                    <strong>{{ item.product_name }}</strong> - Quantity: {{ item.quantity }} - ₹{{ item.price }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p style="text-align: center; color: #ccc; margin-top: 2rem;">You haven't placed any orders yet</p>
+    <div style="text-align: center; margin-top: 2rem;">
+        <button class="btn-primary" onclick="window.location.href='{{ url_for('dashboard') }}'">
+            Start Shopping
+        </button>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
