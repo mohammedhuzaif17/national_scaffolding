@@ -8,6 +8,7 @@ A Flask-based e-commerce platform for National Scaffolding and Fabrications feat
 - Created complete database schema with Users, Admins, Products, Orders, and OrderItems
 - Implemented all frontend templates with glassmorphism design matching provided screenshots
 - Built authentication system with login/register functionality
+- **Security fix**: Removed hardcoded SECRET_KEY fallback; app now requires SESSION_SECRET environment variable
 - Created dual admin panels for scaffolding and fabrication product management
 - Implemented shopping cart with session-based storage
 - Added QR code payment integration for checkout
