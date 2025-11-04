@@ -43,12 +43,18 @@
             
             <div class="form-group">
                 <label>UPI Transaction ID / Payment Reference</label>
-                <input type="text" id="transaction_id" placeholder="Enter your UPI transaction ID" required style="padding: 0.8rem; font-size: 1rem;">
+                <div style="position: relative;">
+                    <input type="text" id="transaction_id" placeholder="Enter your UPI transaction ID" required style="padding: 0.8rem; font-size: 1rem; padding-right: 100px;" oninput="validateUPIID()">
+                    <div id="upi_validation" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); display: none; align-items: center; gap: 5px;">
+                        <span id="validation_icon"></span>
+                        <span id="validation_text" style="font-weight: bold; font-size: 0.85rem;"></span>
+                    </div>
+                </div>
             </div>
         </div>
         
         <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center;">
-            <button class="btn-primary" onclick="completeOrder()">Confirm Payment & Complete Order</button>
+            <button id="payment_btn" class="btn-primary" onclick="completeOrder()" disabled style="opacity: 0.5; cursor: not-allowed;">Confirm Payment & Complete Order</button>
             <button class="btn-secondary" onclick="window.location.href='{{ url_for('cart') }}'">Back to Cart</button>
         </div>
     </div>
@@ -56,6 +62,48 @@
 {% endblock %}
 
 {% block scripts %}
+function validateUPIID() {
+    const upiId = document.getElementById('transaction_id').value.trim();
+    const validationDiv = document.getElementById('upi_validation');
+    const validationIcon = document.getElementById('validation_icon');
+    const validationText = document.getElementById('validation_text');
+    const paymentBtn = document.getElementById('payment_btn');
+    
+    if (upiId.length === 0) {
+        validationDiv.style.display = 'none';
+        paymentBtn.disabled = true;
+        paymentBtn.style.opacity = '0.5';
+        paymentBtn.style.cursor = 'not-allowed';
+        return;
+    }
+    
+    const isValid = upiId.length >= 12 && upiId.length <= 35 && /^[a-zA-Z0-9]+$/.test(upiId);
+    
+    validationDiv.style.display = 'flex';
+    
+    if (isValid) {
+        validationIcon.innerHTML = '✓';
+        validationIcon.style.color = '#4CAF50';
+        validationIcon.style.fontSize = '1.5rem';
+        validationText.textContent = 'Valid';
+        validationText.style.color = '#4CAF50';
+        
+        paymentBtn.disabled = false;
+        paymentBtn.style.opacity = '1';
+        paymentBtn.style.cursor = 'pointer';
+    } else {
+        validationIcon.innerHTML = '✗';
+        validationIcon.style.color = '#ff4444';
+        validationIcon.style.fontSize = '1.5rem';
+        validationText.textContent = 'Invalid';
+        validationText.style.color = '#ff4444';
+        
+        paymentBtn.disabled = true;
+        paymentBtn.style.opacity = '0.5';
+        paymentBtn.style.cursor = 'not-allowed';
+    }
+}
+
 function completeOrder() {
     const transactionId = document.getElementById('transaction_id').value.trim();
     
@@ -64,8 +112,8 @@ function completeOrder() {
         return;
     }
     
-    if (transactionId.length < 8) {
-        alert('Please enter a valid UPI Transaction ID (minimum 8 characters)');
+    if (transactionId.length < 12 || transactionId.length > 35 || !/^[a-zA-Z0-9]+$/.test(transactionId)) {
+        alert('Please enter a valid UPI Transaction ID (12-35 alphanumeric characters)');
         return;
     }
     
