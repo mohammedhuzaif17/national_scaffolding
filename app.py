@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_file
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from flask_mail import Mail, Message
 from models import db, User, Admin, Product, Order, OrderItem
 import os
 import qrcode
@@ -61,8 +62,194 @@ app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
+app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
+app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'True') == 'True'
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER', os.environ.get('MAIL_USERNAME'))
+
+mail = Mail(app)
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def send_order_confirmation_email(user, order, order_items):
+    """Send order confirmation email to customer"""
+    if not app.config['MAIL_USERNAME']:
+        return
+    
+    try:
+        items_html = ""
+        for item in order_items:
+            items_html += f"""
+            <tr style="border-bottom: 1px solid #e0e0e0;">
+                <td style="padding: 15px; color: #333;">{item.product_name}</td>
+                <td style="padding: 15px; text-align: center; color: #333;">{item.quantity}</td>
+                <td style="padding: 15px; text-align: right; color: #333;">₹{item.price:.2f}</td>
+                <td style="padding: 15px; text-align: right; color: #4CAF50; font-weight: bold;">₹{(item.price * item.quantity):.2f}</td>
+            </tr>
+            """
+        
+        msg = Message(
+            subject='Order Confirmation - The National Scaffolding',
+            recipients=[user.email]
+        )
+        
+        msg.html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body {{ font-family: 'Poppins', Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }}
+                .container {{ max-width: 600px; margin: 30px auto; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }}
+                .header {{ background: linear-gradient(135deg, #1e3a8a, #d4af37); padding: 30px; text-align: center; }}
+                .header h1 {{ color: #ffffff; margin: 0; font-size: 28px; }}
+                .content {{ padding: 30px; }}
+                .order-details {{ background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0; }}
+                .order-table {{ width: 100%; border-collapse: collapse; margin-top: 20px; }}
+                .order-table th {{ background-color: #1e3a8a; color: #ffffff; padding: 12px; text-align: left; }}
+                .footer {{ background-color: #1e3a8a; color: #ffffff; padding: 20px; text-align: center; font-size: 14px; }}
+                .total-row {{ background-color: #1e3a8a; color: #ffffff; font-weight: bold; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>✓ Order Confirmed!</h1>
+                    <p style="color: #ffffff; margin: 10px 0 0 0;">Thank you for your order</p>
+                </div>
+                <div class="content">
+                    <h2 style="color: #1e3a8a;">Dear {user.full_name or user.username},</h2>
+                    <p style="color: #555; line-height: 1.6;">Thank you for choosing The National Scaffolding! Your order has been successfully placed and confirmed.</p>
+                    
+                    <div class="order-details">
+                        <h3 style="color: #1e3a8a; margin-top: 0;">Order Details</h3>
+                        <p style="margin: 5px 0; color: #555;"><strong>Order ID:</strong> #{order.id}</p>
+                        <p style="margin: 5px 0; color: #555;"><strong>Order Date:</strong> {order.order_date.strftime('%B %d, %Y at %I:%M %p')}</p>
+                        <p style="margin: 5px 0; color: #555;"><strong>Transaction ID:</strong> <span style="font-family: monospace; background-color: #e8f5e9; padding: 3px 8px; border-radius: 4px;">{order.transaction_id}</span></p>
+                        <p style="margin: 5px 0; color: #555;"><strong>Total Amount:</strong> <span style="color: #4CAF50; font-size: 18px; font-weight: bold;">₹{order.total_price:.2f}</span></p>
+                    </div>
+                    
+                    <h3 style="color: #1e3a8a;">Order Items</h3>
+                    <table class="order-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th style="text-align: center;">Quantity</th>
+                                <th style="text-align: right;">Unit Price</th>
+                                <th style="text-align: right;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {items_html}
+                            <tr class="total-row">
+                                <td colspan="3" style="padding: 15px; text-align: right;">Total Amount (incl. 18% GST):</td>
+                                <td style="padding: 15px; text-align: right;">₹{order.total_price:.2f}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <p style="color: #555; margin-top: 30px; line-height: 1.6;">We will process your order shortly. You can view your order status anytime by logging into your account and visiting the "My Orders" section.</p>
+                    
+                    <p style="color: #555; margin-top: 20px;">If you have any questions, please don't hesitate to contact us.</p>
+                </div>
+                <div class="footer">
+                    <p style="margin: 0;">© 2025 The National Scaffolding. All rights reserved.</p>
+                    <p style="margin: 10px 0 0 0;">Quality scaffolding solutions for your construction needs</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        mail.send(msg)
+    except Exception as e:
+        print(f"Error sending customer email: {e}")
+
+def send_admin_notification_email(order, user, order_items):
+    """Send new order notification to admin"""
+    if not app.config['MAIL_USERNAME']:
+        return
+    
+    admin_email = os.environ.get('ADMIN_EMAIL', app.config['MAIL_DEFAULT_SENDER'])
+    
+    try:
+        items_text = ""
+        for item in order_items:
+            items_text += f"- {item.product_name} x {item.quantity} @ ₹{item.price:.2f} = ₹{(item.price * item.quantity):.2f}\n"
+        
+        msg = Message(
+            subject=f'🔔 New Order #{order.id} - The National Scaffolding',
+            recipients=[admin_email]
+        )
+        
+        msg.html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body {{ font-family: 'Poppins', Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }}
+                .container {{ max-width: 600px; margin: 30px auto; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }}
+                .header {{ background: linear-gradient(135deg, #d4af37, #1e3a8a); padding: 30px; text-align: center; }}
+                .header h1 {{ color: #ffffff; margin: 0; font-size: 28px; }}
+                .content {{ padding: 30px; }}
+                .alert-box {{ background-color: #fff3cd; border-left: 4px solid #d4af37; padding: 15px; margin: 20px 0; border-radius: 4px; }}
+                .customer-info {{ background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 20px 0; }}
+                .order-items {{ background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0; }}
+                .footer {{ background-color: #1e3a8a; color: #ffffff; padding: 20px; text-align: center; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>🔔 New Order Received!</h1>
+                    <p style="color: #ffffff; margin: 10px 0 0 0;">Order #{order.id}</p>
+                </div>
+                <div class="content">
+                    <div class="alert-box">
+                        <p style="margin: 0; color: #856404; font-weight: bold;">⚠️ Action Required: Please verify the payment and process this order</p>
+                    </div>
+                    
+                    <h3 style="color: #1e3a8a;">Order Information</h3>
+                    <p style="color: #555;"><strong>Order ID:</strong> #{order.id}</p>
+                    <p style="color: #555;"><strong>Order Date:</strong> {order.order_date.strftime('%B %d, %Y at %I:%M %p')}</p>
+                    <p style="color: #555;"><strong>Transaction ID:</strong> <span style="font-family: monospace; background-color: #e8f5e9; padding: 3px 8px; border-radius: 4px;">{order.transaction_id}</span></p>
+                    <p style="color: #555;"><strong>Total Amount:</strong> <span style="color: #4CAF50; font-size: 20px; font-weight: bold;">₹{order.total_price:.2f}</span> (incl. 18% GST)</p>
+                    
+                    <div class="customer-info">
+                        <h3 style="color: #1e3a8a; margin-top: 0;">Customer Details</h3>
+                        <p style="margin: 5px 0; color: #555;"><strong>Name:</strong> {user.full_name or user.username}</p>
+                        <p style="margin: 5px 0; color: #555;"><strong>Email:</strong> {user.email}</p>
+                        <p style="margin: 5px 0; color: #555;"><strong>Phone:</strong> {user.phone or 'N/A'}</p>
+                        {f'<p style="margin: 5px 0; color: #555;"><strong>Organization:</strong> {user.organization}</p>' if user.organization else ''}
+                    </div>
+                    
+                    <div class="order-items">
+                        <h3 style="color: #1e3a8a; margin-top: 0;">Order Items</h3>
+                        <pre style="background-color: #ffffff; padding: 10px; border-radius: 4px; overflow-x: auto; color: #333;">{items_text}</pre>
+                    </div>
+                    
+                    <p style="color: #555; margin-top: 20px;"><strong>Next Steps:</strong></p>
+                    <ol style="color: #555; line-height: 1.8;">
+                        <li>Verify the transaction ID in your PhonePe account</li>
+                        <li>Confirm the amount matches: ₹{order.total_price:.2f}</li>
+                        <li>Process the order and prepare items for delivery</li>
+                        <li>Contact customer if needed</li>
+                    </ol>
+                </div>
+                <div class="footer">
+                    <p style="margin: 0;">The National Scaffolding - Admin Dashboard</p>
+                    <p style="margin: 10px 0 0 0; font-size: 12px;">Log in to admin panel to view full order details</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        mail.send(msg)
+    except Exception as e:
+        print(f"Error sending admin email: {e}")
 
 db.init_app(app)
 login_manager = LoginManager()
@@ -398,6 +585,9 @@ def complete_order():
     
     db.session.commit()
     session['cart'] = []
+    
+    send_order_confirmation_email(current_user, order, order.order_items)
+    send_admin_notification_email(order, current_user, order.order_items)
     
     return jsonify({'success': True, 'order_id': order.id})
 
