@@ -76,8 +76,17 @@
 {% endblock %}
 
 {% block scripts %}
+// Check if welcome popup has been shown this session
+window.addEventListener('DOMContentLoaded', () => {
+    const popupShown = sessionStorage.getItem('welcomeShown');
+    if (popupShown) {
+        document.getElementById('welcomePopup').style.display = 'none';
+    }
+});
+
 function closeWelcome() {
     document.getElementById('welcomePopup').style.display = 'none';
+    sessionStorage.setItem('welcomeShown', 'true');
 }
 
 function addToCart(productId, productName, price) {

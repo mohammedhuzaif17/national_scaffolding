@@ -112,33 +112,46 @@ def login():
     if request.method == 'POST':
         identifier = request.form.get('identifier')
         password = request.form.get('password')
-        user_type = request.form.get('user_type', 'user')
         
-        if user_type == 'admin':
-            user = Admin.query.filter_by(username=identifier).first()
-            if user and user.check_password(password):
-                login_user(user)
-                session['user_type'] = 'admin'
-                session['panel_type'] = user.panel_type
-                if user.panel_type == 'scaffolding':
-                    return redirect(url_for('admin_scaffoldings'))
-                else:
-                    return redirect(url_for('admin_fabrication'))
-        else:
-            user = User.query.filter(
-                (User.username == identifier) | 
-                (User.email == identifier) | 
-                (User.phone == identifier)
-            ).first()
-            if user and user.check_password(password):
-                login_user(user)
-                session['user_type'] = 'user'
-                session['cart'] = session.get('cart', [])
-                return redirect(url_for('dashboard'))
+        user = User.query.filter(
+            (User.username == identifier) | 
+            (User.email == identifier) | 
+            (User.phone == identifier)
+        ).first()
+        if user and user.check_password(password):
+            login_user(user)
+            session['user_type'] = 'user'
+            session['cart'] = session.get('cart', [])
+            return redirect(url_for('dashboard'))
         
         flash('Invalid credentials', 'error')
     
     return render_template('login.html')
+
+@app.route('/admin_login', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        identifier = request.form.get('identifier')
+        password = request.form.get('password')
+        panel_type = request.form.get('panel_type')
+        
+        if not panel_type:
+            flash('Please select an admin panel', 'error')
+            return render_template('admin_login.html')
+        
+        user = Admin.query.filter_by(username=identifier, panel_type=panel_type).first()
+        if user and user.check_password(password):
+            login_user(user)
+            session['user_type'] = 'admin'
+            session['panel_type'] = user.panel_type
+            if user.panel_type == 'scaffolding':
+                return redirect(url_for('admin_scaffoldings'))
+            else:
+                return redirect(url_for('admin_fabrication'))
+        
+        flash('Invalid admin credentials or wrong panel selected', 'error')
+    
+    return render_template('admin_login.html')
 
 @app.route('/logout')
 @login_required

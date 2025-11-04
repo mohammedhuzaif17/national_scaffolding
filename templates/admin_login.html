@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Login - National Scaffolding{% endblock %}
+
+{% block content %}
+<div class="glass-container form-container">
+    <h1 class="page-title">Admin Login</h1>
+    <p style="text-align: center; color: #ffa500; margin-bottom: 2rem;">For Authorized Personnel Only</p>
+    <form method="POST">
+        <div class="form-group">
+            <label for="identifier">Username</label>
+            <input type="text" id="identifier" name="identifier" required placeholder="Enter your admin username">
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required placeholder="Enter your password">
+        </div>
+        <div class="form-group">
+            <label for="panel_type">Admin Panel</label>
+            <select id="panel_type" name="panel_type" required>
+                <option value="">-- Select Panel --</option>
+                <option value="scaffolding">National Scaffolding Admin</option>
+                <option value="fabrication">Fabrication Admin</option>
+            </select>
+        </div>
+        <button type="submit" class="btn-primary">Admin Login</button>
+    </form>
+    <p style="text-align: center; margin-top: 1rem;">
+        <a href="{{ url_for('login') }}" style="color: #ffa500;">← Back to User Login</a>
+    </p>
+</div>
+{% endblock %}
