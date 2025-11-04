@@ -43,14 +43,18 @@
                         <option value="4">4m</option>
                         <option value="5">5m</option>
                         <option value="6" disabled id="height_6">6m (Double Width Only)</option>
+                        <option value="7" disabled id="height_7">7m (Double Width Only)</option>
                         <option value="8" disabled id="height_8">8m (Double Width Only)</option>
+                        <option value="9" disabled id="height_9">9m (Double Width Only)</option>
                         <option value="10" disabled id="height_10">10m (Double Width Only)</option>
+                        <option value="11" disabled id="height_11">11m (Double Width Only)</option>
                         <option value="12" disabled id="height_12">12m (Double Width Only)</option>
+                        <option value="13" disabled id="height_13">13m (Double Width Only)</option>
                         <option value="14" disabled id="height_14">14m (Double Width Only)</option>
+                        <option value="15" disabled id="height_15">15m (Double Width Only)</option>
                         <option value="16" disabled id="height_16">16m (Double Width Only)</option>
                     </select>
-                </div>
-                
+                </div>                
                 <div class="form-group">
                     <label>Purchase Type</label>
                     <select id="purchase_type" onchange="updateAluminiumPrice()">
@@ -230,13 +234,13 @@ function updateAluminiumPrice() {
     const quantity = parseInt(document.getElementById('quantity').value);
     
     if (width === 0.7) {
-        ['6', '8', '10', '12', '14', '16'].forEach(h => {
+        ['6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'].forEach(h => {
             const opt = document.getElementById('height_' + h);
             if (opt) opt.disabled = true;
         });
         if (height > 5) document.getElementById('height').value = '2';
     } else {
-        ['6', '8', '10', '12', '14', '16'].forEach(h => {
+        ['6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'].forEach(h => {
             const opt = document.getElementById('height_' + h);
             if (opt) opt.disabled = false;
         });
