@@ -281,18 +281,6 @@ function updateHFramePrice() {
     document.getElementById('final_price').textContent = '₹' + total.toFixed(2);
 }
 
-function updateCuplockOptions() {
-    const type = document.getElementById('cuplock_type').value;
-    if (type === 'vertical') {
-        document.getElementById('vertical_options').style.display = 'block';
-        document.getElementById('ledger_options').style.display = 'none';
-    } else {
-        document.getElementById('vertical_options').style.display = 'none';
-        document.getElementById('ledger_options').style.display = 'block';
-    }
-    updateCuplockPrice();
-}
-
 function updateCuplockPrice() {
     const quantity = parseInt(document.getElementById('quantity').value);
     const pricePerKg = 78;

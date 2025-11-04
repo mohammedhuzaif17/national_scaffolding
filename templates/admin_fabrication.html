@@ -62,9 +62,12 @@
                 <textarea id="productDescription" rows="4"></textarea>
             </div>
             <div class="form-group">
-                <label for="productImageUrl">Product Images (Multiple URLs - Optional)</label>
-                <textarea id="productImageUrl" rows="3" placeholder="Enter image URLs, one per line&#10;https://example.com/image1.jpg&#10;https://example.com/image2.jpg"></textarea>
-                <small style="color: #888; font-size: 0.85rem;">You can add multiple image URLs, one per line. The first image will be the main product image.</small>
+                <label for="productImage">Product Image (Upload from Device/Camera)</label>
+                <input type="file" id="productImage" accept="image/*" capture="environment" style="padding: 0.75rem; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 165, 0, 0.3); border-radius: 8px; color: white; width: 100%;">
+                <small style="color: #888; font-size: 0.85rem; display: block; margin-top: 0.5rem;">Upload a product image from your device or take a photo with your camera</small>
+                <div id="imagePreview" style="margin-top: 1rem; display: none;">
+                    <img id="previewImg" style="max-width: 200px; border-radius: 8px; border: 2px solid #ffa500;">
+                </div>
             </div>
             <div style="display: flex; gap: 1rem;">
                 <button type="submit" class="btn-primary">Save</button>
@@ -118,15 +121,31 @@ function deleteProduct(id) {
     }
 }
 
-document.getElementById('productForm').addEventListener('submit', function(e) {
+document.getElementById('productImage').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('previewImg').src = e.target.result;
+            document.getElementById('imagePreview').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+document.getElementById('productForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
-    const formData = {
-        name: document.getElementById('productName').value,
-        price: document.getElementById('productPrice').value,
-        description: document.getElementById('productDescription').value,
-        product_type: 'fabrication'
-    };
+    const formDataObj = new FormData();
+    formDataObj.append('name', document.getElementById('productName').value);
+    formDataObj.append('price', document.getElementById('productPrice').value);
+    formDataObj.append('description', document.getElementById('productDescription').value);
+    formDataObj.append('product_type', 'fabrication');
+    
+    const imageFile = document.getElementById('productImage').files[0];
+    if (imageFile) {
+        formDataObj.append('product_image', imageFile);
+    }
     
     const url = editMode ? 
         '/admin_update_product/' + document.getElementById('productId').value :
@@ -134,17 +153,19 @@ document.getElementById('productForm').addEventListener('submit', function(e) {
     
     fetch(url, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
+        body: formDataObj
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
             alert(editMode ? 'Product updated successfully!' : 'Product added successfully!');
             location.reload();
+        } else {
+            alert('Error: ' + (data.error || 'Unknown error occurred'));
         }
+    })
+    .catch(error => {
+        alert('Error: ' + error.message);
     });
 });
 {% endblock %}

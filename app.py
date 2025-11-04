@@ -6,6 +6,7 @@ import qrcode
 import io
 import base64
 from datetime import datetime
+from werkzeug.utils import secure_filename
 
 def calculate_price(product, customization):
     quantity = customization.get('quantity', 1)
@@ -56,6 +57,12 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'pool_size': 10,
     'max_overflow': 20
 }
+app.config['UPLOAD_FOLDER'] = 'static/uploads'
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 db.init_app(app)
 login_manager = LoginManager()
@@ -445,17 +452,27 @@ def admin_add_product():
     if session.get('user_type') != 'admin':
         return jsonify({'success': False})
     
-    data = request.json
+    image_url = None
+    if 'product_image' in request.files:
+        file = request.files['product_image']
+        if file and file.filename and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            filename = f"{timestamp}_{filename}"
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(filepath)
+            image_url = f"/static/uploads/{filename}"
+    
     product = Product(
-        name=data['name'],
-        price=float(data['price']),
-        description=data.get('description', ''),
-        category=data.get('category'),
-        product_type=data['product_type'],
-        customization_options=data.get('customization_options'),
-        rent_price=float(data['rent_price']) if data.get('rent_price') else None,
-        image_url=data.get('image_url'),
-        weight_per_unit=float(data['weight_per_unit']) if data.get('weight_per_unit') else None
+        name=request.form.get('name'),
+        price=float(request.form.get('price')),
+        description=request.form.get('description', ''),
+        category=request.form.get('category'),
+        product_type=request.form.get('product_type'),
+        customization_options=request.form.get('customization_options'),
+        rent_price=float(request.form.get('rent_price')) if request.form.get('rent_price') else None,
+        image_url=image_url,
+        weight_per_unit=float(request.form.get('weight_per_unit')) if request.form.get('weight_per_unit') else None
     )
     
     db.session.add(product)
@@ -470,16 +487,24 @@ def admin_update_product(product_id):
         return jsonify({'success': False})
     
     product = Product.query.get_or_404(product_id)
-    data = request.json
     
-    product.name = data['name']
-    product.price = float(data['price'])
-    product.description = data.get('description', '')
-    product.category = data.get('category')
-    product.customization_options = data.get('customization_options')
-    product.rent_price = float(data['rent_price']) if data.get('rent_price') else None
-    product.image_url = data.get('image_url')
-    product.weight_per_unit = float(data['weight_per_unit']) if data.get('weight_per_unit') else None
+    if 'product_image' in request.files:
+        file = request.files['product_image']
+        if file and file.filename and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            filename = f"{timestamp}_{filename}"
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(filepath)
+            product.image_url = f"/static/uploads/{filename}"
+    
+    product.name = request.form.get('name')
+    product.price = float(request.form.get('price'))
+    product.description = request.form.get('description', '')
+    product.category = request.form.get('category')
+    product.customization_options = request.form.get('customization_options')
+    product.rent_price = float(request.form.get('rent_price')) if request.form.get('rent_price') else None
+    product.weight_per_unit = float(request.form.get('weight_per_unit')) if request.form.get('weight_per_unit') else None
     
     db.session.commit()
     
