@@ -20,7 +20,7 @@ This project is a Flask-based e-commerce platform for National Scaffolding and F
 - Branding Fix: Corrected final "Crest Technocrat" reference in dashboard.html to "The National Scaffolding" for consistent branding
 - Logout Flow: Changed logout redirect from login page to landing page to prevent confusing login/logout loops
 - Email Notifications: Installed Flask-Mail and implemented automatic email notifications - customers receive order confirmation emails with complete order details, and admins receive new order alerts with customer information and transaction ID for verification
-- About Page Styling: Updated about.html CSS variables to fully match royal blue (#1e3a8a) and gold (#d4af37) theme for consistent branding across entire website
+- About Page Complete Replacement: Replaced entire about.html with comprehensive new content including hero section with stats, expertise bars, client/project journey, board of administrators, detailed user manual, FAQs, privacy policy, and terms of use - all styled with royal blue (#1e3a8a) and gold (#d4af37) theme and fully integrated with Flask routing
 
 ## User Preferences
 I prefer detailed explanations.
