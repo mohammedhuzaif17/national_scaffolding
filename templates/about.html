@@ -15,26 +15,23 @@
         }
 
         :root {
-            --primary-color: #1e3a8a;
-            --secondary-color: #d4af37;
-            --light-color: #f8f9fa;
-            --dark-color: #333;
-            --text-color: #555;
-            --white: #ffffff;
-            --gray: #e9ecef;
-            --transition: all 0.3s ease;
-            --hero-bg-gradient: linear-gradient(135deg, #1e3a8a, #3b82f6, #d4af37, #1e3a8a);
             --royal-blue: #1e3a8a;
             --royal-gold: #d4af37;
-            --royal-dark-blue: #0c2340;
-            --footer-bg: linear-gradient(135deg, #0c2340, #1e3a8a);
+            --dark-bg: #0a1628;
+            --glass-bg: rgba(255, 255, 255, 0.07);
+            --glass-border: rgba(212, 175, 55, 0.2);
+            --transition: all 0.3s ease;
+            --primary-color: #1e3a8a;
+            --secondary-color: #d4af37;
             --premium-text: #f8f9fa;
-            --premium-gold: #d4af37;
+            --text-color: rgba(255, 255, 255, 0.8);
         }
 
         body {
-            background-color: var(--white);
-            color: var(--text-color);
+            background: linear-gradient(135deg, #0a1628 0%, #1e3a8a 50%, #2c5364 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #fff;
             line-height: 1.6;
         }
 
@@ -59,11 +56,15 @@
 
         .section-title h2 {
             font-size: 2.5rem;
-            color: var(--primary-color);
+            background: linear-gradient(135deg, #d4af37 0%, #f0c14b 50%, #d4af37 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             position: relative;
             display: inline-block;
             padding-bottom: 15px;
             font-family: 'Playfair Display', serif;
+            text-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
         }
 
         .section-title h2::after {
@@ -74,16 +75,20 @@
             transform: translateX(-50%);
             width: 100px;
             height: 4px;
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            background: linear-gradient(to right, var(--royal-blue), var(--royal-gold));
             border-radius: 2px;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
         }
 
         .navbar {
             position: fixed;
             top: 0;
             width: 100%;
-            background: rgba(255, 255, 255, 0.98);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background: rgba(10, 22, 40, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 3px solid rgba(212, 175, 55, 0.3);
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.4);
             z-index: 1000;
             padding: 1rem 0;
         }
@@ -98,11 +103,13 @@
         }
 
         .nav-logo a {
-            font-size: 1.5rem;
+            font-size: 1.7rem;
             font-weight: 700;
-            color: var(--primary-color);
+            color: var(--royal-gold);
             text-decoration: none;
             font-family: 'Playfair Display', serif;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .nav-menu {
@@ -114,15 +121,19 @@
 
         .nav-menu li a {
             text-decoration: none;
-            color: var(--dark-color);
+            color: #fff;
             font-weight: 500;
             transition: var(--transition);
             position: relative;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
         }
 
         .nav-menu li a:hover,
         .nav-menu li a.active {
-            color: var(--primary-color);
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--royal-gold);
+            transform: translateY(-2px);
         }
 
         .nav-menu li a::after {
@@ -132,11 +143,10 @@
             left: 0;
             width: 0;
             height: 2px;
-            background: var(--secondary-color);
+            background: var(--royal-gold);
             transition: var(--transition);
         }
 
-        .nav-menu li a:hover::after,
         .nav-menu li a.active::after {
             width: 100%;
         }
@@ -163,9 +173,8 @@
         .hero {
             margin-top: 80px;
             padding: 60px 20px;
-            background: var(--hero-bg-gradient);
-            background-size: 300% 300%;
-            animation: gradientShift 15s ease infinite;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
         }
 
         @keyframes gradientShift {
@@ -201,35 +210,42 @@
         }
 
         .stat-item {
-            background: rgba(255, 255, 255, 0.95);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 2px solid var(--glass-border);
             padding: 30px;
             border-radius: 15px;
             text-align: center;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
         }
 
         .stat-item:hover {
             transform: translateY(-5px);
+            border-color: rgba(212, 175, 55, 0.4);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
         }
 
         .stat-item h3 {
             font-size: 2.5rem;
-            color: var(--primary-color);
+            background: linear-gradient(135deg, #d4af37 0%, #f0c14b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             font-weight: 700;
             margin-bottom: 10px;
         }
 
         .stat-item p {
-            color: var(--text-color);
+            color: rgba(255, 255, 255, 0.9);
             font-weight: 500;
             font-size: 0.9rem;
         }
 
         .expertise-new {
             padding: 80px 20px;
-            background: var(--light-color);
+            background: rgba(255, 255, 255, 0.02);
         }
 
         .expertise-container {
@@ -258,7 +274,7 @@
         }
 
         .expertise-item h3 {
-            color: var(--dark-color);
+            color: #fff;
             margin-bottom: 15px;
             font-size: 1.1rem;
         }
@@ -266,7 +282,7 @@
         .expertise-bar {
             width: 100%;
             height: 8px;
-            background: var(--gray);
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 4px;
             overflow: hidden;
             margin-bottom: 10px;
@@ -274,19 +290,23 @@
 
         .expertise-percentage {
             height: 100%;
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            background: linear-gradient(to right, var(--royal-blue), var(--royal-gold));
             border-radius: 4px;
             transition: width 1.5s ease;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
         }
 
         .expertise-item p {
-            color: var(--primary-color);
+            background: linear-gradient(135deg, #d4af37 0%, #f0c14b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             font-weight: 600;
         }
 
         .journey {
             padding: 80px 20px;
-            background: white;
+            background: rgba(255, 255, 255, 0.02);
         }
 
         .journey-container {
@@ -299,7 +319,10 @@
 
         .clients-section h3,
         .projects-section h3 {
-            color: var(--primary-color);
+            background: linear-gradient(135deg, #d4af37 0%, #f0c14b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             font-size: 1.8rem;
             margin-bottom: 30px;
             text-align: center;
@@ -315,27 +338,28 @@
 
         .client-item,
         .project-item {
-            background: var(--light-color);
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid var(--glass-border);
             padding: 20px;
             text-align: center;
             border-radius: 10px;
             font-weight: 600;
-            color: var(--dark-color);
+            color: #fff;
             transition: var(--transition);
-            border: 2px solid transparent;
         }
 
         .client-item:hover,
         .project-item:hover {
-            background: white;
-            border-color: var(--secondary-color);
+            border-color: var(--royal-gold);
             transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
         }
 
         .administrators {
             padding: 80px 20px;
-            background: var(--light-color);
+            background: rgba(255, 255, 255, 0.02);
         }
 
         .administrators-container {
@@ -347,17 +371,21 @@
         }
 
         .administrator {
-            background: white;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 2px solid var(--glass-border);
             padding: 30px;
             border-radius: 15px;
             text-align: center;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
             transition: var(--transition);
         }
 
         .administrator:hover {
             transform: translateY(-10px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border-color: rgba(212, 175, 55, 0.4);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
         }
 
         .administrator-image {
@@ -366,7 +394,8 @@
             border-radius: 50%;
             overflow: hidden;
             margin: 0 auto 20px;
-            border: 4px solid var(--secondary-color);
+            border: 4px solid var(--royal-gold);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
         }
 
         .administrator-image img {
@@ -376,13 +405,16 @@
         }
 
         .administrator h3 {
-            color: var(--primary-color);
+            background: linear-gradient(135deg, #d4af37 0%, #f0c14b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             font-size: 1.3rem;
             margin-bottom: 10px;
         }
 
         .administrator p {
-            color: var(--text-color);
+            color: rgba(255, 255, 255, 0.8);
             margin-bottom: 15px;
             font-style: italic;
         }
@@ -396,7 +428,7 @@
         .social-links a {
             width: 40px;
             height: 40px;
-            background: var(--primary-color);
+            background: var(--royal-blue);
             color: white;
             display: flex;
             align-items: center;
@@ -406,13 +438,14 @@
         }
 
         .social-links a:hover {
-            background: var(--secondary-color);
+            background: var(--royal-gold);
             transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
         }
 
         .user-manual {
             padding: 80px 20px;
-            background: white;
+            background: rgba(255, 255, 255, 0.02);
         }
 
         .user-manual-container {
@@ -421,33 +454,66 @@
         }
 
         .user-manual-content {
-            background: var(--light-color);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 2px solid var(--glass-border);
             padding: 40px;
             border-radius: 15px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
         }
 
         .user-manual-content h2 {
-            color: var(--primary-color);
+            background: linear-gradient(135deg, #d4af37 0%, #f0c14b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             font-size: 2rem;
             margin-bottom: 30px;
             font-family: 'Playfair Display', serif;
         }
 
         .user-manual-content h3 {
-            color: var(--primary-color);
+            color: var(--royal-gold);
             font-size: 1.5rem;
             margin: 30px 0 15px;
         }
 
         .user-manual-content h4 {
-            color: var(--dark-color);
+            color: rgba(255, 255, 255, 0.9);
             font-size: 1.2rem;
             margin: 20px 0 10px;
         }
 
         .user-manual-content p {
+            color: rgba(255, 255, 255, 0.8);
             margin-bottom: 15px;
             line-height: 1.8;
+        }
+
+        .download-btn {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, var(--royal-blue), var(--royal-gold));
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            margin: 30px 0;
+            border: 2px solid var(--royal-gold);
+            box-shadow: 0 5px 20px rgba(212, 175, 55, 0.3);
+        }
+
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.5);
+            background: linear-gradient(135deg, var(--royal-gold), var(--royal-blue));
+        }
+
+        .download-btn i {
+            margin-right: 10px;
         }
 
         .user-manual-content ul {
@@ -458,6 +524,11 @@
         .user-manual-content ul li {
             margin-bottom: 10px;
             line-height: 1.8;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .user-manual-content strong {
+            color: var(--royal-gold);
         }
 
         .scaffolding-diagram {
@@ -482,13 +553,15 @@
             width: 100%;
             border-collapse: collapse;
             margin: 30px 0;
-            background: white;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
             border-radius: 10px;
             overflow: hidden;
         }
 
         .user-manual-content table thead {
-            background: var(--primary-color);
+            background: rgba(30, 58, 138, 0.5);
             color: white;
         }
 
@@ -496,19 +569,22 @@
         .user-manual-content table td {
             padding: 15px;
             text-align: left;
-            border-bottom: 1px solid var(--gray);
+            border-bottom: 1px solid var(--glass-border);
+            color: rgba(255, 255, 255, 0.9);
         }
 
         .user-manual-content table tbody tr:hover {
-            background: var(--light-color);
+            background: rgba(255, 255, 255, 0.05);
         }
 
         .faq-item {
-            background: white;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
             margin-bottom: 15px;
             border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }
 
         .faq-summary {
@@ -517,17 +593,22 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: var(--light-color);
+            background: rgba(255, 255, 255, 0.03);
             transition: var(--transition);
+            color: #fff;
         }
 
         .faq-summary:hover {
-            background: var(--secondary-color);
-            color: white;
+            background: rgba(212, 175, 55, 0.2);
         }
 
         .faq-summary strong {
             font-size: 1.1rem;
+            color: var(--royal-gold);
+        }
+
+        .faq-summary i {
+            color: var(--royal-gold);
         }
 
         .faq-content {
@@ -535,6 +616,7 @@
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.3s ease, padding 0.3s ease;
+            color: rgba(255, 255, 255, 0.8);
         }
 
         .faq-item.active .faq-content {
@@ -543,8 +625,10 @@
         }
 
         footer {
-            background: var(--footer-bg);
-            color: var(--premium-text);
+            background: rgba(10, 22, 40, 0.8);
+            backdrop-filter: blur(20px);
+            border-top: 3px solid rgba(212, 175, 55, 0.3);
+            color: #fff;
             padding: 60px 20px 20px;
         }
 
@@ -676,33 +760,40 @@
 
         .policy-section {
             padding: 100px 20px 60px;
-            background: var(--light-color);
+            background: rgba(255, 255, 255, 0.02);
             min-height: 100vh;
         }
 
         .policy-content {
             max-width: 900px;
             margin: 0 auto;
-            background: white;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 2px solid var(--glass-border);
             padding: 50px;
             border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
         }
 
         .policy-content h2 {
-            color: var(--primary-color);
+            background: linear-gradient(135deg, #d4af37 0%, #f0c14b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             font-size: 2.5rem;
             margin-bottom: 30px;
             font-family: 'Playfair Display', serif;
         }
 
         .policy-content h3 {
-            color: var(--primary-color);
+            color: var(--royal-gold);
             font-size: 1.5rem;
             margin: 25px 0 15px;
         }
 
         .policy-content p {
+            color: rgba(255, 255, 255, 0.8);
             line-height: 1.8;
             margin-bottom: 15px;
         }
@@ -713,6 +804,7 @@
         }
 
         .policy-content ul li {
+            color: rgba(255, 255, 255, 0.8);
             margin-bottom: 10px;
             line-height: 1.8;
         }
@@ -721,16 +813,18 @@
             display: inline-block;
             margin-top: 30px;
             padding: 12px 30px;
-            background: var(--primary-color);
+            background: linear-gradient(135deg, var(--royal-blue), var(--royal-gold));
             color: white;
             text-decoration: none;
             border-radius: 25px;
             transition: var(--transition);
+            border: 2px solid var(--royal-gold);
         }
 
         .back-to-footer:hover {
-            background: var(--secondary-color);
+            background: linear-gradient(135deg, var(--royal-gold), var(--royal-blue));
             transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
         }
 
         @media (max-width: 768px) {
@@ -743,11 +837,14 @@
                 left: -100%;
                 top: 70px;
                 flex-direction: column;
-                background: white;
+                background: rgba(10, 22, 40, 0.95);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border-bottom: 2px solid rgba(212, 175, 55, 0.3);
                 width: 100%;
                 text-align: center;
                 transition: 0.3s;
-                box-shadow: 0 10px 27px rgba(0, 0, 0, 0.05);
+                box-shadow: 0 10px 27px rgba(0, 0, 0, 0.5);
                 padding: 20px 0;
             }
 
@@ -967,8 +1064,14 @@
             <h2>User Manual</h2>
         </div>
         <div class="user-manual-container">
-            <div class="user-manual-content">
+            <div class="user-manual-content" id="user-manual-content">
                 <h2>THE NATIONAL SCAFFOLDING (Aluminium)</h2>
+                
+                <div style="text-align: center; margin: 20px 0;">
+                    <a href="#" onclick="downloadUserManual(); return false;" class="download-btn">
+                        <i class="fas fa-download"></i> Download User Manual
+                    </a>
+                </div>
                 
                 <h3>Overview</h3>
                 <p>This manual provides detailed guidance on the safe use, assembly, maintenance, and care of aluminium scaffolding systems supplied by The National Scaffoldings. Please read and follow all sections carefully before operating or assembling your scaffolding.</p>
@@ -1253,6 +1356,47 @@
     </section>
 
     <script>
+        function downloadUserManual() {
+            const manualContent = document.getElementById('user-manual-content');
+            let textContent = 'THE NATIONAL SCAFFOLDING - User Manual\n\n';
+            
+            const sections = manualContent.querySelectorAll('h3, h4, p, ul, table');
+            sections.forEach(section => {
+                if (section.tagName === 'H3') {
+                    textContent += '\n' + section.textContent.trim() + '\n' + '='.repeat(50) + '\n';
+                } else if (section.tagName === 'H4') {
+                    textContent += '\n' + section.textContent.trim() + '\n' + '-'.repeat(30) + '\n';
+                } else if (section.tagName === 'P') {
+                    textContent += section.textContent.trim() + '\n\n';
+                } else if (section.tagName === 'UL') {
+                    const items = section.querySelectorAll('li');
+                    items.forEach(item => {
+                        textContent += '  • ' + item.textContent.trim() + '\n';
+                    });
+                    textContent += '\n';
+                } else if (section.tagName === 'TABLE') {
+                    textContent += '\n--- Table ---\n';
+                    const rows = section.querySelectorAll('tr');
+                    rows.forEach(row => {
+                        const cells = row.querySelectorAll('th, td');
+                        const cellTexts = Array.from(cells).map(cell => cell.textContent.trim());
+                        textContent += cellTexts.join(' | ') + '\n';
+                    });
+                    textContent += '\n';
+                }
+            });
+            
+            const blob = new Blob([textContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'National_Scaffolding_User_Manual.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
         document.addEventListener('DOMContentLoaded', function() {
             const hamburger = document.querySelector('.hamburger');
             const navMenu = document.querySelector('.nav-menu');
