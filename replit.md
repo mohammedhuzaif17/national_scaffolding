@@ -15,24 +15,24 @@ Do not make changes to the file `Y`.
 The platform is built on a Flask backend with PostgreSQL as the database. The frontend utilizes HTML5, CSS3 with a distinct glassmorphism design, and vanilla JavaScript.
 
 **UI/UX Decisions:**
-- **Design:** Modern glassmorphism aesthetic with a royal blue (#1e3a8a) and gold (#d4af37) premium theme.
-- **Typography:** Poppins for body text and Playfair Display for branding.
-- **Interactivity:** Smooth CSS transitions, responsive grid layouts, and consistent styling across all pages.
-- **User Flow:** Enhanced registration and flexible login (email/phone/username), dedicated admin login, category-specific product browsing, and a session-based welcome popup.
+- **Design:** Professional glassmorphism aesthetic with a royal blue (#1e3a8a) and gold (#d4af37) premium theme, enhanced with refined backdrop blur effects, inset shadows, and shimmer animations.
+- **Typography:** Poppins for body text and Playfair Display for branding and titles, with gradient text effects on page titles for premium feel.
+- **Interactivity:** Smooth CSS transitions, responsive grid layouts, ripple button effects, hover shimmer animations on product cards, and consistent royal styling across all pages.
+- **User Flow:** Enhanced registration, unified login system (admins and users login from same /login page), category-specific product browsing, session-based welcome popup, and streamlined fabrication page with View Details-only workflow.
 - **Product Customization:** Extensive use of dropdowns for product specifications (e.g., Aluminium scaffolding dimensions, H-Frame quantities with discount tiers, Cuplock types and sizes).
 
 **Technical Implementations:**
 - **Backend:** Flask handles all routes, business logic, and database interactions using Flask-SQLAlchemy.
 - **Database:** PostgreSQL stores user, admin, product, order, and order item data.
-- **Authentication:** Flask-Login manages user and admin sessions with secure password hashing via Werkzeug. Separate login flows for users and administrators.
-- **Shopping Cart:** Session-based storage for cart items, storing product IDs and customization metadata.
+- **Authentication:** Flask-Login manages user and admin sessions with secure password hashing via Werkzeug. Unified login system where admin usernames (admin_scaffolding, admin_fabrication) are automatically detected at /login and routed to appropriate admin panels.
+- **Shopping Cart:** Session-based storage for cart items, storing product IDs and customization metadata. Toast notifications provide feedback when products are added.
 - **Payment System:** Integration with PhonePe UPI via static QR codes, dynamically displaying exact payment amounts including 18% GST.
 - **Order Processing:** Mandatory UPI Transaction ID entry for order completion, with server-side validation of amount and transaction ID.
-- **Admin Panels:** Dual admin system allows separate management of scaffolding and fabrication products with full CRUD operations and dynamic forms.
+- **Admin Panels:** Dual admin system allows separate management of scaffolding and fabrication products with full CRUD operations, dynamic forms, and comprehensive orders dashboard for payment verification.
 
 **Feature Specifications:**
-- **User Features:** Enhanced registration, flexible login, product browsing, dynamic product customization using dropdowns, session-based welcome popup, shopping cart, PhonePe QR payment verification with UPI transaction ID, and order history.
-- **Admin Features:** Dedicated admin login, panel type selection (scaffolding/fabrication), full CRUD operations on products, and category management.
+- **User Features:** Enhanced registration, unified login (email/phone/username), product browsing with simplified fabrication page (View Details only), dynamic product customization using dropdowns, session-based welcome popup, shopping cart with toast notifications, PhonePe QR payment verification with UPI transaction ID, and order history.
+- **Admin Features:** Unified login from /login page (admin_scaffolding/admin123, admin_fabrication/admin123), automatic panel routing, full CRUD operations on products, category management, and comprehensive orders dashboard showing all customer orders with transaction IDs for payment verification.
 
 **System Design Choices:**
 - **Server-Side Price Calculation:** All pricing, including discounts and GST, is calculated server-side to prevent client-side manipulation.
