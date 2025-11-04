@@ -131,33 +131,11 @@
 
         .nav-menu li a:hover {
             background: rgba(255, 255, 255, 0.1);
-            color: var(--royal-gold);
             transform: translateY(-2px);
         }
 
         .nav-menu li a.active {
             color: var(--royal-gold);
-        }
-
-        .nav-menu li a::after {
-            content: '';
-            position: absolute;
-            bottom: 0px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 2px;
-            background: var(--royal-gold);
-            transition: var(--transition);
-            box-shadow: 0 0 10px var(--royal-gold);
-        }
-
-        .nav-menu li a:hover::after {
-            width: 100%;
-        }
-
-        .nav-menu li a.active::after {
-            width: 100%;
         }
 
         .cart-icon {
