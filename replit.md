@@ -19,6 +19,8 @@ This project is a Flask-based e-commerce platform for National Scaffolding and F
 - Customer Details Enhancement: Improved admin orders dashboard customer display with cleaner card-style layout, labeled fields, and better readability
 - Branding Fix: Corrected final "Crest Technocrat" reference in dashboard.html to "The National Scaffolding" for consistent branding
 - Logout Flow: Changed logout redirect from login page to landing page to prevent confusing login/logout loops
+- Email Notifications: Installed Flask-Mail and implemented automatic email notifications - customers receive order confirmation emails with complete order details, and admins receive new order alerts with customer information and transaction ID for verification
+- About Page Styling: Updated about.html CSS variables to fully match royal blue (#1e3a8a) and gold (#d4af37) theme for consistent branding across entire website
 
 ## User Preferences
 I prefer detailed explanations.
@@ -62,8 +64,30 @@ The platform is built on a Flask backend with PostgreSQL as the database. The fr
 - **Python Libraries:**
     - Flask (web framework and file upload handling)
     - Flask-Login (authentication)
+    - Flask-Mail (email notifications for orders)
     - Flask-SQLAlchemy (database ORM)
     - Werkzeug (password hashing and secure filename generation)
     - Pillow (image processing for uploaded photos)
     - psycopg2-binary (PostgreSQL adapter)
     - qrcode (QR code generation, currently using static image)
+
+## Email Configuration (Optional)
+Email notifications are configured but require SMTP credentials to function. To enable email notifications:
+
+**Required Environment Variables:**
+- `MAIL_USERNAME` - Your email address (e.g., [email protected])
+- `MAIL_PASSWORD` - Your email password or app-specific password
+- `MAIL_DEFAULT_SENDER` - Sender email (defaults to MAIL_USERNAME if not set)
+- `ADMIN_EMAIL` - Admin email to receive order notifications (defaults to MAIL_DEFAULT_SENDER if not set)
+
+**Optional Environment Variables:**
+- `MAIL_SERVER` - SMTP server (default: smtp.gmail.com)
+- `MAIL_PORT` - SMTP port (default: 587)
+- `MAIL_USE_TLS` - Use TLS encryption (default: True)
+
+**For Gmail:**
+1. Enable 2-Factor Authentication on your Google account
+2. Generate an App Password: Google Account → Security → 2-Step Verification → App Passwords
+3. Use the generated App Password as MAIL_PASSWORD
+
+**Note:** If email is not configured, the system will continue to work normally - emails just won't be sent. All email functions fail silently without breaking order processing.
