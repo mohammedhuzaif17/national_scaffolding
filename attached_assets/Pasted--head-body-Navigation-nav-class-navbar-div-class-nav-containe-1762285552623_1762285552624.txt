@@ -1,0 +1,514 @@
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="#">THE NATIONAL SCAFFOLDING</a>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="#hero" class="active">About Us</a></li>
+                <li><a href="#contact-section">Contact Us</a></li>
+                <li><a href="#user-manual">User Manual</a></li>
+                <li><a href="#" class="cart-icon"><i class="fas fa-shopping-cart"></i></a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section with Image and Stats -->
+    <section id="hero" class="hero">
+        <div class="hero-container">
+            <div class="hero-image">
+                <img src="https://z-cdn-media.chatglm.cn/files/0face00d-359f-4d9e-b2f6-339b6e6e55ba_pasted_image_1760871849173.jpg?auth_key=1792407998-c12ab30faf1d4b8b9fd655a35c42d96e-0-640668e647f81948a21e7a6507f8eac1" alt="Scaffolding Work">
+            </div>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <h3>1000+</h3>
+                    <p>COMPLETED PROJECTS</p>
+                </div>
+                <div class="stat-item">
+                    <h3>800+</h3>
+                    <p>SATISFIED CUSTOMERS</p>
+                </div>
+                <div class="stat-item">
+                    <h3>300+</h3>
+                    <p>EQUIPMENT UNITS AVAILABLE</p>
+                </div>
+                <div class="stat-item">
+                    <h3>10+</h3>
+                    <p>YEARS EXPERIENCE</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Attractive Expertise Section -->
+    <section id="expertise" class="expertise-new">
+        <div class="section-title">
+            <h2>Our Expertise</h2>
+        </div>
+        <div class="expertise-container">
+            <div class="expertise-item">
+                <div class="expertise-icon">
+                    <i class="fas fa-drafting-compass"></i>
+                </div>
+                <h3>Scaffolding<br>Design</h3>
+                <div class="expertise-bar">
+                    <div class="expertise-percentage" style="width: 95%;"></div>
+                </div>
+                <p>95%</p>
+            </div>
+            <div class="expertise-item">
+                <div class="expertise-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3>Safety<br>Compliance</h3>
+                <div class="expertise-bar">
+                    <div class="expertise-percentage" style="width: 100%;"></div>
+                </div>
+                <p>100%</p>
+            </div>
+            <div class="expertise-item">
+                <div class="expertise-icon">
+                    <i class="fas fa-project-diagram"></i>
+                </div>
+                <h3>Project<br>Management</h3>
+                <div class="expertise-bar">
+                    <div class="expertise-percentage" style="width: 90%;"></div>
+                </div>
+                <p>90%</p>
+            </div>
+            <div class="expertise-item">
+                <div class="expertise-icon">
+                    <i class="fas fa-headset"></i>
+                </div>
+                <h3>Client<br>Support</h3>
+                <div class="expertise-bar">
+                    <div class="expertise-percentage" style="width: 85%;"></div>
+                </div>
+                <p>85%</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Our Journey Section -->
+    <section id="journey" class="journey">
+        <div class="section-title">
+            <h2>Our Journey Since 2015</h2>
+        </div>
+        <div class="journey-container">
+            <div class="clients-section">
+                <h3>Our Prestigious Clients</h3>
+                <div class="clients-grid">
+                    <div class="client-item">Toyota</div>
+                    <div class="client-item">Asian Paints</div>
+                    <div class="client-item">Hyatt Centric</div>
+                    <div class="client-item">Cisco</div>
+                    <div class="client-item">Bosch</div>
+                    <div class="client-item">Kia Motors</div>
+                    <div class="client-item">TVS</div>
+                    <div class="client-item">Swiggy Instamart</div>
+                    <div class="client-item">Amazon</div>
+                </div>
+            </div>
+            
+            <div class="projects-section">
+                <h3>Major Commercial Projects</h3>
+                <div class="projects-grid">
+                    <div class="project-item">Phoenix Mall of Asia</div>
+                    <div class="project-item">Forum Mall</div>
+                    <div class="project-item">Mantri Mall</div>
+                    <div class="project-item">Shobha Mall</div>
+                    <div class="project-item">M5 Mall</div>
+                    <div class="project-item">Galeria Mall</div>
+                    <div class="project-item">Orion Mall</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Board of Administrators Section -->
+    <section id="administrators" class="administrators">
+        <div class="section-title">
+            <h2>Board Of Administrators</h2>
+        </div>
+        <div class="administrators-container">
+            <div class="administrator">
+                <div class="administrator-image">
+                    <img src="arbaaz.jpeg" alt="Chief Administrator">
+                </div>
+                <h3>Syed Arbaaz</h3>
+                <p>Chief Administrator</p>
+                <div class="social-links">
+                    <a href="https://www.instagram.com/syed.arbaaz.313?igsh=MTBwYTEwazVpaGE1aQ==" target="_blank"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.facebook.com/share/1A8c5B3BLV/?mibextid=LQQJ4d" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                </div>
+            </div>
+            <div class="administrator">
+                <div class="administrator-image">
+                    <img src="zubair.jpeg" alt="Senior Administrator">
+                </div>
+                <h3>Zubair Khan M Y</h3>
+                <p>Senior Administrator</p>
+                <div class="social-links single-icon">
+                    <a href="https://www.instagram.com/zubyrbinnoor?igsh=MWM3N2UyOWZ4YWRicA==" target="_blank"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+            <div class="administrator">
+                <div class="administrator-image">
+                    <img src="nayeem.jpeg" alt="Associate Administrator">
+                </div>
+                <h3>M D Nayeem</h3>
+                <p>Associate Administrator</p>
+                <div class="social-links">
+                    <a href="https://www.instagram.com/nayeem_khan_zaraar?igsh=c3N0dmlqdGFhNm10" target="_blank"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.facebook.com/share/17aDT4e5Zz/" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- User Manual Section -->
+    <section id="user-manual" class="user-manual">
+        <div class="section-title">
+            <h2>User Manual</h2>
+        </div>
+        <div class="user-manual-container">
+            <div class="user-manual-content">
+                <h2>THE NATIONAL SCAFFOLDING (Aluminium)</h2>
+                
+                <h3>Overview</h3>
+                <p>This manual provides detailed guidance on the safe use, assembly, maintenance, and care of aluminium scaffolding systems supplied by The National Scaffoldings. Please read and follow all sections carefully before operating or assembling your scaffolding.</p>
+                
+                <h3>1. Introduction</h3>
+                <p>Welcome to your Aluminium Scaffolding User Manual. This guide helps ensure safe handling, assembly, and maintenance of your aluminium scaffolding. Read all safety instructions carefully before use.</p>
+                
+                <h3>2. Safety Guidelines</h3>
+                <p>To ensure maximum safety and durability, follow these essential guidelines:</p>
+                <ul>
+                    <li>Comply with local safety regulations and scaffolding standards.</li>
+                    <li>Inspect all parts before use; never use damaged or rusted components.</li>
+                    <li>Set up scaffolding on a stable, level surface.</li>
+                    <li>Always wear safety harnesses and protective gear when working at height.</li>
+                    <li>Do not overload scaffolding beyond its rated capacity.</li>
+                    <li>Keep the work area clean and obstacle-free.</li>
+                    <li>Only trained personnel should assemble or dismantle scaffolding.</li>
+                </ul>
+                
+                <h3>3. Components Overview</h3>
+                <p>Each aluminium scaffolding system includes the following parts:</p>
+                <ul>
+                    <li><strong>Aluminium Frames</strong> – Vertical load-bearing structure</li>
+                    <li><strong>Cross Braces</strong> – Maintain stability and alignment</li>
+                    <li><strong>Platform Planks</strong> – Provide safe working surface</li>
+                    <li><strong>Guardrails</strong> – Prevent falls on elevated levels</li>
+                    <li><strong>Base Plates</strong> – Ensure firm and level foundation</li>
+                </ul>
+                
+                <h3>4. Assembly Instructions</h3>
+                <p>Follow these step-by-step assembly guidelines carefully:</p>
+                
+                <h4>Prepare the Site</h4>
+                <p>Clear the area and ensure the ground is stable and level.</p>
+                
+                <h4>Assemble the Base</h4>
+                <ul>
+                    <li>Place base plates on the ground.</li>
+                    <li>Attach the vertical frames securely to the base.</li>
+                </ul>
+                
+                <h4>Install Cross Braces</h4>
+                <p>Connect braces diagonally between frames to stabilize the structure.</p>
+                
+                <h4>Add Platform Planks</h4>
+                <p>Position planks securely across the horizontal supports.</p>
+                
+                <h4>Install Guardrails</h4>
+                <p>Fix guardrails on all open sides of the platform for safety.</p>
+                
+                <h4>Final Inspection</h4>
+                <p>Check every joint, connection, and brace before climbing or loading.</p>
+                
+                <!-- Scaffolding Diagram Placed Here -->
+                <div class="scaffolding-diagram">
+                    <img src="https://z-cdn-media.chatglm.cn/files/3d054a1a-ad94-406d-907c-04c7acfda0ef_pasted_image_1760890570749.png?auth_key=1792427401-cb7aae3ffa6347af93a715464039a22c-0-632beb1576994fa8c0eed01a1e36394e" alt="Scaffolding Diagram">
+                    <p class="scaffolding-diagram-caption">Properly assembled scaffolding with all safety components in place</p>
+                </div>
+                
+                <h3>5. Usage Instructions</h3>
+                <ul>
+                    <li>Inspect scaffolding daily before use.</li>
+                    <li>Never use it as a ladder or for unintended purposes.</li>
+                    <li>Maintain three points of contact when climbing.</li>
+                    <li>Do not exceed the maximum weight capacity.</li>
+                    <li>Keep tools and materials organized to prevent accidents.</li>
+                </ul>
+                
+                <h3>6. Maintenance & Care</h3>
+                <p>Regular maintenance ensures long service life and safety:</p>
+                <ul>
+                    <li>Inspect regularly for signs of corrosion, wear, or damage.</li>
+                    <li>Clean all surfaces after use to prevent buildup.</li>
+                    <li>Store in a dry, covered area to avoid moisture damage.</li>
+                    <li>Lubricate moving joints periodically.</li>
+                    <li>Tighten all nuts and fasteners before every use.</li>
+                </ul>
+                
+                <h3>7. Troubleshooting</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Issue</th>
+                            <th>Possible Cause</th>
+                            <th>Solution</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Scaffolding feels unstable</td>
+                            <td>Uneven surface or loose base plates</td>
+                            <td>Recheck level and secure all plates</td>
+                        </tr>
+                        <tr>
+                            <td>Difficulty assembling parts</td>
+                            <td>Incorrect component placement</td>
+                            <td>Refer to diagram and verify compatibility</td>
+                        </tr>
+                        <tr>
+                            <td>Wobbling during use</td>
+                            <td>Loose braces or guardrails</td>
+                            <td>Stop use immediately and tighten all fittings</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h3>8. Frequently Asked Questions (FAQs)</h3>
+                <div class="faq-item">
+                    <div class="faq-summary">
+                        <strong>Can I use the scaffolding outdoors?</strong>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-content">
+                        <p>Yes. Ensure the scaffolding is rated for outdoor use and set up on firm, level ground to maintain stability.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-summary">
+                        <strong>Can I modify the scaffolding?</strong>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-content">
+                        <p>No. Any modification may affect load capacity and structural safety. Always use the scaffolding as originally designed.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-summary">
+                        <strong>What should I do if an accident occurs?</strong>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-content">
+                        <p>Stop using the scaffolding immediately, contact emergency services if required, and report the incident to your supervisor.</p>
+                    </div>
+                </div>
+                
+                <h3>9. Conclusion</h3>
+                <p>Thank you for choosing The National Scaffoldings. By adhering to this manual, you ensure safe, reliable, and efficient use of your aluminium scaffolding system. Always prioritize safety, conduct regular inspections, and comply with established safety standards for optimal performance.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact-section">
+        <div class="footer-container">
+            <div class="footer-main">
+                <div class="footer-column">
+                    <div class="footer-logo">
+                        <h3>THE NATIONAL SCAFFOLDING</h3>
+                        <p>Providing safe, reliable scaffolding solutions for all your construction needs</p>
+                    </div>
+                    <div class="social-links">
+                        <a href="https://www.instagram.com/the_national_scaffolding?igsh=NWI3MnRhY3RrMm52" target="_blank"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-column">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="#hero">About Us</a></li>
+                        <li><a href="#user-manual">User Manual</a></li>
+                        <li><a href="#contact-section">Contact Us</a></li>
+                    </ul>
+                </div>
+                
+                <div class="services-contact-container">
+                    <div class="footer-column services-column">
+                        <h4>Our Services</h4>
+                        <ul>
+                            <li><a href="#">Scaffolding Design</a></li>
+                            <li><a href="#">Erection & Dismantling</a></li>
+                            <li><a href="#">Safety Inspections</a></li>
+                            <li><a href="#">Project Management</a></li>
+                            <li><a href="#">Consultation</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="footer-column contact-column">
+                        <h4>Contact Us</h4>
+                        <div class="contact-details">
+                            <ul class="contact-info">
+                                <li class="contact-map-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <div class="inline-map-container">
+                                        <iframe 
+                                            src="https://www.google.com/maps/embed?pb=!1m26!1m12!1m3!1d48650.51245197565!2d77.57826172834972!3d13.054063076572426!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m11!3e9!4m3!3m2!1d13.0356729!2d77.62225889999999!4m5!1s0x3bae1791e1e304a3%3A0x8ef57a85ae449b9c!2sRoyal%20heritage%20furniture%20factory!3m2!1d13.0489068!2d77.6268223!5e0!3m2!1sen!2sin!4v1760948910624!5m2!1sen!2sin" 
+                                            width="180" 
+                                            height="100" 
+                                            style="border:0; border-radius: 4px;" 
+                                            allowfullscreen="" 
+                                            loading="lazy" 
+                                            referrerpolicy="no-referrer-when-downgrade">
+                                        </iframe>
+                                        <a href="https://www.google.com/maps/dir/?api=1&destination=13.04886358727369,77.62424417507776" target="_blank" class="view-map-link">
+                                            <i class="fas fa-external-link-alt"></i> View Directions
+                                        </a>
+                                    </div>
+                                </li>
+                                <li>
+                                    <i class="fas fa-phone"></i>
+                                    <span>
+                                        <div>+918105934759</div>
+                                        <div>+919035415933</div>
+                                        <div>+919900186637</div>
+                                    </span>
+                                </li>
+                                <li>
+                                    <i class="fas fa-envelope"></i>
+                                    <span>cresttechnocrat@gmail.com</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <div class="copyright">
+                    <p>&copy; 2023 THE NATIONAL SCAFFOLDING. All Rights Reserved.</p>
+                </div>
+                <div class="footer-bottom-links">
+                    <a href="#privacy-policy">Privacy Policy</a>
+                    <a href="#terms-of-use">Terms of Use</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Privacy Policy Section -->
+    <section id="privacy-policy" class="policy-section">
+        <div class="container">
+            <div class="policy-content">
+                <h2>🔒 Privacy Policy</h2>
+                <p>At The National Scaffolding, your privacy matters to us. We collect only essential information required to enhance your experience and respond to your inquiries effectively.</p>
+                
+                <h3>What We Collect:</h3>
+                <ul>
+                    <li>Basic details you provide voluntarily (e.g., via forms).</li>
+                    <li>Technical data like browser type or visit duration for analytics.</li>
+                </ul>
+                
+                <h3>How We Use It:</h3>
+                <ul>
+                    <li>To improve our products, services, and website performance.</li>
+                    <li>To respond to user requests promptly and efficiently.</li>
+                </ul>
+                
+                <p>We never sell, rent, or misuse your information. Cookies may be used for better navigation—you can disable them anytime in your browser settings.</p>
+                
+                <p>All data is handled securely and confidentially in line with best practices.</p>
+                
+                <a href="#contact-section" class="back-to-footer">Back to Footer</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Terms of Use Section -->
+    <section id="terms-of-use" class="policy-section">
+        <div class="container">
+            <div class="policy-content">
+                <h2>⚖️ Terms of Use</h2>
+                <p>By using this website, you agree to the following terms:</p>
+                
+                <h3>Usage:</h3>
+                <ul>
+                    <li>Access and use the site solely for lawful and informational purposes.</li>
+                    <li>Do not attempt to disrupt or misuse the website in any way.</li>
+                </ul>
+                
+                <h3>Content Ownership:</h3>
+                <p>All designs, images, and text are the exclusive property of The National Scaffolding. Unauthorized use, copying, or modification is prohibited.</p>
+                
+                <h3>Disclaimer:</h3>
+                <p>While we strive for accuracy, product details and visuals are subject to change without prior notice. We are not responsible for any direct or indirect damages arising from site usage.</p>
+                
+                <h3>External Links:</h3>
+                <p>Third-party links are provided for convenience; we are not liable for their content or privacy practices.</p>
+                
+                <p>By continuing to use this site, you acknowledge and agree to these Privacy and Usage Terms.</p>
+                
+                <a href="#contact-section" class="back-to-footer">Back to Footer</a>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Simple JavaScript for hamburger menu toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const hamburger = document.querySelector('.hamburger');
+            const navMenu = document.querySelector('.nav-menu');
+            
+            hamburger.addEventListener('click', function() {
+                navMenu.classList.toggle('active');
+            });
+            
+            // Close menu when clicking on a link
+            const navLinks = document.querySelectorAll('.nav-menu a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    navMenu.classList.remove('active');
+                });
+            });
+            
+            // FAQ toggle functionality
+            const faqItems = document.querySelectorAll('.faq-item');
+            faqItems.forEach(item => {
+                const summary = item.querySelector('.faq-summary');
+                const content = item.querySelector('.faq-content');
+                const icon = summary.querySelector('i');
+                
+                summary.addEventListener('click', function() {
+                    // Toggle active class
+                    item.classList.toggle('active');
+                    
+                    // Toggle icon direction
+                    if (item.classList.contains('active')) {
+                        icon.classList.remove('fa-chevron-down');
+                        icon.classList.add('fa-chevron-up');
+                    } else {
+                        icon.classList.remove('fa-chevron-up');
+                        icon.classList.add('fa-chevron-down');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
