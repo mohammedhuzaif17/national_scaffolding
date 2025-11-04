@@ -63,7 +63,11 @@
                 
                 <div class="form-group">
                     <label>Quantity</label>
-                    <input type="number" id="quantity" value="1" min="1" onchange="updateAluminiumPrice()">
+                    <select id="quantity" onchange="updateAluminiumPrice()">
+                        {% for i in range(1, 51) %}
+                        <option value="{{ i }}" {% if i == 1 %}selected{% endif %}>{{ i }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 
                 <div class="product-price" id="final_price">₹{{ product.price }}</div>
@@ -75,7 +79,16 @@
                 
                 <div class="form-group">
                     <label>Quantity (Discount applies automatically)</label>
-                    <input type="number" id="quantity" value="1" min="1" onchange="updateHFramePrice()">
+                    <select id="quantity" onchange="updateHFramePrice()">
+                        {% for i in range(1, 11) %}
+                        <option value="{{ i }}">{{ i }} {% if i == 1 %}piece{% else %}pieces{% endif %}</option>
+                        {% endfor %}
+                        <option value="15">15 pieces (5% OFF)</option>
+                        <option value="25">25 pieces (7.5% OFF)</option>
+                        <option value="35">35 pieces (10% OFF)</option>
+                        <option value="60">60 pieces (12% OFF)</option>
+                        <option value="80">80 pieces (12% OFF)</option>
+                    </select>
                 </div>
                 
                 <div id="discount_info" style="background: rgba(76, 175, 80, 0.2); padding: 1rem; border-radius: 8px; margin: 1rem 0;">
@@ -182,7 +195,11 @@
             
             <div class="form-group" style="margin-top: 2rem;">
                 <label>Quantity</label>
-                <input type="number" id="quantity" value="1" min="1">
+                <select id="quantity">
+                    {% for i in range(1, 51) %}
+                    <option value="{{ i }}" {% if i == 1 %}selected{% endif %}>{{ i }}</option>
+                    {% endfor %}
+                </select>
             </div>
             {% endif %}
             

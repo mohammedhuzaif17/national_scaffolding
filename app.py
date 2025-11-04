@@ -312,11 +312,18 @@ def qr_scanner():
 @login_required
 def complete_order():
     if session.get('user_type') == 'admin':
-        return jsonify({'success': False})
+        return jsonify({'success': False, 'message': 'Admins cannot place orders'})
     
     cart_items = session.get('cart', [])
     if not cart_items:
-        return jsonify({'success': False})
+        return jsonify({'success': False, 'message': 'Cart is empty'})
+    
+    data = request.json or {}
+    transaction_id = data.get('transaction_id', '')
+    amount_paid = data.get('amount_paid', 0)
+    
+    if not transaction_id:
+        return jsonify({'success': False, 'message': 'Transaction ID is required'})
     
     total = 0
     
@@ -330,7 +337,13 @@ def complete_order():
     gst = total * 0.18
     total_with_gst = total + gst
     
-    order = Order(user_id=current_user.id, total_price=total_with_gst, status='completed')
+    order = Order(
+        user_id=current_user.id, 
+        total_price=total_with_gst, 
+        status='completed',
+        transaction_id=transaction_id,
+        amount_paid=amount_paid
+    )
     db.session.add(order)
     db.session.flush()
     
@@ -352,7 +365,7 @@ def complete_order():
     db.session.commit()
     session['cart'] = []
     
-    return jsonify({'success': True})
+    return jsonify({'success': True, 'order_id': order.id})
 
 @app.route('/my_orders')
 @login_required

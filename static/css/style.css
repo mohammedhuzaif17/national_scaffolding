@@ -5,18 +5,18 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+    font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #0c2340 0%, #1a3a6e 50%, #2c5364 100%);
     background-attachment: fixed;
     min-height: 100vh;
     color: #fff;
 }
 
 .navbar {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-bottom: 2px solid rgba(212, 175, 55, 0.3);
     padding: 1rem 2rem;
     display: flex;
     justify-content: space-between;
@@ -24,21 +24,26 @@ body {
     position: sticky;
     top: 0;
     z-index: 1000;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .navbar-brand {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #ffa500;
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: #d4af37;
     text-decoration: none;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-family: 'Playfair Display', serif;
 }
 
 .navbar-brand::before {
-    content: '●';
-    color: #ffa500;
+    content: '◆';
+    color: #d4af37;
+    font-size: 1.2rem;
 }
 
 .navbar-links {
@@ -61,15 +66,27 @@ body {
 }
 
 .glass-container {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
     border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    padding: 2rem;
+    border: 2px solid rgba(212, 175, 55, 0.2);
+    box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.4);
+    padding: 2.5rem;
     margin: 2rem auto;
     max-width: 1200px;
+    position: relative;
+    overflow: hidden;
+}
+
+.glass-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(to right, #1e3a8a, #d4af37, #4b0082);
 }
 
 .welcome-popup {
@@ -114,20 +131,23 @@ body {
 }
 
 .btn-explore {
-    background: linear-gradient(135deg, #2c5364, #4CAF50);
+    background: linear-gradient(135deg, #1e3a8a, #d4af37);
     color: white;
     border: none;
-    padding: 1rem 2rem;
-    border-radius: 10px;
+    padding: 1rem 2.5rem;
+    border-radius: 12px;
     font-size: 1.1rem;
     cursor: pointer;
     transition: all 0.3s ease;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
 }
 
 .btn-explore:hover {
     transform: translateY(-3px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 10px 25px rgba(212, 175, 55, 0.5);
+    background: linear-gradient(135deg, #d4af37, #1e3a8a);
 }
 
 .category-buttons {
@@ -141,7 +161,7 @@ body {
 .category-btn {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(212, 175, 55, 0.3);
     color: white;
     padding: 0.8rem 2rem;
     border-radius: 25px;
@@ -150,12 +170,15 @@ body {
     font-size: 0.9rem;
     text-transform: uppercase;
     letter-spacing: 1px;
+    font-weight: 600;
 }
 
 .category-btn:hover, .category-btn.active {
-    background: rgba(255, 255, 255, 0.2);
+    background: linear-gradient(135deg, rgba(30, 58, 138, 0.4), rgba(212, 175, 55, 0.4));
+    border-color: #d4af37;
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+    color: #d4af37;
 }
 
 .product-grid {
@@ -182,8 +205,10 @@ body {
 }
 
 .product-card h3 {
-    color: #ffa500;
+    color: #d4af37;
     margin-bottom: 0.5rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
 }
 
 .product-card p {
@@ -199,20 +224,24 @@ body {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #4CAF50, #45a049);
+    background: linear-gradient(135deg, #1e3a8a, #d4af37);
     color: white;
     border: none;
     padding: 0.8rem 1.5rem;
-    border-radius: 10px;
+    border-radius: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
     font-size: 1rem;
     width: 100%;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
 }
 
 .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
+    background: linear-gradient(135deg, #d4af37, #1e3a8a);
 }
 
 .btn-secondary {
