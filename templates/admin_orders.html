@@ -19,7 +19,7 @@
             <thead>
                 <tr>
                     <th>Order ID</th>
-                    <th>Customer</th>
+                    <th>Customer Details</th>
                     <th>Date</th>
                     <th>Total Amount</th>
                     <th>Transaction ID</th>
@@ -31,7 +31,16 @@
                 {% for order in orders %}
                 <tr>
                     <td>#{{ order.id }}</td>
-                    <td>{{ order.user.username }}</td>
+                    <td style="max-width: 250px;">
+                        <div style="line-height: 1.6;">
+                            <strong style="color: #d4af37;">{{ order.user.full_name or order.user.username or 'N/A' }}</strong><br>
+                            <span style="color: #ccc; font-size: 0.9rem;">📧 {{ order.user.email or 'N/A' }}</span><br>
+                            <span style="color: #ccc; font-size: 0.9rem;">📱 {{ order.user.phone or 'N/A' }}</span><br>
+                            {% if order.user.organization %}
+                            <span style="color: #aaa; font-size: 0.85rem;">🏢 {{ order.user.organization }}</span>
+                            {% endif %}
+                        </div>
+                    </td>
                     <td>{{ order.order_date.strftime('%b %d, %Y %I:%M %p') }}</td>
                     <td style="color: #4CAF50; font-weight: bold;">₹{{ "%.2f"|format(order.total_price) }}</td>
                     <td>
