@@ -317,6 +317,12 @@ body {
     background: rgba(255, 255, 255, 0.15);
 }
 
+.form-group select option {
+    background-color: #0c2340;
+    color: white;
+    padding: 0.5rem;
+}
+
 .dashboard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));

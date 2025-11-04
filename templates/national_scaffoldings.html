@@ -15,6 +15,12 @@
     <h1 class="page-title">The National Scaffolding</h1>
     <p class="page-subtitle">Professional scaffolding services for all your construction needs</p>
     
+    <div style="text-align: center; margin-bottom: 1.5rem;">
+        <button class="btn-secondary" onclick="window.location.href='{{ url_for('fabrications') }}'" style="background: linear-gradient(135deg, #1e3a8a, #d4af37); padding: 0.8rem 2rem; font-size: 1rem;">
+            🔧 Go to Fabrications
+        </button>
+    </div>
+    
     <div class="category-buttons">
         <button class="category-btn {% if category == 'all' %}active{% endif %}" 
                 onclick="window.location.href='{{ url_for('national_scaffoldings', category='all') }}'">
