@@ -10,7 +10,16 @@
     {% if cart_items %}
     <div style="margin-top: 2rem;">
         {% for item in cart_items %}
-        <div class="cart-item">
+        <div class="cart-item" style="display: grid; grid-template-columns: 120px 1fr auto; gap: 1.5rem; align-items: center;">
+            <div>
+                {% if item.image_url %}
+                <img src="{{ item.image_url }}" alt="{{ item.product_name }}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; border: 2px solid rgba(255, 165, 0, 0.3);">
+                {% else %}
+                <div style="width: 100%; height: 100px; background: rgba(255, 255, 255, 0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(255, 165, 0, 0.3);">
+                    <span style="font-size: 2rem; color: #ffa500;">📦</span>
+                </div>
+                {% endif %}
+            </div>
             <div>
                 <h3 style="color: #ffa500;">{{ item.product_name }}</h3>
                 <p>Quantity: {{ item.quantity }}</p>

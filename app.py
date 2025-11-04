@@ -295,7 +295,8 @@ def cart():
                     'quantity': item['quantity'],
                     'unit_price': unit_price,
                     'item_total': item_total,
-                    'customization': item['customization']
+                    'customization': item['customization'],
+                    'image_url': product.image_url
                 }
                 enriched_cart.append(enriched_item)
     
