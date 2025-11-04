@@ -15,7 +15,7 @@ A Flask-based e-commerce platform for National Scaffolding and Fabrications feat
 - Added QR code payment integration for checkout
 - Seeded database with sample products and admin accounts
 
-### Phase 2 - Enhanced Features & Security (November 4, 2025)
+### Phase 2 - Enhanced Features & Security (November 4, 2025, Morning)
 - **MAJOR SECURITY FIX**: Implemented server-side price calculation for all products
 - **Enhanced Authentication**: Login now supports email, phone, or username
 - **Enhanced Registration**: Added full_name, phone, and organization fields
@@ -30,6 +30,40 @@ A Flask-based e-commerce platform for National Scaffolding and Fabrications feat
 - **About Page**: Added company information and branding
 - **Product Detail Pages**: Individual pages for each product with customization options
 
+### Phase 3 - UX Improvements & Enhanced Security (November 4, 2025, Afternoon)
+- **Payment Verification System**: 
+  - Users must enter UPI Transaction ID (minimum 8 characters) before order completion
+  - Transaction ID stored in Order model for payment tracking
+  - Server-side validation ensures transaction ID is required and valid
+  - Amount is calculated entirely server-side (no client manipulation possible)
+  - Order.amount_paid field stores server-calculated total for audit trail
+- **Separate Admin Login**:
+  - Created dedicated `/admin_login` route and `admin_login.html` template
+  - Removed admin option from user login page for cleaner UX
+  - Admin login requires username, password, and panel type selection
+  - Link to admin login available from user login page
+- **Dropdown Improvements for Better UX**:
+  - Replaced all manual quantity inputs with dropdown selects (1-50 range)
+  - H-Frames quantity dropdown shows discount tiers (15, 25, 35, 60, 80 pieces)
+  - Aluminium height and width already using dropdowns
+  - Cuplock size selections using dropdowns
+  - Improved user experience with predefined options
+- **Royal Blue & Gold Premium Theme**:
+  - Updated color scheme to royal blue (#1e3a8a) and gold (#d4af37)
+  - Enhanced navbar with gold branding and better backdrop blur
+  - Updated all buttons to use royal gradient (blue to gold)
+  - Category buttons with gold borders and hover effects
+  - Product cards with gold titles and consistent styling
+  - Glass containers with gradient top border (blue-gold-purple)
+  - Premium font styling with Poppins and Playfair Display
+- **Welcome Popup Enhancement**:
+  - Popup now uses sessionStorage to display only once per browser session
+  - No longer shows on every category page change
+  - Rainbow gradient border maintained for visual appeal
+- **Bug Fixes**:
+  - Fixed About page "Home" link to redirect to `/national_scaffoldings` instead of non-existent `index.html`
+  - Updated page title from "User Login" to clearly distinguish from admin login
+
 ## Project Architecture
 
 ### Backend (Flask)
@@ -39,57 +73,67 @@ A Flask-based e-commerce platform for National Scaffolding and Fabrications feat
 
 ### Database (PostgreSQL)
 Tables:
-- `users`: Customer accounts with authentication
+- `users`: Customer accounts with authentication (username, email, phone, full_name, organization)
 - `admins`: Admin accounts with panel type (scaffolding/fabrication)
-- `products`: Product catalog with categories and pricing
-- `orders`: Order records with status tracking
-- `order_items`: Individual items within orders
+- `products`: Product catalog with categories, pricing, and customization options
+- `orders`: Order records with status, transaction_id, and amount_paid for payment verification
+- `order_items`: Individual items within orders with customization details
 
 ### Frontend
 - **templates/**: HTML templates using Jinja2
-  - `base.html`: Base template with navbar
-  - `login.html`, `register.html`: Authentication pages
+  - `base.html`: Base template with royal blue & gold navbar
+  - `login.html`: User login (email/phone/username authentication)
+  - `admin_login.html`: Dedicated admin login with panel selection
+  - `register.html`: User registration page
   - `dashboard.html`: Main navigation hub
-  - `national_scaffoldings.html`: Scaffolding products with welcome popup
+  - `national_scaffoldings.html`: Scaffolding products with session-based welcome popup
   - `fabrications.html`: Fabrication products
-  - `cart.html`: Shopping cart
-  - `qr_scanner.html`: Checkout with QR code
-  - `my_orders.html`: Order history
-  - `admin_scaffoldings.html`: Admin panel for scaffolding
-  - `admin_fabrication.html`: Admin panel for fabrication
+  - `product_detail.html`: Individual product pages with dropdown customization
+  - `cart.html`: Shopping cart with customization details
+  - `qr_scanner.html`: Checkout with PhonePe QR code and transaction ID verification
+  - `my_orders.html`: Order history with transaction IDs
+  - `admin_scaffoldings.html`: Admin panel for scaffolding products
+  - `admin_fabrication.html`: Admin panel for fabrication products
+  - `about.html`: Company information and branding
 
-- **static/css/style.css**: Glassmorphism styling with animations
+- **static/css/style.css**: Royal blue & gold glassmorphism theme with premium styling
 
 ## Features
 
 ### User Features
 - **Enhanced Registration**: Captures full name, phone, organization, email, and password
-- **Flexible Login**: Authenticate using email, phone number, or username
+- **Flexible Login**: Authenticate using email, phone number, or username (separate from admin login)
 - **Product Browsing**: Category-specific pages (All, Aluminium, H-Frames, Cuplock, Accessories)
-- **Welcome Popup**: Glassmorphism popup with rainbow gradient border on first visit
-- **Product Customization**:
-  - Aluminium: Choose width, height, and buy/rent option
-  - H-Frames: Automatic discounts based on quantity
-  - Cuplock: Vertical/Ledger type selection with size customization
-  - Accessories: Simple quantity selection
+- **Welcome Popup**: Glassmorphism popup with rainbow gradient border (shows once per session)
+- **Product Customization with Dropdowns**:
+  - Aluminium: Dropdown select for width, height, purchase type (buy/rent), and quantity (1-50)
+  - H-Frames: Dropdown with pre-selected discount quantities (15, 25, 35, 60, 80 pieces)
+  - Cuplock: Dropdown selects for type, size, cups, and quantity
+  - Accessories: Dropdown quantity selector (1-50)
 - **Shopping Cart**: Add/remove items with customization details displayed
-- **PhonePe Payment**: QR code with embedded amount including 18% GST
-- **Order History**: View all completed orders with details
-- **Responsive Design**: Mobile-friendly interface
+- **Payment Verification**: 
+  - QR code with embedded PhonePe payment amount including 18% GST
+  - Mandatory UPI Transaction ID entry (minimum 8 characters)
+  - Server-side amount validation (no client manipulation possible)
+- **Order History**: View all completed orders with transaction IDs and details
+- **Responsive Design**: Mobile-friendly interface with royal blue and gold theme
 
 ### Admin Features
-- Separate admin logins for scaffolding and fabrication panels
-- Full CRUD operations for products
-- Category management for scaffolding products
-- Real-time product updates
+- **Dedicated Admin Login**: Separate `/admin_login` page (not mixed with user login)
+- **Panel Type Selection**: Choose between scaffolding and fabrication admin panels
+- **Dual Admin System**: Separate admin accounts for scaffolding and fabrication panels
+- **Full CRUD Operations**: Add, edit, delete products from admin panels
+- **Category Management**: Manage scaffolding product categories
+- **Real-time Updates**: Product changes immediately visible to users
 
 ### Design
-- Dark navy blue gradient background
-- Glassmorphism effects with backdrop blur
-- Smooth CSS animations and transitions
-- Rainbow gradient borders on popup
-- Orange (#ffa500) accent color for branding
-- Responsive grid layouts
+- **Royal Blue & Gold Premium Theme**: Professional color scheme with royal blue (#1e3a8a) and gold (#d4af37)
+- **Enhanced Glassmorphism**: Improved backdrop blur effects with gradient borders
+- **Premium Typography**: Poppins for body text, Playfair Display for brand name
+- **Smooth Animations**: CSS transitions on all interactive elements
+- **Rainbow Gradient**: Welcome popup border with multi-color gradient
+- **Responsive Grid**: Mobile-friendly layouts across all pages
+- **Consistent Styling**: Unified color palette across all pages including About
 
 ## Credentials
 
@@ -144,8 +188,11 @@ The Flask app runs on port 5000 and is configured as a workflow. The database is
 
 ## Security Features
 - **Price Integrity**: All prices calculated server-side from database; client cannot manipulate
+- **Payment Amount Security**: Order amount calculated entirely server-side; client only provides transaction ID
+- **Transaction ID Validation**: Server-side validation ensures minimum 8-character transaction ID before order completion
 - **H-Frame Discounts**: Discount tiers computed server-side based on quantity validation
 - **Cuplock Pricing**: Per-kg pricing (₹78/kg) calculated server-side using weight_per_unit
-- **Input Validation**: Quantity must be positive integer; invalid inputs rejected
-- **Session Security**: Secure session management with environment-based secret key
+- **Input Validation**: Quantity and customization validated server-side
+- **Session Security**: Secure session management with environment-based secret key (SESSION_SECRET required)
 - **Password Hashing**: Werkzeug secure password hashing for all user accounts
+- **Separate Admin Authentication**: Admin login completely separated from user login with panel type verification
