@@ -80,7 +80,7 @@ with app.app_context():
 
 @app.route('/')
 def index():
-    return redirect(url_for('national_scaffoldings'))
+    return render_template('landing.html')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -434,7 +434,23 @@ def admin_orders():
     if session.get('user_type') != 'admin':
         return redirect(url_for('dashboard'))
     
-    orders = Order.query.order_by(Order.order_date.desc()).all()
+    # Determine which admin is logged in
+    admin_username = current_user.username
+    
+    if admin_username == 'admin_scaffolding':
+        # Show only orders containing scaffolding products
+        orders = db.session.query(Order).join(OrderItem).join(Product).filter(
+            Product.product_type == 'scaffolding'
+        ).distinct().order_by(Order.order_date.desc()).all()
+    elif admin_username == 'admin_fabrication':
+        # Show only orders containing fabrication products
+        orders = db.session.query(Order).join(OrderItem).join(Product).filter(
+            Product.product_type == 'fabrication'
+        ).distinct().order_by(Order.order_date.desc()).all()
+    else:
+        # Fallback: show all orders
+        orders = Order.query.order_by(Order.order_date.desc()).all()
+    
     return render_template('admin_orders.html', orders=orders)
 
 @app.route('/admin_logout')
