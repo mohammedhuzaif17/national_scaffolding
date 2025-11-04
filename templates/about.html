@@ -792,8 +792,6 @@
             </div>
             <ul class="nav-menu">
                 <li><a href="{{ url_for('index') }}">Home</a></li>
-                <li><a href="{{ url_for('national_scaffoldings') }}">Scaffolding</a></li>
-                <li><a href="{{ url_for('fabrications') }}">Fabrications</a></li>
                 <li><a href="{{ url_for('about') }}" class="active">About Us</a></li>
                 <li><a href="{{ url_for('cart') }}">Cart</a></li>
                 {% if current_user.is_authenticated %}
@@ -806,7 +804,6 @@
                 {% else %}
                     <li><a href="{{ url_for('login') }}">Login</a></li>
                 {% endif %}
-                <li><a href="{{ url_for('cart') }}" class="cart-icon"><i class="fas fa-shopping-cart"></i></a></li>
             </ul>
             <div class="hamburger">
                 <span></span>
