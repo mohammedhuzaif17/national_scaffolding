@@ -319,11 +319,10 @@ def complete_order():
         return jsonify({'success': False, 'message': 'Cart is empty'})
     
     data = request.json or {}
-    transaction_id = data.get('transaction_id', '')
-    amount_paid = data.get('amount_paid', 0)
+    transaction_id = data.get('transaction_id', '').strip()
     
-    if not transaction_id:
-        return jsonify({'success': False, 'message': 'Transaction ID is required'})
+    if not transaction_id or len(transaction_id) < 8:
+        return jsonify({'success': False, 'message': 'Valid Transaction ID is required (minimum 8 characters)'})
     
     total = 0
     
@@ -342,7 +341,7 @@ def complete_order():
         total_price=total_with_gst, 
         status='completed',
         transaction_id=transaction_id,
-        amount_paid=amount_paid
+        amount_paid=total_with_gst
     )
     db.session.add(order)
     db.session.flush()

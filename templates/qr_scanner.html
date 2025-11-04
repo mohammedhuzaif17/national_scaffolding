@@ -80,8 +80,7 @@ function completeOrder() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                transaction_id: transactionId,
-                amount_paid: {{ total_with_gst }}
+                transaction_id: transactionId
             })
         })
         .then(response => response.json())
@@ -90,7 +89,7 @@ function completeOrder() {
                 alert('Order completed successfully! Your transaction ID: ' + transactionId);
                 window.location.href = '{{ url_for('my_orders') }}';
             } else {
-                alert('Failed to complete order. Please try again.');
+                alert(data.message || 'Failed to complete order. Please try again.');
             }
         });
     }
