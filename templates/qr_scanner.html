@@ -7,16 +7,37 @@
     <h1 class="page-title">Checkout</h1>
     
     <div class="qr-container">
-        <h2 style="color: #ffa500; margin-bottom: 1rem;">Total Amount</h2>
-        <div style="font-size: 3rem; color: #4CAF50; margin-bottom: 2rem;">₹{{ total }}</div>
+        <h2 style="color: #ffa500; margin-bottom: 1rem;">Payment Summary</h2>
+        
+        <div style="background: rgba(255, 255, 255, 0.05); padding: 1.5rem; border-radius: 10px; margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                <span>Subtotal:</span>
+                <span>₹{{ "%.2f"|format(total) }}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                <span>GST (18%):</span>
+                <span>₹{{ "%.2f"|format(gst) }}</span>
+            </div>
+            <hr style="border: 1px solid rgba(255, 255, 255, 0.1); margin: 1rem 0;">
+            <div style="display: flex; justify-content: space-between; font-size: 1.5rem; color: #4CAF50; font-weight: bold;">
+                <span>Total Amount:</span>
+                <span>₹{{ "%.2f"|format(total_with_gst) }}</span>
+            </div>
+        </div>
         
         <p style="margin-bottom: 2rem; color: #ccc;">Scan the QR code below to complete your payment</p>
         
-        <div class="qr-code">
-            <img src="data:image/png;base64,{{ qr_code }}" alt="Payment QR Code">
+        <div style="text-align: center;">
+            <div class="qr-code" style="background: white; padding: 2rem; border-radius: 10px; display: inline-block; margin-bottom: 1rem;">
+                <img src="data:image/png;base64,{{ qr_code }}" alt="Payment QR Code" style="width: 300px; height: 300px;">
+            </div>
+            <div style="margin-top: 1rem;">
+                <img src="{{ url_for('static', filename='images/phonepe_qr.png') }}" alt="PhonePe" style="width: 80px; opacity: 0.8;">
+            </div>
         </div>
         
-        <p style="color: #ccc; margin-top: 1rem;">Pay using any UPI app</p>
+        <p style="color: #4CAF50; margin-top: 1rem; font-weight: bold; font-size: 1.3rem;">Pay ₹{{ "%.2f"|format(total_with_gst) }}</p>
+        <p style="color: #ccc; font-size: 0.9rem;">Amount is automatically included - just scan and confirm!</p>
         
         <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center;">
             <button class="btn-primary" onclick="completeOrder()">I've Completed Payment</button>

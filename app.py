@@ -7,6 +7,41 @@ import io
 import base64
 from datetime import datetime
 
+def calculate_price(product, customization):
+    quantity = customization.get('quantity', 1)
+    category = product.category
+    
+    if category == 'aluminium':
+        purchase_type = customization.get('purchaseType', 'buy')
+        if purchase_type == 'rent':
+            unit_price = product.rent_price if product.rent_price else product.price
+        else:
+            unit_price = product.price
+        return unit_price
+    
+    elif category == 'h-frames':
+        discount_rate = 0
+        if quantity >= 100:
+            return None
+        elif quantity >= 50:
+            discount_rate = 0.12
+        elif quantity >= 30:
+            discount_rate = 0.10
+        elif quantity >= 20:
+            discount_rate = 0.075
+        elif quantity >= 10:
+            discount_rate = 0.05
+        unit_price = product.price * (1 - discount_rate)
+        return unit_price
+    
+    elif category == 'cuplock':
+        price_per_kg = 78
+        weight = product.weight_per_unit if product.weight_per_unit else 5
+        return price_per_kg * weight
+    
+    else:
+        return product.price
+
 app = Flask(__name__)
 
 if not os.environ.get('SESSION_SECRET'):
@@ -38,7 +73,10 @@ def index():
 def register():
     if request.method == 'POST':
         username = request.form.get('username')
+        full_name = request.form.get('full_name')
+        phone = request.form.get('phone')
         email = request.form.get('email')
+        organization = request.form.get('organization')
         password = request.form.get('password')
         
         if User.query.filter_by(username=username).first():
@@ -49,7 +87,17 @@ def register():
             flash('Email already registered', 'error')
             return redirect(url_for('register'))
         
-        user = User(username=username, email=email)
+        if User.query.filter_by(phone=phone).first():
+            flash('Phone number already registered', 'error')
+            return redirect(url_for('register'))
+        
+        user = User(
+            username=username,
+            full_name=full_name,
+            phone=phone,
+            email=email,
+            organization=organization
+        )
         user.set_password(password)
         db.session.add(user)
         db.session.commit()
@@ -62,12 +110,12 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form.get('username')
+        identifier = request.form.get('identifier')
         password = request.form.get('password')
         user_type = request.form.get('user_type', 'user')
         
         if user_type == 'admin':
-            user = Admin.query.filter_by(username=username).first()
+            user = Admin.query.filter_by(username=identifier).first()
             if user and user.check_password(password):
                 login_user(user)
                 session['user_type'] = 'admin'
@@ -77,14 +125,18 @@ def login():
                 else:
                     return redirect(url_for('admin_fabrication'))
         else:
-            user = User.query.filter_by(username=username).first()
+            user = User.query.filter(
+                (User.username == identifier) | 
+                (User.email == identifier) | 
+                (User.phone == identifier)
+            ).first()
             if user and user.check_password(password):
                 login_user(user)
                 session['user_type'] = 'user'
                 session['cart'] = session.get('cart', [])
                 return redirect(url_for('dashboard'))
         
-        flash('Invalid username or password', 'error')
+        flash('Invalid credentials', 'error')
     
     return render_template('login.html')
 
@@ -118,6 +170,15 @@ def fabrications():
     products = Product.query.filter_by(product_type='fabrication').all()
     return render_template('fabrications.html', products=products)
 
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+@app.route('/product/<int:product_id>')
+def product_detail(product_id):
+    product = Product.query.get_or_404(product_id)
+    return render_template('product_detail.html', product=product)
+
 @app.route('/add_to_cart', methods=['POST'])
 @login_required
 def add_to_cart():
@@ -125,14 +186,37 @@ def add_to_cart():
         return jsonify({'success': False, 'message': 'Admins cannot purchase items'})
     
     data = request.json
+    product_id = data.get('product_id')
+    quantity = data.get('quantity', 1)
+    customization = data.get('customization', {})
+    
+    try:
+        quantity = int(quantity)
+        if quantity <= 0:
+            return jsonify({'success': False, 'message': 'Quantity must be a positive integer'})
+    except (ValueError, TypeError):
+        return jsonify({'success': False, 'message': 'Invalid quantity'})
+    
+    product = Product.query.get(product_id)
+    if not product:
+        return jsonify({'success': False, 'message': 'Product not found'})
+    
+    customization['quantity'] = quantity
+    
+    if product.category == 'h-frames' and quantity >= 100:
+        return jsonify({'success': False, 'message': 'For orders of 100+ pieces, please contact us directly at sales@nationalscaffolding.com'})
+    
+    unit_price = calculate_price(product, customization)
+    if unit_price is None:
+        return jsonify({'success': False, 'message': 'Cannot calculate price for this configuration'})
+    
     cart = session.get('cart', [])
     
     cart_item = {
-        'product_id': data['product_id'],
-        'product_name': data['product_name'],
-        'price': data['price'],
-        'quantity': data.get('quantity', 1),
-        'customization': data.get('customization', {})
+        'product_id': product_id,
+        'product_name': product.name,
+        'quantity': quantity,
+        'customization': customization
     }
     
     cart.append(cart_item)
@@ -147,9 +231,28 @@ def cart():
         return redirect(url_for('admin_scaffoldings'))
     
     cart_items = session.get('cart', [])
-    total = sum(item['price'] * item['quantity'] for item in cart_items)
     
-    return render_template('cart.html', cart_items=cart_items, total=total)
+    enriched_cart = []
+    total = 0
+    
+    for item in cart_items:
+        product = Product.query.get(item['product_id'])
+        if product:
+            unit_price = calculate_price(product, item['customization'])
+            if unit_price is not None:
+                item_total = unit_price * item['quantity']
+                total += item_total
+                
+                enriched_item = {
+                    'product_name': product.name,
+                    'quantity': item['quantity'],
+                    'unit_price': unit_price,
+                    'item_total': item_total,
+                    'customization': item['customization']
+                }
+                enriched_cart.append(enriched_item)
+    
+    return render_template('cart.html', cart_items=enriched_cart, total=total)
 
 @app.route('/remove_from_cart/<int:index>')
 @login_required
@@ -168,9 +271,19 @@ def qr_scanner():
         return redirect(url_for('admin_scaffoldings'))
     
     cart_items = session.get('cart', [])
-    total = sum(item['price'] * item['quantity'] for item in cart_items)
+    total = 0
     
-    qr_data = f"upi://pay?pa=nationalscaffolding@upi&pn=National Scaffolding&am={total}&cu=INR"
+    for item in cart_items:
+        product = Product.query.get(item['product_id'])
+        if product:
+            unit_price = calculate_price(product, item['customization'])
+            if unit_price is not None:
+                total += unit_price * item['quantity']
+    
+    gst = total * 0.18
+    total_with_gst = total + gst
+    
+    qr_data = f"upi://pay?pa=nationalscaffolding@phonepe&pn=The National Scaffolding&am={total_with_gst:.2f}&cu=INR"
     qr = qrcode.QRCode(version=1, box_size=10, border=5)
     qr.add_data(qr_data)
     qr.make(fit=True)
@@ -180,7 +293,7 @@ def qr_scanner():
     img.save(buffered, format="PNG")
     qr_code_base64 = base64.b64encode(buffered.getvalue()).decode()
     
-    return render_template('qr_scanner.html', total=total, qr_code=qr_code_base64)
+    return render_template('qr_scanner.html', total=total, gst=gst, total_with_gst=total_with_gst, qr_code=qr_code_base64)
 
 @app.route('/complete_order', methods=['POST'])
 @login_required
@@ -192,22 +305,36 @@ def complete_order():
     if not cart_items:
         return jsonify({'success': False})
     
-    total = sum(item['price'] * item['quantity'] for item in cart_items)
+    total = 0
     
-    order = Order(user_id=current_user.id, total_price=total, status='completed')
+    for item in cart_items:
+        product = Product.query.get(item['product_id'])
+        if product:
+            unit_price = calculate_price(product, item['customization'])
+            if unit_price is not None:
+                total += unit_price * item['quantity']
+    
+    gst = total * 0.18
+    total_with_gst = total + gst
+    
+    order = Order(user_id=current_user.id, total_price=total_with_gst, status='completed')
     db.session.add(order)
     db.session.flush()
     
     for item in cart_items:
-        order_item = OrderItem(
-            order_id=order.id,
-            product_id=item['product_id'],
-            product_name=item['product_name'],
-            quantity=item['quantity'],
-            price=item['price'],
-            customization=item.get('customization')
-        )
-        db.session.add(order_item)
+        product = Product.query.get(item['product_id'])
+        if product:
+            unit_price = calculate_price(product, item['customization'])
+            if unit_price is not None:
+                order_item = OrderItem(
+                    order_id=order.id,
+                    product_id=item['product_id'],
+                    product_name=product.name,
+                    quantity=item['quantity'],
+                    price=unit_price,
+                    customization=item.get('customization')
+                )
+                db.session.add(order_item)
     
     db.session.commit()
     session['cart'] = []
@@ -255,7 +382,9 @@ def admin_add_product():
         category=data.get('category'),
         product_type=data['product_type'],
         customization_options=data.get('customization_options'),
-        rent_price=data.get('rent_price')
+        rent_price=float(data['rent_price']) if data.get('rent_price') else None,
+        image_url=data.get('image_url'),
+        weight_per_unit=float(data['weight_per_unit']) if data.get('weight_per_unit') else None
     )
     
     db.session.add(product)
@@ -277,7 +406,9 @@ def admin_update_product(product_id):
     product.description = data.get('description', '')
     product.category = data.get('category')
     product.customization_options = data.get('customization_options')
-    product.rent_price = data.get('rent_price')
+    product.rent_price = float(data['rent_price']) if data.get('rent_price') else None
+    product.image_url = data.get('image_url')
+    product.weight_per_unit = float(data['weight_per_unit']) if data.get('weight_per_unit') else None
     
     db.session.commit()
     

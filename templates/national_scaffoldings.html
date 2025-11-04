@@ -26,11 +26,15 @@
         </button>
         <button class="category-btn {% if category == 'h-frames' %}active{% endif %}" 
                 onclick="window.location.href='{{ url_for('national_scaffoldings', category='h-frames') }}'">
-            H FRAMES SCAFFOLDINGS
+            H FRAMES
         </button>
         <button class="category-btn {% if category == 'cuplock' %}active{% endif %}" 
                 onclick="window.location.href='{{ url_for('national_scaffoldings', category='cuplock') }}'">
-            CUPLOCK SCAFFOLDINGS
+            CUPLOCK
+        </button>
+        <button class="category-btn {% if category == 'accessories' %}active{% endif %}" 
+                onclick="window.location.href='{{ url_for('national_scaffoldings', category='accessories') }}'">
+            ACCESSORIES
         </button>
     </div>
 
@@ -38,28 +42,27 @@
     
     <div class="product-grid">
         {% for product in products %}
-        <div class="product-card">
+        <div class="product-card" onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'" style="cursor: pointer;">
+            {% if product.image_url %}
+            <img src="{{ product.image_url }}" alt="{{ product.name }}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 1rem;">
+            {% else %}
+            <div style="background: rgba(255, 165, 0, 0.2); height: 200px; display: flex; align-items: center; justify-content: center; border-radius: 8px; margin-bottom: 1rem;">
+                <span style="font-size: 3rem;">📦</span>
+            </div>
+            {% endif %}
             <h3>{{ product.name }}</h3>
-            <p>{{ product.description }}</p>
+            <p style="min-height: 60px;">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
             {% if product.category %}
-            <p style="color: #ffa500; font-size: 0.9rem;">Category: {{ product.category|title }}</p>
+            <p style="color: #ffa500; font-size: 0.9rem; text-transform: uppercase;">{{ product.category }}</p>
             {% endif %}
             <div class="product-price">₹{{ product.price }}</div>
             {% if product.rent_price %}
             <p style="color: #4CAF50;">Rent: ₹{{ product.rent_price }}/month</p>
             {% endif %}
             
-            {% if current_user.is_authenticated and session.get('user_type') != 'admin' %}
-            <div class="form-group">
-                <label for="quantity_{{ product.id }}">Quantity</label>
-                <input type="number" id="quantity_{{ product.id }}" value="1" min="1" style="width: 100%;">
-            </div>
-            <button class="btn-primary" onclick="addToCart({{ product.id }}, '{{ product.name }}', {{ product.price }})">
-                Add to Cart
+            <button class="btn-primary" onclick="event.stopPropagation(); window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
+                View Details
             </button>
-            {% elif not current_user.is_authenticated %}
-            <p style="color: #ff6b6b; text-align: center;">Please login to purchase</p>
-            {% endif %}
         </div>
         {% endfor %}
     </div>

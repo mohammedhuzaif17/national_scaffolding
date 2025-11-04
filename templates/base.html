@@ -7,19 +7,28 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    {% if current_user.is_authenticated %}
     <nav class="navbar">
-        <a href="{{ url_for('dashboard') }}" class="navbar-brand">Crest Technocrat</a>
+        <a href="{% if current_user.is_authenticated %}{{ url_for('dashboard') }}{% else %}{{ url_for('national_scaffoldings') }}{% endif %}" class="navbar-brand">THE NATIONAL SCAFFOLDING</a>
         <ul class="navbar-links">
-            <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
-            {% if session.get('user_type') != 'admin' %}
-            <li><a href="{{ url_for('cart') }}">Cart</a></li>
-            <li><a href="{{ url_for('my_orders') }}">My Orders</a></li>
+            {% if current_user.is_authenticated %}
+                {% if session.get('user_type') == 'admin' %}
+                    <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                    <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('national_scaffoldings') }}">Products</a></li>
+                    <li><a href="{{ url_for('cart') }}">Cart</a></li>
+                    <li><a href="{{ url_for('my_orders') }}">My Orders</a></li>
+                    <li><a href="{{ url_for('about') }}">About</a></li>
+                    <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                {% endif %}
+            {% else %}
+                <li><a href="{{ url_for('national_scaffoldings') }}">Products</a></li>
+                <li><a href="{{ url_for('about') }}">About</a></li>
+                <li><a href="{{ url_for('login') }}">Login</a></li>
+                <li><a href="{{ url_for('register') }}">Register</a></li>
             {% endif %}
-            <li><a href="{{ url_for('logout') }}">Logout</a></li>
         </ul>
     </nav>
-    {% endif %}
 
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}

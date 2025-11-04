@@ -13,7 +13,19 @@
             <div>
                 <h3 style="color: #ffa500;">{{ item.product_name }}</h3>
                 <p>Quantity: {{ item.quantity }}</p>
-                <p style="color: #4CAF50; font-size: 1.2rem;">₹{{ item.price }} x {{ item.quantity }} = ₹{{ item.price * item.quantity }}</p>
+                {% if item.customization %}
+                <p style="font-size: 0.9rem; color: #ccc;">
+                    {% if item.customization.purchaseType %}
+                        {{ item.customization.purchaseType|title }} | Width: {{ item.customization.width }}m | Height: {{ item.customization.height }}m
+                    {% elif item.customization.discount_rate %}
+                        Discount Applied: {{ (item.customization.discount_rate * 100)|int }}%
+                    {% elif item.customization.type %}
+                        {{ item.customization.type|title }}
+                        {% if item.customization.size %} ({{ item.customization.size }}m){% endif %}
+                    {% endif %}
+                </p>
+                {% endif %}
+                <p style="color: #4CAF50; font-size: 1.2rem;">₹{{ "%.2f"|format(item.unit_price) }} x {{ item.quantity }} = ₹{{ "%.2f"|format(item.item_total) }}</p>
             </div>
             <div>
                 <button class="btn-danger" onclick="removeItem({{ loop.index0 }})">Remove</button>
@@ -22,7 +34,8 @@
         {% endfor %}
         
         <div style="text-align: right; margin-top: 2rem; padding: 1.5rem; background: rgba(255, 255, 255, 0.05); border-radius: 10px;">
-            <h2 style="color: #ffa500;">Total: ₹{{ total }}</h2>
+            <h2 style="color: #ffa500;">Subtotal: ₹{{ "%.2f"|format(total) }}</h2>
+            <p style="color: #ccc; font-size: 0.9rem;">GST (18%) will be added at checkout</p>
             <button class="btn-primary" onclick="window.location.href='{{ url_for('qr_scanner') }}'" style="width: auto; margin-top: 1rem;">
                 Proceed to Checkout
             </button>

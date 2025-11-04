@@ -58,7 +58,7 @@
             </div>
             <div class="form-group">
                 <label for="productCategory">Category</label>
-                <select id="productCategory" required>
+                <select id="productCategory" required onchange="updateCategoryFields()">
                     <option value="aluminium">Aluminium</option>
                     <option value="h-frames">H-Frames</option>
                     <option value="cuplock">Cuplock</option>
@@ -68,6 +68,14 @@
             <div class="form-group">
                 <label for="productDescription">Description</label>
                 <textarea id="productDescription" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="productImageUrl">Image URL (Optional)</label>
+                <input type="url" id="productImageUrl" placeholder="https://example.com/image.jpg">
+            </div>
+            <div class="form-group" id="weightField">
+                <label for="productWeight">Weight per Unit (kg) - For Cuplock pricing</label>
+                <input type="number" id="productWeight" step="0.1" placeholder="Default: 5 kg">
             </div>
             <div style="display: flex; gap: 1rem;">
                 <button type="submit" class="btn-primary">Save</button>
@@ -81,12 +89,30 @@
 {% block scripts %}
 let editMode = false;
 
+function updateCategoryFields() {
+    const category = document.getElementById('productCategory').value;
+    const rentField = document.getElementById('productRentPrice').closest('.form-group');
+    const weightField = document.getElementById('weightField');
+    
+    if (category === 'aluminium') {
+        rentField.style.display = 'block';
+        weightField.style.display = 'none';
+    } else if (category === 'cuplock') {
+        rentField.style.display = 'none';
+        weightField.style.display = 'block';
+    } else {
+        rentField.style.display = 'none';
+        weightField.style.display = 'none';
+    }
+}
+
 function showAddModal() {
     editMode = false;
     document.getElementById('modalTitle').textContent = 'Add Product';
     document.getElementById('productForm').reset();
     document.getElementById('productId').value = '';
     document.getElementById('productModal').classList.add('show');
+    updateCategoryFields();
 }
 
 function editProduct(id, name, price, description, category, rentPrice) {
@@ -132,6 +158,8 @@ document.getElementById('productForm').addEventListener('submit', function(e) {
         rent_price: document.getElementById('productRentPrice').value || null,
         category: document.getElementById('productCategory').value,
         description: document.getElementById('productDescription').value,
+        image_url: document.getElementById('productImageUrl').value || null,
+        weight_per_unit: document.getElementById('productWeight').value || null,
         product_type: 'scaffolding'
     };
     

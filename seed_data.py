@@ -14,49 +14,98 @@ def seed_database():
         admin_fabrication.set_password('admin123')
         db.session.add(admin_fabrication)
         
-        test_user = User(username='testuser', email='test@example.com')
+        test_user = User(
+            username='testuser',
+            full_name='Test User',
+            email='test@example.com',
+            phone='9999999999',
+            organization='Test Company'
+        )
         test_user.set_password('test123')
         db.session.add(test_user)
         
         scaffolding_products = [
             Product(
-                name='Aluminium H-Frame (Customizable)',
+                name='Aluminium H-Frame Scaffolding',
                 price=2500,
                 rent_price=500,
-                description='High-quality aluminium H-frame scaffolding with customizable width and height options',
+                description='High-quality aluminium H-frame scaffolding with customizable width (0.7m or 1.4m) and height options from 2m to 16m. Ideal for construction and maintenance work.',
                 category='aluminium',
-                product_type='scaffolding'
-            ),
-            Product(
-                name='Cuplock System Standard',
-                price=3200,
-                rent_price=650,
-                description='Professional cuplock scaffolding system for heavy-duty construction',
-                category='cuplock',
-                product_type='scaffolding'
+                product_type='scaffolding',
+                weight_per_unit=25
             ),
             Product(
                 name='Aluminium Mobile Tower',
                 price=4500,
                 rent_price=900,
-                description='Portable aluminium mobile tower scaffolding, easy to move and assemble',
+                description='Portable aluminium mobile tower scaffolding with wheels. Easy to move and assemble. Perfect for indoor and outdoor projects.',
                 category='aluminium',
-                product_type='scaffolding'
+                product_type='scaffolding',
+                weight_per_unit=35
             ),
             Product(
                 name='H-Frame Standard Set',
                 price=1800,
-                rent_price=350,
-                description='Standard H-frame scaffolding set with bulk discount options',
+                description='Standard H-frame scaffolding set made from high-grade steel. Bulk discounts available: 10+ pieces get 5% off, 20+ get 7.5% off, 30-50 get 10% off, 50-100 get 12% off.',
                 category='h-frames',
-                product_type='scaffolding'
+                product_type='scaffolding',
+                weight_per_unit=30
             ),
             Product(
-                name='Cuplock Vertical (1-6 cups)',
+                name='H-Frame Heavy Duty',
+                price=2200,
+                description='Heavy-duty H-frame scaffolding for industrial applications. Supports higher loads. Bulk discounts apply automatically.',
+                category='h-frames',
+                product_type='scaffolding',
+                weight_per_unit=40
+            ),
+            Product(
+                name='Cuplock Vertical System',
                 price=850,
-                description='Cuplock vertical components available in various sizes',
+                description='Cuplock vertical components available in 1m, 2m, and 3m sizes with 1-6 cups. Customizable length from 1.1m to 3.0m. Priced at ₹78 per kg.',
                 category='cuplock',
-                product_type='scaffolding'
+                product_type='scaffolding',
+                weight_per_unit=10.9
+            ),
+            Product(
+                name='Cuplock Ledger System',
+                price=780,
+                description='Cuplock ledger components available in sizes from 0.6m to 3.0m. Professional-grade quality. Priced at ₹78 per kg.',
+                category='cuplock',
+                product_type='scaffolding',
+                weight_per_unit=10
+            ),
+            Product(
+                name='Safety Harness',
+                price=1200,
+                description='Full-body safety harness with adjustable straps. Essential safety equipment for working at heights.',
+                category='accessories',
+                product_type='scaffolding',
+                weight_per_unit=2
+            ),
+            Product(
+                name='Scaffolding Clamps',
+                price=150,
+                description='Heavy-duty scaffolding clamps for secure connections. Sold per piece.',
+                category='accessories',
+                product_type='scaffolding',
+                weight_per_unit=0.5
+            ),
+            Product(
+                name='Base Plates',
+                price=450,
+                description='Adjustable base plates for scaffolding stability on uneven surfaces.',
+                category='accessories',
+                product_type='scaffolding',
+                weight_per_unit=3
+            ),
+            Product(
+                name='Scaffolding Wheels',
+                price=800,
+                description='Durable wheels for mobile scaffolding systems. Set of 4 wheels.',
+                category='accessories',
+                product_type='scaffolding',
+                weight_per_unit=5
             ),
         ]
         
