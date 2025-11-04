@@ -14,6 +14,9 @@ This project is a Flask-based e-commerce platform for National Scaffolding and F
 - Payment Validation: Implemented real-time UPI Transaction ID validation with visual feedback (green tick for valid 12-35 char IDs, red cross for invalid), payment button disabled until valid ID entered
 - Admin Orders Dashboard: Enhanced to display complete customer details (full name, email, phone, organization) instead of just username, with proper fallbacks for missing data
 - About Page Navigation: Fixed navigation bar to include all site options (Scaffolding, Fabrications, Cart, My Orders, Dashboard, Login/Logout) with proper Flask routing and authentication-based conditional display
+- Landing Page: Created new welcome page with two category cards (National Scaffolding and Fabrications) with responsive styling and smooth animations
+- Admin Order Filtering: Scaffolding admin now sees only orders containing scaffolding products; Fabrication admin sees only orders containing fabrication products
+- Customer Details Enhancement: Improved admin orders dashboard customer display with cleaner card-style layout, labeled fields, and better readability
 
 ## User Preferences
 I prefer detailed explanations.
