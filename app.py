@@ -119,6 +119,27 @@ def login():
         identifier = request.form.get('identifier')
         password = request.form.get('password')
         
+        # Check if this is an admin login attempt
+        if identifier in ['admin_scaffolding', 'admin_fabrication']:
+            # Determine panel type from username
+            panel_type = 'scaffolding' if identifier == 'admin_scaffolding' else 'fabrication'
+            
+            # Check admin credentials
+            admin = Admin.query.filter_by(username=identifier, panel_type=panel_type).first()
+            if admin and admin.check_password(password):
+                login_user(admin)
+                session['user_type'] = 'admin'
+                session['panel_type'] = admin.panel_type
+                
+                if admin.panel_type == 'scaffolding':
+                    return redirect(url_for('admin_scaffoldings'))
+                else:
+                    return redirect(url_for('admin_fabrication'))
+            else:
+                flash('Invalid admin credentials', 'error')
+                return render_template('login.html')
+        
+        # Regular user login
         user = User.query.filter(
             (User.username == identifier) | 
             (User.email == identifier) | 

@@ -25,19 +25,11 @@
             <div class="product-price">₹{{ product.price }}</div>
             
             {% if current_user.is_authenticated and session.get('user_type') != 'admin' %}
-            <div class="form-group">
-                <label for="quantity_{{ product.id }}">Quantity</label>
-                <select id="quantity_{{ product.id }}" style="width: 100%;">
-                    {% for i in range(1, 51) %}
-                    <option value="{{ i }}">{{ i }}</option>
-                    {% endfor %}
-                </select>
-            </div>
             <button class="btn-primary" onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
-                View Details & Add to Cart
+                View Details
             </button>
             {% elif not current_user.is_authenticated %}
-            <p style="color: #ff6b6b; text-align: center;">Please login to purchase</p>
+            <p style="color: #ff6b6b; text-align: center;">Please login to view details</p>
             {% endif %}
         </div>
         {% endfor %}
