@@ -50,6 +50,12 @@ if not os.environ.get('SESSION_SECRET'):
 app.config['SECRET_KEY'] = os.environ.get('SESSION_SECRET')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'pool_pre_ping': True,
+    'pool_recycle': 300,
+    'pool_size': 10,
+    'max_overflow': 20
+}
 
 db.init_app(app)
 login_manager = LoginManager()

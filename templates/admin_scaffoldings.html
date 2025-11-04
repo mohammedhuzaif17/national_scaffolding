@@ -4,6 +4,10 @@
 
 {% block content %}
 <div class="glass-container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <button class="btn-secondary" onclick="window.location.href='{{ url_for('national_scaffoldings') }}'" style="width: auto;">← Back to Home</button>
+        <button class="btn-danger" onclick="window.location.href='{{ url_for('admin_logout') }}'" style="width: auto;">Logout</button>
+    </div>
     <h1 class="page-title">Admin Panel - Scaffolding Products</h1>
     
     <button class="btn-primary" onclick="showAddModal()" style="width: auto; margin-bottom: 2rem;">
@@ -70,8 +74,9 @@
                 <textarea id="productDescription" rows="4"></textarea>
             </div>
             <div class="form-group">
-                <label for="productImageUrl">Image URL (Optional)</label>
-                <input type="url" id="productImageUrl" placeholder="https://example.com/image.jpg">
+                <label for="productImageUrl">Product Images (Multiple URLs - Optional)</label>
+                <textarea id="productImageUrl" rows="3" placeholder="Enter image URLs, one per line&#10;https://example.com/image1.jpg&#10;https://example.com/image2.jpg"></textarea>
+                <small style="color: #888; font-size: 0.85rem;">You can add multiple image URLs, one per line. The first image will be the main product image.</small>
             </div>
             <div class="form-group" id="weightField">
                 <label for="productWeight">Weight per Unit (kg) - For Cuplock pricing</label>
