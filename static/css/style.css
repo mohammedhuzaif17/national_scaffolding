@@ -60,12 +60,6 @@ body {
     font-family: 'Playfair Display', serif;
 }
 
-.navbar-brand::before {
-    content: '◆';
-    color: #d4af37;
-    font-size: 1.2rem;
-}
-
 .navbar-links {
     display: flex;
     gap: 2rem;
