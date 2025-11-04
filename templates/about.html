@@ -1304,14 +1304,21 @@
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
-                <a href="#">THE NATIONAL SCAFFOLDING</a>
+                <a href="{{ url_for('national_scaffoldings') }}">THE NATIONAL SCAFFOLDING</a>
             </div>
             <ul class="nav-menu">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="#hero" class="active">About Us</a></li>
-                <li><a href="#contact-section">Contact Us</a></li>
-                <li><a href="#user-manual">User Manual</a></li>
-                <li><a href="#" class="cart-icon"><i class="fas fa-shopping-cart"></i></a></li>
+                <li><a href="{{ url_for('national_scaffoldings') }}">Scaffolding</a></li>
+                <li><a href="{{ url_for('fabrications') }}">Fabrications</a></li>
+                <li><a href="{{ url_for('about') }}" class="active">About Us</a></li>
+                {% if current_user.is_authenticated %}
+                    <li><a href="{{ url_for('cart') }}">Cart</a></li>
+                    <li><a href="{{ url_for('my_orders') }}">My Orders</a></li>
+                    <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                    <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('cart') }}">Cart</a></li>
+                    <li><a href="{{ url_for('login') }}">Login</a></li>
+                {% endif %}
             </ul>
             <div class="hamburger">
                 <span></span>
