@@ -21,6 +21,8 @@ This project is a Flask-based e-commerce platform for National Scaffolding and F
 - Logout Flow: Changed logout redirect from login page to landing page to prevent confusing login/logout loops
 - Email Notifications: Installed Flask-Mail and implemented automatic email notifications - customers receive order confirmation emails with complete order details, and admins receive new order alerts with customer information and transaction ID for verification
 - About Page Complete Replacement: Replaced entire about.html with comprehensive new content including hero section with stats, expertise bars, client/project journey, board of administrators, detailed user manual, FAQs, privacy policy, and terms of use - all styled with royal blue (#1e3a8a) and gold (#d4af37) theme and fully integrated with Flask routing
+- About Page Theme Conversion: Converted about page from light theme to consistent dark glassmorphism design matching main website - added dark gradient background (linear-gradient(135deg, #0a1628 0%, #1e3a8a 50%, #2c5364 100%)), applied backdrop blur effects to all sections (navbar, hero, stats, expertise, administrators, footer), changed all text colors to white/light for readability, updated mobile navigation with dark glass background, and added all necessary CSS variables for theme consistency
+- User Manual Download: Added download button in user manual section with gradient royal blue-to-gold styling, implemented JavaScript function to extract and download user manual content as formatted .txt file ("National_Scaffolding_User_Manual.txt") including all sections, tables, and bullet points
 
 ## User Preferences
 I prefer detailed explanations.
