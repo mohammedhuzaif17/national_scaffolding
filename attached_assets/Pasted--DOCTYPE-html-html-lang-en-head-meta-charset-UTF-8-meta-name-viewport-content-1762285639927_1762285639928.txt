@@ -6,807 +6,20 @@
     <title>About Us - THE NATIONAL SCAFFOLDING</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600;700&family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        :root {
-            --primary-color: #1e3a8a;
-            --secondary-color: #d4af37;
-            --light-color: #f8f9fa;
-            --dark-color: #333;
-            --text-color: #555;
-            --white: #ffffff;
-            --gray: #e9ecef;
-            --transition: all 0.3s ease;
-            --hero-bg-gradient: linear-gradient(135deg, #1e3a8a, #3b82f6, #d4af37, #1e3a8a);
-            --royal-blue: #1e3a8a;
-            --royal-gold: #d4af37;
-            --royal-dark-blue: #0c2340;
-            --footer-bg: linear-gradient(135deg, #0c2340, #1e3a8a);
-            --premium-text: #f8f9fa;
-            --premium-gold: #d4af37;
-        }
-
-        body {
-            background-color: var(--white);
-            color: var(--text-color);
-            line-height: 1.6;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        section {
-            scroll-margin-top: 80px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 15px;
-        }
-
-        .section-title {
-            text-align: center;
-            margin-bottom: 50px;
-        }
-
-        .section-title h2 {
-            font-size: 2.5rem;
-            color: var(--primary-color);
-            position: relative;
-            display: inline-block;
-            padding-bottom: 15px;
-            font-family: 'Playfair Display', serif;
-        }
-
-        .section-title h2::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100px;
-            height: 4px;
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
-            border-radius: 2px;
-        }
-
-        .navbar {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.98);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            padding: 1rem 0;
-        }
-
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .nav-logo a {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            text-decoration: none;
-            font-family: 'Playfair Display', serif;
-        }
-
-        .nav-menu {
-            display: flex;
-            list-style: none;
-            gap: 30px;
-            align-items: center;
-        }
-
-        .nav-menu li a {
-            text-decoration: none;
-            color: var(--dark-color);
-            font-weight: 500;
-            transition: var(--transition);
-            position: relative;
-        }
-
-        .nav-menu li a:hover,
-        .nav-menu li a.active {
-            color: var(--primary-color);
-        }
-
-        .nav-menu li a::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--secondary-color);
-            transition: var(--transition);
-        }
-
-        .nav-menu li a:hover::after,
-        .nav-menu li a.active::after {
-            width: 100%;
-        }
-
-        .cart-icon {
-            font-size: 1.2rem;
-            color: var(--primary-color);
-        }
-
-        .hamburger {
-            display: none;
-            flex-direction: column;
-            cursor: pointer;
-        }
-
-        .hamburger span {
-            width: 25px;
-            height: 3px;
-            background: var(--primary-color);
-            margin: 3px 0;
-            transition: var(--transition);
-        }
-
-        .hero {
-            margin-top: 80px;
-            padding: 60px 20px;
-            background: var(--hero-bg-gradient);
-            background-size: 300% 300%;
-            animation: gradientShift 15s ease infinite;
-        }
-
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-
-        .hero-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            align-items: center;
-        }
-
-        .hero-image {
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .hero-image img {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-
-        .hero-stats {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-        }
-
-        .stat-item {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .stat-item:hover {
-            transform: translateY(-5px);
-        }
-
-        .stat-item h3 {
-            font-size: 2.5rem;
-            color: var(--primary-color);
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .stat-item p {
-            color: var(--text-color);
-            font-weight: 500;
-            font-size: 0.9rem;
-        }
-
-        .expertise-new {
-            padding: 80px 20px;
-            background: var(--light-color);
-        }
-
-        .expertise-container {
-            max-width: 1000px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 40px;
-        }
-
-        .expertise-item {
-            text-align: center;
-        }
-
-        .expertise-icon {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            color: white;
-            font-size: 2rem;
-        }
-
-        .expertise-item h3 {
-            color: var(--dark-color);
-            margin-bottom: 15px;
-            font-size: 1.1rem;
-        }
-
-        .expertise-bar {
-            width: 100%;
-            height: 8px;
-            background: var(--gray);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 10px;
-        }
-
-        .expertise-percentage {
-            height: 100%;
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
-            border-radius: 4px;
-            transition: width 1.5s ease;
-        }
-
-        .expertise-item p {
-            color: var(--primary-color);
-            font-weight: 600;
-        }
-
-        .journey {
-            padding: 80px 20px;
-            background: white;
-        }
-
-        .journey-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 50px;
-        }
-
-        .clients-section h3,
-        .projects-section h3 {
-            color: var(--primary-color);
-            font-size: 1.8rem;
-            margin-bottom: 30px;
-            text-align: center;
-            font-family: 'Playfair Display', serif;
-        }
-
-        .clients-grid,
-        .projects-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-        }
-
-        .client-item,
-        .project-item {
-            background: var(--light-color);
-            padding: 20px;
-            text-align: center;
-            border-radius: 10px;
-            font-weight: 600;
-            color: var(--dark-color);
-            transition: var(--transition);
-            border: 2px solid transparent;
-        }
-
-        .client-item:hover,
-        .project-item:hover {
-            background: white;
-            border-color: var(--secondary-color);
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .administrators {
-            padding: 80px 20px;
-            background: var(--light-color);
-        }
-
-        .administrators-container {
-            max-width: 1000px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 40px;
-        }
-
-        .administrator {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-            transition: var(--transition);
-        }
-
-        .administrator:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-        }
-
-        .administrator-image {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            overflow: hidden;
-            margin: 0 auto 20px;
-            border: 4px solid var(--secondary-color);
-        }
-
-        .administrator-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .administrator h3 {
-            color: var(--primary-color);
-            font-size: 1.3rem;
-            margin-bottom: 10px;
-        }
-
-        .administrator p {
-            color: var(--text-color);
-            margin-bottom: 15px;
-            font-style: italic;
-        }
-
-        .social-links {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        .social-links a {
-            width: 40px;
-            height: 40px;
-            background: var(--primary-color);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: var(--transition);
-        }
-
-        .social-links a:hover {
-            background: var(--secondary-color);
-            transform: scale(1.1);
-        }
-
-        .user-manual {
-            padding: 80px 20px;
-            background: white;
-        }
-
-        .user-manual-container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .user-manual-content {
-            background: var(--light-color);
-            padding: 40px;
-            border-radius: 15px;
-        }
-
-        .user-manual-content h2 {
-            color: var(--primary-color);
-            font-size: 2rem;
-            margin-bottom: 30px;
-            font-family: 'Playfair Display', serif;
-        }
-
-        .user-manual-content h3 {
-            color: var(--primary-color);
-            font-size: 1.5rem;
-            margin: 30px 0 15px;
-        }
-
-        .user-manual-content h4 {
-            color: var(--dark-color);
-            font-size: 1.2rem;
-            margin: 20px 0 10px;
-        }
-
-        .user-manual-content p {
-            margin-bottom: 15px;
-            line-height: 1.8;
-        }
-
-        .user-manual-content ul {
-            margin-left: 25px;
-            margin-bottom: 20px;
-        }
-
-        .user-manual-content ul li {
-            margin-bottom: 10px;
-            line-height: 1.8;
-        }
-
-        .scaffolding-diagram {
-            margin: 40px 0;
-            text-align: center;
-        }
-
-        .scaffolding-diagram img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .scaffolding-diagram-caption {
-            margin-top: 15px;
-            font-style: italic;
-            color: var(--text-color);
-        }
-
-        .user-manual-content table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 30px 0;
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .user-manual-content table thead {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .user-manual-content table th,
-        .user-manual-content table td {
-            padding: 15px;
-            text-align: left;
-            border-bottom: 1px solid var(--gray);
-        }
-
-        .user-manual-content table tbody tr:hover {
-            background: var(--light-color);
-        }
-
-        .faq-item {
-            background: white;
-            margin-bottom: 15px;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .faq-summary {
-            padding: 20px;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--light-color);
-            transition: var(--transition);
-        }
-
-        .faq-summary:hover {
-            background: var(--secondary-color);
-            color: white;
-        }
-
-        .faq-summary strong {
-            font-size: 1.1rem;
-        }
-
-        .faq-content {
-            padding: 0 20px;
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease, padding 0.3s ease;
-        }
-
-        .faq-item.active .faq-content {
-            max-height: 300px;
-            padding: 20px;
-        }
-
-        footer {
-            background: var(--footer-bg);
-            color: var(--premium-text);
-            padding: 60px 20px 20px;
-        }
-
-        .footer-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .footer-main {
-            display: grid;
-            grid-template-columns: 2fr 1fr 2fr;
-            gap: 40px;
-            margin-bottom: 40px;
-        }
-
-        .footer-logo h3 {
-            color: var(--secondary-color);
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-            font-family: 'Playfair Display', serif;
-        }
-
-        .footer-logo p {
-            line-height: 1.8;
-            margin-bottom: 20px;
-        }
-
-        .footer-column h4 {
-            color: var(--secondary-color);
-            margin-bottom: 20px;
-            font-size: 1.2rem;
-        }
-
-        .footer-column ul {
-            list-style: none;
-        }
-
-        .footer-column ul li {
-            margin-bottom: 12px;
-        }
-
-        .footer-column ul li a {
-            color: var(--premium-text);
-            text-decoration: none;
-            transition: var(--transition);
-        }
-
-        .footer-column ul li a:hover {
-            color: var(--secondary-color);
-            padding-left: 5px;
-        }
-
-        .services-contact-container {
-            display: contents;
-        }
-
-        .contact-details {
-            color: var(--premium-text);
-        }
-
-        .contact-info {
-            list-style: none;
-        }
-
-        .contact-info li {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 20px;
-        }
-
-        .contact-info li i {
-            color: var(--secondary-color);
-            margin-right: 15px;
-            font-size: 1.2rem;
-            margin-top: 3px;
-        }
-
-        .contact-map-item {
-            align-items: flex-start !important;
-        }
-
-        .inline-map-container {
-            flex: 1;
-        }
-
-        .inline-map-container iframe {
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-
-        .view-map-link {
-            display: inline-block;
-            color: var(--secondary-color);
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: var(--transition);
-        }
-
-        .view-map-link:hover {
-            color: white;
-        }
-
-        .footer-bottom {
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding-top: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .copyright p {
-            color: var(--premium-text);
-        }
-
-        .footer-bottom-links {
-            display: flex;
-            gap: 20px;
-        }
-
-        .footer-bottom-links a {
-            color: var(--premium-text);
-            text-decoration: none;
-            transition: var(--transition);
-        }
-
-        .footer-bottom-links a:hover {
-            color: var(--secondary-color);
-        }
-
-        .policy-section {
-            padding: 100px 20px 60px;
-            background: var(--light-color);
-            min-height: 100vh;
-        }
-
-        .policy-content {
-            max-width: 900px;
-            margin: 0 auto;
-            background: white;
-            padding: 50px;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .policy-content h2 {
-            color: var(--primary-color);
-            font-size: 2.5rem;
-            margin-bottom: 30px;
-            font-family: 'Playfair Display', serif;
-        }
-
-        .policy-content h3 {
-            color: var(--primary-color);
-            font-size: 1.5rem;
-            margin: 25px 0 15px;
-        }
-
-        .policy-content p {
-            line-height: 1.8;
-            margin-bottom: 15px;
-        }
-
-        .policy-content ul {
-            margin-left: 25px;
-            margin-bottom: 20px;
-        }
-
-        .policy-content ul li {
-            margin-bottom: 10px;
-            line-height: 1.8;
-        }
-
-        .back-to-footer {
-            display: inline-block;
-            margin-top: 30px;
-            padding: 12px 30px;
-            background: var(--primary-color);
-            color: white;
-            text-decoration: none;
-            border-radius: 25px;
-            transition: var(--transition);
-        }
-
-        .back-to-footer:hover {
-            background: var(--secondary-color);
-            transform: translateY(-2px);
-        }
-
-        @media (max-width: 768px) {
-            .hamburger {
-                display: flex;
-            }
-
-            .nav-menu {
-                position: fixed;
-                left: -100%;
-                top: 70px;
-                flex-direction: column;
-                background: white;
-                width: 100%;
-                text-align: center;
-                transition: 0.3s;
-                box-shadow: 0 10px 27px rgba(0, 0, 0, 0.05);
-                padding: 20px 0;
-            }
-
-            .nav-menu.active {
-                left: 0;
-            }
-
-            .hero-container {
-                grid-template-columns: 1fr;
-            }
-
-            .hero-stats {
-                grid-template-columns: 1fr;
-            }
-
-            .journey-container {
-                grid-template-columns: 1fr;
-            }
-
-            .clients-grid,
-            .projects-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .footer-main {
-                grid-template-columns: 1fr;
-            }
-
-            .footer-bottom {
-                flex-direction: column;
-                gap: 20px;
-                text-align: center;
-            }
-        }
-    </style>
-</head>
+    </head>
 <body>
+    <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
-                <a href="{{ url_for('landing') }}">THE NATIONAL SCAFFOLDING</a>
+                <a href="#">THE NATIONAL SCAFFOLDING</a>
             </div>
             <ul class="nav-menu">
-                <li><a href="{{ url_for('landing') }}">Home</a></li>
-                <li><a href="{{ url_for('scaffolding') }}">Scaffolding</a></li>
-                <li><a href="{{ url_for('fabrications') }}">Fabrications</a></li>
-                <li><a href="{{ url_for('about') }}" class="active">About Us</a></li>
-                <li><a href="{{ url_for('cart') }}">Cart</a></li>
-                {% if current_user.is_authenticated %}
-                    {% if current_user.username in ['admin_scaffolding', 'admin_fabrication'] %}
-                        <li><a href="{{ url_for('admin_orders') }}">Admin Orders</a></li>
-                    {% else %}
-                        <li><a href="{{ url_for('user_orders') }}">My Orders</a></li>
-                    {% endif %}
-                    <li><a href="{{ url_for('logout') }}">Logout</a></li>
-                {% else %}
-                    <li><a href="{{ url_for('login') }}">Login</a></li>
-                {% endif %}
-                <li><a href="{{ url_for('cart') }}" class="cart-icon"><i class="fas fa-shopping-cart"></i></a></li>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="#hero" class="active">About Us</a></li>
+                <li><a href="#contact-section">Contact Us</a></li>
+                <li><a href="#user-manual">User Manual</a></li>
+                <li><a href="#" class="cart-icon"><i class="fas fa-shopping-cart"></i></a></li>
             </ul>
             <div class="hamburger">
                 <span></span>
@@ -816,6 +29,7 @@
         </div>
     </nav>
 
+    <!-- Hero Section with Image and Stats -->
     <section id="hero" class="hero">
         <div class="hero-container">
             <div class="hero-image">
@@ -842,6 +56,7 @@
         </div>
     </section>
 
+    <!-- Attractive Expertise Section -->
     <section id="expertise" class="expertise-new">
         <div class="section-title">
             <h2>Our Expertise</h2>
@@ -890,6 +105,7 @@
         </div>
     </section>
 
+    <!-- Our Journey Section -->
     <section id="journey" class="journey">
         <div class="section-title">
             <h2>Our Journey Since 2015</h2>
@@ -925,6 +141,7 @@
         </div>
     </section>
 
+    <!-- Board of Administrators Section -->
     <section id="administrators" class="administrators">
         <div class="section-title">
             <h2>Board Of Administrators</h2>
@@ -932,7 +149,7 @@
         <div class="administrators-container">
             <div class="administrator">
                 <div class="administrator-image">
-                    <img src="{{ url_for('static', filename='arbaaz.jpeg') }}" alt="Chief Administrator">
+                    <img src="arbaaz.jpeg" alt="Chief Administrator">
                 </div>
                 <h3>Syed Arbaaz</h3>
                 <p>Chief Administrator</p>
@@ -943,7 +160,7 @@
             </div>
             <div class="administrator">
                 <div class="administrator-image">
-                    <img src="{{ url_for('static', filename='zubair.jpeg') }}" alt="Senior Administrator">
+                    <img src="zubair.jpeg" alt="Senior Administrator">
                 </div>
                 <h3>Zubair Khan M Y</h3>
                 <p>Senior Administrator</p>
@@ -953,7 +170,7 @@
             </div>
             <div class="administrator">
                 <div class="administrator-image">
-                    <img src="{{ url_for('static', filename='nayeem.jpeg') }}" alt="Associate Administrator">
+                    <img src="nayeem.jpeg" alt="Associate Administrator">
                 </div>
                 <h3>M D Nayeem</h3>
                 <p>Associate Administrator</p>
@@ -965,6 +182,7 @@
         </div>
     </section>
 
+    <!-- User Manual Section -->
     <section id="user-manual" class="user-manual">
         <div class="section-title">
             <h2>User Manual</h2>
@@ -1025,6 +243,7 @@
                 <h4>Final Inspection</h4>
                 <p>Check every joint, connection, and brace before climbing or loading.</p>
                 
+                <!-- Scaffolding Diagram Placed Here -->
                 <div class="scaffolding-diagram">
                     <img src="https://z-cdn-media.chatglm.cn/files/3d054a1a-ad94-406d-907c-04c7acfda0ef_pasted_image_1760890570749.png?auth_key=1792427401-cb7aae3ffa6347af93a715464039a22c-0-632beb1576994fa8c0eed01a1e36394e" alt="Scaffolding Diagram">
                     <p class="scaffolding-diagram-caption">Properly assembled scaffolding with all safety components in place</p>
@@ -1114,6 +333,7 @@
         </div>
     </section>
 
+    <!-- Footer -->
     <footer id="contact-section">
         <div class="footer-container">
             <div class="footer-main">
@@ -1130,8 +350,8 @@
                 <div class="footer-column">
                     <h4>Quick Links</h4>
                     <ul>
-                        <li><a href="{{ url_for('landing') }}">Home</a></li>
-                        <li><a href="{{ url_for('about') }}">About Us</a></li>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="#hero">About Us</a></li>
                         <li><a href="#user-manual">User Manual</a></li>
                         <li><a href="#contact-section">Contact Us</a></li>
                     </ul>
@@ -1141,7 +361,7 @@
                     <div class="footer-column services-column">
                         <h4>Our Services</h4>
                         <ul>
-                            <li><a href="{{ url_for('scaffolding') }}">Scaffolding Design</a></li>
+                            <li><a href="#">Scaffolding Design</a></li>
                             <li><a href="#">Erection & Dismantling</a></li>
                             <li><a href="#">Safety Inspections</a></li>
                             <li><a href="#">Project Management</a></li>
@@ -1200,6 +420,7 @@
         </div>
     </footer>
 
+    <!-- Privacy Policy Section -->
     <section id="privacy-policy" class="policy-section">
         <div class="container">
             <div class="policy-content">
@@ -1227,6 +448,7 @@
         </div>
     </section>
 
+    <!-- Terms of Use Section -->
     <section id="terms-of-use" class="policy-section">
         <div class="container">
             <div class="policy-content">
@@ -1256,6 +478,7 @@
     </section>
 
     <script>
+        // Simple JavaScript for hamburger menu toggle
         document.addEventListener('DOMContentLoaded', function() {
             const hamburger = document.querySelector('.hamburger');
             const navMenu = document.querySelector('.nav-menu');
@@ -1264,6 +487,7 @@
                 navMenu.classList.toggle('active');
             });
             
+            // Close menu when clicking on a link
             const navLinks = document.querySelectorAll('.nav-menu a');
             navLinks.forEach(link => {
                 link.addEventListener('click', function() {
@@ -1271,6 +495,7 @@
                 });
             });
             
+            // FAQ toggle functionality
             const faqItems = document.querySelectorAll('.faq-item');
             faqItems.forEach(item => {
                 const summary = item.querySelector('.faq-summary');
@@ -1278,8 +503,10 @@
                 const icon = summary.querySelector('i');
                 
                 summary.addEventListener('click', function() {
+                    // Toggle active class
                     item.classList.toggle('active');
                     
+                    // Toggle icon direction
                     if (item.classList.contains('active')) {
                         icon.classList.remove('fa-chevron-down');
                         icon.classList.add('fa-chevron-up');
