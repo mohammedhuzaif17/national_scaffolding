@@ -544,6 +544,32 @@ body {
     box-shadow: 0 8px 30px rgba(255, 165, 0, 0.7);
 }
 
+.toast-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    padding: 1.2rem 2rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+    z-index: 10000;
+    font-weight: 600;
+    font-size: 1.1rem;
+    opacity: 0;
+    transform: translateX(400px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.toast-notification.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
 @media (max-width: 768px) {
     .navbar {
         flex-direction: column;

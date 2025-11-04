@@ -33,8 +33,8 @@
                     {% endfor %}
                 </select>
             </div>
-            <button class="btn-primary" onclick="addToCart({{ product.id }}, '{{ product.name }}', {{ product.price }})">
-                Add to Cart
+            <button class="btn-primary" onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
+                View Details & Add to Cart
             </button>
             {% elif not current_user.is_authenticated %}
             <p style="color: #ff6b6b; text-align: center;">Please login to purchase</p>
@@ -52,26 +52,4 @@
 {% endblock %}
 
 {% block scripts %}
-function addToCart(productId, productName, price) {
-    const quantity = document.getElementById('quantity_' + productId).value;
-    
-    fetch('/add_to_cart', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            product_id: productId,
-            product_name: productName,
-            price: price,
-            quantity: parseInt(quantity)
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('Product added to cart!');
-        }
-    });
-}
 {% endblock %}

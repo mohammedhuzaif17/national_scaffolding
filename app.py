@@ -399,6 +399,25 @@ def admin_fabrication():
     products = Product.query.filter_by(product_type='fabrication').all()
     return render_template('admin_fabrication.html', products=products)
 
+@app.route('/admin_orders')
+@login_required
+def admin_orders():
+    if session.get('user_type') != 'admin':
+        return redirect(url_for('dashboard'))
+    
+    orders = Order.query.order_by(Order.order_date.desc()).all()
+    return render_template('admin_orders.html', orders=orders)
+
+@app.route('/admin_logout')
+@login_required
+def admin_logout():
+    if session.get('user_type') == 'admin':
+        session.clear()
+        logout_user()
+        flash('Admin logged out successfully', 'success')
+        return redirect(url_for('national_scaffoldings'))
+    return redirect(url_for('dashboard'))
+
 @app.route('/admin_add_product', methods=['POST'])
 @login_required
 def admin_add_product():

@@ -6,7 +6,10 @@
 <div class="glass-container">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
         <button class="btn-secondary" onclick="window.location.href='{{ url_for('fabrications') }}'" style="width: auto;">← Back to Fabrications</button>
-        <button class="btn-danger" onclick="window.location.href='{{ url_for('admin_logout') }}'" style="width: auto;">Logout</button>
+        <div style="display: flex; gap: 1rem;">
+            <button class="btn-primary" onclick="window.location.href='{{ url_for('admin_orders') }}'" style="width: auto; background: linear-gradient(135deg, #4CAF50, #45a049);">📋 View All Orders</button>
+            <button class="btn-danger" onclick="window.location.href='{{ url_for('admin_logout') }}'" style="width: auto;">Logout</button>
+        </div>
     </div>
     <h1 class="page-title">Admin Panel - Fabrication Products</h1>
     

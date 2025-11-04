@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Admin - All Orders{% endblock %}
+
+{% block content %}
+<div class="glass-container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <button class="btn-secondary" onclick="history.back()" style="width: auto;">← Back</button>
+        <button class="btn-danger" onclick="window.location.href='{{ url_for('admin_logout') }}'" style="width: auto;">Logout</button>
+    </div>
+    <h1 class="page-title">All Customer Orders</h1>
+    <p style="text-align: center; color: #d4af37; margin-bottom: 2rem;">
+        View all orders with payment verification details
+    </p>
+    
+    {% if orders %}
+    <div style="overflow-x: auto; margin-top: 2rem;">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Date</th>
+                    <th>Total Amount</th>
+                    <th>Transaction ID</th>
+                    <th>Status</th>
+                    <th>Items</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td>#{{ order.id }}</td>
+                    <td>{{ order.user.username }}</td>
+                    <td>{{ order.order_date.strftime('%b %d, %Y %I:%M %p') }}</td>
+                    <td style="color: #4CAF50; font-weight: bold;">₹{{ "%.2f"|format(order.total_price) }}</td>
+                    <td>
+                        {% if order.transaction_id %}
+                        <span style="color: #d4af37; font-family: monospace; font-size: 0.9rem;">{{ order.transaction_id }}</span>
+                        {% else %}
+                        <span style="color: #888;">N/A</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if order.status == 'completed' %}
+                        <span style="color: #4CAF50; font-weight: bold;">✓ {{ order.status|title }}</span>
+                        {% else %}
+                        <span style="color: #ffa500;">{{ order.status|title }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button class="btn-secondary" onclick="showOrderDetails({{ order.id }})" style="padding: 0.4rem 0.8rem; font-size: 0.9rem;">
+                            View Items
+                        </button>
+                    </td>
+                </tr>
+                <tr id="order-details-{{ order.id }}" style="display: none;">
+                    <td colspan="7" style="background: rgba(255, 255, 255, 0.03); padding: 1.5rem;">
+                        <div style="max-width: 800px; margin: 0 auto;">
+                            <h4 style="color: #d4af37; margin-bottom: 1rem;">Order Items:</h4>
+                            {% for item in order.order_items %}
+                            <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px; margin-bottom: 0.8rem; border-left: 3px solid #d4af37;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <strong style="color: #fff; font-size: 1.1rem;">{{ item.product_name }}</strong>
+                                        <p style="color: #ccc; margin: 0.3rem 0; font-size: 0.9rem;">
+                                            Quantity: {{ item.quantity }} | Unit Price: ₹{{ "%.2f"|format(item.price) }}
+                                        </p>
+                                        {% if item.customization %}
+                                        <p style="color: #888; font-size: 0.85rem; margin-top: 0.3rem;">
+                                            Customization: 
+                                            {% for key, value in item.customization.items() %}
+                                                {{ key|replace('_', ' ')|title }}: {{ value }}{% if not loop.last %}, {% endif %}
+                                            {% endfor %}
+                                        </p>
+                                        {% endif %}
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <p style="color: #4CAF50; font-size: 1.2rem; font-weight: bold; margin: 0;">
+                                            ₹{{ "%.2f"|format(item.price * item.quantity) }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p style="text-align: center; color: #ccc; margin-top: 3rem; font-size: 1.2rem;">No orders found</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+function showOrderDetails(orderId) {
+    const detailsRow = document.getElementById('order-details-' + orderId);
+    if (detailsRow.style.display === 'none') {
+        detailsRow.style.display = 'table-row';
+    } else {
+        detailsRow.style.display = 'none';
+    }
+}
+{% endblock %}
