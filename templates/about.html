@@ -888,15 +888,11 @@
                 <a href="{{ url_for('index') }}">THE NATIONAL SCAFFOLDING</a>
             </div>
             <ul class="nav-menu">
-                <li><a href="{{ url_for('index') }}">Home</a></li>
-                <li><a href="{{ url_for('about') }}" class="active">About Us</a></li>
+                <li><a href="{{ url_for('national_scaffoldings') }}">Products</a></li>
                 <li><a href="{{ url_for('cart') }}">Cart</a></li>
+                <li><a href="{{ url_for('my_orders') }}">My Orders</a></li>
+                <li><a href="{{ url_for('about') }}" class="active">About</a></li>
                 {% if current_user.is_authenticated %}
-                    {% if current_user.username in ['admin_scaffolding', 'admin_fabrication'] %}
-                        <li><a href="{{ url_for('admin_orders') }}">Admin Orders</a></li>
-                    {% else %}
-                        <li><a href="{{ url_for('my_orders') }}">My Orders</a></li>
-                    {% endif %}
                     <li><a href="{{ url_for('logout') }}">Logout</a></li>
                 {% else %}
                     <li><a href="{{ url_for('login') }}">Login</a></li>
