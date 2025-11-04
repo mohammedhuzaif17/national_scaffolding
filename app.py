@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_file
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from models import db, User, Admin, Product, Order, OrderItem
 import os
@@ -496,6 +496,19 @@ def admin_delete_product(product_id):
     db.session.commit()
     
     return jsonify({'success': True})
+
+@app.route('/download-backup')
+def download_backup():
+    """Temporary route to download project backup"""
+    import os
+    backup_path = '/home/runner/workspace/PROJECT_BACKUP.tar.gz'
+    if os.path.exists(backup_path):
+        return send_file(backup_path, 
+                        as_attachment=True, 
+                        download_name='national-scaffolding-backup.tar.gz',
+                        mimetype='application/gzip')
+    else:
+        return "Backup file not found. Please contact support.", 404
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
