@@ -17,6 +17,8 @@ This project is a Flask-based e-commerce platform for National Scaffolding and F
 - Landing Page: Created new welcome page with two category cards (National Scaffolding and Fabrications) with responsive styling and smooth animations
 - Admin Order Filtering: Scaffolding admin now sees only orders containing scaffolding products; Fabrication admin sees only orders containing fabrication products
 - Customer Details Enhancement: Improved admin orders dashboard customer display with cleaner card-style layout, labeled fields, and better readability
+- Branding Fix: Corrected final "Crest Technocrat" reference in dashboard.html to "The National Scaffolding" for consistent branding
+- Logout Flow: Changed logout redirect from login page to landing page to prevent confusing login/logout loops
 
 ## User Preferences
 I prefer detailed explanations.
