@@ -1,0 +1,98 @@
+essfully installed psycopg2-2.9.11
+(venv) PS C:\Users\smary\Downloads\national\final> python app.py       
+Traceback (most recent call last):
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\engine\base.py", line 143, in __init__  
+    self._dbapi_connection = engine.raw_connection()
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\engine\base.py", line 3301, in raw_connection
+    return self.pool.connect()
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\pool\base.py", line 447, in connect     
+    return _ConnectionFairy._checkout(self)
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\pool\base.py", line 1264, in _checkout  
+    fairy = _ConnectionRecord.checkout(pool)
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\pool\base.py", line 711, in checkout    
+    rec = pool._do_get()
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\pool\impl.py", line 177, in _do_get     
+    with util.safe_reraise():
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\pool\impl.py", line 175, in _do_get     
+    return self._create_connection()
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\pool\base.py", line 388, in _create_connection
+    return _ConnectionRecord(self)
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\pool\base.py", line 673, in __init__    
+    self.__connect()
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\pool\base.py", line 899, in __connect   
+    with util.safe_reraise():
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\pool\base.py", line 895, in __connect   
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\engine\create.py", line 661, in connect 
+    return dialect.connect(*cargs, **cparams)
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\engine\default.py", line 629, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\psycopg2\__init__.py", line 135, in connect        
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+psycopg2.OperationalError: connection to server at "ep-round-firefly-a60ysmec.us-west-2.aws.neon.tech" (2600:1f14:3392:6b2c:92f3:5c5a:b24:4481), port 5432 failed: ERROR:  password authentication failed for user 'neondb_owner'
+connection to server at "ep-round-firefly-a60ysmec.us-west-2.aws.neon.tech" (2600:1f14:3392:6b2c:92f3:5c5a:b24:4481), port 5432 failed: ERROR:  connection is insecure (try using `sslmode=require`)
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\smary\Downloads\national\final\app.py", line 269, in <module>
+    db.create_all()
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\flask_sqlalchemy\extension.py", line 900, in create_all
+    self._call_for_binds(bind_key, "create_all")
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\flask_sqlalchemy\extension.py", line 881, in _call_for_binds
+    getattr(metadata, op_name)(bind=engine)
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\sql\schema.py", line 5928, in create_all
+    bind._run_ddl_visitor(
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\engine\base.py", line 3251, in _run_ddl_visitor
+    with self.begin() as conn:
+  File "C:\Program Files\Python310\lib\contextlib.py", line 135, in __enter__
+    return next(self.gen)
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\engine\base.py", line 3241, in begin    
+    with self.connect() as conn:
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\engine\base.py", line 3277, in connect  
+    return self._connection_cls(self)
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\engine\base.py", line 145, in __init__  
+    Connection._handle_dbapi_exception_noconnection(
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\engine\base.py", line 2440, in _handle_dbapi_exception_noconnection
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\engine\base.py", line 143, in __init__  
+    self._dbapi_connection = engine.raw_connection()
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\engine\base.py", line 3301, in raw_connection
+    return self.pool.connect()
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\pool\base.py", line 447, in connect     
+    return _ConnectionFairy._checkout(self)
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\pool\base.py", line 1264, in _checkout  
+    fairy = _ConnectionRecord.checkout(pool)
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\pool\base.py", line 711, in checkout    
+    rec = pool._do_get()
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\pool\impl.py", line 177, in _do_get     
+    with util.safe_reraise():
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\pool\impl.py", line 175, in _do_get     
+    return self._create_connection()
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\pool\base.py", line 388, in _create_connection
+    return _ConnectionRecord(self)
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\pool\base.py", line 673, in __init__    
+    self.__connect()
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\pool\base.py", line 899, in __connect   
+    with util.safe_reraise():
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\pool\base.py", line 895, in __connect   
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\engine\create.py", line 661, in connect 
+    return dialect.connect(*cargs, **cparams)
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\sqlalchemy\engine\default.py", line 629, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+  File "C:\Users\smary\Downloads\national\final\venv\lib\site-packages\psycopg2\__init__.py", line 135, in connect        
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) connection to server at "ep-round-firefly-a60ysmec.us-west-2.aws.neon.tech" (2600:1f14:3392:6b2c:92f3:5c5a:b24:4481), port 5432 failed: ERROR:  password authentication failed for user 'neondb_owner'
+connection to server at "ep-round-firefly-a60ysmec.us-west-2.aws.neon.tech" (2600:1f14:3392:6b2c:92f3:5c5a:b24:4481), port 5432 failed: ERROR:  connection is insecure (try using `sslmode=require`)
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)

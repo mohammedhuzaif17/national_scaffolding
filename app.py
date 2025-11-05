@@ -8,6 +8,10 @@ import io
 import base64
 from datetime import datetime
 from werkzeug.utils import secure_filename
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 def calculate_price(product, customization):
     quantity = customization.get('quantity', 1)
