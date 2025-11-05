@@ -48,8 +48,8 @@ Do not make changes to the file `Y`.
 The platform is built on a Flask backend with PostgreSQL as the database. The frontend utilizes HTML5, CSS3 with a distinct glassmorphism design, and vanilla JavaScript.
 
 **UI/UX Decisions:**
-- **Design:** Clean, modern light theme with royal blue (#2563eb) as the primary color, inspired by Amazon, Netflix, and professional e-commerce platforms. Features white backgrounds, minimal shadows, and simple aesthetics for maximum readability and professionalism.
-- **Typography:** Poppins for body text and Playfair Display for branding and titles, with clean hierarchy and excellent readability.
+- **Design:** Netflix-inspired dark theme with black background (#000000), Netflix red (#e50914) CTAs, and dark gray cards (#2a2a2a). Professional e-commerce design with bold typography, minimal shadows, and clean card-based layout that scales on hover like Netflix.
+- **Typography:** Netflix Sans (system fallback: Helvetica Neue, Arial), bold headings, and clean text hierarchy for excellent readability on dark backgrounds.
 - **Interactivity:** Smooth CSS transitions, responsive grid layouts, ripple button effects, hover shimmer animations on product cards, and consistent royal styling across all pages.
 - **User Flow:** Enhanced registration, unified login system (admins and users login from same /login page), category-specific product browsing, session-based welcome popup, and streamlined fabrication page with View Details-only workflow.
 - **Product Customization:** Extensive use of dropdowns for product specifications (e.g., Aluminium scaffolding dimensions, H-Frame quantities with discount tiers showing all heights 6-16, Cuplock requiring both vertical and ledger specifications).
