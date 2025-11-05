@@ -281,6 +281,10 @@ def register():
         organization = request.form.get('organization')
         password = request.form.get('password')
         
+        if not phone or not phone.isdigit() or len(phone) != 10:
+            flash('Phone number must be exactly 10 digits', 'error')
+            return redirect(url_for('register'))
+        
         if User.query.filter_by(username=username).first():
             flash('Username already exists', 'error')
             return redirect(url_for('register'))
