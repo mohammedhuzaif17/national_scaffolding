@@ -1,0 +1,182 @@
+╔══════════════════════════════════════════════════════════════════════╗
+║                                                                      ║
+║        THE NATIONAL SCAFFOLDING - COMPLETE WEBSITE PACKAGE          ║
+║                      Latest Version - Nov 2025                       ║
+║                                                                      ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+📦 PACKAGE CONTENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ ALL LATEST FEATURES INCLUDED:
+
+1. ✨ Welcome Popup on Landing Page
+   - Appears immediately when website opens
+   - Beautiful glassmorphism design with gold accents
+   - Two buttons: "Continue to Explore" and "Login/Register"
+   - Session-based display (shows once per session)
+
+2. 🏠 Landing Page with Category Selection
+   - Professional welcome screen
+   - Two animated category cards:
+     • National Scaffolding
+     • Fabrications
+   - Smooth hover effects and transitions
+
+3. 📱 Fixed Phone Number Format
+   - +91 prefix is fixed and pre-displayed
+   - Users enter only 10 digits
+   - Validates: must start with 6, 7, 8, or 9
+   - Client-side AND server-side validation
+
+4. 📍 Customer Address Collection
+   - Complete address field in registration
+   - Displayed in admin orders dashboard
+   - Included in email notifications
+
+5. 🔒 Unique Transaction ID Validation
+   - Each payment must have unique transaction ID
+   - Prevents fraud from reused payment screenshots
+   - Real-time validation with visual feedback
+
+6. 🛒 Shopping Cart System
+   - Session-based cart storage
+   - Product images displayed in cart
+   - Toast notifications for cart actions
+   - Quantity management
+
+7. 💳 Payment Integration
+   - PhonePe UPI QR code payment
+   - Real-time transaction ID validation (12-35 characters)
+   - Green tick ✓ for valid, red cross ✗ for invalid
+   - Amount verification with 18% GST
+
+8. 📧 Email Notifications (Optional)
+   - Order confirmation emails to customers
+   - New order alerts to admin
+   - Complete order details included
+   - Customer address in emails
+
+9. 👨‍💼 Admin Panels
+   - Dual admin system: Scaffolding & Fabrication
+   - Separate product management for each category
+   - File upload for product images (camera/device support)
+   - Image preview before upload
+   - Orders dashboard with filtering
+   - Transaction ID verification
+
+10. 🛍️ Product Management
+    - Full CRUD operations
+    - Multiple categories: Aluminium, H-Frames, Cuplock, Accessories
+    - Rent/Buy options
+    - Dynamic pricing and discounts
+    - Weight-based pricing for Cuplock
+    - Extensive customization options
+
+11. 📊 Database Models
+    - User authentication
+    - Product catalog
+    - Orders and order items
+    - Admin accounts
+    - Transaction tracking
+
+12. 🎨 Premium UI/UX
+    - Dark glassmorphism theme
+    - Royal blue (#1e3a8a) and gold (#d4af37) colors
+    - Smooth animations and transitions
+    - Fully responsive (mobile, tablet, desktop)
+    - Professional typography (Poppins + Playfair Display)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📂 FILES INCLUDED:
+
+CORE APPLICATION:
+✓ app.py                      - Main Flask application
+✓ models.py                   - Database models & schema
+✓ seed_data.py               - Initial data seeding script
+✓ main.py                    - Entry point
+✓ requirements.txt           - Python dependencies list
+
+TEMPLATES (HTML):
+✓ landing.html               - Landing page with welcome popup ⭐ NEW
+✓ register.html              - User registration with +91 phone ⭐ UPDATED
+✓ login.html                 - Unified login for users & admins
+✓ national_scaffoldings.html - Scaffolding products page
+✓ fabrications.html          - Fabrications products page
+✓ product_detail.html        - Product customization page
+✓ cart.html                  - Shopping cart
+✓ dashboard.html             - Checkout & payment
+✓ my_orders.html             - User order history
+✓ admin_scaffoldings.html    - Scaffolding admin panel
+✓ admin_fabrication.html     - Fabrication admin panel
+✓ admin_orders.html          - Orders management dashboard
+✓ about.html                 - About page with user manual
+✓ base.html                  - Base template
+
+STATIC FILES:
+✓ static/css/style.css       - Global styles
+✓ static/images/phonepe_qr.png - Payment QR code
+✓ static/uploads/            - Directory for product images
+
+DOCUMENTATION:
+✓ SETUP_INSTRUCTIONS.md      - Complete setup guide ⭐ NEW
+✓ ENV_TEMPLATE.txt           - Environment variables template ⭐ NEW
+✓ ADMIN_GUIDE.md            - Admin panel usage guide
+✓ replit.md                 - Technical architecture docs
+✓ WHATS_INCLUDED.txt        - This file
+
+CONFIGURATION:
+✓ pyproject.toml            - Project metadata
+✓ requirements.txt          - Python package list ⭐ NEW
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚀 QUICK START:
+
+1. Extract all files
+2. Create virtual environment: python -m venv venv
+3. Activate: venv\Scripts\activate (Windows) or source venv/bin/activate (Mac/Linux)
+4. Install packages: pip install -r requirements.txt
+5. Rename ENV_TEMPLATE.txt to .env
+6. Edit .env with your database URL and secret key
+7. Run: python app.py
+8. Open: http://127.0.0.1:5000
+
+📖 For detailed instructions, see SETUP_INSTRUCTIONS.md
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+👤 DEFAULT CREDENTIALS:
+
+Scaffolding Admin:
+  Username: admin_scaffolding
+  Password: admin123
+
+Fabrication Admin:
+  Username: admin_fabrication
+  Password: admin123
+
+⚠️ CHANGE THESE IN PRODUCTION!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 TESTED & READY:
+
+✅ All features tested and working
+✅ Database migrations ready
+✅ Phone validation working (+91 format)
+✅ Transaction ID uniqueness enforced
+✅ Welcome popup displays on first visit
+✅ Responsive on all devices
+✅ Payment flow complete
+✅ Admin panels functional
+✅ Email system ready (needs SMTP config)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Version: Latest (November 2025)
+Package Size: ~431 KB
+Format: .tar.gz (compatible with all platforms)
+
+Developed with ❤️ for The National Scaffolding
