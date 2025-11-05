@@ -31,6 +31,7 @@ This project is a Flask-based e-commerce platform for National Scaffolding and F
 - Admin Weight Field Fix: Fixed cuplock product editing to properly populate and save weight_per_unit field - added weight parameter to editProduct() function
 - Cuplock Dual Customization: Restored cuplock to include BOTH vertical AND ledger specifications as required customization features within single product - vertical section (size, cups, custom length) and ledger section (ledger size) both displayed in separate royal blue glass containers for clear visual separation, quantity dropdown extended to 1-100 range matching H-frames
 - Dropdown Scrollability: Added CSS styling for scrollable dropdowns with max-height 250px and custom royal gold scrollbar styling, verified all dropdowns across website show complete number ranges (no even-number-only dropdowns)
+- Cuplock Product Consolidation: Deleted separate "Cuplock Ledger System" product from database and renamed "Cuplock Vertical System" to "Cuplock System" - now there is only ONE cuplock product with both vertical and ledger customization options within its detail page
 
 ## User Preferences
 I prefer detailed explanations.
