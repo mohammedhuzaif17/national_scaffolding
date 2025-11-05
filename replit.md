@@ -23,6 +23,13 @@ This project is a Flask-based e-commerce platform for National Scaffolding and F
 - About Page Complete Replacement: Replaced entire about.html with comprehensive new content including hero section with stats, expertise bars, client/project journey, board of administrators, detailed user manual, FAQs, privacy policy, and terms of use - all styled with royal blue (#1e3a8a) and gold (#d4af37) theme and fully integrated with Flask routing
 - About Page Theme Conversion: Converted about page from light theme to consistent dark glassmorphism design matching main website - added dark gradient background (linear-gradient(135deg, #0a1628 0%, #1e3a8a 50%, #2c5364 100%)), applied backdrop blur effects to all sections (navbar, hero, stats, expertise, administrators, footer), changed all text colors to white/light for readability, updated mobile navigation with dark glass background, and added all necessary CSS variables for theme consistency
 - User Manual Download: Added download button in user manual section with gradient royal blue-to-gold styling, implemented JavaScript function to extract and download user manual content as formatted .txt file ("National_Scaffolding_User_Manual.txt") including all sections, tables, and bullet points
+- About Page Navigation Fix: Updated navigation to show "Cart" and "My Orders" only when user is authenticated - logged out users see only "Products", "About", and "Login"
+
+**November 5, 2025:**
+- Admin Panel Rent Option: Extended rent price field to ALL product categories (aluminium, h-frames, cuplock, accessories) - previously only available for aluminium
+- H-Frame Quantity Range: Changed H-Frame quantity dropdown from limited options (1-10, then 15, 25, 35, 60, 80) to complete range 1-100 with automatic discount labels shown directly in dropdown, quantity 100 now works correctly with 12% discount
+- Cuplock System Simplification: Removed "Ledger Specifications" section entirely, renamed "Cuplock Vertical System" to simply "Cuplock System" with only vertical-size, cups, custom-length, and quantity fields
+- Admin Weight Field Fix: Fixed cuplock product editing to properly populate and save weight_per_unit field - added weight parameter to editProduct() function
 
 ## User Preferences
 I prefer detailed explanations.
