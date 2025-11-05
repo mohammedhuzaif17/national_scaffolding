@@ -32,6 +32,8 @@ This project is a Flask-based e-commerce platform for National Scaffolding and F
 - Cuplock Dual Customization: Restored cuplock to include BOTH vertical AND ledger specifications as required customization features within single product - vertical section (size, cups, custom length) and ledger section (ledger size) both displayed in separate royal blue glass containers for clear visual separation, quantity dropdown extended to 1-100 range matching H-frames
 - Dropdown Scrollability: Added CSS styling for scrollable dropdowns with max-height 250px and custom royal gold scrollbar styling, verified all dropdowns across website show complete number ranges (no even-number-only dropdowns)
 - Cuplock Product Consolidation: Deleted separate "Cuplock Ledger System" product from database and renamed "Cuplock Vertical System" to "Cuplock System" - now there is only ONE cuplock product with both vertical and ledger customization options within its detail page
+- Customer Address Field: Added complete address field to User model and registration form - users now required to enter full address (Street, City, State, PIN) during registration, address is displayed in admin orders dashboard and included in email notifications for order fulfillment
+- Duplicate Transaction ID Prevention: Implemented transaction ID uniqueness validation - each transaction ID can only be used once, preventing fraud where users reuse the same payment screenshot for multiple orders. System checks database before accepting order and shows clear error message: "This Transaction ID has already been used. Each purchase requires a unique payment."
 
 ## User Preferences
 I prefer detailed explanations.

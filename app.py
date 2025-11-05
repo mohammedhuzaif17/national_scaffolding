@@ -222,6 +222,7 @@ def send_admin_notification_email(order, user, order_items):
                         <p style="margin: 5px 0; color: #555;"><strong>Name:</strong> {user.full_name or user.username}</p>
                         <p style="margin: 5px 0; color: #555;"><strong>Email:</strong> {user.email}</p>
                         <p style="margin: 5px 0; color: #555;"><strong>Phone:</strong> {user.phone or 'N/A'}</p>
+                        {f'<p style="margin: 5px 0; color: #555;"><strong>Address:</strong> {user.address}</p>' if user.address else ''}
                         {f'<p style="margin: 5px 0; color: #555;"><strong>Organization:</strong> {user.organization}</p>' if user.organization else ''}
                     </div>
                     
