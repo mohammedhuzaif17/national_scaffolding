@@ -223,7 +223,7 @@ function updateHFramePrice() {
     let discount = 0;
     let discountText = 'No discount yet';
     
-    if (quantity >= 100) {
+    if (quantity > 100) {
         document.getElementById('discount_info').innerHTML = `
             <p style="color: #ff6b6b; font-weight: bold;">For orders of 100+ pieces, please contact us for special pricing!</p>
             <p style="font-size: 0.9rem;">Email: sales@nationalscaffolding.com | Phone: +91-XXXXXXXXXX</p>
@@ -286,8 +286,8 @@ function addToCartCustom() {
         finalPrice = unitPrice * quantity;
     } else if (category === 'h-frames') {
         let discount = 0;
-        if (quantity >= 100) {
-            alert('For orders of 100+ pieces, please contact us directly for special pricing.');
+        if (quantity > 100) {
+            alert('For orders over 100 pieces, please contact us directly for special pricing.');
             return;
         } else if (quantity >= 50) {
             discount = 0.12;
