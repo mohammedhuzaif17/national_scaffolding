@@ -15,8 +15,11 @@
             <input type="text" id="full_name" name="full_name" required placeholder="Enter your full name">
         </div>
         <div class="form-group">
-            <label for="phone">Phone Number (with +91)</label>
-            <input type="tel" id="phone" name="phone" required placeholder="+91XXXXXXXXXX" pattern="\+91[0-9]{10}" maxlength="13" title="Please enter phone number with +91 followed by 10 digits">
+            <label for="phone">Phone Number</label>
+            <div style="display: flex; align-items: center; gap: 0;">
+                <span style="background: rgba(255, 255, 255, 0.1); padding: 0.75rem 1rem; border-radius: 8px 0 0 8px; color: #d4af37; font-weight: bold; border: 1px solid rgba(255, 255, 255, 0.2); border-right: none;">+91</span>
+                <input type="tel" id="phone" name="phone" required placeholder="9876543210" pattern="[6-9][0-9]{9}" maxlength="10" title="Please enter 10 digit mobile number starting with 6, 7, 8, or 9" style="border-radius: 0 8px 8px 0; flex: 1;">
+            </div>
         </div>
         <div class="form-group">
             <label for="email">Email</label>

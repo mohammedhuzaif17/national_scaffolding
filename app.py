@@ -281,14 +281,15 @@ def register():
         organization = request.form.get('organization')
         password = request.form.get('password')
         
-        if not phone or not phone.startswith('+91') or len(phone) != 13:
-            flash('Phone number must start with +91 and have 10 digits (e.g., +919876543210)', 'error')
+        if not phone or not phone.isdigit() or len(phone) != 10:
+            flash('Phone number must be exactly 10 digits', 'error')
             return redirect(url_for('register'))
         
-        phone_digits = phone[3:]
-        if not phone_digits.isdigit():
-            flash('Phone number must contain only digits after +91', 'error')
+        if phone[0] not in ['6', '7', '8', '9']:
+            flash('Phone number must start with 6, 7, 8, or 9', 'error')
             return redirect(url_for('register'))
+        
+        phone = '+91' + phone
         
         if User.query.filter_by(username=username).first():
             flash('Username already exists', 'error')
