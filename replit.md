@@ -28,8 +28,9 @@ This project is a Flask-based e-commerce platform for National Scaffolding and F
 **November 5, 2025:**
 - Admin Panel Rent Option: Extended rent price field to ALL product categories (aluminium, h-frames, cuplock, accessories) - previously only available for aluminium
 - H-Frame Quantity Range: Changed H-Frame quantity dropdown from limited options (1-10, then 15, 25, 35, 60, 80) to complete range 1-100 with automatic discount labels shown directly in dropdown, quantity 100 now works correctly with 12% discount
-- Cuplock System Simplification: Removed "Ledger Specifications" section entirely, renamed "Cuplock Vertical System" to simply "Cuplock System" with only vertical-size, cups, custom-length, and quantity fields
 - Admin Weight Field Fix: Fixed cuplock product editing to properly populate and save weight_per_unit field - added weight parameter to editProduct() function
+- Cuplock Dual Customization: Restored cuplock to include BOTH vertical AND ledger specifications as required customization features within single product - vertical section (size, cups, custom length) and ledger section (ledger size) both displayed in separate royal blue glass containers for clear visual separation, quantity dropdown extended to 1-100 range matching H-frames
+- Dropdown Scrollability: Added CSS styling for scrollable dropdowns with max-height 250px and custom royal gold scrollbar styling, verified all dropdowns across website show complete number ranges (no even-number-only dropdowns)
 
 ## User Preferences
 I prefer detailed explanations.
