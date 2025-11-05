@@ -105,14 +105,13 @@ function updateCategoryFields() {
     const rentField = document.getElementById('productRentPrice').closest('.form-group');
     const weightField = document.getElementById('weightField');
     
-    if (category === 'aluminium') {
-        rentField.style.display = 'block';
-        weightField.style.display = 'none';
-    } else if (category === 'cuplock') {
-        rentField.style.display = 'none';
+    // Rent option is now available for all categories
+    rentField.style.display = 'block';
+    
+    // Weight field only for cuplock
+    if (category === 'cuplock') {
         weightField.style.display = 'block';
     } else {
-        rentField.style.display = 'none';
         weightField.style.display = 'none';
     }
 }
@@ -136,6 +135,7 @@ function editProduct(id, name, price, description, category, rentPrice) {
     document.getElementById('productCategory').value = category;
     document.getElementById('productDescription').value = description;
     document.getElementById('productModal').classList.add('show');
+    updateCategoryFields();
 }
 
 function closeModal() {

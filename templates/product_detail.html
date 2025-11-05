@@ -84,14 +84,9 @@
                 <div class="form-group">
                     <label>Quantity (Discount applies automatically)</label>
                     <select id="quantity" onchange="updateHFramePrice()">
-                        {% for i in range(1, 11) %}
-                        <option value="{{ i }}">{{ i }} {% if i == 1 %}piece{% else %}pieces{% endif %}</option>
+                        {% for i in range(1, 101) %}
+                        <option value="{{ i }}">{{ i }} {% if i == 1 %}piece{% else %}pieces{% endif %}{% if i >= 50 %} (12% OFF){% elif i >= 30 %} (10% OFF){% elif i >= 20 %} (7.5% OFF){% elif i >= 10 %} (5% OFF){% endif %}</option>
                         {% endfor %}
-                        <option value="15">15 pieces (5% OFF)</option>
-                        <option value="25">25 pieces (7.5% OFF)</option>
-                        <option value="35">35 pieces (10% OFF)</option>
-                        <option value="60">60 pieces (12% OFF)</option>
-                        <option value="80">80 pieces (12% OFF)</option>
                     </select>
                 </div>
                 
@@ -111,12 +106,11 @@
             
             {% elif product.category == 'cuplock' %}
             <div class="customization-section">
-                <h3 style="color: #ffa500; margin-bottom: 1rem;">Customize Your Cuplock</h3>
+                <h3 style="color: #ffa500; margin-bottom: 1rem;">Customize Your Cuplock System</h3>
                 
-                <h4 style="color: #ffa500; margin-top: 1.5rem; margin-bottom: 0.5rem;">Vertical Specifications (Required)</h4>
                 <div class="form-group">
                     <label>Vertical Size <span style="color: red;">*</span></label>
-                    <select id="vertical_size" required>
+                    <select id="vertical_size" required onchange="updateCuplockPrice()">
                         <option value="1">1m</option>
                         <option value="2">2m</option>
                         <option value="3">3m</option>
@@ -125,7 +119,7 @@
                 
                 <div class="form-group">
                     <label>Number of Cups <span style="color: red;">*</span></label>
-                    <select id="cups" required>
+                    <select id="cups" required onchange="updateCuplockPrice()">
                         <option value="1">1 Cup</option>
                         <option value="2">2 Cups</option>
                         <option value="3">3 Cups</option>
@@ -137,24 +131,7 @@
                 
                 <div class="form-group">
                     <label>Custom Length (1.1m - 3.0m) <span style="color: red;">*</span></label>
-                    <input type="number" id="custom_length" value="1.1" min="1.1" max="3.0" step="0.1" required>
-                </div>
-                
-                <h4 style="color: #ffa500; margin-top: 1.5rem; margin-bottom: 0.5rem;">Ledger Specifications (Required)</h4>
-                <div class="form-group">
-                    <label>Ledger Size <span style="color: red;">*</span></label>
-                    <select id="ledger_size" required>
-                        <option value="0.6">0.6m</option>
-                        <option value="0.8">0.8m</option>
-                        <option value="1.0">1.0m</option>
-                        <option value="1.2">1.2m</option>
-                        <option value="1.4">1.4m</option>
-                        <option value="1.6">1.6m</option>
-                        <option value="1.8">1.8m</option>
-                        <option value="2.0">2.0m</option>
-                        <option value="2.5">2.5m</option>
-                        <option value="3.0">3.0m</option>
-                    </select>
+                    <input type="number" id="custom_length" value="1.1" min="1.1" max="3.0" step="0.1" required onchange="updateCuplockPrice()">
                 </div>
                 
                 <div class="form-group">
@@ -326,22 +303,12 @@ function addToCartCustom() {
         unitPrice = finalPrice / quantity;
         customization = { quantity, discount_rate: discount };
     } else if (category === 'cuplock') {
-        const type = document.getElementById('cuplock_type').value;
-        if (type === 'vertical') {
-            customization = {
-                type,
-                size: document.getElementById('vertical_size').value,
-                cups: document.getElementById('cups').value,
-                custom_length: document.getElementById('custom_length').value,
-                quantity
-            };
-        } else {
-            customization = {
-                type,
-                ledger_size: document.getElementById('ledger_size').value,
-                quantity
-            };
-        }
+        customization = {
+            size: document.getElementById('vertical_size').value,
+            cups: document.getElementById('cups').value,
+            custom_length: document.getElementById('custom_length').value,
+            quantity
+        };
         unitPrice = 78 * weightPerUnit;
         finalPrice = unitPrice * quantity;
     } else if (category === 'accessories') {
