@@ -276,6 +276,7 @@ def register():
         full_name = request.form.get('full_name')
         phone = request.form.get('phone')
         email = request.form.get('email')
+        address = request.form.get('address')
         organization = request.form.get('organization')
         password = request.form.get('password')
         
@@ -296,6 +297,7 @@ def register():
             full_name=full_name,
             phone=phone,
             email=email,
+            address=address,
             organization=organization
         )
         user.set_password(password)
@@ -545,6 +547,10 @@ def complete_order():
     
     if not transaction_id or len(transaction_id) < 8:
         return jsonify({'success': False, 'message': 'Valid Transaction ID is required (minimum 8 characters)'})
+    
+    existing_order = Order.query.filter_by(transaction_id=transaction_id).first()
+    if existing_order:
+        return jsonify({'success': False, 'message': 'This Transaction ID has already been used. Each purchase requires a unique payment. Please make a new payment and enter the new Transaction ID.'})
     
     total = 0
     

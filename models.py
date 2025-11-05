@@ -12,6 +12,7 @@ class User(UserMixin, db.Model):
     full_name = db.Column(db.String(200), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     phone = db.Column(db.String(20), unique=True, nullable=False)
+    address = db.Column(db.Text, nullable=True)
     organization = db.Column(db.String(200), nullable=True)
     password_hash = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
