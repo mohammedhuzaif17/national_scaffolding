@@ -346,6 +346,30 @@ body {
     transition: all 0.3s ease;
 }
 
+.form-group select {
+    max-height: 250px;
+    overflow-y: auto;
+    cursor: pointer;
+}
+
+.form-group select::-webkit-scrollbar {
+    width: 8px;
+}
+
+.form-group select::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+.form-group select::-webkit-scrollbar-thumb {
+    background: rgba(212, 175, 55, 0.6);
+    border-radius: 10px;
+}
+
+.form-group select::-webkit-scrollbar-thumb:hover {
+    background: rgba(212, 175, 55, 0.8);
+}
+
 .form-group input::placeholder,
 .form-group textarea::placeholder {
     color: rgba(255, 255, 255, 0.5);
