@@ -48,8 +48,8 @@ Do not make changes to the file `Y`.
 The platform is built on a Flask backend with PostgreSQL as the database. The frontend utilizes HTML5, CSS3 with a distinct glassmorphism design, and vanilla JavaScript.
 
 **UI/UX Decisions:**
-- **Design:** Premium light theme with calm, trustworthy aesthetic. Light beige backgrounds (#faf8f3, #f5f1e8), soft gray text (#4b5563, #6b7280), muted blue accents (#60a5fa, #3b82f6), and gentle gold highlights (#f59e0b, #fbbf24). Features minimal navigation, rounded buttons (12px radius), subtle shadows, and generous white space for a professional, modern appearance.
-- **Typography:** Poppins and Lato fonts with clean hierarchy, excellent readability, and smooth letter spacing for a calm, premium feel.
+- **Design:** Clean royal theme with simple, subtle colors. Pure white backgrounds (#ffffff, #fafafa), royal blue primary (#1e3a8a, #2563eb), royal gold accents (#d4af37), and neutral grays. Features minimal navigation, clean rounded buttons (8px radius), subtle shadows, and simple professional layout.
+- **Typography:** Poppins font with clean hierarchy, excellent readability, and professional appearance.
 - **Interactivity:** Smooth CSS transitions, responsive grid layouts, ripple button effects, hover shimmer animations on product cards, and consistent royal styling across all pages.
 - **User Flow:** Enhanced registration, unified login system (admins and users login from same /login page), category-specific product browsing, session-based welcome popup, and streamlined fabrication page with View Details-only workflow.
 - **Product Customization:** Extensive use of dropdowns for product specifications (e.g., Aluminium scaffolding dimensions, H-Frame quantities with discount tiers showing all heights 6-16, Cuplock requiring both vertical and ledger specifications).
