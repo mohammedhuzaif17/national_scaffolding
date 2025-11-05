@@ -48,8 +48,8 @@ Do not make changes to the file `Y`.
 The platform is built on a Flask backend with PostgreSQL as the database. The frontend utilizes HTML5, CSS3 with a distinct glassmorphism design, and vanilla JavaScript.
 
 **UI/UX Decisions:**
-- **Design:** Professional glassmorphism aesthetic with a royal blue (#1e3a8a) and gold (#d4af37) premium theme, enhanced with refined backdrop blur effects, inset shadows, and shimmer animations.
-- **Typography:** Poppins for body text and Playfair Display for branding and titles, with gradient text effects on page titles for premium feel.
+- **Design:** Clean, modern light theme with royal blue (#2563eb) as the primary color, inspired by Amazon, Netflix, and professional e-commerce platforms. Features white backgrounds, minimal shadows, and simple aesthetics for maximum readability and professionalism.
+- **Typography:** Poppins for body text and Playfair Display for branding and titles, with clean hierarchy and excellent readability.
 - **Interactivity:** Smooth CSS transitions, responsive grid layouts, ripple button effects, hover shimmer animations on product cards, and consistent royal styling across all pages.
 - **User Flow:** Enhanced registration, unified login system (admins and users login from same /login page), category-specific product browsing, session-based welcome popup, and streamlined fabrication page with View Details-only workflow.
 - **Product Customization:** Extensive use of dropdowns for product specifications (e.g., Aluminium scaffolding dimensions, H-Frame quantities with discount tiers showing all heights 6-16, Cuplock requiring both vertical and ledger specifications).
