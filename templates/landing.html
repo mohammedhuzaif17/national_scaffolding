@@ -54,7 +54,7 @@
     
     <div class="products-grid">
         {% for product in products %}
-        <div class="product-card">
+        <div class="product-card" {% if product.category == 'cuplock' %}style="grid-column: span 2;"{% endif %}>
             <div onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'" style="cursor: pointer;">
                 {% if product.image_url %}
                 <img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-image">
@@ -70,33 +70,36 @@
                 {% if product.category %}
                 <p class="product-category">{{ product.category }}</p>
                 {% endif %}
-                <div class="product-price">₹{{ product.price }}</div>
-                {% if product.rent_price %}
-                <p class="product-rent">Rent: ₹{{ product.rent_price }}/month</p>
-                {% endif %}
                 
-                {% if current_user.is_authenticated and session.get('user_type') != 'admin' %}
-                <div class="form-group" style="margin-top: 1rem;">
-                    <label for="quantity_{{ product.id }}">Quantity:</label>
-                    <select id="quantity_{{ product.id }}" class="form-control">
-                        {% for i in range(1, 11) %}
-                        <option value="{{ i }}">{{ i }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                
-                <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
-                    <button class="btn btn-primary" onclick="event.stopPropagation(); addToCart({{ product.id }}, '{{ product.name }}', {{ product.price }})" style="flex: 1;">
-                        🛒 Add to Cart
-                    </button>
-                    <button class="btn btn-secondary" onclick="event.stopPropagation(); window.location.href='{{ url_for('product_detail', product_id=product.id) }}'" style="flex: 1;">
+                {% if product.category == 'cuplock' %}
+                    <!-- Cuplock: Contact-only, show only View Details -->
+                    <button class="btn" onclick="event.stopPropagation(); window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
                         View Details
                     </button>
-                </div>
+                {% elif current_user.is_authenticated and session.get('user_type') != 'admin' %}
+                    <!-- Other products: Show quantity and add to cart for customers -->
+                    <div class="form-group" style="margin-top: 1rem;">
+                        <label for="quantity_{{ product.id }}">Quantity:</label>
+                        <select id="quantity_{{ product.id }}" class="form-control">
+                            {% for i in range(1, 11) %}
+                            <option value="{{ i }}">{{ i }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                        <button class="btn btn-primary" onclick="event.stopPropagation(); addToCart({{ product.id }}, '{{ product.name }}', {{ product.price }})" style="flex: 1;">
+                            🛒 Add to Cart
+                        </button>
+                        <button class="btn btn-secondary" onclick="event.stopPropagation(); window.location.href='{{ url_for('product_detail', product_id=product.id) }}'" style="flex: 1;">
+                            View Details
+                        </button>
+                    </div>
                 {% else %}
-                <button class="btn" onclick="event.stopPropagation(); window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
-                    View Details
-                </button>
+                    <!-- Not logged in or admin: show only View Details -->
+                    <button class="btn" onclick="event.stopPropagation(); window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
+                        View Details
+                    </button>
                 {% endif %}
             </div>
         </div>

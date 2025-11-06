@@ -23,7 +23,7 @@ The platform is built on a Flask backend with PostgreSQL as the database. The fr
 - **Product Customization:** Extensive use of dropdowns for product specifications:
   - **Aluminium:** Width (0.7m/1.4m) and height (2m-16m) selections with buy/rent options
   - **H-Frames:** Quantity selector up to 200 sets with buy/rent options (no discount tiers)
-  - **Cuplock:** Contact-only products - Vertical shows vertical specs, Ledger shows ledger specs, no purchasing options
+  - **Cuplock:** Contact-only products - Vertical shows vertical specs, Ledger shows ledger specs, no purchasing options. Product cards hide price, quantity, and add to cart buttons - only show "View Details"
   - **Accessories:** Full buy/rent options with quantity selection
 
 **Technical Implementations:**
