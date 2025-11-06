@@ -717,7 +717,7 @@ def admin_add_product():
         description=request.form.get('description', ''),
         category=request.form.get('category'),
         product_type=request.form.get('product_type'),
-        customization_options=request.form.get('customization_options'),
+        customization_options=None,
         rent_price=float(request.form.get('rent_price')) if request.form.get('rent_price') else None,
         image_url=image_url,
         weight_per_unit=float(request.form.get('weight_per_unit')) if request.form.get('weight_per_unit') else None
@@ -750,7 +750,6 @@ def admin_update_product(product_id):
     product.price = float(request.form.get('price'))
     product.description = request.form.get('description', '')
     product.category = request.form.get('category')
-    product.customization_options = request.form.get('customization_options')
     product.rent_price = float(request.form.get('rent_price')) if request.form.get('rent_price') else None
     product.weight_per_unit = float(request.form.get('weight_per_unit')) if request.form.get('weight_per_unit') else None
     
