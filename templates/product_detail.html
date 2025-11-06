@@ -230,14 +230,28 @@ const weightPerUnit = {{ product.weight_per_unit if product.weight_per_unit else
 // Aluminium Scaffolding Pricing Matrix (Load from Database)
 const aluminiumPricing = {{ product.customization_options.get('pricing_matrix', {})|tojson|safe if product.customization_options else '{}' }};
 
-// Rent prices are 20% of buy prices
+// Get aluminium price from pricing matrix (handles both old and new formats)
 function getAluminiumPrice(width, height, purchaseType) {
     const widthKey = width.toString();
     const heightKey = height.toString();
     
     if (aluminiumPricing[widthKey] && aluminiumPricing[widthKey][heightKey]) {
-        const buyPrice = aluminiumPricing[widthKey][heightKey];
-        return purchaseType === 'rent' ? buyPrice * 0.2 : buyPrice;
+        const priceData = aluminiumPricing[widthKey][heightKey];
+        
+        // Handle both old format (single number) and new format (object with buy/rent)
+        if (typeof priceData === 'object') {
+            // New format: {buy: xxx, rent: yyy}
+            if (purchaseType === 'rent') {
+                // Use rent price if available, otherwise calculate as 20% of buy
+                return priceData.rent || (priceData.buy ? priceData.buy * 0.2 : rentPrice);
+            } else {
+                return priceData.buy || basePrice;
+            }
+        } else {
+            // Old format: just a number (buy price)
+            const buyPrice = priceData;
+            return purchaseType === 'rent' ? buyPrice * 0.2 : buyPrice;
+        }
     }
     
     // Fallback to base price if combination not found

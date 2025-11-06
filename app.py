@@ -26,10 +26,26 @@ def calculate_price(product, customization):
         if product.customization_options and 'pricing_matrix' in product.customization_options:
             pricing_matrix = product.customization_options['pricing_matrix']
             if width in pricing_matrix and height in pricing_matrix[width]:
-                buy_price = pricing_matrix[width][height]
-                # Rent price is 20% of buy price
-                unit_price = (buy_price * 0.2) if purchase_type == 'rent' else buy_price
-                return unit_price
+                price_data = pricing_matrix[width][height]
+                
+                # Handle both old format (single number) and new format (object with buy/rent)
+                if isinstance(price_data, dict):
+                    # New format: {buy: xxx, rent: yyy}
+                    if purchase_type == 'rent':
+                        unit_price = price_data.get('rent')
+                        if unit_price is None and 'buy' in price_data:
+                            # Fallback: calculate rent as 20% of buy if rent not set
+                            unit_price = price_data['buy'] * 0.2
+                    else:
+                        unit_price = price_data.get('buy')
+                    
+                    if unit_price is not None:
+                        return unit_price
+                else:
+                    # Old format: just a number (buy price)
+                    buy_price = price_data
+                    unit_price = (buy_price * 0.2) if purchase_type == 'rent' else buy_price
+                    return unit_price
         
         # Fallback to base price if no matrix or combination not found
         if purchase_type == 'rent':
