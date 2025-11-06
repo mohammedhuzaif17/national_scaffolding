@@ -1386,6 +1386,19 @@ footer {
 .policy-section {
     padding: 5rem 2rem;
     background: var(--white);
+    transition: all var(--transition-normal) ease;
+    animation: slideDown 0.5s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .policy-content {

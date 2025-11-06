@@ -422,15 +422,15 @@
                     <p>&copy; 2023 THE NATIONAL SCAFFOLDING. All Rights Reserved.</p>
                 </div>
                 <div class="footer-bottom-links">
-                    <a href="#privacy-policy">Privacy Policy</a>
-                    <a href="#terms-of-use">Terms of Use</a>
+                    <a href="javascript:void(0)" onclick="togglePolicy('privacy-policy')">Privacy Policy</a>
+                    <a href="javascript:void(0)" onclick="togglePolicy('terms-of-use')">Terms of Use</a>
                 </div>
             </div>
         </div>
     </footer>
 
     <!-- Privacy Policy Section -->
-    <section id="privacy-policy" class="policy-section">
+    <section id="privacy-policy" class="policy-section" style="display: none;">
         <div class="container">
             <div class="policy-content">
                 <h2>🔒 Privacy Policy</h2>
@@ -452,13 +452,13 @@
                 
                 <p>All data is handled securely and confidentially in line with best practices.</p>
                 
-                <a href="#contact-section" class="back-to-footer">Back to Footer</a>
+                <a href="javascript:void(0)" onclick="togglePolicy('privacy-policy')" class="back-to-footer">Close</a>
             </div>
         </div>
     </section>
 
     <!-- Terms of Use Section -->
-    <section id="terms-of-use" class="policy-section">
+    <section id="terms-of-use" class="policy-section" style="display: none;">
         <div class="container">
             <div class="policy-content">
                 <h2>⚖️ Terms of Use</h2>
@@ -481,12 +481,31 @@
                 
                 <p>By continuing to use this site, you acknowledge and agree to these Privacy and Usage Terms.</p>
                 
-                <a href="#contact-section" class="back-to-footer">Back to Footer</a>
+                <a href="javascript:void(0)" onclick="togglePolicy('terms-of-use')" class="back-to-footer">Close</a>
             </div>
         </div>
     </section>
 
     <script>
+        // Toggle Policy Sections
+        function togglePolicy(policyId) {
+            const section = document.getElementById(policyId);
+            if (section.style.display === 'none' || section.style.display === '') {
+                section.style.display = 'block';
+                // Smooth scroll to the policy section
+                setTimeout(() => {
+                    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            } else {
+                section.style.display = 'none';
+                // Smooth scroll back to footer
+                const footer = document.getElementById('contact-section');
+                if (footer) {
+                    footer.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }
+            }
+        }
+
         // Simple JavaScript for hamburger menu toggle
         document.addEventListener('DOMContentLoaded', function() {
             const hamburger = document.querySelector('.hamburger');
