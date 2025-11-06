@@ -4,17 +4,40 @@
 
 {% block content %}
 <div class="glass-container">
-    <h1 class="page-title">Welcome to The National Scaffolding</h1>
+    <h1 class="page-title">Welcome{% if current_user.is_authenticated %}, {{ current_user.username }}{% endif %}!</h1>
     <p class="page-subtitle">Choose a category to explore our products</p>
     
-    <div class="dashboard-grid">
-        <div class="dashboard-card" onclick="window.location.href='{{ url_for('national_scaffoldings') }}'">
-            <h2>National Scaffolding</h2>
-            <p>Professional scaffolding services for all your construction needs</p>
+    <!-- Product Categories Section -->
+    <div style="margin-bottom: 3rem;">
+        <h2 style="color: #d4af37; font-size: 1.8rem; margin-bottom: 1.5rem; text-align: center;">🏗️ Our Product Categories</h2>
+        <div class="dashboard-grid">
+            <div class="dashboard-card" onclick="window.location.href='{{ url_for('national_scaffoldings') }}'">
+                <h2>National Scaffolding</h2>
+                <p>Professional scaffolding services for all your construction needs</p>
+                <span style="color: #d4af37; font-weight: 600;">View Products →</span>
+            </div>
+            <div class="dashboard-card" onclick="window.location.href='{{ url_for('fabrications') }}'">
+                <h2>Fabrications</h2>
+                <p>Custom fabrication products including furniture and more</p>
+                <span style="color: #d4af37; font-weight: 600;">View Products →</span>
+            </div>
         </div>
-        <div class="dashboard-card" onclick="window.location.href='{{ url_for('fabrications') }}'">
-            <h2>Fabrications</h2>
-            <p>Custom fabrication products including furniture and more</p>
+    </div>
+    
+    <!-- Quick Actions Section -->
+    <div style="margin-top: 3rem;">
+        <h2 style="color: #d4af37; font-size: 1.8rem; margin-bottom: 1.5rem; text-align: center;">⚡ Quick Actions</h2>
+        <div class="dashboard-grid">
+            <div class="dashboard-card" onclick="window.location.href='{{ url_for('cart') }}'">
+                <h3 style="font-size: 1.5rem; color: #4CAF50;">🛒 My Cart</h3>
+                <p>View and manage your shopping cart</p>
+                <span style="color: #4CAF50; font-weight: 600;">Go to Cart →</span>
+            </div>
+            <div class="dashboard-card" onclick="window.location.href='{{ url_for('my_orders') }}'">
+                <h3 style="font-size: 1.5rem; color: #9333ea;">📦 My Orders</h3>
+                <p>Track your past and current orders</p>
+                <span style="color: #9333ea; font-weight: 600;">View Orders →</span>
+            </div>
         </div>
     </div>
 </div>

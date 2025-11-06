@@ -4,7 +4,7 @@
    ============================================ */
 
 /* ===== GOOGLE FONTS IMPORT ===== */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700;800&family=Montserrat:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 /* ===== CSS VARIABLES - ROYAL BLUE & GOLD THEME ===== */
 :root {
@@ -62,7 +62,7 @@ html {
 }
 
 body {
-    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background: var(--cream);
     color: var(--text-dark);
     line-height: 1.7;
@@ -72,7 +72,7 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', serif;
+    font-family: 'Montserrat', sans-serif;
     color: var(--royal-blue);
     font-weight: 700;
     line-height: 1.3;
@@ -124,7 +124,7 @@ a:hover {
 
 .navbar-brand,
 .nav-logo a {
-    font-family: 'Playfair Display', serif;
+    font-family: 'Montserrat', sans-serif;
     font-size: 1.8rem;
     font-weight: 800;
     color: var(--royal-blue);
@@ -273,7 +273,7 @@ button:not(.hamburger):not(.faq-summary) {
     cursor: pointer;
     transition: all var(--transition-normal) ease;
     font-size: 1rem;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Inter', sans-serif;
     box-shadow: var(--shadow-gold);
     position: relative;
     overflow: hidden;
@@ -651,7 +651,7 @@ body.popup-active .landing-page {
     font-size: 2.2rem;
     font-weight: 800;
     margin: 1rem 0;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Inter', sans-serif;
 }
 
 .product-rent {
@@ -754,7 +754,7 @@ body.popup-active .landing-page {
     padding: 1rem;
     border: 2px solid var(--medium-gray);
     border-radius: 8px;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 1rem;
     transition: all var(--transition-normal) ease;
     background: var(--white);
@@ -865,7 +865,7 @@ body.popup-active .landing-page {
     color: #b8860b;
     font-weight: 800;
     margin-bottom: 0.5rem;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Inter', sans-serif;
 }
 
 .stat-item p {
@@ -1287,7 +1287,7 @@ footer {
     color: var(--gold);
     font-size: 1.5rem;
     margin-bottom: 1rem;
-    font-family: 'Playfair Display', serif;
+    font-family: 'Montserrat', sans-serif;
 }
 
 .footer-logo p {
@@ -1858,7 +1858,7 @@ footer {
     padding: 1rem;
     border-radius: 10px;
     width: 100%;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 1rem;
     transition: all var(--transition-normal) ease;
 }
@@ -1952,7 +1952,7 @@ footer {
     color: var(--white);
     font-size: 2.2rem;
     font-weight: 900;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Inter', sans-serif;
 }
 
 .chart-container {

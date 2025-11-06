@@ -38,13 +38,13 @@
                                 <strong style="color: #d4af37; font-size: 1.05rem; display: block; margin-bottom: 0.3rem;">{{ order.user.full_name or order.user.username or 'N/A' }}</strong>
                             </div>
                             <div style="display: flex; flex-direction: column; gap: 0.3rem;">
-                                <span style="color: #fff; font-size: 0.9rem;"><strong style="color: #d4af37;">Email:</strong> {{ order.user.email or 'N/A' }}</span>
-                                <span style="color: #fff; font-size: 0.9rem;"><strong style="color: #d4af37;">Phone:</strong> {{ order.user.phone or 'N/A' }}</span>
+                                <span style="color: #001d3d; font-size: 0.9rem;"><strong style="color: #d4af37;">Email:</strong> {{ order.user.email or 'N/A' }}</span>
+                                <span style="color: #001d3d; font-size: 0.9rem;"><strong style="color: #d4af37;">Phone:</strong> {{ order.user.phone or 'N/A' }}</span>
                                 {% if order.user.address %}
-                                <span style="color: #fff; font-size: 0.9rem;"><strong style="color: #d4af37;">Address:</strong> {{ order.user.address }}</span>
+                                <span style="color: #001d3d; font-size: 0.9rem;"><strong style="color: #d4af37;">Address:</strong> {{ order.user.address }}</span>
                                 {% endif %}
                                 {% if order.user.organization %}
-                                <span style="color: #fff; font-size: 0.9rem;"><strong style="color: #d4af37;">Org:</strong> {{ order.user.organization }}</span>
+                                <span style="color: #001d3d; font-size: 0.9rem;"><strong style="color: #d4af37;">Org:</strong> {{ order.user.organization }}</span>
                                 {% endif %}
                             </div>
                         </div>
@@ -97,7 +97,7 @@
                             <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px; margin-bottom: 0.8rem; border-left: 3px solid #d4af37;">
                                 <div style="display: flex; justify-content: space-between; align-items: center;">
                                     <div>
-                                        <strong style="color: #fff; font-size: 1.1rem;">{{ item.product_name }}</strong>
+                                        <strong style="color: #001d3d; font-size: 1.1rem;">{{ item.product_name }}</strong>
                                         <p style="color: #ccc; margin: 0.3rem 0; font-size: 0.9rem;">
                                             Quantity: {{ item.quantity }} | Unit Price: ₹{{ "%.2f"|format(item.price) }}
                                         </p>

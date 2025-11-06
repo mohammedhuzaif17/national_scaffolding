@@ -13,10 +13,10 @@
     
     <div style="background: rgba(255, 165, 0, 0.1); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
         <h3 style="color: #ffa500; margin-bottom: 1rem;">ℹ️ How it works:</h3>
-        <ul style="color: #fff; line-height: 2;">
-            <li>Set prices for each width (0.7m Single Width and 1.4m Double Width)</li>
+        <ul style="color: #d4af37; line-height: 2;">
+            <li>Set both BUY and RENT prices for each width (0.7m Single Width and 1.4m Double Width)</li>
             <li>For each width, set prices for different heights (2m to 16m)</li>
-            <li>Rent prices will be calculated as 20% of buy prices automatically</li>
+            <li>Set both buy and rent prices separately for maximum flexibility</li>
             <li>Leave fields blank to use default product price</li>
         </ul>
     </div>
@@ -25,22 +25,50 @@
         <!-- Single Width (0.7m) Section -->
         <div style="background: rgba(30, 58, 138, 0.2); padding: 2rem; border-radius: 10px; margin-bottom: 2rem;">
             <h2 style="color: #ffa500; margin-bottom: 1.5rem;">🔸 Single Width (0.7m)</h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
-                <div class="form-group">
-                    <label for="price_0.7_2">Height 2m</label>
-                    <input type="number" id="price_0.7_2" step="0.01" placeholder="₹2500" class="pricing-input" data-width="0.7" data-height="2">
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem;">
+                <div style="background: rgba(212, 175, 55, 0.05); padding: 1rem; border-radius: 8px; border: 2px solid rgba(212, 175, 55, 0.2);">
+                    <h4 style="color: #d4af37; margin-bottom: 0.8rem;">Height 2m</h4>
+                    <div class="form-group" style="margin-bottom: 0.5rem;">
+                        <label for="price_0.7_2">Buy Price (₹)</label>
+                        <input type="number" id="price_0.7_2" step="0.01" placeholder="₹2500" class="pricing-input" data-width="0.7" data-height="2">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="rent_0.7_2">Rent Price (₹/month)</label>
+                        <input type="number" id="rent_0.7_2" step="0.01" placeholder="₹500" class="rent-pricing-input" data-width="0.7" data-height="2">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="price_0.7_3">Height 3m</label>
-                    <input type="number" id="price_0.7_3" step="0.01" placeholder="₹3200" class="pricing-input" data-width="0.7" data-height="3">
+                <div style="background: rgba(212, 175, 55, 0.05); padding: 1rem; border-radius: 8px; border: 2px solid rgba(212, 175, 55, 0.2);">
+                    <h4 style="color: #d4af37; margin-bottom: 0.8rem;">Height 3m</h4>
+                    <div class="form-group" style="margin-bottom: 0.5rem;">
+                        <label for="price_0.7_3">Buy Price (₹)</label>
+                        <input type="number" id="price_0.7_3" step="0.01" placeholder="₹3200" class="pricing-input" data-width="0.7" data-height="3">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="rent_0.7_3">Rent Price (₹/month)</label>
+                        <input type="number" id="rent_0.7_3" step="0.01" placeholder="₹640" class="rent-pricing-input" data-width="0.7" data-height="3">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="price_0.7_4">Height 4m</label>
-                    <input type="number" id="price_0.7_4" step="0.01" placeholder="₹3800" class="pricing-input" data-width="0.7" data-height="4">
+                <div style="background: rgba(212, 175, 55, 0.05); padding: 1rem; border-radius: 8px; border: 2px solid rgba(212, 175, 55, 0.2);">
+                    <h4 style="color: #d4af37; margin-bottom: 0.8rem;">Height 4m</h4>
+                    <div class="form-group" style="margin-bottom: 0.5rem;">
+                        <label for="price_0.7_4">Buy Price (₹)</label>
+                        <input type="number" id="price_0.7_4" step="0.01" placeholder="₹3800" class="pricing-input" data-width="0.7" data-height="4">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="rent_0.7_4">Rent Price (₹/month)</label>
+                        <input type="number" id="rent_0.7_4" step="0.01" placeholder="₹760" class="rent-pricing-input" data-width="0.7" data-height="4">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="price_0.7_5">Height 5m</label>
-                    <input type="number" id="price_0.7_5" step="0.01" placeholder="₹4500" class="pricing-input" data-width="0.7" data-height="5">
+                <div style="background: rgba(212, 175, 55, 0.05); padding: 1rem; border-radius: 8px; border: 2px solid rgba(212, 175, 55, 0.2);">
+                    <h4 style="color: #d4af37; margin-bottom: 0.8rem;">Height 5m</h4>
+                    <div class="form-group" style="margin-bottom: 0.5rem;">
+                        <label for="price_0.7_5">Buy Price (₹)</label>
+                        <input type="number" id="price_0.7_5" step="0.01" placeholder="₹4500" class="pricing-input" data-width="0.7" data-height="5">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="rent_0.7_5">Rent Price (₹/month)</label>
+                        <input type="number" id="rent_0.7_5" step="0.01" placeholder="₹900" class="rent-pricing-input" data-width="0.7" data-height="5">
+                    </div>
                 </div>
             </div>
         </div>
