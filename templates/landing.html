@@ -45,18 +45,27 @@
 
 
 <script>
-// Show welcome popup immediately without delay
+// Show welcome popup only for non-logged-in users
 window.addEventListener('DOMContentLoaded', () => {
-    const popupShown = sessionStorage.getItem('welcomeShown');
     const popup = document.getElementById('welcomePopup');
+    const isLoggedIn = {{ 'true' if current_user.is_authenticated else 'false' }};
     
-    if (popupShown) {
+    if (isLoggedIn) {
+        // Never show popup for logged-in users
         popup.style.display = 'none';
         document.body.classList.remove('popup-active');
     } else {
-        // Show popup immediately with blur effect
-        popup.style.display = 'flex';
-        document.body.classList.add('popup-active');
+        // Show popup for non-logged-in users (only once per session)
+        const popupShown = sessionStorage.getItem('welcomeShown');
+        
+        if (popupShown) {
+            popup.style.display = 'none';
+            document.body.classList.remove('popup-active');
+        } else {
+            // Show popup immediately with blur effect
+            popup.style.display = 'flex';
+            document.body.classList.add('popup-active');
+        }
     }
 });
 
