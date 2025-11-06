@@ -75,6 +75,9 @@
                 </div>
                 
                 <div class="product-price" id="final_price">₹{{ product.price }}</div>
+                <div id="deposit_display" style="color: #d4af37; margin-top: 1rem; font-size: 1.1rem; display: none;">
+                    <strong>Deposit Required:</strong> <span id="deposit_amount">₹0</span>
+                </div>
             </div>
             
             {% elif product.category == 'h-frames' %}
@@ -99,6 +102,9 @@
                 </div>
                 
                 <div class="product-price" id="final_price">₹{{ product.price }}</div>
+                <div id="deposit_display" style="color: #d4af37; margin-top: 1rem; font-size: 1.1rem; display: none;">
+                    <strong>Deposit Required:</strong> <span id="deposit_amount">₹0</span>
+                </div>
             </div>
             
             {% elif product.category == 'cuplock' %}
@@ -189,6 +195,9 @@
                 </div>
                 
                 <div class="product-price" id="final_price">₹{{ product.price }}</div>
+                <div id="deposit_display" style="color: #d4af37; margin-top: 1rem; font-size: 1.1rem; display: none;">
+                    <strong>Deposit Required:</strong> <span id="deposit_amount">₹0</span>
+                </div>
             </div>
             
             {% else %}
@@ -232,38 +241,45 @@
 {% block scripts %}
 const basePrice = {{ product.price }};
 const rentPrice = {{ product.rent_price if product.rent_price else 0 }};
+const depositAmount = {{ product.deposit_amount if product.deposit_amount else 0 }};
 const category = '{{ product.category }}';
 const weightPerUnit = {{ product.weight_per_unit if product.weight_per_unit else 5 }};
 
 // Aluminium Scaffolding Pricing Matrix (Load from Database)
 const aluminiumPricing = {{ product.customization_options.get('pricing_matrix', {})|tojson|safe if product.customization_options else '{}' }};
 
-// Get aluminium price from pricing matrix (handles both old and new formats)
-function getAluminiumPrice(width, height, purchaseType) {
+// Get aluminium price and deposit from pricing matrix (handles both old and new formats)
+function getAluminiumPriceData(width, height, purchaseType) {
     const widthKey = width.toString();
     const heightKey = height.toString();
+    
+    let price = basePrice;
+    let deposit = depositAmount;
     
     if (aluminiumPricing[widthKey] && aluminiumPricing[widthKey][heightKey]) {
         const priceData = aluminiumPricing[widthKey][heightKey];
         
-        // Handle both old format (single number) and new format (object with buy/rent)
+        // Handle both old format (single number) and new format (object with buy/rent/deposit)
         if (typeof priceData === 'object') {
-            // New format: {buy: xxx, rent: yyy}
+            // New format: {buy: xxx, rent: yyy, deposit: zzz}
             if (purchaseType === 'rent') {
                 // Use rent price if available, otherwise calculate as 20% of buy
-                return priceData.rent || (priceData.buy ? priceData.buy * 0.2 : rentPrice);
+                price = priceData.rent || (priceData.buy ? priceData.buy * 0.2 : rentPrice);
             } else {
-                return priceData.buy || basePrice;
+                price = priceData.buy || basePrice;
             }
+            deposit = priceData.deposit || depositAmount;
         } else {
             // Old format: just a number (buy price)
             const buyPrice = priceData;
-            return purchaseType === 'rent' ? buyPrice * 0.2 : buyPrice;
+            price = purchaseType === 'rent' ? buyPrice * 0.2 : buyPrice;
         }
+    } else {
+        // Fallback to base price if combination not found
+        price = purchaseType === 'buy' ? basePrice : rentPrice;
     }
     
-    // Fallback to base price if combination not found
-    return purchaseType === 'buy' ? basePrice : rentPrice;
+    return { price, deposit };
 }
 
 function updateAluminiumPrice() {
@@ -286,9 +302,18 @@ function updateAluminiumPrice() {
         });
     }
     
-    const price = getAluminiumPrice(width, height, purchaseType);
-    const total = price * quantity;
+    const priceData = getAluminiumPriceData(width, height, purchaseType);
+    const total = priceData.price * quantity;
     document.getElementById('final_price').textContent = '₹' + total.toFixed(2);
+    
+    // Show/hide deposit based on purchase type
+    const depositDisplay = document.getElementById('deposit_display');
+    if (purchaseType === 'rent' && priceData.deposit > 0) {
+        depositDisplay.style.display = 'block';
+        document.getElementById('deposit_amount').textContent = '₹' + priceData.deposit.toFixed(2);
+    } else {
+        depositDisplay.style.display = 'none';
+    }
 }
 
 function updateHFramePrice() {
@@ -297,6 +322,15 @@ function updateHFramePrice() {
     const price = purchaseType === 'rent' ? rentPrice : basePrice;
     const total = price * quantity;
     document.getElementById('final_price').textContent = '₹' + total.toFixed(2);
+    
+    // Show/hide deposit based on purchase type
+    const depositDisplay = document.getElementById('deposit_display');
+    if (purchaseType === 'rent' && depositAmount > 0) {
+        depositDisplay.style.display = 'block';
+        document.getElementById('deposit_amount').textContent = '₹' + depositAmount.toFixed(2);
+    } else {
+        depositDisplay.style.display = 'none';
+    }
 }
 
 function updateCuplockPrice() {
@@ -312,6 +346,15 @@ function updateAccessoryPrice() {
     const price = purchaseType === 'rent' ? rentPrice : basePrice;
     const total = price * quantity;
     document.getElementById('final_price').textContent = '₹' + total.toFixed(2);
+    
+    // Show/hide deposit based on purchase type
+    const depositDisplay = document.getElementById('deposit_display');
+    if (purchaseType === 'rent' && depositAmount > 0) {
+        depositDisplay.style.display = 'block';
+        document.getElementById('deposit_amount').textContent = '₹' + depositAmount.toFixed(2);
+    } else {
+        depositDisplay.style.display = 'none';
+    }
 }
 
 function addToCartCustom() {
@@ -325,7 +368,8 @@ function addToCartCustom() {
         const height = document.getElementById('height').value;
         const purchaseType = document.getElementById('purchase_type').value;
         customization = { width, height, purchaseType, quantity };
-        unitPrice = getAluminiumPrice(parseFloat(width), parseFloat(height), purchaseType);
+        const priceData = getAluminiumPriceData(parseFloat(width), parseFloat(height), purchaseType);
+        unitPrice = priceData.price;
         finalPrice = unitPrice * quantity;
     } else if (category === 'h-frames') {
         const purchaseType = document.getElementById('purchase_type').value;
