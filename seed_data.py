@@ -32,7 +32,20 @@ def seed_database():
                 description='High-quality aluminium H-frame scaffolding with customizable width (0.7m or 1.4m) and height options from 2m to 16m. Ideal for construction and maintenance work.',
                 category='aluminium',
                 product_type='scaffolding',
-                weight_per_unit=25
+                weight_per_unit=25,
+                customization_options={
+                    'pricing_matrix': {
+                        '0.7': {
+                            '2': 2500, '3': 3200, '4': 3800, '5': 4500
+                        },
+                        '1.4': {
+                            '2': 3500, '3': 4200, '4': 5000, '5': 5800,
+                            '6': 6500, '7': 7200, '8': 8000, '9': 8800,
+                            '10': 9500, '11': 10300, '12': 11000, '13': 11800,
+                            '14': 12500, '15': 13300, '16': 14000
+                        }
+                    }
+                }
             ),
             Product(
                 name='Aluminium Mobile Tower',
@@ -41,7 +54,19 @@ def seed_database():
                 description='Portable aluminium mobile tower scaffolding with wheels. Easy to move and assemble. Perfect for indoor and outdoor projects.',
                 category='aluminium',
                 product_type='scaffolding',
-                weight_per_unit=35
+                weight_per_unit=35,
+                customization_options={
+                    'pricing_matrix': {
+                        '0.7': {
+                            '2': 4500, '3': 5200, '4': 5800, '5': 6500
+                        },
+                        '1.4': {
+                            '2': 5500, '3': 6200, '4': 7000, '5': 7800,
+                            '6': 8500, '7': 9200, '8': 10000, '9': 10800,
+                            '10': 11500, '11': 12300, '12': 13000
+                        }
+                    }
+                }
             ),
             Product(
                 name='H-Frame Standard Set',
