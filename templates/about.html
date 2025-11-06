@@ -331,6 +331,13 @@
                 
                 <h3>9. Conclusion</h3>
                 <p>Thank you for choosing The National Scaffoldings. By adhering to this manual, you ensure safe, reliable, and efficient use of your aluminium scaffolding system. Always prioritize safety, conduct regular inspections, and comply with established safety standards for optimal performance.</p>
+                
+                <!-- Download Button -->
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button onclick="downloadUserManual()" class="download-manual-btn">
+                        <i class="fas fa-download"></i> Download User Manual
+                    </button>
+                </div>
             </div>
         </div>
     </section>
@@ -519,6 +526,111 @@
                 });
             });
         });
+        
+        // Download User Manual Function
+        function downloadUserManual() {
+            const manualContent = document.querySelector('.user-manual-content');
+            if (!manualContent) {
+                alert('User manual content not found!');
+                return;
+            }
+            
+            // Extract text content
+            let textContent = '';
+            textContent += '='.repeat(70) + '\n';
+            textContent += '          THE NATIONAL SCAFFOLDING - USER MANUAL\n';
+            textContent += '                 Aluminium Scaffolding System\n';
+            textContent += '='.repeat(70) + '\n\n';
+            
+            // Get all sections from h2 to conclusion
+            const sections = [
+                { selector: 'h2', text: manualContent.querySelector('h2').textContent },
+                { type: 'content' }
+            ];
+            
+            // Manually extract each section
+            const allElements = Array.from(manualContent.querySelectorAll('h2, h3, h4, p, li, table, th, td'));
+            let currentTable = null;
+            let tableRows = [];
+            
+            allElements.forEach((element, index) => {
+                const tagName = element.tagName.toLowerCase();
+                const text = element.textContent.trim();
+                
+                if (!text || text === 'Download User Manual') return;
+                
+                if (tagName === 'h2') {
+                    textContent += '\n' + '='.repeat(70) + '\n';
+                    textContent += text.toUpperCase() + '\n';
+                    textContent += '='.repeat(70) + '\n\n';
+                } else if (tagName === 'h3') {
+                    textContent += '\n' + '-'.repeat(60) + '\n';
+                    textContent += text + '\n';
+                    textContent += '-'.repeat(60) + '\n\n';
+                } else if (tagName === 'h4') {
+                    textContent += '\n  ' + text + '\n';
+                    textContent += '  ' + '~'.repeat(text.length) + '\n\n';
+                } else if (tagName === 'p') {
+                    textContent += text + '\n\n';
+                } else if (tagName === 'li') {
+                    textContent += '  • ' + text + '\n';
+                } else if (tagName === 'table') {
+                    currentTable = element;
+                    textContent += '\n' + '-'.repeat(60) + '\n';
+                } else if (tagName === 'th' || tagName === 'td') {
+                    // Skip - handled by table processing
+                }
+            });
+            
+            // Process tables separately
+            const tables = manualContent.querySelectorAll('table');
+            if (tables.length > 0) {
+                let tableText = '\n' + '-'.repeat(60) + '\n';
+                tableText += 'TROUBLESHOOTING TABLE\n';
+                tableText += '-'.repeat(60) + '\n\n';
+                
+                tables.forEach(table => {
+                    const headers = Array.from(table.querySelectorAll('th')).map(th => th.textContent.trim());
+                    const rows = Array.from(table.querySelectorAll('tbody tr'));
+                    
+                    headers.forEach(header => {
+                        tableText += header.padEnd(20) + ' | ';
+                    });
+                    tableText += '\n' + '-'.repeat(60) + '\n';
+                    
+                    rows.forEach(row => {
+                        const cells = Array.from(row.querySelectorAll('td')).map(td => td.textContent.trim());
+                        cells.forEach(cell => {
+                            tableText += cell.padEnd(20) + ' | ';
+                        });
+                        tableText += '\n';
+                    });
+                });
+                
+                // Insert table text before FAQs
+                const faqIndex = textContent.indexOf('Frequently Asked Questions');
+                if (faqIndex !== -1) {
+                    textContent = textContent.slice(0, faqIndex) + tableText + '\n\n' + textContent.slice(faqIndex);
+                }
+            }
+            
+            textContent += '\n' + '='.repeat(70) + '\n';
+            textContent += 'End of User Manual\n';
+            textContent += 'THE NATIONAL SCAFFOLDING © 2025\n';
+            textContent += 'Contact: +918105934759 | cresttechnocrat@gmail.com\n';
+            textContent += '='.repeat(70) + '\n';
+            
+            // Create blob and download
+            const blob = new Blob([textContent], { type: 'text/plain; charset=utf-8' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'National_Scaffolding_User_Manual.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
     </script>
 </body>
 </html>
