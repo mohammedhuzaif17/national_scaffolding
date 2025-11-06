@@ -3,28 +3,31 @@
 {% block title %}Cart - National Scaffolding{% endblock %}
 
 {% block content %}
-<div class="glass-container">
-    <button class="btn-secondary" onclick="history.back()" style="margin-bottom: 1rem; width: auto;">← Back</button>
-    <h1 class="page-title">Shopping Cart</h1>
+<div class="cart-container">
+    <button class="btn btn-secondary mb-2" onclick="history.back()">← Back</button>
+    
+    <div class="page-header">
+        <h1>Shopping Cart</h1>
+    </div>
     
     {% if cart_items %}
-    <div style="margin-top: 2rem;">
+    <div class="cart-items mt-4">
         {% for item in cart_items %}
-        <div class="cart-item" style="display: grid; grid-template-columns: 120px 1fr auto; gap: 1.5rem; align-items: center;">
-            <div>
+        <div class="cart-item">
+            <div class="cart-item-image-container">
                 {% if item.image_url %}
-                <img src="{{ item.image_url }}" alt="{{ item.product_name }}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; border: 2px solid rgba(255, 165, 0, 0.3);">
+                <img src="{{ item.image_url }}" alt="{{ item.product_name }}" class="cart-item-image">
                 {% else %}
-                <div style="width: 100%; height: 100px; background: rgba(255, 255, 255, 0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(255, 165, 0, 0.3);">
-                    <span style="font-size: 2rem; color: #ffa500;">📦</span>
+                <div class="cart-item-placeholder">
+                    <span>📦</span>
                 </div>
                 {% endif %}
             </div>
-            <div>
-                <h3 style="color: #ffa500;">{{ item.product_name }}</h3>
+            <div class="cart-item-details">
+                <h3 class="cart-item-name">{{ item.product_name }}</h3>
                 <p>Quantity: {{ item.quantity }}</p>
                 {% if item.customization %}
-                <p style="font-size: 0.9rem; color: #ccc;">
+                <p class="cart-item-specs">
                     {% if item.customization.purchaseType %}
                         {{ item.customization.purchaseType|title }} | Width: {{ item.customization.width }}m | Height: {{ item.customization.height }}m
                     {% elif item.customization.discount_rate %}
@@ -35,26 +38,26 @@
                     {% endif %}
                 </p>
                 {% endif %}
-                <p style="color: #4CAF50; font-size: 1.2rem;">₹{{ "%.2f"|format(item.unit_price) }} x {{ item.quantity }} = ₹{{ "%.2f"|format(item.item_total) }}</p>
+                <p class="cart-item-price">₹{{ "%.2f"|format(item.unit_price) }} x {{ item.quantity }} = ₹{{ "%.2f"|format(item.item_total) }}</p>
             </div>
             <div>
-                <button class="btn-danger" onclick="removeItem({{ loop.index0 }})">Remove</button>
+                <button class="btn btn-danger" onclick="removeItem({{ loop.index0 }})">Remove</button>
             </div>
         </div>
         {% endfor %}
         
-        <div style="text-align: right; margin-top: 2rem; padding: 1.5rem; background: rgba(255, 255, 255, 0.05); border-radius: 10px;">
-            <h2 style="color: #ffa500;">Subtotal: ₹{{ "%.2f"|format(total) }}</h2>
-            <p style="color: #ccc; font-size: 0.9rem;">GST (18%) will be added at checkout</p>
-            <button class="btn-primary" onclick="window.location.href='{{ url_for('qr_scanner') }}'" style="width: auto; margin-top: 1rem;">
+        <div class="cart-summary">
+            <h2>Subtotal: ₹{{ "%.2f"|format(total) }}</h2>
+            <p>GST (18%) will be added at checkout</p>
+            <button class="btn checkout-btn mt-3" onclick="window.location.href='{{ url_for('qr_scanner') }}'">
                 Proceed to Checkout
             </button>
         </div>
     </div>
     {% else %}
-    <p style="text-align: center; color: #ccc; margin-top: 2rem;">Your cart is empty</p>
-    <div style="text-align: center; margin-top: 2rem;">
-        <button class="btn-primary" onclick="window.location.href='{{ url_for('dashboard') }}'">
+    <p class="text-center mt-4">Your cart is empty</p>
+    <div class="text-center mt-4">
+        <button class="btn" onclick="window.location.href='{{ url_for('dashboard') }}'">
             Continue Shopping
         </button>
     </div>

@@ -15,8 +15,8 @@
     <h1 class="page-title">The National Scaffolding</h1>
     <p class="page-subtitle">Professional scaffolding services for all your construction needs</p>
     
-    <div style="text-align: center; margin-bottom: 1.5rem;">
-        <button class="btn-secondary" onclick="window.location.href='{{ url_for('fabrications') }}'" style="background: linear-gradient(135deg, #1e3a8a, #d4af37); padding: 0.8rem 2rem; font-size: 1rem;">
+    <div class="text-center mb-3">
+        <button class="btn btn-secondary" onclick="window.location.href='{{ url_for('fabrications') }}'">
             🔧 Go to Fabrications
         </button>
     </div>
@@ -44,31 +44,33 @@
         </button>
     </div>
 
-    <h2 style="color: #ffa500; margin-top: 2rem;">Our Products</h2>
+    <h2 class="mt-4">Our Products</h2>
     
-    <div class="product-grid">
+    <div class="products-grid">
         {% for product in products %}
-        <div class="product-card" onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'" style="cursor: pointer;">
+        <div class="product-card" onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
             {% if product.image_url %}
-            <img src="{{ product.image_url }}" alt="{{ product.name }}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 1rem;">
+            <img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-image">
             {% else %}
-            <div style="background: rgba(255, 165, 0, 0.2); height: 200px; display: flex; align-items: center; justify-content: center; border-radius: 8px; margin-bottom: 1rem;">
-                <span style="font-size: 3rem;">📦</span>
+            <div class="product-image-placeholder">
+                <span>📦</span>
             </div>
             {% endif %}
-            <h3>{{ product.name }}</h3>
-            <p style="min-height: 60px;">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
-            {% if product.category %}
-            <p style="color: #ffa500; font-size: 0.9rem; text-transform: uppercase;">{{ product.category }}</p>
-            {% endif %}
-            <div class="product-price">₹{{ product.price }}</div>
-            {% if product.rent_price %}
-            <p style="color: #4CAF50;">Rent: ₹{{ product.rent_price }}/month</p>
-            {% endif %}
-            
-            <button class="btn-primary" onclick="event.stopPropagation(); window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
-                View Details
-            </button>
+            <div class="product-info">
+                <h3 class="product-name">{{ product.name }}</h3>
+                <p class="product-description">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
+                {% if product.category %}
+                <p class="product-category">{{ product.category }}</p>
+                {% endif %}
+                <div class="product-price">₹{{ product.price }}</div>
+                {% if product.rent_price %}
+                <p class="product-rent">Rent: ₹{{ product.rent_price }}/month</p>
+                {% endif %}
+                
+                <button class="btn" onclick="event.stopPropagation(); window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
+                    View Details
+                </button>
+            </div>
         </div>
         {% endfor %}
     </div>

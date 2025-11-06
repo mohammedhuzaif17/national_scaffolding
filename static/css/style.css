@@ -1879,3 +1879,234 @@ footer {
 }
 
 /* ===== END OF CSS ===== */
+
+/* ===== MISSING PRODUCT & CART STYLES ===== */
+.product-image-placeholder {
+    background: rgba(65, 90, 119, 0.2);
+    height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.product-image-placeholder span {
+    font-size: 4rem;
+}
+
+.product-rent {
+    color: var(--success-green);
+    font-weight: 600;
+    margin-top: 0.5rem;
+}
+
+.cart-item-image-container {
+    width: 120px;
+}
+
+.cart-item-placeholder {
+    width: 100%;
+    height: 100px;
+    background: rgba(65, 90, 119, 0.1);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--slate-blue);
+}
+
+.cart-item-placeholder span {
+    font-size: 2.5rem;
+}
+
+.glass-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    color: var(--midnight-navy);
+    margin-bottom: 1rem;
+    font-weight: 800;
+}
+
+.page-subtitle {
+    color: var(--medium-text);
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+}
+
+.category-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+}
+
+.category-btn {
+    background: var(--white);
+    color: var(--medium-text);
+    border: 2px solid var(--slate-blue);
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.category-btn:hover,
+.category-btn.active {
+    background: var(--slate-blue);
+    color: var(--white);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.view-cart-btn {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--gradient-accent);
+    color: var(--white);
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: var(--shadow-lg);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.view-cart-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-xl);
+}
+
+/* ===== WELCOME POPUP ===== */
+.welcome-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(13, 27, 42, 0.95);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.welcome-content {
+    background: var(--white);
+    padding: 3rem;
+    border-radius: 16px;
+    max-width: 600px;
+    text-align: center;
+    box-shadow: var(--shadow-xl);
+}
+
+.welcome-content h1 {
+    color: var(--midnight-navy);
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.welcome-content p {
+    color: var(--medium-text);
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    line-height: 1.7;
+}
+
+.popup-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.btn-explore,
+.btn-login {
+    padding: 1rem 2.5rem;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    font-size: 1rem;
+}
+
+.btn-explore {
+    background: var(--gradient-primary);
+    color: var(--white);
+}
+
+.btn-login {
+    background: var(--white);
+    color: var(--slate-blue);
+    border: 2px solid var(--slate-blue);
+}
+
+.btn-explore:hover,
+.btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* ===== LANDING PAGE ADDITIONAL ===== */
+.landing-page {
+    min-height: 100vh;
+    background: var(--gradient-primary);
+}
+
+.category-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2.5rem;
+    max-width: 1000px;
+    width: 100%;
+}
+
+.card-content {
+    text-align: center;
+}
+
+.card-btn {
+    background: var(--gradient-accent);
+    color: var(--white);
+    border: none;
+    padding: 0.9rem 2rem;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.card-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* ===== DANGER BUTTON ===== */
+.btn-danger {
+    background: var(--danger-red);
+    color: var(--white);
+    border: none;
+    padding: 0.7rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-danger:hover {
+    background: #d32f2f;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
