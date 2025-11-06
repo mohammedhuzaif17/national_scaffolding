@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Accessories Pricing Management{% endblock %}
+
+{% block content %}
+<div class="glass-container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <button class="btn-secondary" onclick="window.location.href='{{ url_for('admin_scaffoldings') }}'" style="width: auto;">← Back to Admin Panel</button>
+    </div>
+    
+    <h1 class="page-title">Accessories Pricing Management</h1>
+    <p style="color: #d4af37; margin-bottom: 2rem;">Set buy and rent prices for all Accessory products</p>
+    
+    <div style="background: rgba(212, 175, 55, 0.1); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+        <h3 style="color: #d4af37; margin-bottom: 1rem;">ℹ️ How it works:</h3>
+        <ul style="color: #d4af37; line-height: 2;">
+            <li>For each accessory product, set both BUY and RENT prices</li>
+            <li>Buy price is the one-time purchase price for the accessory</li>
+            <li>Rent price is the monthly rental cost for the accessory</li>
+            <li>Set both prices to give customers purchasing flexibility</li>
+            <li>Leave fields blank to use default product price</li>
+        </ul>
+    </div>
+    
+    <div id="accessoriesPricingForm">
+        {% if accessory_products %}
+        <div style="background: rgba(30, 58, 138, 0.2); padding: 2rem; border-radius: 10px; margin-bottom: 2rem;">
+            <h2 style="color: #ffa500; margin-bottom: 1.5rem;">All Accessories</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+                {% for product in accessory_products %}
+                <div style="background: rgba(212, 175, 55, 0.05); padding: 1.5rem; border-radius: 8px; border: 2px solid rgba(212, 175, 55, 0.2);">
+                    <h4 style="color: #d4af37; margin-bottom: 0.5rem;">{{ product.name }}</h4>
+                    <p style="color: #a0a0a0; font-size: 0.85rem; margin-bottom: 1rem;">{{ product.description[:50] }}{% if product.description|length > 50 %}...{% endif %}</p>
+                    <div class="form-group" style="margin-bottom: 0.5rem;">
+                        <label for="buy_{{ product.id }}">Buy Price (₹)</label>
+                        <input type="number" id="buy_{{ product.id }}" step="0.01" placeholder="₹{{ product.price }}" class="pricing-input" data-product-id="{{ product.id }}">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="rent_{{ product.id }}">Rent Price (₹/month)</label>
+                        <input type="number" id="rent_{{ product.id }}" step="0.01" placeholder="₹{{ product.rent_price }}" class="rent-pricing-input" data-product-id="{{ product.id }}">
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <div style="background: rgba(212, 175, 55, 0.1); padding: 2rem; border-radius: 8px; text-align: center;">
+            <p style="color: #d4af37; font-size: 1.1rem;">No accessories products found. Add products first from the Admin Panel.</p>
+        </div>
+        {% endif %}
+        
+        {% if accessory_products %}
+        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
+            <button class="btn-primary" onclick="saveAllPricing()" style="padding: 1rem 3rem;">💾 Save All Accessories Pricing</button>
+            <button class="btn-secondary" onclick="window.location.href='{{ url_for('admin_scaffoldings') }}'" style="padding: 1rem 3rem;">Cancel</button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+const pricingData = {{ pricing_data|tojson|safe }};
+
+// Load existing pricing data
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('Loading Accessories pricing data:', pricingData);
+    
+    if (pricingData && Object.keys(pricingData).length > 0) {
+        for (const productId in pricingData) {
+            const priceData = pricingData[productId];
+            
+            if (typeof priceData === 'object') {
+                const buyInputId = `buy_${productId}`;
+                const rentInputId = `rent_${productId}`;
+                
+                const buyInput = document.getElementById(buyInputId);
+                const rentInput = document.getElementById(rentInputId);
+                
+                if (buyInput && priceData.buy) {
+                    buyInput.value = priceData.buy;
+                }
+                if (rentInput && priceData.rent) {
+                    rentInput.value = priceData.rent;
+                }
+            }
+        }
+    }
+});
+
+function saveAllPricing() {
+    const allPricing = {};
+    const buyInputs = document.querySelectorAll('.pricing-input');
+    const rentInputs = document.querySelectorAll('.rent-pricing-input');
+    
+    // Collect buy prices
+    buyInputs.forEach(input => {
+        const productId = input.dataset.productId;
+        const buyValue = parseFloat(input.value);
+        
+        if (buyValue && buyValue > 0) {
+            if (!allPricing[productId]) {
+                allPricing[productId] = {};
+            }
+            allPricing[productId].buy = buyValue;
+        }
+    });
+    
+    // Collect rent prices
+    rentInputs.forEach(input => {
+        const productId = input.dataset.productId;
+        const rentValue = parseFloat(input.value);
+        
+        if (rentValue && rentValue > 0) {
+            if (!allPricing[productId]) {
+                allPricing[productId] = {};
+            }
+            allPricing[productId].rent = rentValue;
+        }
+    });
+    
+    if (Object.keys(allPricing).length === 0) {
+        alert('Please enter at least one price (buy or rent) for at least one product!');
+        return;
+    }
+    
+    console.log('Saving Accessories pricing:', allPricing);
+    
+    fetch('/admin_update_accessories_pricing', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            pricing_data: allPricing
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ Accessories pricing updated successfully!');
+            window.location.href = '{{ url_for("admin_scaffoldings") }}';
+        } else {
+            alert('❌ Error: ' + (data.message || 'Failed to update pricing'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('❌ Error updating Accessories pricing');
+    });
+}
+{% endblock %}

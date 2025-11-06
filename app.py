@@ -874,6 +874,94 @@ def admin_update_pricing_matrix(product_id):
     
     return jsonify({'success': True, 'message': 'Pricing matrix updated successfully'})
 
+@app.route('/admin_hframes_pricing')
+@login_required
+def admin_hframes_pricing():
+    if session.get('user_type') != 'admin':
+        return redirect(url_for('dashboard'))
+    
+    # Get all H-Frame products (using hyphenated category key)
+    hframe_products = Product.query.filter_by(category='h-frames').all()
+    
+    # Collect pricing data for all H-Frame products
+    pricing_data = {}
+    for product in hframe_products:
+        if product.customization_options and 'pricing_matrix' in product.customization_options:
+            pricing_data[str(product.id)] = product.customization_options['pricing_matrix']
+    
+    return render_template('admin_hframes_pricing.html', 
+                         hframe_products=hframe_products, 
+                         pricing_data=pricing_data)
+
+@app.route('/admin_update_hframes_pricing', methods=['POST'])
+@login_required
+def admin_update_hframes_pricing():
+    if session.get('user_type') != 'admin':
+        return jsonify({'success': False, 'message': 'Unauthorized'})
+    
+    data = request.json
+    pricing_data = data.get('pricing_data', {})
+    
+    # Update each product's pricing matrix
+    for product_id, pricing_matrix in pricing_data.items():
+        product = Product.query.get(int(product_id))
+        if product and product.category == 'h-frames':
+            if not product.customization_options:
+                product.customization_options = {}
+            
+            product.customization_options['pricing_matrix'] = pricing_matrix
+            
+            from sqlalchemy.orm.attributes import flag_modified
+            flag_modified(product, 'customization_options')
+    
+    db.session.commit()
+    
+    return jsonify({'success': True, 'message': 'H-Frames pricing updated successfully'})
+
+@app.route('/admin_accessories_pricing')
+@login_required
+def admin_accessories_pricing():
+    if session.get('user_type') != 'admin':
+        return redirect(url_for('dashboard'))
+    
+    # Get all Accessory products
+    accessory_products = Product.query.filter_by(category='accessories').all()
+    
+    # Collect pricing data for all Accessory products
+    pricing_data = {}
+    for product in accessory_products:
+        if product.customization_options and 'pricing_matrix' in product.customization_options:
+            pricing_data[str(product.id)] = product.customization_options['pricing_matrix']
+    
+    return render_template('admin_accessories_pricing.html', 
+                         accessory_products=accessory_products, 
+                         pricing_data=pricing_data)
+
+@app.route('/admin_update_accessories_pricing', methods=['POST'])
+@login_required
+def admin_update_accessories_pricing():
+    if session.get('user_type') != 'admin':
+        return jsonify({'success': False, 'message': 'Unauthorized'})
+    
+    data = request.json
+    pricing_data = data.get('pricing_data', {})
+    
+    # Update each product's pricing matrix
+    for product_id, price_info in pricing_data.items():
+        product = Product.query.get(int(product_id))
+        if product and product.category == 'accessories':
+            if not product.customization_options:
+                product.customization_options = {}
+            
+            product.customization_options['pricing_matrix'] = price_info
+            
+            from sqlalchemy.orm.attributes import flag_modified
+            flag_modified(product, 'customization_options')
+    
+    db.session.commit()
+    
+    return jsonify({'success': True, 'message': 'Accessories pricing updated successfully'})
+
 @app.route('/download-backup')
 def download_backup():
     """Temporary route to download project backup"""
