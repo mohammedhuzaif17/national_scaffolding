@@ -16,6 +16,7 @@ load_dotenv()
 def calculate_price(product, customization):
     quantity = customization.get('quantity', 1)
     category = product.category
+    deposit = 0
     
     if category == 'aluminium':
         purchase_type = customization.get('purchaseType', 'buy')
@@ -28,47 +29,62 @@ def calculate_price(product, customization):
             if width in pricing_matrix and height in pricing_matrix[width]:
                 price_data = pricing_matrix[width][height]
                 
-                # Handle both old format (single number) and new format (object with buy/rent)
+                # Handle both old format (single number) and new format (object with buy/rent/deposit)
                 if isinstance(price_data, dict):
-                    # New format: {buy: xxx, rent: yyy}
+                    # New format: {buy: xxx, rent: yyy, deposit: zzz}
                     if purchase_type == 'rent':
                         unit_price = price_data.get('rent')
                         if unit_price is None and 'buy' in price_data:
                             # Fallback: calculate rent as 20% of buy if rent not set
                             unit_price = price_data['buy'] * 0.2
+                        # Get deposit from matrix, fallback to product deposit
+                        deposit = price_data.get('deposit', product.deposit_amount if product.deposit_amount else 0)
                     else:
                         unit_price = price_data.get('buy')
                     
                     if unit_price is not None:
-                        return unit_price
+                        return {'price': unit_price, 'deposit': deposit}
                 else:
                     # Old format: just a number (buy price)
                     buy_price = price_data
                     unit_price = (buy_price * 0.2) if purchase_type == 'rent' else buy_price
-                    return unit_price
+                    if purchase_type == 'rent':
+                        deposit = product.deposit_amount if product.deposit_amount else 0
+                    return {'price': unit_price, 'deposit': deposit}
         
         # Fallback to base price if no matrix or combination not found
         if purchase_type == 'rent':
             unit_price = product.rent_price if product.rent_price else product.price
+            deposit = product.deposit_amount if product.deposit_amount else 0
         else:
             unit_price = product.price
-        return unit_price
+        return {'price': unit_price, 'deposit': deposit}
     
     elif category == 'h-frames':
         purchase_type = customization.get('purchaseType', 'buy')
         if purchase_type == 'rent':
             unit_price = product.rent_price if product.rent_price else product.price
+            deposit = product.deposit_amount if product.deposit_amount else 0
         else:
             unit_price = product.price
-        return unit_price
+        return {'price': unit_price, 'deposit': deposit}
     
     elif category == 'cuplock':
         price_per_kg = 78
         weight = product.weight_per_unit if product.weight_per_unit else 5
-        return price_per_kg * weight
+        return {'price': price_per_kg * weight, 'deposit': 0}
+    
+    elif category == 'accessories':
+        purchase_type = customization.get('purchaseType', 'buy')
+        if purchase_type == 'rent':
+            unit_price = product.rent_price if product.rent_price else product.price
+            deposit = product.deposit_amount if product.deposit_amount else 0
+        else:
+            unit_price = product.price
+        return {'price': unit_price, 'deposit': deposit}
     
     else:
-        return product.price
+        return {'price': product.price, 'deposit': 0}
 
 app = Flask(__name__)
 
@@ -486,8 +502,8 @@ def add_to_cart():
     if product.category == 'h-frames' and quantity >= 100:
         return jsonify({'success': False, 'message': 'For orders of 100+ pieces, please contact us directly at sales@nationalscaffolding.com'})
     
-    unit_price = calculate_price(product, customization)
-    if unit_price is None:
+    price_data = calculate_price(product, customization)
+    if price_data is None:
         return jsonify({'success': False, 'message': 'Cannot calculate price for this configuration'})
     
     cart = session.get('cart', [])
@@ -514,26 +530,33 @@ def cart():
     
     enriched_cart = []
     total = 0
+    total_deposit = 0
     
     for item in cart_items:
         product = Product.query.get(item['product_id'])
         if product:
-            unit_price = calculate_price(product, item['customization'])
-            if unit_price is not None:
+            price_data = calculate_price(product, item['customization'])
+            if price_data is not None:
+                unit_price = price_data['price']
+                deposit = price_data['deposit']
                 item_total = unit_price * item['quantity']
+                item_deposit = deposit * item['quantity'] if deposit > 0 else 0
                 total += item_total
+                total_deposit += item_deposit
                 
                 enriched_item = {
                     'product_name': product.name,
                     'quantity': item['quantity'],
                     'unit_price': unit_price,
+                    'deposit': deposit,
                     'item_total': item_total,
+                    'item_deposit': item_deposit,
                     'customization': item['customization'],
                     'image_url': product.image_url
                 }
                 enriched_cart.append(enriched_item)
     
-    return render_template('cart.html', cart_items=enriched_cart, total=total)
+    return render_template('cart.html', cart_items=enriched_cart, total=total, total_deposit=total_deposit)
 
 @app.route('/remove_from_cart/<int:index>')
 @login_required
@@ -553,16 +576,18 @@ def qr_scanner():
     
     cart_items = session.get('cart', [])
     total = 0
+    total_deposit = 0
     
     for item in cart_items:
         product = Product.query.get(item['product_id'])
         if product:
-            unit_price = calculate_price(product, item['customization'])
-            if unit_price is not None:
-                total += unit_price * item['quantity']
+            price_data = calculate_price(product, item['customization'])
+            if price_data is not None:
+                total += price_data['price'] * item['quantity']
+                total_deposit += price_data['deposit'] * item['quantity'] if price_data['deposit'] > 0 else 0
     
     gst = total * 0.18
-    total_with_gst = total + gst
+    total_with_gst = total + gst + total_deposit
     
     qr_data = f"upi://pay?pa=nationalscaffolding@phonepe&pn=The National Scaffolding&am={total_with_gst:.2f}&cu=INR"
     qr = qrcode.QRCode(version=1, box_size=10, border=5)
@@ -574,7 +599,7 @@ def qr_scanner():
     img.save(buffered, format="PNG")
     qr_code_base64 = base64.b64encode(buffered.getvalue()).decode()
     
-    return render_template('qr_scanner.html', total=total, gst=gst, total_with_gst=total_with_gst, qr_code=qr_code_base64)
+    return render_template('qr_scanner.html', total=total, gst=gst, total_deposit=total_deposit, total_with_gst=total_with_gst, qr_code=qr_code_base64)
 
 @app.route('/complete_order', methods=['POST'])
 @login_required
@@ -597,16 +622,18 @@ def complete_order():
         return jsonify({'success': False, 'message': 'This Transaction ID has already been used. Each purchase requires a unique payment. Please make a new payment and enter the new Transaction ID.'})
     
     total = 0
+    total_deposit = 0
     
     for item in cart_items:
         product = Product.query.get(item['product_id'])
         if product:
-            unit_price = calculate_price(product, item['customization'])
-            if unit_price is not None:
-                total += unit_price * item['quantity']
+            price_data = calculate_price(product, item['customization'])
+            if price_data is not None:
+                total += price_data['price'] * item['quantity']
+                total_deposit += price_data['deposit'] * item['quantity'] if price_data['deposit'] > 0 else 0
     
     gst = total * 0.18
-    total_with_gst = total + gst
+    total_with_gst = total + gst + total_deposit
     
     order = Order(
         user_id=current_user.id, 
@@ -621,14 +648,14 @@ def complete_order():
     for item in cart_items:
         product = Product.query.get(item['product_id'])
         if product:
-            unit_price = calculate_price(product, item['customization'])
-            if unit_price is not None:
+            price_data = calculate_price(product, item['customization'])
+            if price_data is not None:
                 order_item = OrderItem(
                     order_id=order.id,
                     product_id=item['product_id'],
                     product_name=product.name,
                     quantity=item['quantity'],
-                    price=unit_price,
+                    price=price_data['price'],
                     customization=item.get('customization')
                 )
                 db.session.add(order_item)
