@@ -79,41 +79,37 @@
             
             {% elif product.category == 'h-frames' %}
             <div class="customization-section">
-                <h3 style="color: #ffa500; margin-bottom: 1rem;">Customize Your Order</h3>
-                
                 <div class="form-group">
-                    <label>Quantity (Discount applies automatically)</label>
-                    <select id="quantity" onchange="updateHFramePrice()">
-                        {% for i in range(1, 101) %}
-                        <option value="{{ i }}">{{ i }} {% if i == 1 %}piece{% else %}pieces{% endif %}{% if i >= 50 %} (12% OFF){% elif i >= 30 %} (10% OFF){% elif i >= 20 %} (7.5% OFF){% elif i >= 10 %} (5% OFF){% endif %}</option>
-                        {% endfor %}
+                    <label>Purchase Type</label>
+                    <select id="purchase_type" onchange="updateHFramePrice()">
+                        <option value="buy">Buy - ₹{{ product.price }}</option>
+                        {% if product.rent_price %}
+                        <option value="rent">Rent - ₹{{ product.rent_price }}/month</option>
+                        {% endif %}
                     </select>
                 </div>
                 
-                <div id="discount_info" style="background: rgba(76, 175, 80, 0.2); padding: 1rem; border-radius: 8px; margin: 1rem 0;">
-                    <p style="color: #4CAF50; font-weight: bold;">No discount yet</p>
-                    <p style="font-size: 0.9rem;">
-                        • 10-19 pieces: 5% off<br>
-                        • 20-29 pieces: 7.5% off<br>
-                        • 30-49 pieces: 10% off<br>
-                        • 50-100 pieces: 12% off<br>
-                        • 100+ pieces: Contact us for special pricing
-                    </p>
+                <div class="form-group">
+                    <label>Quantity</label>
+                    <select id="quantity" onchange="updateHFramePrice()">
+                        {% for i in range(1, 201) %}
+                        <option value="{{ i }}">{{ i }} {% if i == 1 %}set{% else %}sets{% endif %}</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 
                 <div class="product-price" id="final_price">₹{{ product.price }}</div>
             </div>
             
             {% elif product.category == 'cuplock' %}
-            <div class="customization-section">
-                <h3 style="color: #ffa500; margin-bottom: 1rem;">Customize Your Cuplock System</h3>
-                
-                <div style="background: rgba(30, 58, 138, 0.2); padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
-                    <h4 style="color: #ffa500; margin-bottom: 1rem;">Vertical Specifications <span style="color: red;">*</span></h4>
+            <div class="customization-section" style="max-width: 100%;">
+                {% if 'Vertical' in product.name %}
+                <div style="background: rgba(30, 58, 138, 0.2); padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; width: 100%;">
+                    <h4 style="color: #ffa500; margin-bottom: 1rem;">Vertical Specifications</h4>
                     
                     <div class="form-group">
-                        <label>Vertical Size <span style="color: red;">*</span></label>
-                        <select id="vertical_size" required onchange="updateCuplockPrice()">
+                        <label>Vertical Size</label>
+                        <select id="vertical_size">
                             <option value="1">1m</option>
                             <option value="2">2m</option>
                             <option value="3">3m</option>
@@ -121,8 +117,8 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>Number of Cups <span style="color: red;">*</span></label>
-                        <select id="cups" required onchange="updateCuplockPrice()">
+                        <label>Number of Cups</label>
+                        <select id="cups">
                             <option value="1">1 Cup</option>
                             <option value="2">2 Cups</option>
                             <option value="3">3 Cups</option>
@@ -133,17 +129,17 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>Custom Length (1.1m - 3.0m) <span style="color: red;">*</span></label>
-                        <input type="number" id="custom_length" value="1.1" min="1.1" max="3.0" step="0.1" required onchange="updateCuplockPrice()">
+                        <label>Custom Length (1.1m - 3.0m)</label>
+                        <input type="number" id="custom_length" value="1.1" min="1.1" max="3.0" step="0.1">
                     </div>
                 </div>
-                
-                <div style="background: rgba(30, 58, 138, 0.2); padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
-                    <h4 style="color: #ffa500; margin-bottom: 1rem;">Ledger Specifications <span style="color: red;">*</span></h4>
+                {% elif 'Ledger' in product.name %}
+                <div style="background: rgba(30, 58, 138, 0.2); padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; width: 100%;">
+                    <h4 style="color: #ffa500; margin-bottom: 1rem;">Ledger Specifications</h4>
                     
                     <div class="form-group">
-                        <label>Ledger Size <span style="color: red;">*</span></label>
-                        <select id="ledger_size" required onchange="updateCuplockPrice()">
+                        <label>Ledger Size</label>
+                        <select id="ledger_size">
                             <option value="0.5">0.5m</option>
                             <option value="0.73">0.73m</option>
                             <option value="1.0">1.0m</option>
@@ -156,26 +152,36 @@
                         </select>
                     </div>
                 </div>
+                {% endif %}
                 
-                <div class="form-group">
-                    <label>Quantity</label>
-                    <select id="quantity" onchange="updateCuplockPrice()">
-                        {% for i in range(1, 101) %}
-                        <option value="{{ i }}">{{ i }}</option>
-                        {% endfor %}
-                    </select>
+                <div style="background: linear-gradient(135deg, #001d3d 0%, #003d7a 100%); padding: 2rem; border-radius: 12px; margin: 1.5rem 0; border: 2px solid #d4af37; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);">
+                    <h3 style="color: #d4af37; margin-bottom: 1rem; text-align: center;">Product Information</h3>
+                    <p style="color: #ffffff; font-size: 1.1rem; line-height: 1.8; text-align: center;">
+                        This product is available for both <strong style="color: #d4af37;">rent</strong> and <strong style="color: #d4af37;">sale</strong>.<br>
+                        For detailed pricing, specifications, and availability,<br>
+                        please contact us directly.
+                    </p>
+                    <div style="margin-top: 1.5rem; text-align: center; padding-top: 1rem; border-top: 1px solid rgba(212, 175, 55, 0.3);">
+                        <p style="color: #d4af37; font-weight: bold; margin-bottom: 0.5rem;">Contact Us:</p>
+                        <p style="color: #ffffff;">
+                            📧 Email: sales@nationalscaffolding.com<br>
+                            📞 Phone: +91-XXXXXXXXXX
+                        </p>
+                    </div>
                 </div>
-                
-                <p style="background: rgba(255, 165, 0, 0.2); padding: 1rem; border-radius: 8px; margin: 1rem 0;">
-                    <strong>Pricing:</strong> ₹78 per kg
-                </p>
-                
-                <div class="product-price" id="final_price">₹{{ product.price }}</div>
             </div>
             
             {% elif product.category == 'accessories' %}
             <div class="customization-section">
-                <h3 style="color: #ffa500; margin-bottom: 1rem;">Select Quantity</h3>
+                <div class="form-group">
+                    <label>Purchase Type</label>
+                    <select id="purchase_type" onchange="updateAccessoryPrice()">
+                        <option value="buy">Buy - ₹{{ product.price }}</option>
+                        {% if product.rent_price %}
+                        <option value="rent">Rent - ₹{{ product.rent_price }}/month</option>
+                        {% endif %}
+                    </select>
+                </div>
                 
                 <div class="form-group">
                     <label>Quantity</label>
@@ -201,20 +207,22 @@
             </div>
             {% endif %}
             
-            {% if current_user.is_authenticated and session.get('user_type') == 'admin' %}
-            <div style="background: rgba(255, 165, 0, 0.2); padding: 1.5rem; border-radius: 8px; margin-top: 2rem; text-align: center;">
-                <p style="color: #ffa500; font-weight: bold; margin: 0;">
-                    ℹ️ Admin accounts cannot make purchases. Please use a customer account to add items to cart.
-                </p>
-            </div>
-            {% elif current_user.is_authenticated %}
-            <button class="btn-primary" onclick="addToCartCustom()" style="width: 100%; margin-top: 2rem; font-size: 1.1rem; padding: 1.2rem;">
-                🛒 Add to Cart
-            </button>
-            {% else %}
-            <button class="btn-primary" onclick="window.location.href='{{ url_for('login') }}'" style="width: 100%; margin-top: 2rem; font-size: 1.1rem; padding: 1.2rem;">
-                🔐 Login to Purchase
-            </button>
+            {% if product.category != 'cuplock' %}
+                {% if current_user.is_authenticated and session.get('user_type') == 'admin' %}
+                <div style="background: rgba(255, 165, 0, 0.2); padding: 1.5rem; border-radius: 8px; margin-top: 2rem; text-align: center;">
+                    <p style="color: #ffa500; font-weight: bold; margin: 0;">
+                        ℹ️ Admin accounts cannot make purchases. Please use a customer account to add items to cart.
+                    </p>
+                </div>
+                {% elif current_user.is_authenticated %}
+                <button class="btn-primary" onclick="addToCartCustom()" style="width: 100%; margin-top: 2rem; font-size: 1.1rem; padding: 1.2rem;">
+                    🛒 Add to Cart
+                </button>
+                {% else %}
+                <button class="btn-primary" onclick="window.location.href='{{ url_for('login') }}'" style="width: 100%; margin-top: 2rem; font-size: 1.1rem; padding: 1.2rem;">
+                    🔐 Login to Purchase
+                </button>
+                {% endif %}
             {% endif %}
         </div>
     </div>
@@ -285,41 +293,9 @@ function updateAluminiumPrice() {
 
 function updateHFramePrice() {
     const quantity = parseInt(document.getElementById('quantity').value);
-    let discount = 0;
-    let discountText = 'No discount yet';
-    
-    if (quantity > 100) {
-        document.getElementById('discount_info').innerHTML = `
-            <p style="color: #ff6b6b; font-weight: bold;">For orders of 100+ pieces, please contact us for special pricing!</p>
-            <p style="font-size: 0.9rem;">Email: sales@nationalscaffolding.com | Phone: +91-XXXXXXXXXX</p>
-        `;
-        return;
-    } else if (quantity >= 50) {
-        discount = 0.12;
-        discountText = '12% Discount Applied!';
-    } else if (quantity >= 30) {
-        discount = 0.10;
-        discountText = '10% Discount Applied!';
-    } else if (quantity >= 20) {
-        discount = 0.075;
-        discountText = '7.5% Discount Applied!';
-    } else if (quantity >= 10) {
-        discount = 0.05;
-        discountText = '5% Discount Applied!';
-    }
-    
-    const subtotal = basePrice * quantity;
-    const discountAmount = subtotal * discount;
-    const total = subtotal - discountAmount;
-    
-    document.getElementById('discount_info').innerHTML = `
-        <p style="color: #4CAF50; font-weight: bold;">${discountText}</p>
-        <p style="font-size: 0.9rem;">
-            Subtotal: ₹${subtotal.toFixed(2)}<br>
-            Discount: -₹${discountAmount.toFixed(2)}
-        </p>
-    `;
-    
+    const purchaseType = document.getElementById('purchase_type').value;
+    const price = purchaseType === 'rent' ? rentPrice : basePrice;
+    const total = price * quantity;
     document.getElementById('final_price').textContent = '₹' + total.toFixed(2);
 }
 
@@ -332,7 +308,9 @@ function updateCuplockPrice() {
 
 function updateAccessoryPrice() {
     const quantity = parseInt(document.getElementById('quantity').value);
-    const total = basePrice * quantity;
+    const purchaseType = document.getElementById('purchase_type').value;
+    const price = purchaseType === 'rent' ? rentPrice : basePrice;
+    const total = price * quantity;
     document.getElementById('final_price').textContent = '₹' + total.toFixed(2);
 }
 
@@ -350,23 +328,10 @@ function addToCartCustom() {
         unitPrice = getAluminiumPrice(parseFloat(width), parseFloat(height), purchaseType);
         finalPrice = unitPrice * quantity;
     } else if (category === 'h-frames') {
-        let discount = 0;
-        if (quantity > 100) {
-            alert('For orders over 100 pieces, please contact us directly for special pricing.');
-            return;
-        } else if (quantity >= 50) {
-            discount = 0.12;
-        } else if (quantity >= 30) {
-            discount = 0.10;
-        } else if (quantity >= 20) {
-            discount = 0.075;
-        } else if (quantity >= 10) {
-            discount = 0.05;
-        }
-        const subtotal = basePrice * quantity;
-        finalPrice = subtotal * (1 - discount);
-        unitPrice = finalPrice / quantity;
-        customization = { quantity, discount_rate: discount };
+        const purchaseType = document.getElementById('purchase_type').value;
+        unitPrice = purchaseType === 'rent' ? rentPrice : basePrice;
+        finalPrice = unitPrice * quantity;
+        customization = { quantity, purchaseType };
     } else if (category === 'cuplock') {
         customization = {
             vertical_size: document.getElementById('vertical_size').value,
@@ -378,8 +343,10 @@ function addToCartCustom() {
         unitPrice = 78 * weightPerUnit;
         finalPrice = unitPrice * quantity;
     } else if (category === 'accessories') {
-        unitPrice = basePrice;
+        const purchaseType = document.getElementById('purchase_type').value;
+        unitPrice = purchaseType === 'rent' ? rentPrice : basePrice;
         finalPrice = unitPrice * quantity;
+        customization = { quantity, purchaseType };
     } else {
         unitPrice = basePrice;
         finalPrice = unitPrice * quantity;

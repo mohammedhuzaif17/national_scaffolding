@@ -55,18 +55,11 @@ def calculate_price(product, customization):
         return unit_price
     
     elif category == 'h-frames':
-        discount_rate = 0
-        if quantity >= 100:
-            return None
-        elif quantity >= 50:
-            discount_rate = 0.12
-        elif quantity >= 30:
-            discount_rate = 0.10
-        elif quantity >= 20:
-            discount_rate = 0.075
-        elif quantity >= 10:
-            discount_rate = 0.05
-        unit_price = product.price * (1 - discount_rate)
+        purchase_type = customization.get('purchaseType', 'buy')
+        if purchase_type == 'rent':
+            unit_price = product.rent_price if product.rent_price else product.price
+        else:
+            unit_price = product.price
         return unit_price
     
     elif category == 'cuplock':

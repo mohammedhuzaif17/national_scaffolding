@@ -109,17 +109,27 @@ let editMode = false;
 function updateCategoryFields() {
     const category = document.getElementById('productCategory').value;
     const rentField = document.getElementById('productRentPrice').closest('.form-group');
+    const priceField = document.getElementById('productPrice').closest('.form-group');
+    const priceInput = document.getElementById('productPrice');
+    const rentPriceInput = document.getElementById('productRentPrice');
     const weightField = document.getElementById('weightField');
     const categorySection = document.getElementById('categorySpecificSection');
     
-    // Rent option is now available for all categories
-    rentField.style.display = 'block';
-    
-    // Weight field only for cuplock
+    // For Cuplock: Hide Price, Rent Price, and Weight fields - Only show Name, Description, and Images
     if (category === 'cuplock') {
-        weightField.style.display = 'block';
-    } else {
+        priceField.style.display = 'none';
+        rentField.style.display = 'none';
         weightField.style.display = 'none';
+        // Remove required attribute and set default value for Cuplock
+        priceInput.removeAttribute('required');
+        priceInput.value = '0';
+        rentPriceInput.value = '0';
+    } else {
+        priceField.style.display = 'block';
+        rentField.style.display = 'block';
+        weightField.style.display = 'none';
+        // Re-add required attribute for other categories
+        priceInput.setAttribute('required', 'required');
     }
     
     // Add category-specific fields
@@ -166,26 +176,8 @@ function updateCategoryFields() {
             </div>
         `;
     } else if (category === 'cuplock') {
-        categoryHTML = `
-            <div class="category-specific-fields">
-                <h3>🔩 Cuplock Specifications</h3>
-                <div class="form-group">
-                    <label for="cuplockType">Component Type</label>
-                    <select id="cuplockType">
-                        <option value="">Select Type</option>
-                        <option value="vertical">Vertical Standard</option>
-                        <option value="ledger">Ledger</option>
-                        <option value="transom">Transom</option>
-                        <option value="brace">Brace</option>
-                        <option value="other">Other Component</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="cuplockLength">Standard Length</label>
-                    <input type="text" id="cuplockLength" placeholder="e.g., 2m, 3m, 4m">
-                </div>
-            </div>
-        `;
+        // Cuplock: No additional fields - Only Product Name, Description, and Multiple Images
+        categoryHTML = '';
     } else if (category === 'accessories') {
         categoryHTML = `
             <div class="category-specific-fields">

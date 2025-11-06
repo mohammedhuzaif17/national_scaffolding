@@ -3,34 +3,20 @@
 {% block title %}National Scaffolding - Products{% endblock %}
 
 {% block content %}
-<!-- Welcome Popup -->
-<div id="welcomePopup" class="welcome-popup">
-    <div class="welcome-content">
-        <h1>Welcome to THE NATIONAL SCAFFOLDING</h1>
-        <p>We don't just build scaffolds — we build confidence. Explore our premium scaffolding products for all your construction needs.</p>
-        <div class="popup-buttons">
-            <button class="btn-explore" onclick="closeWelcome()">Continue to Explore</button>
-            {% if not current_user.is_authenticated %}
-            <button class="btn-login" onclick="window.location.href='{{ url_for('login') }}'">Login / Register</button>
-            {% endif %}
-        </div>
-    </div>
-</div>
-
 <div class="glass-container">
     <h1 class="page-title">The National Scaffolding</h1>
     <p class="page-subtitle">Professional scaffolding services for all your construction needs</p>
     
     <div class="text-center mb-3">
         <button class="btn btn-secondary" onclick="window.location.href='{{ url_for('fabrications') }}'">
-            🔧 Go to Fabrications
+            Go to Fabrications
         </button>
     </div>
     
     <div class="category-buttons">
         <button class="category-btn {% if category == 'all' %}active{% endif %}" 
                 onclick="window.location.href='{{ url_for('national_scaffoldings', category='all') }}'">
-            ALL PRODUCTS ✓
+            ALL PRODUCTS
         </button>
         <button class="category-btn {% if category == 'aluminium' %}active{% endif %}" 
                 onclick="window.location.href='{{ url_for('national_scaffoldings', category='aluminium') }}'">
@@ -54,7 +40,7 @@
     
     <div class="products-grid">
         {% for product in products %}
-        <div class="product-card">
+        <div class="product-card" {% if product.category == 'cuplock' %}style="grid-column: span 2;"{% endif %}>
             <div onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'" style="cursor: pointer;">
                 {% if product.image_url %}
                 <img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-image">
@@ -70,12 +56,15 @@
                 {% if product.category %}
                 <p class="product-category">{{ product.category }}</p>
                 {% endif %}
+                
+                {% if product.category != 'cuplock' %}
                 <div class="product-price">₹{{ product.price }}</div>
                 {% if product.rent_price %}
                 <p class="product-rent">Rent: ₹{{ product.rent_price }}/month</p>
                 {% endif %}
+                {% endif %}
                 
-                {% if current_user.is_authenticated and session.get('user_type') != 'admin' %}
+                {% if product.category != 'cuplock' and current_user.is_authenticated and session.get('user_type') != 'admin' %}
                 <div class="form-group" style="margin-top: 1rem;">
                     <label for="quantity_{{ product.id }}">Quantity:</label>
                     <select id="quantity_{{ product.id }}" class="form-control">
@@ -112,27 +101,6 @@
 {% endblock %}
 
 {% block scripts %}
-// Show welcome popup immediately without delay
-window.addEventListener('DOMContentLoaded', () => {
-    const popupShown = sessionStorage.getItem('welcomeShown');
-    const popup = document.getElementById('welcomePopup');
-    
-    if (popupShown) {
-        popup.style.display = 'none';
-        document.body.classList.remove('popup-active');
-    } else {
-        // Show popup immediately with blur effect
-        popup.style.display = 'flex';
-        document.body.classList.add('popup-active');
-    }
-});
-
-function closeWelcome() {
-    document.getElementById('welcomePopup').style.display = 'none';
-    document.body.classList.remove('popup-active');
-    sessionStorage.setItem('welcomeShown', 'true');
-}
-
 function addToCart(productId, productName, price) {
     const quantity = parseInt(document.getElementById('quantity_' + productId).value);
     
