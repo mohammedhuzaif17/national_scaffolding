@@ -39,6 +39,9 @@
                 </p>
                 {% endif %}
                 <p class="cart-item-price">₹{{ "%.2f"|format(item.unit_price) }} x {{ item.quantity }} = ₹{{ "%.2f"|format(item.item_total) }}</p>
+                {% if item.deposit and item.deposit > 0 %}
+                <p class="cart-item-deposit" style="color: #d4af37; font-weight: 500;">Deposit: ₹{{ "%.2f"|format(item.deposit) }} x {{ item.quantity }} = ₹{{ "%.2f"|format(item.item_deposit) }}</p>
+                {% endif %}
             </div>
             <div>
                 <button class="btn btn-danger" onclick="removeItem({{ loop.index0 }})">Remove</button>
@@ -48,6 +51,9 @@
         
         <div class="cart-summary">
             <h2>Subtotal: ₹{{ "%.2f"|format(total) }}</h2>
+            {% if total_deposit and total_deposit > 0 %}
+            <h3 style="color: #d4af37;">Total Deposit: ₹{{ "%.2f"|format(total_deposit) }}</h3>
+            {% endif %}
             <p>GST (18%) will be added at checkout</p>
             <button class="btn checkout-btn mt-3" onclick="window.location.href='{{ url_for('qr_scanner') }}'">
                 Proceed to Checkout

@@ -19,6 +19,12 @@
                 <span>GST (18%):</span>
                 <span>₹{{ "%.2f"|format(gst) }}</span>
             </div>
+            {% if total_deposit and total_deposit > 0 %}
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; color: #d4af37; font-weight: 500;">
+                <span>Rental Deposit:</span>
+                <span>₹{{ "%.2f"|format(total_deposit) }}</span>
+            </div>
+            {% endif %}
             <hr style="border: 1px solid rgba(255, 255, 255, 0.1); margin: 1rem 0;">
             <div style="display: flex; justify-content: space-between; font-size: 1.5rem; color: #4CAF50; font-weight: bold;">
                 <span>Total Amount:</span>
