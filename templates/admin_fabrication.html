@@ -35,7 +35,7 @@
                 <td>₹{{ product.price }}</td>
                 <td>{{ product.description[:50] }}...</td>
                 <td>
-                    <button class="btn-secondary" onclick="editProduct({{ product.id }}, '{{ product.name }}', {{ product.price }}, '{{ product.description }}')" style="padding: 0.5rem 1rem; margin-right: 0.5rem;">Edit</button>
+                    <button class="btn-secondary" onclick="editProduct({{ product.id }}, '{{ product.name }}', {{ product.price }}, '{{ product.description }}', '{{ product.image_url if product.image_url else '' }}')" style="padding: 0.5rem 1rem; margin-right: 0.5rem;">Edit</button>
                     <button class="btn-danger" onclick="deleteProduct({{ product.id }})">Delete</button>
                 </td>
             </tr>
@@ -62,11 +62,12 @@
                 <textarea id="productDescription" rows="4"></textarea>
             </div>
             <div class="form-group">
-                <label for="productImage">Product Image (Upload from Device/Camera)</label>
-                <input type="file" id="productImage" accept="image/*" capture="environment" style="padding: 0.75rem; background: rgba(255, 255, 255, 0.95); border: 2px solid rgba(212, 175, 55, 0.3); border-radius: 8px; color: #001d3d; width: 100%;">
-                <small style="color: #888; font-size: 0.85rem; display: block; margin-top: 0.5rem;">Upload a product image from your device or take a photo with your camera</small>
-                <div id="imagePreview" style="margin-top: 1rem; display: none;">
-                    <img id="previewImg" style="max-width: 200px; border-radius: 8px; border: 2px solid #ffa500;">
+                <label for="productImage">Product Image (All image types supported)</label>
+                <input type="file" id="productImage" accept="image/*,.bmp,.svg,.tiff,.tif,.ico,.jfif,.pjpeg,.pjp,.avif,.heic,.heif" capture="environment" style="padding: 0.75rem; background: rgba(255, 255, 255, 0.95); border: 2px solid rgba(212, 175, 55, 0.3); border-radius: 8px; color: #001d3d; width: 100%;">
+                <small style="color: #888; font-size: 0.85rem; display: block; margin-top: 0.5rem;">Upload any image type (PNG, JPG, GIF, WebP, BMP, SVG, TIFF, HEIC, etc.) from your device or camera</small>
+                <div id="imagePreview" style="margin-top: 1rem; display: none; position: relative;">
+                    <img id="previewImg" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #ffa500; display: block;">
+                    <button type="button" onclick="removePhoto()" style="position: absolute; top: -10px; right: 10px; background: #ff4444; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">×</button>
                 </div>
             </div>
             <div style="display: flex; gap: 1rem;">
@@ -89,18 +90,57 @@ function showAddModal() {
     document.getElementById('productModal').classList.add('show');
 }
 
-function editProduct(id, name, price, description) {
+function editProduct(id, name, price, description, imageUrl) {
     editMode = true;
     document.getElementById('modalTitle').textContent = 'Edit Product';
     document.getElementById('productId').value = id;
     document.getElementById('productName').value = name;
     document.getElementById('productPrice').value = price;
     document.getElementById('productDescription').value = description;
+    
+    if (imageUrl) {
+        document.getElementById('previewImg').src = imageUrl;
+        document.getElementById('imagePreview').style.display = 'block';
+    } else {
+        document.getElementById('imagePreview').style.display = 'none';
+    }
+    
     document.getElementById('productModal').classList.add('show');
 }
 
 function closeModal() {
     document.getElementById('productModal').classList.remove('show');
+    document.getElementById('imagePreview').style.display = 'none';
+    document.getElementById('productImage').value = '';
+}
+
+function removePhoto() {
+    const productId = document.getElementById('productId').value;
+    
+    if (editMode && productId && confirm('Are you sure you want to remove this photo?')) {
+        fetch('/admin_remove_photo/' + productId, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('imagePreview').style.display = 'none';
+                document.getElementById('productImage').value = '';
+                alert('Photo removed successfully!');
+            } else {
+                alert('Error removing photo');
+            }
+        })
+        .catch(error => {
+            alert('Error: ' + error.message);
+        });
+    } else {
+        document.getElementById('imagePreview').style.display = 'none';
+        document.getElementById('productImage').value = '';
+    }
 }
 
 function deleteProduct(id) {

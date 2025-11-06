@@ -853,6 +853,27 @@ def admin_update_product(product_id):
     
     return jsonify({'success': True})
 
+@app.route('/admin_remove_photo/<int:product_id>', methods=['POST'])
+@login_required
+def admin_remove_photo(product_id):
+    if session.get('user_type') != 'admin':
+        return jsonify({'success': False, 'message': 'Unauthorized'})
+    
+    product = Product.query.get_or_404(product_id)
+    
+    if product.image_url:
+        old_image_path = product.image_url.replace('/static/', 'static/')
+        if os.path.exists(old_image_path):
+            try:
+                os.remove(old_image_path)
+            except Exception as e:
+                print(f"Error removing file: {e}")
+    
+    product.image_url = None
+    db.session.commit()
+    
+    return jsonify({'success': True})
+
 @app.route('/admin_delete_product/<int:product_id>', methods=['POST'])
 @login_required
 def admin_delete_product(product_id):
@@ -860,6 +881,15 @@ def admin_delete_product(product_id):
         return jsonify({'success': False})
     
     product = Product.query.get_or_404(product_id)
+    
+    if product.image_url:
+        old_image_path = product.image_url.replace('/static/', 'static/')
+        if os.path.exists(old_image_path):
+            try:
+                os.remove(old_image_path)
+            except Exception as e:
+                print(f"Error removing file: {e}")
+    
     db.session.delete(product)
     db.session.commit()
     
