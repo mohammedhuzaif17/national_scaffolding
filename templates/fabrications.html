@@ -7,37 +7,39 @@
     <h1 class="page-title">Fabrications</h1>
     <p class="page-subtitle">Custom fabrication products including furniture and more</p>
     
-    <div style="text-align: center; margin-bottom: 1.5rem;">
-        <button class="btn-secondary" onclick="window.location.href='{{ url_for('national_scaffoldings') }}'" style="background: linear-gradient(135deg, #1e3a8a, #d4af37); padding: 0.8rem 2rem; font-size: 1rem;">
+    <div class="text-center mb-3">
+        <button class="btn btn-secondary" onclick="window.location.href='{{ url_for('national_scaffoldings') }}'">
             🏗️ Go to National Scaffolding
         </button>
     </div>
     
-    <p style="text-align: center; color: #ffa500; margin-bottom: 2rem;">
+    <p class="text-center mb-4">
         For inquiries, contact us at: <strong>+91 1234567890</strong>
     </p>
     
-    <div class="product-grid">
+    <div class="products-grid">
         {% for product in products %}
-        <div class="product-card" onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'" style="cursor: pointer;">
+        <div class="product-card" onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
             {% if product.image_url %}
-            <img src="{{ product.image_url }}" alt="{{ product.name }}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 1rem;">
+            <img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-image">
             {% else %}
-            <div style="background: rgba(255, 165, 0, 0.2); height: 200px; display: flex; align-items: center; justify-content: center; border-radius: 8px; margin-bottom: 1rem;">
-                <span style="font-size: 3rem;">🔧</span>
+            <div class="product-image-placeholder">
+                <span>🔧</span>
             </div>
             {% endif %}
-            <h3>{{ product.name }}</h3>
-            <p style="min-height: 60px;">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
-            <div class="product-price">₹{{ product.price }}</div>
-            
-            {% if current_user.is_authenticated and session.get('user_type') != 'admin' %}
-            <button class="btn-primary" onclick="event.stopPropagation(); window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
-                View Details
-            </button>
-            {% elif not current_user.is_authenticated %}
-            <p style="color: #ff6b6b; text-align: center;">Please login to view details</p>
-            {% endif %}
+            <div class="product-info">
+                <h3 class="product-name">{{ product.name }}</h3>
+                <p class="product-description">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
+                <div class="product-price">₹{{ product.price }}</div>
+                
+                {% if current_user.is_authenticated and session.get('user_type') != 'admin' %}
+                <button class="btn" onclick="event.stopPropagation(); window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
+                    View Details
+                </button>
+                {% elif not current_user.is_authenticated %}
+                <p class="text-center" style="color: var(--danger-red);">Please login to view details</p>
+                {% endif %}
+            </div>
         </div>
         {% endfor %}
     </div>
