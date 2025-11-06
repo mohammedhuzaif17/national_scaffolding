@@ -1,0 +1,20 @@
+1st. remove the page what i have provided in the screenshot from  the whole website 
+
+2nd. remove the emojis from the go to fabrication , all products category on the main page
+
+3rd. for h frame i need buy and rent same as aluminuin, in h frame it is mentioned as 1 ,2,3,4 piece i need 1,2,3,4 set so on t and remove the discount from the h frame for all the h frames product and remove that customize your order heading  just mention quantity as heading and increase the set drop down till 200 sets
+
+4th. in cuplock under vertical if im cllicking on that, the page will open and in that remove ledger specifications div itself.....also remove the quantity parrt from the same...also remove pricing  from the same page....and u have to add the description box in which specify that this product is given to both rent and sale ,for more details contact us 
+
+also sme way in cuplock under ledger if im cllicking on that, the page will open and in that remove vertical specifications div itself.....also remove the quantity parrt from the same...also remove pricing  from the same page....and u have to add the description box in which specify that this product is given to both rent and sale ,for more details contact us......
+
+u also have to remove the "add to cart" option from the both vertical and ledger ...
+
+one more thing i want u to spead the both vertical and ledger divs to occupy the full width..also remove the price and quantity from both the divs..under cuplock
+
+5th.  same admin panel i want it to be made for h frames  categorysame as aluminium excatly but instead of single width and double width i want u to make it as per the sets and i want u to make the same for how many set
+
+6th.  under the acessories  catgegory and if i open that perticular product  there should be the buy and rent option given and i want the same admin panel for acessories also same as the aluminium u have given . i want u to make the admin panel for accesieries also, for  as much as product im puting in the accessories that all must be controled by the admin. also i want u to segregate the accsesories products in buy and rent category in the admin panel as how u have given aluminium under single width and doublew width...
+
+7th.  in the admin panel ,,,if the admin is clicking on the "add the product" under the category cuplock ..if the admin is selecting the category cuplock ...there must only be product name, descrption and the multiple images an admin can add
+(this change is only for cuplock category not the other ones)
