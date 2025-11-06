@@ -130,7 +130,7 @@ function completeOrder() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('Order completed successfully! Your transaction ID: ' + transactionId);
+                alert('Order submitted successfully! Your transaction ID: ' + transactionId + '\n\nYour order is now pending admin verification to confirm the payment amount. You will receive email confirmation once verified.');
                 window.location.href = '{{ url_for('my_orders') }}';
             } else {
                 alert(data.message || 'Failed to complete order. Please try again.');

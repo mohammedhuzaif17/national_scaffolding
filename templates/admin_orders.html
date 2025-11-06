@@ -24,6 +24,7 @@
                     <th>Total Amount</th>
                     <th>Transaction ID</th>
                     <th>Status</th>
+                    <th>Actions</th>
                     <th>Items</th>
                 </tr>
             </thead>
@@ -59,9 +60,27 @@
                     </td>
                     <td>
                         {% if order.status == 'completed' %}
-                        <span style="color: #4CAF50; font-weight: bold;">✓ {{ order.status|title }}</span>
+                        <span style="color: #4CAF50; font-weight: bold;">✓ Completed</span>
+                        {% elif order.status == 'pending_verification' %}
+                        <span style="color: #ffa500; font-weight: bold;">⏳ Pending Verification</span>
+                        {% elif order.status == 'rejected' %}
+                        <span style="color: #ff4444; font-weight: bold;">✗ Rejected</span>
                         {% else %}
-                        <span style="color: #ffa500;">{{ order.status|title }}</span>
+                        <span style="color: #ccc;">{{ order.status|title }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if order.status == 'pending_verification' %}
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <button class="btn" onclick="verifyPayment({{ order.id }}, {{ order.total_price }})" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; background: #4CAF50;">
+                                ✓ Approve
+                            </button>
+                            <button class="btn-danger" onclick="rejectPayment({{ order.id }})" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
+                                ✗ Reject
+                            </button>
+                        </div>
+                        {% else %}
+                        <span style="color: #888;">-</span>
                         {% endif %}
                     </td>
                     <td>
@@ -71,7 +90,7 @@
                     </td>
                 </tr>
                 <tr id="order-details-{{ order.id }}" style="display: none;">
-                    <td colspan="7" style="background: rgba(255, 255, 255, 0.03); padding: 1.5rem;">
+                    <td colspan="8" style="background: rgba(255, 255, 255, 0.03); padding: 1.5rem;">
                         <div style="max-width: 800px; margin: 0 auto;">
                             <h4 style="color: #d4af37; margin-bottom: 1rem;">Order Items:</h4>
                             {% for item in order.order_items %}
@@ -120,5 +139,75 @@ function showOrderDetails(orderId) {
     } else {
         detailsRow.style.display = 'none';
     }
+}
+
+function verifyPayment(orderId, totalPrice) {
+    const amountPaid = prompt(`Enter the amount received via PhonePe for Order #${orderId}:\n\nExpected Amount: ₹${totalPrice.toFixed(2)}`);
+    
+    if (amountPaid === null) return; // User cancelled
+    
+    const amount = parseFloat(amountPaid);
+    
+    if (isNaN(amount) || amount <= 0) {
+        alert('Please enter a valid amount');
+        return;
+    }
+    
+    if (amount < totalPrice) {
+        if (!confirm(`WARNING: Amount paid (₹${amount.toFixed(2)}) is LESS than required (₹${totalPrice.toFixed(2)})\n\nAre you sure you want to approve this order with partial payment?`)) {
+            return;
+        }
+    }
+    
+    fetch(`/verify_payment/${orderId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            action: 'approve',
+            amount_paid: amount
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert(data.message || 'Failed to verify payment');
+        }
+    })
+    .catch(error => {
+        alert('Error verifying payment: ' + error);
+    });
+}
+
+function rejectPayment(orderId) {
+    if (!confirm(`Are you sure you want to REJECT Order #${orderId}?\n\nThis action will mark the order as rejected and cannot be undone.`)) {
+        return;
+    }
+    
+    fetch(`/verify_payment/${orderId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            action: 'reject'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert(data.message || 'Failed to reject order');
+        }
+    })
+    .catch(error => {
+        alert('Error rejecting order: ' + error);
+    });
 }
 {% endblock %}

@@ -582,9 +582,9 @@ def complete_order():
     order = Order(
         user_id=current_user.id, 
         total_price=total_with_gst, 
-        status='completed',
+        status='pending_verification',
         transaction_id=transaction_id,
-        amount_paid=total_with_gst
+        amount_paid=0
     )
     db.session.add(order)
     db.session.flush()
@@ -762,6 +762,58 @@ def download_backup():
                         mimetype='application/gzip')
     else:
         return "Backup file not found. Please contact support.", 404
+
+@app.route('/verify_payment/<int:order_id>', methods=['POST'])
+@login_required
+def verify_payment(order_id):
+    if session.get('user_type') != 'admin':
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 403
+    
+    order = Order.query.get_or_404(order_id)
+    data = request.json or {}
+    
+    action = data.get('action')
+    
+    if action == 'approve':
+        try:
+            amount_paid = float(data.get('amount_paid', 0))
+        except (ValueError, TypeError):
+            return jsonify({
+                'success': False, 
+                'message': 'Invalid amount format. Please enter a valid number.'
+            })
+        
+        if amount_paid <= 0:
+            return jsonify({
+                'success': False, 
+                'message': 'Amount must be greater than zero.'
+            })
+        
+        if amount_paid < order.total_price:
+            return jsonify({
+                'success': False, 
+                'message': f'Amount paid (₹{amount_paid:.2f}) is less than required (₹{order.total_price:.2f})'
+            })
+        
+        order.amount_paid = amount_paid
+        order.status = 'completed'
+        db.session.commit()
+        
+        return jsonify({
+            'success': True, 
+            'message': 'Payment verified and order approved'
+        })
+    
+    elif action == 'reject':
+        order.status = 'rejected'
+        db.session.commit()
+        
+        return jsonify({
+            'success': True, 
+            'message': 'Order rejected'
+        })
+    
+    return jsonify({'success': False, 'message': 'Invalid action'})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
