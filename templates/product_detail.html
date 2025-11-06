@@ -201,11 +201,17 @@
             </div>
             {% endif %}
             
-            {% if current_user.is_authenticated and session.get('user_type') != 'admin' %}
+            {% if current_user.is_authenticated and session.get('user_type') == 'admin' %}
+            <div style="background: rgba(255, 165, 0, 0.2); padding: 1.5rem; border-radius: 8px; margin-top: 2rem; text-align: center;">
+                <p style="color: #ffa500; font-weight: bold; margin: 0;">
+                    ℹ️ Admin accounts cannot make purchases. Please use a customer account to add items to cart.
+                </p>
+            </div>
+            {% elif current_user.is_authenticated %}
             <button class="btn-primary" onclick="addToCartCustom()" style="width: 100%; margin-top: 2rem; font-size: 1.1rem; padding: 1.2rem;">
                 🛒 Add to Cart
             </button>
-            {% elif not current_user.is_authenticated %}
+            {% else %}
             <button class="btn-primary" onclick="window.location.href='{{ url_for('login') }}'" style="width: 100%; margin-top: 2rem; font-size: 1.1rem; padding: 1.2rem;">
                 🔐 Login to Purchase
             </button>
