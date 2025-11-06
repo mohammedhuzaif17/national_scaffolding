@@ -1,7 +1,7 @@
 # National Scaffolding and Fabrications E-Commerce Platform
 
 ## Overview
-This project is a Flask-based e-commerce platform for National Scaffolding and Fabrications. Its primary purpose is to provide an intuitive online storefront for scaffolding and fabrication products, featuring a modern glassmorphism UI. Key capabilities include a robust shopping cart, dual admin panels for managing different product lines, and integrated QR code payment with server-side validation. The platform aims to streamline the sales process, offer comprehensive product customization, and ensure secure transactions, enhancing market reach and operational efficiency for the business.
+This project is a Flask-based e-commerce platform for National Scaffolding and Fabrications. Its primary purpose is to provide an intuitive online storefront for scaffolding and fabrication products, featuring a premium Royal Blue and Gold design theme that conveys luxury, trust, and professionalism. Key capabilities include a robust shopping cart, dual admin panels for managing different product lines, and integrated QR code payment with server-side validation. The platform aims to streamline the sales process, offer comprehensive product customization, and ensure secure transactions, enhancing market reach and operational efficiency for the business.
 
 ## User Preferences
 I prefer detailed explanations.
@@ -12,13 +12,14 @@ Do not make changes to the folder `Z`.
 Do not make changes to the file `Y`.
 
 ## System Architecture
-The platform is built on a Flask backend with PostgreSQL as the database. The frontend utilizes HTML5, CSS3 with a distinct glassmorphism design, and vanilla JavaScript.
+The platform is built on a Flask backend with PostgreSQL as the database. The frontend utilizes HTML5, CSS3 with a premium Royal Blue and Gold design system, and vanilla JavaScript. All styling is centralized in a single style.css file with no inline styles, ensuring maintainability and consistency across all pages.
 
 **UI/UX Decisions:**
-- **Design:** Modern professional theme with a sophisticated navy and slate color palette. Features clean navigation, rounded buttons, enhanced shadows, and professional layout with strong visual hierarchy.
-- **Typography:** Poppins font with darker, readable text colors for excellent readability and professional appearance.
-- **Interactivity:** Smooth CSS transitions, responsive grid layouts, ripple button effects, hover shimmer animations on product cards, and consistent styling across all pages.
-- **User Flow:** Enhanced registration, unified login for admins and users, category-specific product browsing, session-based welcome popup, and streamlined fabrication page with "View Details"-only workflow.
+- **Design:** Premium ecommerce theme with Royal Blue and Gold color scheme. Features luxurious visual identity with elegant navigation, gold-accented buttons, sophisticated shadows, and professional layout with strong visual hierarchy. Royal Blue (#1e3a8a) serves as the primary brand color, while Gold (#d4af37) provides premium accents and highlights.
+- **Typography:** Combination of Playfair Display for headings (elegant serif) and Poppins for body text (clean sans-serif), creating a luxurious yet readable appearance with excellent hierarchy and professional feel.
+- **Interactivity:** Smooth CSS transitions with premium animations including fade-in effects, scale transformations, gold glow effects on hover, elegant underline animations on navigation links, and subtle ripple effects on buttons. All animations are classy and refined, not flashy.
+- **Color Palette:** Royal Blue gradient backgrounds, Gold highlights on interactive elements, white/cream content areas for elegant contrast, gold borders on premium cards and sections, and soft shadows with royal blue tints.
+- **User Flow:** Enhanced registration, unified login for admins and users, category-specific product browsing, session-based welcome popup with gold-bordered design, and streamlined fabrication page with "View Details"-only workflow.
 - **Product Customization:** Extensive use of dropdowns for product specifications (e.g., Aluminium scaffolding dimensions, H-Frame quantities with discount tiers, Cuplock requiring both vertical and ledger specifications).
 
 **Technical Implementations:**
