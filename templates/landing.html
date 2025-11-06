@@ -17,34 +17,101 @@
     </div>
 </div>
 
-<div class="landing-page">
-    <div class="landing-container">
-        <h1 class="landing-title">Welcome to The National Scaffolding</h1>
-        <p class="landing-subtitle">Choose a category to explore our products</p>
-        
-        <div class="category-cards">
-            <div class="category-card" onclick="window.location.href='{{ url_for('national_scaffoldings') }}'">
-                <div class="card-content">
-                    <h2>National Scaffolding</h2>
-                    <p>Professional scaffolding services for all your construction needs</p>
-                    <button class="card-btn">Explore Scaffolding</button>
+<div class="glass-container">
+    <h1 class="page-title">The National Scaffolding</h1>
+    <p class="page-subtitle">Professional scaffolding services for all your construction needs</p>
+    
+    <div class="text-center mb-3">
+        <button class="btn btn-secondary" onclick="window.location.href='{{ url_for('fabrications') }}'">
+            🔧 Go to Fabrications
+        </button>
+    </div>
+    
+    <div class="category-buttons">
+        <button class="category-btn {% if category == 'all' %}active{% endif %}" 
+                onclick="window.location.href='{{ url_for('index', category='all') }}'">
+            ALL PRODUCTS ✓
+        </button>
+        <button class="category-btn {% if category == 'aluminium' %}active{% endif %}" 
+                onclick="window.location.href='{{ url_for('index', category='aluminium') }}'">
+            ALUMINIUM SCAFFOLDINGS
+        </button>
+        <button class="category-btn {% if category == 'h-frames' %}active{% endif %}" 
+                onclick="window.location.href='{{ url_for('index', category='h-frames') }}'">
+            H FRAMES
+        </button>
+        <button class="category-btn {% if category == 'cuplock' %}active{% endif %}" 
+                onclick="window.location.href='{{ url_for('index', category='cuplock') }}'">
+            CUPLOCK
+        </button>
+        <button class="category-btn {% if category == 'accessories' %}active{% endif %}" 
+                onclick="window.location.href='{{ url_for('index', category='accessories') }}'">
+            ACCESSORIES
+        </button>
+    </div>
+
+    <h2 class="mt-4">Our Products</h2>
+    
+    <div class="products-grid">
+        {% for product in products %}
+        <div class="product-card">
+            <div onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'" style="cursor: pointer;">
+                {% if product.image_url %}
+                <img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-image">
+                {% else %}
+                <div class="product-image-placeholder">
+                    <span>📦</span>
                 </div>
+                {% endif %}
             </div>
-            
-            <div class="category-card" onclick="window.location.href='{{ url_for('fabrications') }}'">
-                <div class="card-content">
-                    <h2>Fabrications</h2>
-                    <p>Custom fabrication products including furniture and more</p>
-                    <button class="card-btn">Explore Fabrications</button>
+            <div class="product-info">
+                <h3 class="product-name" onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'" style="cursor: pointer;">{{ product.name }}</h3>
+                <p class="product-description">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
+                {% if product.category %}
+                <p class="product-category">{{ product.category }}</p>
+                {% endif %}
+                <div class="product-price">₹{{ product.price }}</div>
+                {% if product.rent_price %}
+                <p class="product-rent">Rent: ₹{{ product.rent_price }}/month</p>
+                {% endif %}
+                
+                {% if current_user.is_authenticated and session.get('user_type') != 'admin' %}
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label for="quantity_{{ product.id }}">Quantity:</label>
+                    <select id="quantity_{{ product.id }}" class="form-control">
+                        {% for i in range(1, 11) %}
+                        <option value="{{ i }}">{{ i }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
+                
+                <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                    <button class="btn btn-primary" onclick="event.stopPropagation(); addToCart({{ product.id }}, '{{ product.name }}', {{ product.price }})" style="flex: 1;">
+                        🛒 Add to Cart
+                    </button>
+                    <button class="btn btn-secondary" onclick="event.stopPropagation(); window.location.href='{{ url_for('product_detail', product_id=product.id) }}'" style="flex: 1;">
+                        View Details
+                    </button>
+                </div>
+                {% else %}
+                <button class="btn" onclick="event.stopPropagation(); window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
+                    View Details
+                </button>
+                {% endif %}
             </div>
         </div>
+        {% endfor %}
     </div>
 </div>
 
+{% if current_user.is_authenticated and session.get('user_type') != 'admin' %}
+<button class="view-cart-btn" onclick="window.location.href='{{ url_for('cart') }}'">
+    🛒 View Cart
+</button>
+{% endif %}
+{% endblock %}
 
-
-<script>
+{% block scripts %}
 // Show welcome popup only for non-logged-in users
 window.addEventListener('DOMContentLoaded', () => {
     const popup = document.getElementById('welcomePopup');
@@ -74,5 +141,57 @@ function closeWelcome() {
     document.body.classList.remove('popup-active');
     sessionStorage.setItem('welcomeShown', 'true');
 }
-</script>
+
+function addToCart(productId, productName, price) {
+    const quantity = parseInt(document.getElementById('quantity_' + productId).value);
+    
+    fetch('/add_to_cart', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            product_id: productId,
+            quantity: quantity,
+            customization: { quantity: quantity }
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('✅ ' + productName + ' added to cart!');
+        } else {
+            showToast('❌ Error adding to cart: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('❌ Error adding to cart');
+    });
+}
+
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        background: var(--royal-blue);
+        color: var(--gold);
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: var(--shadow-xl);
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+        font-weight: 600;
+        border: 2px solid var(--gold);
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
 {% endblock %}

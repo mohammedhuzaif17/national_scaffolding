@@ -285,7 +285,14 @@ with app.app_context():
 
 @app.route('/')
 def index():
-    return render_template('landing.html')
+    category = request.args.get('category', 'all')
+    
+    if category == 'all':
+        products = Product.query.filter_by(product_type='scaffolding').all()
+    else:
+        products = Product.query.filter_by(product_type='scaffolding', category=category).all()
+    
+    return render_template('landing.html', products=products, category=category)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
