@@ -3,6 +3,20 @@
 {% block title %}National Scaffolding - Products{% endblock %}
 
 {% block content %}
+<!-- Welcome Popup -->
+<div id="welcomePopup" class="welcome-popup">
+    <div class="welcome-content">
+        <h1>Welcome to THE NATIONAL SCAFFOLDING</h1>
+        <p>We don't just build scaffolds — we build confidence. Explore our premium scaffolding products for all your construction needs.</p>
+        <div class="popup-buttons">
+            <button class="btn-explore" onclick="closeWelcome()">Continue to Explore</button>
+            {% if not current_user.is_authenticated %}
+            <button class="btn-login" onclick="window.location.href='{{ url_for('login') }}'">Login / Register</button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
 <div class="glass-container">
     <h1 class="page-title">The National Scaffolding</h1>
     <p class="page-subtitle">Professional scaffolding services for all your construction needs</p>
@@ -40,16 +54,18 @@
     
     <div class="products-grid">
         {% for product in products %}
-        <div class="product-card" onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
-            {% if product.image_url %}
-            <img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-image">
-            {% else %}
-            <div class="product-image-placeholder">
-                <span>📦</span>
+        <div class="product-card">
+            <div onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'" style="cursor: pointer;">
+                {% if product.image_url %}
+                <img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-image">
+                {% else %}
+                <div class="product-image-placeholder">
+                    <span>📦</span>
+                </div>
+                {% endif %}
             </div>
-            {% endif %}
             <div class="product-info">
-                <h3 class="product-name">{{ product.name }}</h3>
+                <h3 class="product-name" onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'" style="cursor: pointer;">{{ product.name }}</h3>
                 <p class="product-description">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
                 {% if product.category %}
                 <p class="product-category">{{ product.category }}</p>
@@ -59,9 +75,29 @@
                 <p class="product-rent">Rent: ₹{{ product.rent_price }}/month</p>
                 {% endif %}
                 
+                {% if current_user.is_authenticated and session.get('user_type') != 'admin' %}
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label for="quantity_{{ product.id }}">Quantity:</label>
+                    <select id="quantity_{{ product.id }}" class="form-control">
+                        {% for i in range(1, 11) %}
+                        <option value="{{ i }}">{{ i }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                    <button class="btn btn-primary" onclick="event.stopPropagation(); addToCart({{ product.id }}, '{{ product.name }}', {{ product.price }})" style="flex: 1;">
+                        🛒 Add to Cart
+                    </button>
+                    <button class="btn btn-secondary" onclick="event.stopPropagation(); window.location.href='{{ url_for('product_detail', product_id=product.id) }}'" style="flex: 1;">
+                        View Details
+                    </button>
+                </div>
+                {% else %}
                 <button class="btn" onclick="event.stopPropagation(); window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
                     View Details
                 </button>
+                {% endif %}
             </div>
         </div>
         {% endfor %}
@@ -76,21 +112,29 @@
 {% endblock %}
 
 {% block scripts %}
-// Check if welcome popup has been shown this session
+// Show welcome popup immediately without delay
 window.addEventListener('DOMContentLoaded', () => {
     const popupShown = sessionStorage.getItem('welcomeShown');
+    const popup = document.getElementById('welcomePopup');
+    
     if (popupShown) {
-        document.getElementById('welcomePopup').style.display = 'none';
+        popup.style.display = 'none';
+        document.body.classList.remove('popup-active');
+    } else {
+        // Show popup immediately with blur effect
+        popup.style.display = 'flex';
+        document.body.classList.add('popup-active');
     }
 });
 
 function closeWelcome() {
     document.getElementById('welcomePopup').style.display = 'none';
+    document.body.classList.remove('popup-active');
     sessionStorage.setItem('welcomeShown', 'true');
 }
 
 function addToCart(productId, productName, price) {
-    const quantity = document.getElementById('quantity_' + productId).value;
+    const quantity = parseInt(document.getElementById('quantity_' + productId).value);
     
     fetch('/add_to_cart', {
         method: 'POST',
@@ -101,14 +145,48 @@ function addToCart(productId, productName, price) {
             product_id: productId,
             product_name: productName,
             price: price,
-            quantity: parseInt(quantity)
+            quantity: quantity,
+            customization: { quantity: quantity }
         })
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('Product added to cart!');
+            showToast('✅ Product added to cart successfully!');
+            // Update cart count if you have a cart icon
+        } else {
+            showToast('❌ ' + (data.message || 'Failed to add to cart'));
         }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('❌ Error adding to cart');
     });
+}
+
+function showToast(message) {
+    // Remove existing toast if any
+    const existingToast = document.querySelector('.toast-notification');
+    if (existingToast) {
+        existingToast.remove();
+    }
+    
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.innerHTML = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 100);
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            if (toast.parentNode) {
+                document.body.removeChild(toast);
+            }
+        }, 300);
+    }, 3000);
 }
 {% endblock %}
