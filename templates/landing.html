@@ -45,16 +45,24 @@
 
 
 <script>
-// Check if welcome popup has been shown this session
+// Show welcome popup immediately without delay
 window.addEventListener('DOMContentLoaded', () => {
     const popupShown = sessionStorage.getItem('welcomeShown');
+    const popup = document.getElementById('welcomePopup');
+    
     if (popupShown) {
-        document.getElementById('welcomePopup').style.display = 'none';
+        popup.style.display = 'none';
+        document.body.classList.remove('popup-active');
+    } else {
+        // Show popup immediately with blur effect
+        popup.style.display = 'flex';
+        document.body.classList.add('popup-active');
     }
 });
 
 function closeWelcome() {
     document.getElementById('welcomePopup').style.display = 'none';
+    document.body.classList.remove('popup-active');
     sessionStorage.setItem('welcomeShown', 'true');
 }
 </script>
