@@ -83,7 +83,7 @@
                     </div>
                 {% else %}
                     <!-- Not logged in or admin: show only View Details -->
-                    <button class="btn" onclick="event.stopPropagation(); window.location.href='{{ url_for('product_detail', product_id=product.id') }}'">
+                    <button class="btn" onclick="event.stopPropagation(); window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
                         View Details
                     </button>
                 {% endif %}
