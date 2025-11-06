@@ -227,32 +227,8 @@ const rentPrice = {{ product.rent_price if product.rent_price else 0 }};
 const category = '{{ product.category }}';
 const weightPerUnit = {{ product.weight_per_unit if product.weight_per_unit else 5 }};
 
-// Aluminium Scaffolding Pricing Matrix (Buy Prices)
-const aluminiumPricing = {
-    '0.7': {  // Single Width
-        '2': 2500,
-        '3': 3200,
-        '4': 3800,
-        '5': 4500
-    },
-    '1.4': {  // Double Width
-        '2': 3500,
-        '3': 4200,
-        '4': 5000,
-        '5': 5800,
-        '6': 6500,
-        '7': 7200,
-        '8': 8000,
-        '9': 8800,
-        '10': 9500,
-        '11': 10300,
-        '12': 11000,
-        '13': 11800,
-        '14': 12500,
-        '15': 13300,
-        '16': 14000
-    }
-};
+// Aluminium Scaffolding Pricing Matrix (Load from Database)
+const aluminiumPricing = {{ product.customization_options.get('pricing_matrix', {})|tojson|safe if product.customization_options else '{}' }};
 
 // Rent prices are 20% of buy prices
 function getAluminiumPrice(width, height, purchaseType) {
