@@ -684,6 +684,60 @@ def admin_orders():
     
     return render_template('admin_orders.html', orders=orders)
 
+@app.route('/admin_analytics')
+@login_required
+def admin_analytics():
+    if session.get('user_type') != 'admin':
+        return redirect(url_for('dashboard'))
+    
+    # Get all orders
+    orders = Order.query.all()
+    
+    # Aggregate data by month
+    monthly_data = {}
+    yearly_data = {}
+    category_data = {}
+    
+    for order in orders:
+        # Monthly aggregation
+        month_key = order.order_date.strftime('%Y-%m')
+        if month_key not in monthly_data:
+            monthly_data[month_key] = {'revenue': 0, 'orders': 0}
+        monthly_data[month_key]['revenue'] += float(order.total_price)
+        monthly_data[month_key]['orders'] += 1
+        
+        # Yearly aggregation
+        year_key = order.order_date.strftime('%Y')
+        if year_key not in yearly_data:
+            yearly_data[year_key] = {'revenue': 0, 'orders': 0}
+        yearly_data[year_key]['revenue'] += float(order.total_price)
+        yearly_data[year_key]['orders'] += 1
+        
+        # Category-wise aggregation
+        for item in order.items:
+            category = item.product.category or 'Other'
+            if category not in category_data:
+                category_data[category] = {'revenue': 0, 'quantity': 0}
+            category_data[category]['revenue'] += float(item.price) * item.quantity
+            category_data[category]['quantity'] += item.quantity
+    
+    # Sort monthly data
+    sorted_months = sorted(monthly_data.keys())
+    
+    # Calculate totals
+    total_revenue = sum(order.total_price for order in orders)
+    total_orders = len(orders)
+    avg_order_value = total_revenue / total_orders if total_orders > 0 else 0
+    
+    return render_template('admin_analytics.html',
+                         monthly_data=monthly_data,
+                         yearly_data=yearly_data,
+                         category_data=category_data,
+                         sorted_months=sorted_months,
+                         total_revenue=total_revenue,
+                         total_orders=total_orders,
+                         avg_order_value=avg_order_value)
+
 @app.route('/admin_logout')
 @login_required
 def admin_logout():

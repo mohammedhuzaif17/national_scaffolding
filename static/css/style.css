@@ -1796,4 +1796,190 @@ footer {
     box-shadow: var(--shadow-xl), 0 0 50px rgba(212, 175, 55, 0.7);
 }
 
+/* ===== MODAL/POPUP STYLES ===== */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 29, 61, 0.9);
+    backdrop-filter: blur(8px);
+    overflow-y: auto;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #001d3d 0%, #003366 100%);
+    border-radius: 20px;
+    padding: 3rem;
+    max-width: 700px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(212, 175, 55, 0.3);
+    border: 3px solid var(--gold);
+    position: relative;
+    animation: slideDown 0.4s ease;
+}
+
+.modal-content h2 {
+    color: var(--gold);
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+    font-weight: 800;
+    text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
+}
+
+.modal-content .form-group label {
+    color: var(--gold);
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.modal-content .form-group input,
+.modal-content .form-group select,
+.modal-content .form-group textarea {
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--royal-blue);
+    border: 2px solid rgba(212, 175, 55, 0.3);
+    padding: 1rem;
+    border-radius: 10px;
+    width: 100%;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    transition: all var(--transition-normal) ease;
+}
+
+.modal-content .form-group input:focus,
+.modal-content .form-group select:focus,
+.modal-content .form-group textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+    background: var(--white);
+}
+
+.modal-content .form-group input::placeholder,
+.modal-content .form-group textarea::placeholder {
+    color: #888;
+}
+
+.modal-content small {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85rem;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== CATEGORY-SPECIFIC FIELDS ===== */
+.category-specific-fields {
+    background: rgba(212, 175, 55, 0.1);
+    border: 2px solid rgba(212, 175, 55, 0.3);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.category-specific-fields h3 {
+    color: var(--gold);
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+/* ===== ANALYTICS PAGE ===== */
+.metric-card {
+    background: linear-gradient(135deg, var(--royal-blue), #003366);
+    border: 3px solid var(--gold);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: var(--shadow-xl), 0 0 30px rgba(212, 175, 55, 0.2);
+    transition: all var(--transition-normal) ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-xl), 0 0 40px rgba(212, 175, 55, 0.4);
+}
+
+.metric-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.metric-label {
+    color: var(--gold);
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.metric-value {
+    color: var(--white);
+    font-size: 2.2rem;
+    font-weight: 900;
+    font-family: 'Poppins', sans-serif;
+}
+
+.chart-container {
+    background: rgba(255, 255, 255, 0.98);
+    border: 3px solid var(--gold);
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: var(--shadow-lg);
+    transition: all var(--transition-normal) ease;
+}
+
+.chart-container:hover {
+    box-shadow: var(--shadow-xl), 0 0 25px rgba(212, 175, 55, 0.2);
+}
+
+.chart-title {
+    color: var(--royal-blue);
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    padding-bottom: 1rem;
+    border-bottom: 3px solid var(--gold);
+}
+
+.chart-container canvas {
+    max-height: 400px;
+}
+
 /* ===== END OF CSS ===== */

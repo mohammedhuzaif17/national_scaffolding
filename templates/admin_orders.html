@@ -5,7 +5,7 @@
 {% block content %}
 <div class="glass-container">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-        <button class="btn-secondary" onclick="history.back()" style="width: auto;">← Back</button>
+        <button class="btn-primary" onclick="window.location.href='{{ url_for('admin_analytics') }}'" style="width: auto; background: linear-gradient(135deg, #4CAF50, #45a049);">📊 Business Analytics</button>
         <button class="btn-danger" onclick="window.location.href='{{ url_for('admin_logout') }}'" style="width: auto;">Logout</button>
     </div>
     <h1 class="page-title">All Customer Orders</h1>

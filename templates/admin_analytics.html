@@ -1,0 +1,318 @@
+{% extends "base.html" %}
+
+{% block title %}Admin - Business Analytics{% endblock %}
+
+{% block content %}
+<div class="glass-container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h1 class="page-title" style="margin: 0;">📊 Business Analytics Dashboard</h1>
+        <div style="display: flex; gap: 1rem;">
+            <button class="btn-primary" onclick="window.location.href='{{ url_for('admin_scaffoldings') }}'" style="width: auto; background: linear-gradient(135deg, #9333ea, #7928ca);">📦 Products</button>
+            <button class="btn-primary" onclick="window.location.href='{{ url_for('admin_orders') }}'" style="width: auto; background: linear-gradient(135deg, #4CAF50, #45a049);">📋 Orders</button>
+            <button class="btn-danger" onclick="window.location.href='{{ url_for('admin_logout') }}'" style="width: auto;">Logout</button>
+        </div>
+    </div>
+    
+    <!-- Key Metrics Cards -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin: 2rem 0;">
+        <div class="metric-card">
+            <div class="metric-icon">₹</div>
+            <div class="metric-label">Total Revenue</div>
+            <div class="metric-value">₹{{ "{:,.2f}".format(total_revenue) }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-icon">📦</div>
+            <div class="metric-label">Total Orders</div>
+            <div class="metric-value">{{ total_orders }}</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-icon">💰</div>
+            <div class="metric-label">Average Order Value</div>
+            <div class="metric-value">₹{{ "{:,.2f}".format(avg_order_value) }}</div>
+        </div>
+    </div>
+    
+    <!-- Charts Section -->
+    <div style="display: grid; grid-template-columns: 1fr; gap: 2rem; margin-top: 3rem;">
+        <!-- Monthly Revenue Chart -->
+        <div class="chart-container">
+            <h2 class="chart-title">📈 Monthly Revenue Trend</h2>
+            <canvas id="monthlyRevenueChart"></canvas>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem;">
+            <!-- Yearly Revenue Chart -->
+            <div class="chart-container">
+                <h2 class="chart-title">📊 Yearly Revenue</h2>
+                <canvas id="yearlyRevenueChart"></canvas>
+            </div>
+            
+            <!-- Category Breakdown -->
+            <div class="chart-container">
+                <h2 class="chart-title">🎯 Revenue by Category</h2>
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Monthly Orders Chart -->
+        <div class="chart-container">
+            <h2 class="chart-title">📦 Monthly Orders Count</h2>
+            <canvas id="monthlyOrdersChart"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+// Chart.js CDN is loaded in base.html
+const monthlyData = {{ monthly_data|tojson }};
+const yearlyData = {{ yearly_data|tojson }};
+const categoryData = {{ category_data|tojson }};
+const sortedMonths = {{ sorted_months|tojson }};
+
+// Theme colors
+const goldColor = '#d4af37';
+const royalBlueColor = '#001d3d';
+const accentColors = [
+    '#d4af37', // Gold
+    '#4CAF50', // Green
+    '#9333ea', // Purple
+    '#FF6384', // Pink
+    '#36A2EB', // Blue
+    '#FFCE56', // Yellow
+];
+
+// Chart.js default configuration
+Chart.defaults.color = goldColor;
+Chart.defaults.font.family = "'Poppins', sans-serif";
+Chart.defaults.font.size = 13;
+
+// Monthly Revenue Chart
+const monthlyRevenueCtx = document.getElementById('monthlyRevenueChart').getContext('2d');
+const monthlyRevenueChart = new Chart(monthlyRevenueCtx, {
+    type: 'line',
+    data: {
+        labels: sortedMonths.map(m => {
+            const date = new Date(m + '-01');
+            return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        }),
+        datasets: [{
+            label: 'Revenue (₹)',
+            data: sortedMonths.map(m => monthlyData[m].revenue),
+            borderColor: goldColor,
+            backgroundColor: 'rgba(212, 175, 55, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: goldColor,
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 7
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                display: true,
+                labels: {
+                    color: goldColor,
+                    font: { size: 14, weight: 'bold' }
+                }
+            },
+            tooltip: {
+                backgroundColor: royalBlueColor,
+                titleColor: goldColor,
+                bodyColor: '#fff',
+                borderColor: goldColor,
+                borderWidth: 2,
+                padding: 12,
+                displayColors: false,
+                callbacks: {
+                    label: function(context) {
+                        return '₹' + context.parsed.y.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    }
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    color: goldColor,
+                    callback: function(value) {
+                        return '₹' + value.toLocaleString('en-IN');
+                    }
+                },
+                grid: {
+                    color: 'rgba(212, 175, 55, 0.1)'
+                }
+            },
+            x: {
+                ticks: { color: goldColor },
+                grid: {
+                    color: 'rgba(212, 175, 55, 0.1)'
+                }
+            }
+        }
+    }
+});
+
+// Yearly Revenue Chart
+const yearlyRevenueCtx = document.getElementById('yearlyRevenueChart').getContext('2d');
+const yearlyRevenueChart = new Chart(yearlyRevenueCtx, {
+    type: 'bar',
+    data: {
+        labels: Object.keys(yearlyData),
+        datasets: [{
+            label: 'Revenue (₹)',
+            data: Object.values(yearlyData).map(d => d.revenue),
+            backgroundColor: accentColors.slice(0, Object.keys(yearlyData).length),
+            borderColor: goldColor,
+            borderWidth: 2,
+            borderRadius: 8
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                display: false
+            },
+            tooltip: {
+                backgroundColor: royalBlueColor,
+                titleColor: goldColor,
+                bodyColor: '#fff',
+                borderColor: goldColor,
+                borderWidth: 2,
+                padding: 12,
+                callbacks: {
+                    label: function(context) {
+                        return '₹' + context.parsed.y.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    }
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    color: goldColor,
+                    callback: function(value) {
+                        return '₹' + value.toLocaleString('en-IN');
+                    }
+                },
+                grid: {
+                    color: 'rgba(212, 175, 55, 0.1)'
+                }
+            },
+            x: {
+                ticks: { color: goldColor },
+                grid: {
+                    display: false
+                }
+            }
+        }
+    }
+});
+
+// Category Chart
+const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+const categoryChart = new Chart(categoryCtx, {
+    type: 'doughnut',
+    data: {
+        labels: Object.keys(categoryData).map(cat => cat.charAt(0).toUpperCase() + cat.slice(1)),
+        datasets: [{
+            data: Object.values(categoryData).map(d => d.revenue),
+            backgroundColor: accentColors,
+            borderColor: '#fff',
+            borderWidth: 3
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    color: goldColor,
+                    font: { size: 12 },
+                    padding: 15
+                }
+            },
+            tooltip: {
+                backgroundColor: royalBlueColor,
+                titleColor: goldColor,
+                bodyColor: '#fff',
+                borderColor: goldColor,
+                borderWidth: 2,
+                padding: 12,
+                callbacks: {
+                    label: function(context) {
+                        return context.label + ': ₹' + context.parsed.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    }
+                }
+            }
+        }
+    }
+});
+
+// Monthly Orders Chart
+const monthlyOrdersCtx = document.getElementById('monthlyOrdersChart').getContext('2d');
+const monthlyOrdersChart = new Chart(monthlyOrdersCtx, {
+    type: 'bar',
+    data: {
+        labels: sortedMonths.map(m => {
+            const date = new Date(m + '-01');
+            return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        }),
+        datasets: [{
+            label: 'Number of Orders',
+            data: sortedMonths.map(m => monthlyData[m].orders),
+            backgroundColor: 'rgba(76, 175, 80, 0.8)',
+            borderColor: '#4CAF50',
+            borderWidth: 2,
+            borderRadius: 8
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                display: false
+            },
+            tooltip: {
+                backgroundColor: royalBlueColor,
+                titleColor: goldColor,
+                bodyColor: '#fff',
+                borderColor: goldColor,
+                borderWidth: 2,
+                padding: 12
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    color: goldColor,
+                    stepSize: 1
+                },
+                grid: {
+                    color: 'rgba(212, 175, 55, 0.1)'
+                }
+            },
+            x: {
+                ticks: { color: goldColor },
+                grid: {
+                    display: false
+                }
+            }
+        }
+    }
+});
+{% endblock %}

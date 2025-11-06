@@ -5,9 +5,9 @@
 {% block content %}
 <div class="glass-container">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-        <button class="btn-secondary" onclick="window.location.href='{{ url_for('national_scaffoldings') }}'" style="width: auto;">← Back to Home</button>
+        <button class="btn-primary" onclick="window.location.href='{{ url_for('admin_analytics') }}'" style="width: auto; background: linear-gradient(135deg, #4CAF50, #45a049);">📊 Business Analytics</button>
         <div style="display: flex; gap: 1rem;">
-            <button class="btn-primary" onclick="window.location.href='{{ url_for('admin_orders') }}'" style="width: auto; background: linear-gradient(135deg, #4CAF50, #45a049);">📋 View All Orders</button>
+            <button class="btn-primary" onclick="window.location.href='{{ url_for('admin_orders') }}'" style="width: auto; background: linear-gradient(135deg, #9333ea, #7928ca);">📋 View All Orders</button>
             <button class="btn-danger" onclick="window.location.href='{{ url_for('admin_logout') }}'" style="width: auto;">Logout</button>
         </div>
     </div>
@@ -87,10 +87,13 @@
                     <img id="previewImg" style="max-width: 200px; border-radius: 8px; border: 2px solid #ffa500;">
                 </div>
             </div>
-            <div class="form-group" id="weightField">
+            <div class="form-group" id="weightField" style="display: none;">
                 <label for="productWeight">Weight per Unit (kg) - For Cuplock pricing</label>
                 <input type="number" id="productWeight" step="0.1" placeholder="Default: 5 kg">
             </div>
+            
+            <!-- Category-Specific Fields Section -->
+            <div id="categorySpecificSection"></div>
             <div style="display: flex; gap: 1rem;">
                 <button type="submit" class="btn-primary">Save</button>
                 <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
@@ -107,6 +110,7 @@ function updateCategoryFields() {
     const category = document.getElementById('productCategory').value;
     const rentField = document.getElementById('productRentPrice').closest('.form-group');
     const weightField = document.getElementById('weightField');
+    const categorySection = document.getElementById('categorySpecificSection');
     
     // Rent option is now available for all categories
     rentField.style.display = 'block';
@@ -117,6 +121,94 @@ function updateCategoryFields() {
     } else {
         weightField.style.display = 'none';
     }
+    
+    // Add category-specific fields
+    let categoryHTML = '';
+    
+    if (category === 'aluminium') {
+        categoryHTML = `
+            <div class="category-specific-fields">
+                <h3>⚙️ Aluminium Scaffolding Options</h3>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="hasPricingMatrix" style="width: auto; margin-right: 0.5rem;">
+                        This product has a Pricing Matrix (different prices for width/height combinations)
+                    </label>
+                    <small>Check this if the product needs custom prices for 0.7m/1.4m widths and 2m-16m heights</small>
+                </div>
+                <div class="form-group">
+                    <label for="aluminiumNotes">Dimension Notes</label>
+                    <textarea id="aluminiumNotes" rows="2" placeholder="e.g., Available in single width (0.7m) and double width (1.4m)"></textarea>
+                </div>
+            </div>
+        `;
+    } else if (category === 'h-frames') {
+        categoryHTML = `
+            <div class="category-specific-fields">
+                <h3>🔧 H-Frame Options</h3>
+                <div class="form-group">
+                    <label for="hframeHeight">Standard Height</label>
+                    <select id="hframeHeight">
+                        <option value="">Select Height</option>
+                        <option value="1.8m">1.8m</option>
+                        <option value="2.0m">2.0m</option>
+                        <option value="2.5m">2.5m</option>
+                        <option value="3.0m">3.0m</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="hasQuantityDiscount" style="width: auto; margin-right: 0.5rem;">
+                        Quantity-based Discounts (e.g., 10%, 15%, 20% for bulk orders)
+                    </label>
+                </div>
+            </div>
+        `;
+    } else if (category === 'cuplock') {
+        categoryHTML = `
+            <div class="category-specific-fields">
+                <h3>🔩 Cuplock Specifications</h3>
+                <div class="form-group">
+                    <label for="cuplockType">Component Type</label>
+                    <select id="cuplockType">
+                        <option value="">Select Type</option>
+                        <option value="vertical">Vertical Standard</option>
+                        <option value="ledger">Ledger</option>
+                        <option value="transom">Transom</option>
+                        <option value="brace">Brace</option>
+                        <option value="other">Other Component</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="cuplockLength">Standard Length</label>
+                    <input type="text" id="cuplockLength" placeholder="e.g., 2m, 3m, 4m">
+                </div>
+            </div>
+        `;
+    } else if (category === 'accessories') {
+        categoryHTML = `
+            <div class="category-specific-fields">
+                <h3>🛠️ Accessory Details</h3>
+                <div class="form-group">
+                    <label for="accessoryMaterial">Material</label>
+                    <select id="accessoryMaterial">
+                        <option value="">Select Material</option>
+                        <option value="steel">Steel</option>
+                        <option value="aluminum">Aluminum</option>
+                        <option value="plastic">Plastic</option>
+                        <option value="composite">Composite</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="compatibility">Compatible With</label>
+                    <textarea id="compatibility" rows="2" placeholder="e.g., All scaffolding types, Aluminium only, H-Frames only"></textarea>
+                </div>
+            </div>
+        `;
+    }
+    
+    categorySection.innerHTML = categoryHTML;
 }
 
 function showAddModal() {
