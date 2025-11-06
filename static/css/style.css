@@ -332,9 +332,13 @@ button[type="submit"]:active,
 }
 
 /* ===== LANDING PAGE ===== */
-.landing-container {
+.landing-page {
     min-height: 100vh;
     background: var(--gradient-primary);
+}
+
+.landing-container {
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -359,7 +363,8 @@ button[type="submit"]:active,
     font-weight: 400;
 }
 
-.categories-grid {
+.categories-grid,
+.category-cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 2.5rem;
@@ -2058,20 +2063,7 @@ footer {
     box-shadow: var(--shadow-md);
 }
 
-/* ===== LANDING PAGE ADDITIONAL ===== */
-.landing-page {
-    min-height: 100vh;
-    background: var(--gradient-primary);
-}
-
-.category-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 2.5rem;
-    max-width: 1000px;
-    width: 100%;
-}
-
+/* ===== CARD CONTENT & BUTTONS ===== */
 .card-content {
     text-align: center;
 }
