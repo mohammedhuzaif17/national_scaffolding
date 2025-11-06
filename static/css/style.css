@@ -1,7 +1,7 @@
 /* ============================================
    COMPLETE WEBSITE CSS - NEW COLOR PALETTE
-   Colors: Midnight Navy, Slate Blue, Platinum
-   Enhanced Hover Effects & Darker Typography
+   Colors: Midnight Navy, Dark Navy, Slate Blue, Light Slate, Platinum
+   Enhanced with Modern Corporate Design
    ============================================ */
 
 /* ===== RESET ===== */
@@ -19,36 +19,41 @@
     --slate-blue: #415a77;
     --light-slate: #778da9;
     --platinum: #e0e1dd;
-    
+
     /* Extended Colors */
     --white: #ffffff;
     --near-black: #0a0f14;
     --dark-text: #1a1a1a;
     --medium-text: #333333;
     --light-text: #555555;
-    
+
     /* Accent Colors */
     --accent-blue: #5a7fa0;
     --accent-light: #92a8bd;
     --success-green: #2a9d8f;
     --warning-yellow: #e9c46a;
     --danger-red: #e63946;
-    
+
     /* Shadows - Enhanced */
     --shadow-sm: 0 2px 6px rgba(13, 27, 42, 0.1);
     --shadow-md: 0 4px 12px rgba(13, 27, 42, 0.15);
     --shadow-lg: 0 8px 20px rgba(13, 27, 42, 0.2);
     --shadow-xl: 0 12px 32px rgba(13, 27, 42, 0.25);
-    
+
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, var(--midnight-navy) 0%, var(--dark-navy) 50%, var(--slate-blue) 100%);
     --gradient-accent: linear-gradient(135deg, var(--slate-blue) 0%, var(--light-slate) 100%);
     --gradient-light: linear-gradient(135deg, var(--platinum) 0%, var(--white) 100%);
+
+    /* Animation durations */
+    --transition-fast: 0.2s;
+    --transition-normal: 0.3s;
+    --transition-slow: 0.5s;
 }
 
-/* ===== BODY - DARKER TYPOGRAPHY ===== */
+/* ===== BODY - PROFESSIONAL TYPOGRAPHY ===== */
 body {
-    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: 'Poppins', 'Lato', 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background: var(--platinum);
     color: var(--dark-text);
     line-height: 1.7;
@@ -71,7 +76,7 @@ p {
 a {
     color: var(--slate-blue);
     text-decoration: none;
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
 }
 
 a:hover {
@@ -100,7 +105,7 @@ a:hover {
     color: var(--midnight-navy);
     text-decoration: none;
     letter-spacing: 0.5px;
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
 }
 
 .navbar-brand:hover,
@@ -112,49 +117,49 @@ a:hover {
 .navbar-links,
 .nav-menu {
     display: flex;
-    gap: 1.5rem;
+    gap: 2rem;
     list-style: none;
     align-items: center;
 }
 
-.navbar-links a,
-.nav-menu a {
-    color: var(--medium-text);
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.95rem;
-    padding: 0.6rem 1.2rem;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
+.navbar-links li,
+.nav-menu li {
+    margin: 0;
+    padding: 0;
 }
 
-.navbar-links a::before,
-.nav-menu a::before {
+.navbar-links a,
+.nav-menu a {
+    color: var(--midnight-navy);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 0.5rem 0;
+    transition: all 0.3s ease;
+    position: relative;
+    display: inline-block;
+}
+
+.navbar-links a::after,
+.nav-menu a::after {
     content: '';
     position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: var(--gradient-accent);
-    transition: left 0.4s ease;
-    z-index: -1;
-    opacity: 0.1;
+    bottom: 0;
+    left: 0;
+    width: 0%;
+    height: 3px;
+    background: var(--slate-blue);
+    transition: width 0.3s ease;
 }
 
 .navbar-links a:hover,
 .nav-menu a:hover {
-    color: var(--white);
-    background: var(--slate-blue);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+    color: var(--slate-blue);
 }
 
-.navbar-links a:hover::before,
-.nav-menu a:hover::before {
-    left: 0;
+.navbar-links a:hover::after,
+.nav-menu a:hover::after {
+    width: 100%;
 }
 
 /* Cart Icon */
@@ -162,7 +167,7 @@ a:hover {
     position: relative;
     color: var(--midnight-navy);
     font-size: 1.4rem;
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
 }
 
 .cart-icon:hover {
@@ -200,7 +205,7 @@ a:hover {
     height: 3px;
     background: var(--midnight-navy);
     border-radius: 3px;
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
 }
 
 .hamburger:hover span {
@@ -222,7 +227,7 @@ button[type="submit"],
     font-size: 1rem;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
     box-shadow: var(--shadow-md);
     position: relative;
     overflow: hidden;
@@ -289,7 +294,7 @@ button[type="submit"]:active,
     color: var(--white);
 }
 
-/* ===== FORMS - DARKER TEXT & HOVER EFFECTS ===== */
+/* ===== FORMS - PROFESSIONAL STYLING ===== */
 .form-group {
     margin-bottom: 1.5rem;
 }
@@ -312,7 +317,7 @@ button[type="submit"]:active,
     font-size: 1rem;
     color: var(--dark-text);
     background: var(--white);
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
     font-family: 'Poppins', sans-serif;
 }
 
@@ -378,7 +383,7 @@ button[type="submit"]:active,
     padding: 3rem 2.5rem;
     text-align: center;
     box-shadow: var(--shadow-xl);
-    transition: all 0.4s ease;
+    transition: all var(--transition-slow) ease;
     position: relative;
     overflow: hidden;
     opacity: 0.95;
@@ -410,7 +415,7 @@ button[type="submit"]:active,
     font-size: 4rem;
     color: var(--slate-blue);
     margin-bottom: 1.5rem;
-    transition: all 0.4s ease;
+    transition: all var(--transition-slow) ease;
 }
 
 .category-card:hover .category-icon {
@@ -450,7 +455,7 @@ button[type="submit"]:active,
     border-radius: 12px;
     overflow: hidden;
     box-shadow: var(--shadow-md);
-    transition: all 0.4s ease;
+    transition: all var(--transition-slow) ease;
     position: relative;
     opacity: 0.92;
 }
@@ -465,7 +470,7 @@ button[type="submit"]:active,
     width: 100%;
     height: 250px;
     object-fit: cover;
-    transition: all 0.4s ease;
+    transition: all var(--transition-slow) ease;
 }
 
 .product-card:hover .product-image {
@@ -500,7 +505,7 @@ button[type="submit"]:active,
     max-height: 0;
     overflow: hidden;
     opacity: 0;
-    transition: all 0.4s ease;
+    transition: all var(--transition-slow) ease;
 }
 
 .product-card:hover .product-description {
@@ -585,7 +590,7 @@ button[type="submit"]:active,
     gap: 2rem;
     padding: 1.5rem;
     border-bottom: 2px solid var(--platinum);
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
     opacity: 0.9;
 }
 
@@ -601,7 +606,7 @@ button[type="submit"]:active,
     object-fit: cover;
     border-radius: 8px;
     box-shadow: var(--shadow-sm);
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
 }
 
 .cart-item:hover .cart-item-image {
@@ -696,7 +701,7 @@ button[type="submit"]:active,
     width: 100%;
     border-radius: 12px;
     box-shadow: var(--shadow-lg);
-    transition: all 0.4s ease;
+    transition: all var(--transition-slow) ease;
 }
 
 .product-detail-image:hover {
@@ -776,7 +781,7 @@ button[type="submit"]:active,
     padding: 2rem;
     border-radius: 12px;
     box-shadow: var(--shadow-md);
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
     opacity: 0.95;
 }
 
@@ -836,7 +841,7 @@ button[type="submit"]:active,
 
 .products-table tr,
 .orders-table tr {
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
     opacity: 0.9;
 }
 
@@ -926,7 +931,7 @@ button[type="submit"]:active,
     padding: 2rem;
     border-radius: 12px;
     border: 2px solid rgba(255, 255, 255, 0.2);
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
     opacity: 0.9;
 }
 
@@ -987,7 +992,7 @@ button[type="submit"]:active,
     padding: 2.5rem;
     border-radius: 12px;
     box-shadow: var(--shadow-md);
-    transition: all 0.4s ease;
+    transition: all var(--transition-slow) ease;
     opacity: 0.95;
 }
 
@@ -1007,7 +1012,7 @@ button[type="submit"]:active,
     align-items: center;
     justify-content: center;
     margin-bottom: 1.5rem;
-    transition: all 0.4s ease;
+    transition: all var(--transition-slow) ease;
 }
 
 .expertise-item:hover .expertise-icon {
@@ -1067,7 +1072,7 @@ button[type="submit"]:active,
     border-radius: 12px;
     text-align: center;
     box-shadow: var(--shadow-md);
-    transition: all 0.4s ease;
+    transition: all var(--transition-slow) ease;
     opacity: 0.95;
 }
 
@@ -1084,7 +1089,7 @@ button[type="submit"]:active,
     overflow: hidden;
     border-radius: 50%;
     border: 4px solid var(--slate-blue);
-    transition: all 0.4s ease;
+    transition: all var(--transition-slow) ease;
 }
 
 .administrator:hover .administrator-image {
@@ -1096,7 +1101,7 @@ button[type="submit"]:active,
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: all 0.4s ease;
+    transition: all var(--transition-slow) ease;
 }
 
 .administrator:hover .administrator-image img {
@@ -1134,7 +1139,7 @@ button[type="submit"]:active,
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
     font-size: 1.1rem;
 }
 
@@ -1247,7 +1252,7 @@ button[type="submit"]:active,
     max-width: 100%;
     border-radius: 12px;
     box-shadow: var(--shadow-lg);
-    transition: all 0.4s ease;
+    transition: all var(--transition-slow) ease;
 }
 
 .scaffolding-diagram img:hover {
@@ -1268,7 +1273,7 @@ button[type="submit"]:active,
     border-radius: 8px;
     overflow: hidden;
     box-shadow: var(--shadow-sm);
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
 }
 
 .faq-item:hover {
@@ -1282,7 +1287,7 @@ button[type="submit"]:active,
     justify-content: space-between;
     align-items: center;
     background: var(--white);
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
     color: var(--midnight-navy);
     font-weight: 600;
 }
@@ -1293,7 +1298,7 @@ button[type="submit"]:active,
 
 .faq-summary i {
     color: var(--slate-blue);
-    transition: transform 0.3s ease;
+    transition: transform var(--transition-normal) ease;
 }
 
 .faq-item.active .faq-summary i {
@@ -1303,7 +1308,7 @@ button[type="submit"]:active,
 .faq-content {
     max-height: 0;
     overflow: hidden;
-    transition: all 0.4s ease;
+    transition: all var(--transition-slow) ease;
     opacity: 0;
     padding: 0 1.5rem;
     background: var(--white);
@@ -1330,7 +1335,7 @@ button[type="submit"]:active,
     font-size: 1.1rem;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
     box-shadow: var(--shadow-md);
     display: inline-flex;
     align-items: center;
@@ -1363,7 +1368,7 @@ button[type="submit"]:active,
 
 .download-manual-btn i {
     font-size: 1.3rem;
-    transition: transform 0.3s ease;
+    transition: transform var(--transition-normal) ease;
 }
 
 .download-manual-btn:hover i {
@@ -1407,7 +1412,7 @@ footer {
 
 .footer-column ul li a {
     color: var(--light-slate);
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
     font-size: 0.95rem;
 }
 
@@ -1449,7 +1454,7 @@ footer {
 .footer-bottom-links a {
     color: var(--light-slate);
     font-size: 0.9rem;
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
 }
 
 .footer-bottom-links a:hover {
@@ -1534,7 +1539,7 @@ footer {
     color: var(--white);
     border-radius: 8px;
     font-weight: 600;
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
 }
 
 .back-to-footer:hover {
@@ -1555,7 +1560,7 @@ footer {
     padding: 2rem;
     margin-bottom: 2rem;
     box-shadow: var(--shadow-md);
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
     opacity: 0.95;
 }
 
@@ -1688,7 +1693,7 @@ footer {
     max-width: 300px;
     border-radius: 12px;
     box-shadow: var(--shadow-md);
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
 }
 
 .qr-code-image:hover {
@@ -1711,7 +1716,7 @@ footer {
     transform: translateY(-50%);
     font-size: 1.5rem;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity var(--transition-normal) ease;
 }
 
 .validation-icon.valid {
@@ -1730,11 +1735,11 @@ footer {
         grid-template-columns: 1fr;
         gap: 2rem;
     }
-    
+
     .categories-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .admin-stats {
         grid-template-columns: repeat(2, 1fr);
     }
@@ -1744,7 +1749,7 @@ footer {
     .hamburger {
         display: flex;
     }
-    
+
     .nav-menu {
         position: fixed;
         top: 70px;
@@ -1756,52 +1761,52 @@ footer {
         align-items: flex-start;
         padding: 2rem;
         box-shadow: var(--shadow-lg);
-        transition: right 0.3s ease;
+        transition: right var(--transition-normal) ease;
     }
-    
+
     .nav-menu.active {
         right: 0;
     }
-    
+
     .nav-menu a {
         width: 100%;
         padding: 1rem;
     }
-    
+
     .landing-title {
         font-size: 2.5rem;
     }
-    
+
     .hero-section h1 {
         font-size: 2.5rem;
     }
-    
+
     .page-header h1 {
         font-size: 2.2rem;
     }
-    
+
     .products-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .footer-main {
         grid-template-columns: 1fr;
     }
-    
+
     .footer-bottom {
         flex-direction: column;
         gap: 1.5rem;
         text-align: center;
     }
-    
+
     .admin-stats {
         grid-template-columns: 1fr;
     }
-    
+
     .cart-item {
         flex-direction: column;
     }
-    
+
     .order-header {
         flex-direction: column;
         align-items: flex-start;
@@ -1813,28 +1818,28 @@ footer {
     .landing-title {
         font-size: 2rem;
     }
-    
+
     .landing-subtitle {
         font-size: 1.1rem;
     }
-    
+
     .hero-section h1 {
         font-size: 2rem;
     }
-    
+
     .page-header h1 {
         font-size: 1.8rem;
     }
-    
+
     .section-title h2 {
         font-size: 2rem;
     }
-    
+
     .download-manual-btn {
         width: 100%;
         justify-content: center;
     }
-    
+
     .user-manual-content {
         padding: 1.5rem;
     }
@@ -1880,10 +1885,42 @@ footer {
 
 /* ===== SMOOTH ANIMATIONS ===== */
 * {
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transition: opacity var(--transition-normal) ease, transform var(--transition-normal) ease;
 }
 
-/* ===== END OF CSS ===== */
+/* ===== FADE-IN ANIMATIONS ===== */
+.fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.slide-in-left {
+    opacity: 0;
+    transform: translateX(-50px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.slide-in-left.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.slide-in-right {
+    opacity: 0;
+    transform: translateX(50px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.slide-in-right.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
 
 /* ===== MISSING PRODUCT & CART STYLES ===== */
 .product-image-placeholder {
@@ -1959,7 +1996,7 @@ footer {
     border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
 }
 
 .category-btn:hover,
@@ -1983,7 +2020,7 @@ footer {
     font-weight: 700;
     cursor: pointer;
     box-shadow: var(--shadow-lg);
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
     z-index: 1000;
 }
 
@@ -2041,7 +2078,7 @@ footer {
     border-radius: 8px;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
     border: none;
     font-size: 1rem;
 }
@@ -2076,7 +2113,7 @@ footer {
     border-radius: 8px;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
     font-size: 1rem;
 }
 
@@ -2094,7 +2131,7 @@ footer {
     border-radius: 6px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
 }
 
 .btn-danger:hover {
@@ -2102,3 +2139,5 @@ footer {
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
 }
+
+/* ===== END OF CSS ===== */
