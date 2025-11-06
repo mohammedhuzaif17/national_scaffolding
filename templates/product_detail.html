@@ -183,15 +183,17 @@
                     <label>Purchase Type</label>
                     <select id="purchase_type" onchange="updateAccessoryPrice()">
                         <option value="buy">Buy</option>
-                        {% if product.rent_price %}
                         <option value="rent">Rent</option>
-                        {% endif %}
                     </select>
                 </div>
                 
                 <div class="form-group">
                     <label>Quantity</label>
-                    <input type="number" id="quantity" value="1" min="1" onchange="updateAccessoryPrice()">
+                    <select id="quantity" onchange="updateAccessoryPrice()">
+                        {% for i in range(1, 51) %}
+                        <option value="{{ i }}" {% if i == 1 %}selected{% endif %}>{{ i }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 
                 <div class="product-price" id="final_price">₹{{ product.price }}</div>
@@ -239,14 +241,28 @@
 {% endblock %}
 
 {% block scripts %}
-const basePrice = {{ product.price }};
-const rentPrice = {{ product.rent_price if product.rent_price else 0 }};
-const depositAmount = {{ product.deposit_amount if product.deposit_amount else 0 }};
+// Load pricing from pricing_matrix if available, otherwise use product fields
+const pricingMatrix = {{ product.customization_options.get('pricing_matrix', {})|tojson|safe if product.customization_options else '{}' }};
 const category = '{{ product.category }}';
+
+// For Accessories and H-Frames: Use pricing_matrix if available
+let basePrice = {{ product.price }};
+let rentPrice = {{ product.rent_price if product.rent_price else 0 }};
+let depositAmount = {{ product.deposit_amount if product.deposit_amount else 0 }};
+
+// Override with pricing matrix if available (for accessories and h-frames)
+if (pricingMatrix && typeof pricingMatrix === 'object') {
+    if (category === 'accessories' || category === 'h-frames') {
+        if (pricingMatrix.buy !== undefined) basePrice = pricingMatrix.buy;
+        if (pricingMatrix.rent !== undefined) rentPrice = pricingMatrix.rent;
+        if (pricingMatrix.deposit !== undefined) depositAmount = pricingMatrix.deposit;
+    }
+}
+
 const weightPerUnit = {{ product.weight_per_unit if product.weight_per_unit else 5 }};
 
 // Aluminium Scaffolding Pricing Matrix (Load from Database)
-const aluminiumPricing = {{ product.customization_options.get('pricing_matrix', {})|tojson|safe if product.customization_options else '{}' }};
+const aluminiumPricing = pricingMatrix;
 
 // Get aluminium price and deposit from pricing matrix (handles both old and new formats)
 function getAluminiumPriceData(width, height, purchaseType) {
@@ -327,10 +343,15 @@ function updateHFramePrice() {
     const depositDisplay = document.getElementById('deposit_display');
     if (purchaseType === 'rent' && depositAmount > 0) {
         depositDisplay.style.display = 'block';
-        document.getElementById('deposit_amount').textContent = '₹' + depositAmount.toFixed(2);
+        document.getElementById('deposit_amount').textContent = '₹' + (depositAmount * quantity).toFixed(2);
     } else {
         depositDisplay.style.display = 'none';
     }
+}
+
+// Initialize H-frame price on page load
+if (category === 'h-frames') {
+    updateHFramePrice();
 }
 
 function updateCuplockPrice() {
@@ -351,10 +372,15 @@ function updateAccessoryPrice() {
     const depositDisplay = document.getElementById('deposit_display');
     if (purchaseType === 'rent' && depositAmount > 0) {
         depositDisplay.style.display = 'block';
-        document.getElementById('deposit_amount').textContent = '₹' + depositAmount.toFixed(2);
+        document.getElementById('deposit_amount').textContent = '₹' + (depositAmount * quantity).toFixed(2);
     } else {
         depositDisplay.style.display = 'none';
     }
+}
+
+// Initialize accessory price on page load
+if (category === 'accessories') {
+    updateAccessoryPrice();
 }
 
 function addToCartCustom() {
