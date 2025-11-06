@@ -47,6 +47,7 @@ class Product(db.Model):
     product_type = db.Column(db.String(50), nullable=False)
     customization_options = db.Column(db.JSON)
     rent_price = db.Column(db.Float)
+    deposit_amount = db.Column(db.Float)
     image_url = db.Column(db.String(500))
     weight_per_unit = db.Column(db.Float)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

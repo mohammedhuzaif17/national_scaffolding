@@ -36,6 +36,7 @@
                 <th>Price</th>
                 <th>Category</th>
                 <th>Rent Price</th>
+                <th>Deposit</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -47,8 +48,9 @@
                 <td>₹{{ product.price }}</td>
                 <td>{{ product.category|title if product.category else 'N/A' }}</td>
                 <td>₹{{ product.rent_price if product.rent_price else 'N/A' }}</td>
+                <td>₹{{ product.deposit_amount if product.deposit_amount else 'N/A' }}</td>
                 <td>
-                    <button class="btn-secondary" onclick="editProduct({{ product.id }}, '{{ product.name }}', {{ product.price }}, '{{ product.description }}', '{{ product.category }}', {{ product.rent_price if product.rent_price else 0 }}, {{ product.weight_per_unit if product.weight_per_unit else 0 }})" style="padding: 0.5rem 1rem; margin-right: 0.5rem;">Edit</button>
+                    <button class="btn-secondary" onclick="editProduct({{ product.id }}, '{{ product.name }}', {{ product.price }}, '{{ product.description }}', '{{ product.category }}', {{ product.rent_price if product.rent_price else 0 }}, {{ product.weight_per_unit if product.weight_per_unit else 0 }}, {{ product.deposit_amount if product.deposit_amount else 0 }})" style="padding: 0.5rem 1rem; margin-right: 0.5rem;">Edit</button>
                     <button class="btn-danger" onclick="deleteProduct({{ product.id }})">Delete</button>
                 </td>
             </tr>
@@ -73,6 +75,11 @@
             <div class="form-group">
                 <label for="productRentPrice">Rent Price (₹/month)</label>
                 <input type="number" id="productRentPrice" step="0.01">
+            </div>
+            <div class="form-group">
+                <label for="productDeposit">Deposit Amount (₹)</label>
+                <input type="number" id="productDeposit" step="0.01">
+                <small style="color: #888; font-size: 0.85rem; display: block; margin-top: 0.5rem;">Deposit required when renting this product</small>
             </div>
             <div class="form-group">
                 <label for="productCategory">Category</label>
@@ -118,23 +125,28 @@ function updateCategoryFields() {
     const category = document.getElementById('productCategory').value;
     const rentField = document.getElementById('productRentPrice').closest('.form-group');
     const priceField = document.getElementById('productPrice').closest('.form-group');
+    const depositField = document.getElementById('productDeposit').closest('.form-group');
     const priceInput = document.getElementById('productPrice');
     const rentPriceInput = document.getElementById('productRentPrice');
+    const depositInput = document.getElementById('productDeposit');
     const weightField = document.getElementById('weightField');
     const categorySection = document.getElementById('categorySpecificSection');
     
-    // For Cuplock: Hide Price, Rent Price, and Weight fields - Only show Name, Description, and Images
+    // For Cuplock: Hide Price, Rent Price, Deposit and Weight fields - Only show Name, Description, and Images
     if (category === 'cuplock') {
         priceField.style.display = 'none';
         rentField.style.display = 'none';
+        depositField.style.display = 'none';
         weightField.style.display = 'none';
         // Remove required attribute and set default value for Cuplock
         priceInput.removeAttribute('required');
         priceInput.value = '0';
         rentPriceInput.value = '0';
+        depositInput.value = '0';
     } else {
         priceField.style.display = 'block';
         rentField.style.display = 'block';
+        depositField.style.display = 'block';
         weightField.style.display = 'none';
         // Re-add required attribute for other categories
         priceInput.setAttribute('required', 'required');
@@ -220,13 +232,14 @@ function showAddModal() {
     updateCategoryFields();
 }
 
-function editProduct(id, name, price, description, category, rentPrice, weight) {
+function editProduct(id, name, price, description, category, rentPrice, weight, deposit) {
     editMode = true;
     document.getElementById('modalTitle').textContent = 'Edit Product';
     document.getElementById('productId').value = id;
     document.getElementById('productName').value = name;
     document.getElementById('productPrice').value = price;
     document.getElementById('productRentPrice').value = rentPrice || '';
+    document.getElementById('productDeposit').value = deposit || '';
     document.getElementById('productCategory').value = category;
     document.getElementById('productDescription').value = description;
     document.getElementById('productWeight').value = weight || '';
@@ -275,6 +288,7 @@ document.getElementById('productForm').addEventListener('submit', async function
     formDataObj.append('name', document.getElementById('productName').value);
     formDataObj.append('price', document.getElementById('productPrice').value);
     formDataObj.append('rent_price', document.getElementById('productRentPrice').value || '');
+    formDataObj.append('deposit_amount', document.getElementById('productDeposit').value || '');
     formDataObj.append('category', document.getElementById('productCategory').value);
     formDataObj.append('description', document.getElementById('productDescription').value);
     formDataObj.append('weight_per_unit', document.getElementById('productWeight').value || '');
