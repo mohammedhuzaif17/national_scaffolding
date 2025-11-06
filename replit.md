@@ -36,8 +36,13 @@ The platform is built on a Flask backend with PostgreSQL as the database. The fr
 - **Admin Features:** Unified login with automatic panel routing, full CRUD operations on products with file upload and image preview, category management, and comprehensive orders dashboard with transaction IDs for payment verification.
 
 **System Design Choices:**
-- **Server-Side Price Calculation:** All pricing, including discounts and GST, is calculated server-side to prevent client-side manipulation.
-- **Security:** Robust security measures including server-side validation for all inputs, secure file upload handling, secure session management, password hashing, and separate authentication for users and administrators. Implemented transaction ID uniqueness validation to prevent fraud.
+- **Server-Side Price Calculation:** All pricing, including discounts and GST, is calculated server-side to prevent client-side manipulation. Aluminium scaffolding uses a comprehensive pricing matrix that considers both width (0.7m or 1.4m) and height (2m-16m) dimensions, with rent prices calculated as 20% of purchase prices.
+- **Aluminium Scaffolding Pricing Matrix:**
+  - Single Width (0.7m): Heights 2m-5m with prices ranging from ₹2,500 to ₹4,500
+  - Double Width (1.4m): Heights 2m-16m with prices ranging from ₹3,500 to ₹14,000
+  - Rental prices: 20% of purchase price for all combinations
+  - Frontend and backend use identical pricing matrices to ensure consistency
+- **Security:** Robust security measures including server-side validation for all inputs, secure file upload handling, secure session management, password hashing, and separate authentication for users and administrators. Implemented transaction ID uniqueness validation to prevent fraud. Orders created with 'pending_verification' status require admin approval after verifying actual payment amount.
 - **File Storage:** Product images uploaded by admins are stored in `static/uploads/` directory with secure filename handling.
 - **Modular Structure:** Clear separation of concerns with `app.py` for routes, `models.py` for database schema, and `seed_data.py` for initial data.
 
