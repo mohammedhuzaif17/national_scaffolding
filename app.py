@@ -750,6 +750,48 @@ def admin_delete_product(product_id):
     
     return jsonify({'success': True})
 
+@app.route('/admin_pricing_matrix/<int:product_id>')
+@login_required
+def admin_pricing_matrix(product_id):
+    if session.get('user_type') != 'admin':
+        return redirect(url_for('dashboard'))
+    
+    product = Product.query.get_or_404(product_id)
+    
+    if product.category != 'aluminium':
+        flash('Pricing matrix is only available for aluminium products', 'warning')
+        return redirect(url_for('admin_scaffoldings'))
+    
+    pricing_matrix = product.customization_options.get('pricing_matrix', {}) if product.customization_options else {}
+    
+    return render_template('admin_pricing_matrix.html', product=product, pricing_matrix=pricing_matrix)
+
+@app.route('/admin_update_pricing_matrix/<int:product_id>', methods=['POST'])
+@login_required
+def admin_update_pricing_matrix(product_id):
+    if session.get('user_type') != 'admin':
+        return jsonify({'success': False, 'message': 'Unauthorized'})
+    
+    product = Product.query.get_or_404(product_id)
+    
+    if product.category != 'aluminium':
+        return jsonify({'success': False, 'message': 'Pricing matrix only for aluminium products'})
+    
+    data = request.json
+    pricing_matrix = data.get('pricing_matrix', {})
+    
+    if not product.customization_options:
+        product.customization_options = {}
+    
+    product.customization_options['pricing_matrix'] = pricing_matrix
+    
+    from sqlalchemy.orm.attributes import flag_modified
+    flag_modified(product, 'customization_options')
+    
+    db.session.commit()
+    
+    return jsonify({'success': True, 'message': 'Pricing matrix updated successfully'})
+
 @app.route('/download-backup')
 def download_backup():
     """Temporary route to download project backup"""
