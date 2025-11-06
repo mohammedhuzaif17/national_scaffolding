@@ -311,6 +311,19 @@ button:active {
     transform: translateY(-1px);
 }
 
+.btn-primary {
+    background: var(--gradient-gold);
+    color: var(--royal-blue);
+    border: 2px solid var(--gold-dark);
+    font-weight: 700;
+}
+
+.btn-primary:hover {
+    background: var(--gold-metallic);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-xl), 0 0 25px rgba(212, 175, 55, 0.6);
+}
+
 .btn-secondary {
     background: var(--white);
     color: var(--royal-blue);

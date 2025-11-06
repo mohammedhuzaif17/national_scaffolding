@@ -202,12 +202,12 @@
             {% endif %}
             
             {% if current_user.is_authenticated and session.get('user_type') != 'admin' %}
-            <button class="btn-primary" onclick="addToCartCustom()" style="width: 100%; margin-top: 2rem;">
-                Add to Cart
+            <button class="btn-primary" onclick="addToCartCustom()" style="width: 100%; margin-top: 2rem; font-size: 1.1rem; padding: 1.2rem;">
+                🛒 Add to Cart
             </button>
             {% elif not current_user.is_authenticated %}
-            <button class="btn-primary" onclick="window.location.href='{{ url_for('login') }}'" style="width: 100%; margin-top: 2rem;">
-                Login to Purchase
+            <button class="btn-primary" onclick="window.location.href='{{ url_for('login') }}'" style="width: 100%; margin-top: 2rem; font-size: 1.1rem; padding: 1.2rem;">
+                🔐 Login to Purchase
             </button>
             {% endif %}
         </div>
