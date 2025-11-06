@@ -19,6 +19,19 @@ def calculate_price(product, customization):
     
     if category == 'aluminium':
         purchase_type = customization.get('purchaseType', 'buy')
+        width = str(customization.get('width', ''))
+        height = str(customization.get('height', ''))
+        
+        # Try to get price from pricing matrix in database
+        if product.customization_options and 'pricing_matrix' in product.customization_options:
+            pricing_matrix = product.customization_options['pricing_matrix']
+            if width in pricing_matrix and height in pricing_matrix[width]:
+                buy_price = pricing_matrix[width][height]
+                # Rent price is 20% of buy price
+                unit_price = (buy_price * 0.2) if purchase_type == 'rent' else buy_price
+                return unit_price
+        
+        # Fallback to base price if no matrix or combination not found
         if purchase_type == 'rent':
             unit_price = product.rent_price if product.rent_price else product.price
         else:
