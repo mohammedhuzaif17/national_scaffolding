@@ -57,13 +57,6 @@
                 <p class="product-category">{{ product.category }}</p>
                 {% endif %}
                 
-                {% if product.category != 'cuplock' %}
-                <div class="product-price">₹{{ product.price }}</div>
-                {% if product.rent_price %}
-                <p class="product-rent">Rent: ₹{{ product.rent_price }}/month</p>
-                {% endif %}
-                {% endif %}
-                
                 {% if product.category != 'cuplock' and current_user.is_authenticated and session.get('user_type') != 'admin' %}
                 <div class="form-group" style="margin-top: 1rem;">
                     <label for="quantity_{{ product.id }}">Quantity:</label>
