@@ -389,7 +389,7 @@ def login():
             login_user(user)
             session['user_type'] = 'user'
             session['cart'] = session.get('cart', [])
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('index'))
         
         flash('Invalid credentials', 'error')
     

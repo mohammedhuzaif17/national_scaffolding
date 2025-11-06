@@ -3,6 +3,20 @@
 {% block title %}Welcome - THE NATIONAL SCAFFOLDING{% endblock %}
 
 {% block content %}
+<!-- Welcome Popup -->
+<div id="welcomePopup" class="welcome-popup">
+    <div class="welcome-content">
+        <h1>Welcome to THE NATIONAL SCAFFOLDING</h1>
+        <p>We don't just build scaffolds — we build confidence. Explore our premium scaffolding and fabrication products for all your construction needs.</p>
+        <div class="popup-buttons">
+            <button class="btn-explore" onclick="closeWelcome()">Continue to Explore</button>
+            {% if not current_user.is_authenticated %}
+            <button class="btn-login" onclick="window.location.href='{{ url_for('login') }}'">Login / Register</button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
 <div class="glass-container">
     <h1 class="page-title">The National Scaffolding</h1>
     <p class="page-subtitle">Professional scaffolding services for all your construction needs</p>
@@ -98,6 +112,36 @@
 {% endblock %}
 
 {% block scripts %}
+// Show welcome popup only for non-logged-in users
+window.addEventListener('DOMContentLoaded', () => {
+    const popup = document.getElementById('welcomePopup');
+    const isLoggedIn = {{ 'true' if current_user.is_authenticated else 'false' }};
+    
+    if (isLoggedIn) {
+        // Never show popup for logged-in users
+        popup.style.display = 'none';
+        document.body.classList.remove('popup-active');
+    } else {
+        // Show popup for non-logged-in users (only once per session)
+        const popupShown = sessionStorage.getItem('welcomeShown');
+        
+        if (popupShown) {
+            popup.style.display = 'none';
+            document.body.classList.remove('popup-active');
+        } else {
+            // Show popup immediately with blur effect
+            popup.style.display = 'flex';
+            document.body.classList.add('popup-active');
+        }
+    }
+});
+
+function closeWelcome() {
+    document.getElementById('welcomePopup').style.display = 'none';
+    document.body.classList.remove('popup-active');
+    sessionStorage.setItem('welcomeShown', 'true');
+}
+
 function addToCart(productId, productName, price) {
     const quantity = parseInt(document.getElementById('quantity_' + productId).value);
     
