@@ -54,7 +54,13 @@ The platform is built on a Flask backend with PostgreSQL as the database. The fr
   - Product cards and purchase type dropdowns hide prices - only show "Buy" and "Rent" options without price display
   - Deposit amounts only visible to customers when "Rent" is selected on product detail pages
 - **Security:** Robust security measures including server-side validation for all inputs, secure file upload handling, secure session management, password hashing, and separate authentication for users and administrators. Implemented transaction ID uniqueness validation to prevent fraud. Orders created with 'pending_verification' status require admin approval after verifying actual payment amount.
-- **File Storage:** Product images uploaded by admins are stored in `static/uploads/` directory with secure filename handling.
+- **File Storage:** Product images uploaded by admins are stored in `static/uploads/` directory with secure filename handling. The system automatically creates the uploads directory if it doesn't exist, preventing file upload errors.
+- **Photo Upload System:** Admins can upload all image types (PNG, JPG, JPEG, GIF, WebP, BMP, SVG, TIFF, HEIC, AVIF, etc.) for both National Scaffolding categories and Fabrication products. The admin interface includes:
+  - Image preview before uploading
+  - Remove photo button (X) to delete existing photos
+  - Support for camera capture on mobile devices
+  - Automatic file cleanup when products are deleted
+  - Timestamped filenames to prevent naming conflicts
 - **Modular Structure:** Clear separation of concerns with `app.py` for routes, `models.py` for database schema, and `seed_data.py` for initial data.
 
 ## External Dependencies
