@@ -118,6 +118,19 @@ mail = Mail(app)
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def safe_float(value):
+    """Safely convert a value to float, returning None if value is empty or invalid"""
+    if value is None:
+        return None
+    if isinstance(value, str):
+        value = value.strip()
+        if value == '' or value.lower() == 'none':
+            return None
+    try:
+        return float(value)
+    except (ValueError, TypeError):
+        return None
+
 def send_order_confirmation_email(user, order, order_items):
     """Send order confirmation email to customer"""
     if not app.config['MAIL_USERNAME']:
@@ -806,15 +819,15 @@ def admin_add_product():
     
     product = Product(
         name=request.form.get('name'),
-        price=float(request.form.get('price')),
+        price=safe_float(request.form.get('price')) or 0.0,
         description=request.form.get('description', ''),
         category=request.form.get('category'),
         product_type=request.form.get('product_type'),
         customization_options=None,
-        rent_price=float(request.form.get('rent_price')) if request.form.get('rent_price') else None,
-        deposit_amount=float(request.form.get('deposit_amount')) if request.form.get('deposit_amount') else None,
+        rent_price=safe_float(request.form.get('rent_price')),
+        deposit_amount=safe_float(request.form.get('deposit_amount')),
         image_url=image_url,
-        weight_per_unit=float(request.form.get('weight_per_unit')) if request.form.get('weight_per_unit') else None
+        weight_per_unit=safe_float(request.form.get('weight_per_unit'))
     )
     
     db.session.add(product)
@@ -842,12 +855,32 @@ def admin_update_product(product_id):
             product.image_url = f"/static/uploads/{filename}"
     
     product.name = request.form.get('name')
-    product.price = float(request.form.get('price'))
+    
+    # Update price fields only if valid numbers are provided
+    new_price = safe_float(request.form.get('price'))
+    if new_price is not None:
+        product.price = new_price
+    
+    new_rent_price = safe_float(request.form.get('rent_price'))
+    if new_rent_price is not None:
+        product.rent_price = new_rent_price
+    elif request.form.get('rent_price') == '':
+        product.rent_price = None
+    
+    new_deposit = safe_float(request.form.get('deposit_amount'))
+    if new_deposit is not None:
+        product.deposit_amount = new_deposit
+    elif request.form.get('deposit_amount') == '':
+        product.deposit_amount = None
+    
+    new_weight = safe_float(request.form.get('weight_per_unit'))
+    if new_weight is not None:
+        product.weight_per_unit = new_weight
+    elif request.form.get('weight_per_unit') == '':
+        product.weight_per_unit = None
+    
     product.description = request.form.get('description', '')
     product.category = request.form.get('category')
-    product.rent_price = float(request.form.get('rent_price')) if request.form.get('rent_price') else None
-    product.deposit_amount = float(request.form.get('deposit_amount')) if request.form.get('deposit_amount') else None
-    product.weight_per_unit = float(request.form.get('weight_per_unit')) if request.form.get('weight_per_unit') else None
     
     db.session.commit()
     
