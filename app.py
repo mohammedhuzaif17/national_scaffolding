@@ -102,7 +102,9 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
 }
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg', 'tiff', 'tif', 'ico', 'jfif', 'pjpeg', 'pjp', 'avif', 'heic', 'heif'}
+
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
 app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
@@ -794,6 +796,7 @@ def admin_add_product():
     if 'product_image' in request.files:
         file = request.files['product_image']
         if file and file.filename and allowed_file(file.filename):
+            os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
             filename = secure_filename(file.filename)
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
             filename = f"{timestamp}_{filename}"
@@ -830,6 +833,7 @@ def admin_update_product(product_id):
     if 'product_image' in request.files:
         file = request.files['product_image']
         if file and file.filename and allowed_file(file.filename):
+            os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
             filename = secure_filename(file.filename)
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
             filename = f"{timestamp}_{filename}"
