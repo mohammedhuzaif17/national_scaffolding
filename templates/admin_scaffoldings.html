@@ -49,9 +49,6 @@
                 <td>₹{{ product.rent_price if product.rent_price else 'N/A' }}</td>
                 <td>
                     <button class="btn-secondary" onclick="editProduct({{ product.id }}, '{{ product.name }}', {{ product.price }}, '{{ product.description }}', '{{ product.category }}', {{ product.rent_price if product.rent_price else 0 }}, {{ product.weight_per_unit if product.weight_per_unit else 0 }})" style="padding: 0.5rem 1rem; margin-right: 0.5rem;">Edit</button>
-                    {% if product.category == 'aluminium' %}
-                    <button class="btn-primary" onclick="window.location.href='{{ url_for('admin_pricing_matrix', product_id=product.id) }}'" style="padding: 0.5rem 1rem; margin-right: 0.5rem; background: linear-gradient(135deg, #4CAF50, #45a049);">💰 Manage Pricing</button>
-                    {% endif %}
                     <button class="btn-danger" onclick="deleteProduct({{ product.id }})">Delete</button>
                 </td>
             </tr>
