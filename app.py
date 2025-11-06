@@ -19,10 +19,44 @@ def calculate_price(product, customization):
     
     if category == 'aluminium':
         purchase_type = customization.get('purchaseType', 'buy')
-        if purchase_type == 'rent':
-            unit_price = product.rent_price if product.rent_price else product.price
+        width = float(customization.get('width', 0.7))
+        height = float(customization.get('height', 2))
+        
+        # Aluminium Scaffolding Pricing Matrix
+        aluminium_pricing = {
+            0.7: {  # Single Width
+                2.0: 2500,
+                3.0: 3200,
+                4.0: 3800,
+                5.0: 4500
+            },
+            1.4: {  # Double Width
+                2.0: 3500,
+                3.0: 4200,
+                4.0: 5000,
+                5.0: 5800,
+                6.0: 6500,
+                7.0: 7200,
+                8.0: 8000,
+                9.0: 8800,
+                10.0: 9500,
+                11.0: 10300,
+                12.0: 11000,
+                13.0: 11800,
+                14.0: 12500,
+                15.0: 13300,
+                16.0: 14000
+            }
+        }
+        
+        # Get price from matrix
+        if width in aluminium_pricing and height in aluminium_pricing[width]:
+            buy_price = aluminium_pricing[width][height]
+            unit_price = buy_price * 0.2 if purchase_type == 'rent' else buy_price
         else:
-            unit_price = product.price
+            # Fallback to base price if combination not found
+            unit_price = product.rent_price if purchase_type == 'rent' else product.price
+        
         return unit_price
     
     elif category == 'h-frames':

@@ -221,12 +221,54 @@ const rentPrice = {{ product.rent_price if product.rent_price else 0 }};
 const category = '{{ product.category }}';
 const weightPerUnit = {{ product.weight_per_unit if product.weight_per_unit else 5 }};
 
+// Aluminium Scaffolding Pricing Matrix (Buy Prices)
+const aluminiumPricing = {
+    '0.7': {  // Single Width
+        '2': 2500,
+        '3': 3200,
+        '4': 3800,
+        '5': 4500
+    },
+    '1.4': {  // Double Width
+        '2': 3500,
+        '3': 4200,
+        '4': 5000,
+        '5': 5800,
+        '6': 6500,
+        '7': 7200,
+        '8': 8000,
+        '9': 8800,
+        '10': 9500,
+        '11': 10300,
+        '12': 11000,
+        '13': 11800,
+        '14': 12500,
+        '15': 13300,
+        '16': 14000
+    }
+};
+
+// Rent prices are 20% of buy prices
+function getAluminiumPrice(width, height, purchaseType) {
+    const widthKey = width.toString();
+    const heightKey = height.toString();
+    
+    if (aluminiumPricing[widthKey] && aluminiumPricing[widthKey][heightKey]) {
+        const buyPrice = aluminiumPricing[widthKey][heightKey];
+        return purchaseType === 'rent' ? buyPrice * 0.2 : buyPrice;
+    }
+    
+    // Fallback to base price if combination not found
+    return purchaseType === 'buy' ? basePrice : rentPrice;
+}
+
 function updateAluminiumPrice() {
     const width = parseFloat(document.getElementById('width').value);
     const height = parseFloat(document.getElementById('height').value);
     const purchaseType = document.getElementById('purchase_type').value;
     const quantity = parseInt(document.getElementById('quantity').value);
     
+    // Disable heights > 5m for single width
     if (width === 0.7) {
         ['6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'].forEach(h => {
             const opt = document.getElementById('height_' + h);
@@ -240,7 +282,7 @@ function updateAluminiumPrice() {
         });
     }
     
-    const price = purchaseType === 'buy' ? basePrice : rentPrice;
+    const price = getAluminiumPrice(width, height, purchaseType);
     const total = price * quantity;
     document.getElementById('final_price').textContent = '₹' + total.toFixed(2);
 }
@@ -309,7 +351,7 @@ function addToCartCustom() {
         const height = document.getElementById('height').value;
         const purchaseType = document.getElementById('purchase_type').value;
         customization = { width, height, purchaseType, quantity };
-        unitPrice = purchaseType === 'buy' ? basePrice : rentPrice;
+        unitPrice = getAluminiumPrice(parseFloat(width), parseFloat(height), purchaseType);
         finalPrice = unitPrice * quantity;
     } else if (category === 'h-frames') {
         let discount = 0;
