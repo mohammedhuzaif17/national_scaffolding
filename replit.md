@@ -19,7 +19,7 @@ The platform is built on a Flask backend with PostgreSQL as the database. The fr
 - **Typography:** Combination of Playfair Display for headings (elegant serif) and Poppins for body text and numerical values (clean sans-serif), creating a luxurious yet readable appearance with excellent hierarchy and professional feel. All numbers use professional Poppins font for clarity.
 - **Interactivity:** Smooth CSS transitions with premium animations including fade-in effects, scale transformations, gold glow effects on hover, elegant underline animations on navigation links, and subtle ripple effects on buttons. All animations are classy and refined, not flashy.
 - **Color Palette:** Deep Blue (#001d3d) gradient backgrounds, Gold highlights on interactive elements, white/cream content areas for elegant contrast, gold borders on premium cards and sections, and soft shadows with deep blue tints.
-- **User Flow:** Enhanced registration, unified login for admins and users, category-specific product browsing, session-based welcome popup with gold-bordered design appearing only for non-logged-in users with background blur effect (logged-in users bypass the popup), streamlined fabrication page with "View Details"-only workflow, and expandable Privacy Policy and Terms of Use sections in footer.
+- **User Flow:** Enhanced registration, unified login for admins and users, landing page displays National Scaffolding products directly with category filtering (Aluminium, H-Frames, Cuplock, Accessories), session-based welcome popup with gold-bordered design appearing only for non-logged-in users with background blur effect (logged-in users bypass the popup), streamlined fabrication page with "View Details"-only workflow, and expandable Privacy Policy and Terms of Use sections in footer.
 - **Product Customization:** Extensive use of dropdowns for product specifications (e.g., Aluminium scaffolding dimensions, H-Frame quantities with discount tiers, Cuplock requiring both vertical and ledger specifications).
 
 **Technical Implementations:**
@@ -33,15 +33,16 @@ The platform is built on a Flask backend with PostgreSQL as the database. The fr
 
 **Feature Specifications:**
 - **User Features:** Enhanced registration, unified login, product browsing, dynamic product customization, session-based welcome popup, shopping cart, PhonePe QR payment verification with real-time UPI transaction ID validation, and order history.
-- **Admin Features:** Unified login with automatic panel routing, full CRUD operations on products with file upload and image preview, category management, and comprehensive orders dashboard with transaction IDs for payment verification.
+- **Admin Features:** Unified login with automatic panel routing, full CRUD operations on products with file upload and image preview, pricing matrix management for aluminium scaffolding products (set custom prices for each width/height combination), category management, and comprehensive orders dashboard with transaction IDs for payment verification.
 
 **System Design Choices:**
 - **Server-Side Price Calculation:** All pricing, including discounts and GST, is calculated server-side to prevent client-side manipulation. Aluminium scaffolding uses a comprehensive pricing matrix that considers both width (0.7m or 1.4m) and height (2m-16m) dimensions, with rent prices calculated as 20% of purchase prices.
 - **Aluminium Scaffolding Pricing Matrix:**
-  - Single Width (0.7m): Heights 2m-5m with prices ranging from ₹2,500 to ₹4,500
-  - Double Width (1.4m): Heights 2m-16m with prices ranging from ₹3,500 to ₹14,000
+  - Dynamic pricing stored in database and managed through admin interface
+  - Default pricing: Single Width (0.7m) Heights 2m-5m (₹2,500-₹4,500), Double Width (1.4m) Heights 2m-16m (₹3,500-₹14,000)
   - Rental prices: 20% of purchase price for all combinations
-  - Frontend and backend use identical pricing matrices to ensure consistency
+  - Admins can customize prices for each width/height combination via admin dashboard
+  - Frontend and backend load pricing dynamically from database to ensure consistency
 - **Security:** Robust security measures including server-side validation for all inputs, secure file upload handling, secure session management, password hashing, and separate authentication for users and administrators. Implemented transaction ID uniqueness validation to prevent fraud. Orders created with 'pending_verification' status require admin approval after verifying actual payment amount.
 - **File Storage:** Product images uploaded by admins are stored in `static/uploads/` directory with secure filename handling.
 - **Modular Structure:** Clear separation of concerns with `app.py` for routes, `models.py` for database schema, and `seed_data.py` for initial data.
