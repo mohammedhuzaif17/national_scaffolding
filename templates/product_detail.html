@@ -3,343 +3,495 @@
 {% block title %}{{ product.name }} - National Scaffolding{% endblock %}
 
 {% block content %}
+<style>
+:root{
+    --brand-900: #001d3d;
+    --brand-700: #002855;
+    --accent: #ffd966;
+    --muted: #666;
+}
+
+.glass-container {
+    max-width: 1100px;
+    margin: 20px auto;
+    padding: 18px;
+    font-family: Inter,  sans-serif;
+    color: #111827;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+@media (max-width: 880px) {
+    .detail-grid { grid-template-columns: 1fr; }
+}
+
+/* Gallery */
+.product-detail-gallery {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.gallery-main-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.gallery-main-image {
+    position: absolute;
+    inset: 0;.
+    opacity: 0;
+    transition: opacity 0.45s ease-in-out;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fafafa;
+}
+
+.gallery-main-image.active {
+    opacity: 1;
+    z-index: 1;
+    pointer-events: auto;
+}
+
+.gallery-main-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 10px;
+    cursor: zoom-in;
+}
+
+.gallery-thumbnails {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+}
+
+.gallery-thumbnail {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: all 0.18s ease;
+    flex-shrink: 0;
+}
+.gallery-thumbnail:hover { transform: scale(1.03); border-color: rgba(0,0,0,0.06); }
+.gallery-thumbnail.active { border-color: #d4af37; transform: scale(1.05); }
+
+.gallery-navigation {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.65);
+    color: white;
+    border: 2px solid rgba(255,255,255,0.8);
+    width: 48px;
+    height: 48px;
+    cursor: pointer;
+    font-size: 26px;
+    border-radius: 50%;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.gallery-prev { left: 14px; }
+.gallery-next { right: 14px; }
+.gallery-navigation.single-image { display: none !important; }
+
+.gallery-counter {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(0,0,0,0.66);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-weight: 700;
+    z-index: 30;
+}
+
+.no-image-box {
+    background: rgba(255,255,255,0.06);
+    padding: 3.5rem;
+    text-align: center;
+    border-radius: 10px;
+}
+
+/* Product info */
+.page-title { font-size: 1.6rem; margin: 0; color: var(--brand-900); }
+.product-meta { color: var(--accent); text-transform: uppercase; margin: 8px 0 16px; font-weight:700; }
+.product-description { color: var(--muted); line-height:1.6; margin-bottom: 1rem; }
+
+.customization-section { margin-top: 10px; }
+.product-price { font-size: 1.3rem; font-weight: 900; color: var(--brand-900); margin-top: 8px; }
+.form-group { margin-bottom: 10px; }
+.form-group label { display:block; margin-bottom:6px; font-weight:700; color:var(--brand-700); }
+.form-group select { width:100%; padding:8px 10px; border-radius:6px; border:1px solid #e6e9ee; }
+
+.btn-primary {
+    background: linear-gradient(135deg,var(--brand-700),var(--brand-900));
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: 800;
+    width: 100%;
+    cursor: pointer;
+}
+
+.toast-notification {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background-color: rgba(0,0,0,0.82);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 6px;
+    z-index: 2000;
+    opacity: 0;
+    transition: all .28s ease;
+}
+.toast-notification.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+    padding: 18px;
+}
+.modal-overlay.show { display: flex; }
+
+.modal-content {
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    max-height: 95vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-image-wrap {
+    width: 100%;
+    height: 0;
+    padding-bottom: 56%;
+    position: relative;
+}
+.modal-image-wrap img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.modal-close, .modal-nav {
+    position: absolute;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    border: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 3050;
+}
+.modal-close { right: 18px; top: 18px; }
+.modal-nav { top: 50%; transform: translateY(-50%); width: 56px; height: 56px; font-size: 28px; }
+.modal-prev { left: 12px; }
+.modal-next { right: 12px; }
+
+@media (max-width: 480px) {
+    .gallery-thumbnail { width: 56px; height:56px; }
+    .product-detail-gallery { height: 260px; }
+}
+</style>
+
 <div class="glass-container">
     <button class="btn-secondary" onclick="history.back()" style="margin-bottom: 1rem;">← Back to Products</button>
-    
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+
+    <div class="detail-grid">
+        <!-- Gallery -->
         <div>
-            {% if product.image_url %}
-            <img src="{{ product.image_url }}" alt="{{ product.name }}" style="width: 100%; border-radius: 10px;">
-            {% else %}
-            <div style="background: rgba(255, 255, 255, 0.1); padding: 5rem; text-align: center; border-radius: 10px;">
-                <p style="color: #ffa500; font-size: 1.5rem;">📦</p>
-                <p>Product Image</p>
+        {% if product.image_url %}
+    {% set valid_images = product.image_url
+        .split(',')
+        | map('trim')
+        | reject('equalto', '')
+        | list %}
+
+    {% if valid_images|length > 0 %}
+
+        <div class="product-detail-gallery">
+            <div class="gallery-main-container">
+                {% for img_url in valid_images %}
+                <div class="gallery-main-image {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}">
+                    <img src="{{ img_url }}" alt="{{ product.name }} - Image {{ loop.index }}" loading="lazy" onclick="openModal({{ loop.index0 }})">
+                </div>
+                {% endfor %}
             </div>
+
+            {% if valid_images|length > 1 %}
+                <div class="gallery-counter"><span id="currentImageNum">1</span> / {{ valid_images|length }}</div>
+                <button class="gallery-navigation gallery-prev" id="galleryPrev">‹</button>
+                <button class="gallery-navigation gallery-next" id="galleryNext">›</button>
+            {% else %}
+                <button class="gallery-navigation gallery-prev single-image" style="display:none;">‹</button>
+                <button class="gallery-navigation gallery-next single-image" style="display:none;">›</button>
             {% endif %}
         </div>
-        
+        {% if valid_images|length > 1 %}
+        <div class="gallery-thumbnails">
+            {% for img_url in valid_images %}
+            <img src="{{ img_url }}" alt="{{ product.name }} thumbnail {{ loop.index }}" loading="lazy"
+                 class="gallery-thumbnail {% if loop.first %}active{% endif %}"
+                 data-index="{{ loop.index0 }}"
+                 onclick="setMainImage({{ loop.index0 }})">
+            {% endfor %}
+        </div>
+        {% endif %}
+
+    {% else %}
+        <div class="no-image-box"><p style="font-size: 2rem; color: #ffa500">📦</p><p>No Image Available</p></div>
+    {% endif %}
+
+{% else %}
+    <div class="no-image-box"><p style="font-size: 2rem; color: #ffa500">📦</p><p>Product Image Not Set</p></div>
+{% endif %}
+</div>
+        <!-- Info -->
         <div>
             <h1 class="page-title">{{ product.name }}</h1>
-            <p style="color: #ffa500; text-transform: uppercase; margin-bottom: 1rem;">{{ product.category|title }}</p>
-            <p style="margin-bottom: 2rem;">{{ product.description }}</p>
-            
+            <p class="product-meta">{{ product.category|title if product.category else 'N/A' }}</p>
+            <p class="product-description">{{ product.description }}</p>
+
+            <!-- Product details and pricing -->
             {% if product.category == 'aluminium' %}
             <div class="customization-section">
-                <h3 style="color: #ffa500; margin-bottom: 1rem;">Customize Your Product</h3>
-                
-                <div class="form-group">
-                    <label>Width</label>
-                    <select id="width" onchange="updateAluminiumPrice()">
-                        <option value="0.7">Single Width (0.7 m)</option>
-                        <option value="1.4">Double Width (1.4 m)</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>Height</label>
-                    <select id="height" onchange="updateAluminiumPrice()">
-                        <option value="2">2m</option>
-                        <option value="3">3m</option>
-                        <option value="4">4m</option>
-                        <option value="5">5m</option>
-                        <option value="6" disabled id="height_6">6m (Double Width Only)</option>
-                        <option value="7" disabled id="height_7">7m (Double Width Only)</option>
-                        <option value="8" disabled id="height_8">8m (Double Width Only)</option>
-                        <option value="9" disabled id="height_9">9m (Double Width Only)</option>
-                        <option value="10" disabled id="height_10">10m (Double Width Only)</option>
-                        <option value="11" disabled id="height_11">11m (Double Width Only)</option>
-                        <option value="12" disabled id="height_12">12m (Double Width Only)</option>
-                        <option value="13" disabled id="height_13">13m (Double Width Only)</option>
-                        <option value="14" disabled id="height_14">14m (Double Width Only)</option>
-                        <option value="15" disabled id="height_15">15m (Double Width Only)</option>
-                        <option value="16" disabled id="height_16">16m (Double Width Only)</option>
-                    </select>
-                </div>                
-                <div class="form-group">
-                    <label>Purchase Type</label>
+                <h3 style="color: var(--accent); margin-bottom: 8px;">Product Details</h3>
+                <p style="color: var(--muted); margin-bottom: 1rem;">Height and width specifications are included in product description.</p>
+
+                <div class="form-group"><label for="purchase_type">Purchase Type</label>
                     <select id="purchase_type" onchange="updateAluminiumPrice()">
                         <option value="buy">Buy</option>
-                        {% if product.rent_price %}
-                        <option value="rent">Rent</option>
-                        {% endif %}
+                        {% if product.rent_price %}<option value="rent">Rent</option>{% endif %}
                     </select>
                 </div>
-                
-                <div class="form-group">
-                    <label>Quantity</label>
+
+                <div class="form-group"><label for="quantity">Quantity</label>
                     <select id="quantity" onchange="updateAluminiumPrice()">
-                        {% for i in range(1, 51) %}
+                        {% for i in range(1,51) %}
                         <option value="{{ i }}" {% if i == 1 %}selected{% endif %}>{{ i }}</option>
                         {% endfor %}
                     </select>
                 </div>
-                
-                <div class="product-price" id="final_price">₹{{ product.price }}</div>
-                <div id="deposit_display" style="color: #d4af37; margin-top: 1rem; font-size: 1.1rem; display: none;">
+
+                <div class="product-price" id="final_price_display">₹{{ product.price }}</div>
+                <div id="deposit_display" style="color: #d4af37; margin-top: 1rem; display: none;">
                     <strong>Deposit Required:</strong> <span id="deposit_amount">₹0</span>
                 </div>
             </div>
-            
-            {% elif product.category == 'h-frames' %}
+
+            {% elif product.category == 'h-frames' or product.category == 'accessories' %}
             <div class="customization-section">
-                <div class="form-group">
-                    <label>Purchase Type</label>
-                    <select id="purchase_type" onchange="updateHFramePrice()">
+                <div class="form-group"><label for="purchase_type">Purchase Type</label>
+                    <select id="purchase_type" onchange="updatePrice()">
                         <option value="buy">Buy</option>
-                        {% if product.rent_price %}
-                        <option value="rent">Rent</option>
-                        {% endif %}
+                        {% if product.rent_price %}<option value="rent">Rent</option>{% endif %}
                     </select>
                 </div>
-                
-                <div class="form-group">
-                    <label>Quantity</label>
-                    <select id="quantity" onchange="updateHFramePrice()">
-                        {% for i in range(1, 201) %}
-                        <option value="{{ i }}">{{ i }} {% if i == 1 %}set{% else %}sets{% endif %}</option>
+
+                <div class="form-group"><label for="quantity">Quantity</label>
+                    <select id="quantity" onchange="updatePrice()">
+                        {% for i in range(1,201) %}
+                        <option value="{{ i }}">{{ i }}</option>
                         {% endfor %}
                     </select>
                 </div>
-                
-                <div class="product-price" id="final_price">₹{{ product.price }}</div>
-                <div id="deposit_display" style="color: #d4af37; margin-top: 1rem; font-size: 1.1rem; display: none;">
+
+                <div class="product-price" id="final_price_display">₹{{ product.price }}</div>
+                <div id="deposit_display" style="color: #d4af37; margin-top: 1rem; display:none;">
                     <strong>Deposit Required:</strong> <span id="deposit_amount">₹0</span>
                 </div>
             </div>
-            
+
             {% elif product.category == 'cuplock' %}
-            <div class="customization-section" style="max-width: 100%;">
-                {% if 'Vertical' in product.name %}
-                <div style="background: rgba(30, 58, 138, 0.2); padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; width: 100%;">
-                    <h4 style="color: #ffa500; margin-bottom: 1rem;">Vertical Specifications</h4>
-                    
-                    <div class="form-group">
-                        <label>Vertical Size</label>
-                        <select id="vertical_size">
-                            <option value="1">1m</option>
-                            <option value="2">2m</option>
-                            <option value="3">3m</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Number of Cups</label>
-                        <select id="cups">
-                            <option value="1">1 Cup</option>
-                            <option value="2">2 Cups</option>
-                            <option value="3">3 Cups</option>
-                            <option value="4">4 Cups</option>
-                            <option value="5">5 Cups</option>
-                            <option value="6">6 Cups</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Custom Length (1.1m - 3.0m)</label>
-                        <input type="number" id="custom_length" value="1.1" min="1.1" max="3.0" step="0.1">
-                    </div>
-                </div>
-                {% elif 'Ledger' in product.name %}
-                <div style="background: rgba(30, 58, 138, 0.2); padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; width: 100%;">
-                    <h4 style="color: #ffa500; margin-bottom: 1rem;">Ledger Specifications</h4>
-                    
-                    <div class="form-group">
-                        <label>Ledger Size</label>
-                        <select id="ledger_size">
-                            <option value="0.5">0.5m</option>
-                            <option value="0.73">0.73m</option>
-                            <option value="1.0">1.0m</option>
-                            <option value="1.09">1.09m</option>
-                            <option value="1.4">1.4m</option>
-                            <option value="1.57">1.57m</option>
-                            <option value="2.07">2.07m</option>
-                            <option value="2.57">2.57m</option>
-                            <option value="3.07">3.07m</option>
-                        </select>
-                    </div>
-                </div>
-                {% endif %}
-                
-                <div style="background: linear-gradient(135deg, #001d3d 0%, #003d7a 100%); padding: 2rem; border-radius: 12px; margin: 1.5rem 0; border: 2px solid #d4af37; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);">
-                    <h3 style="color: #d4af37; margin-bottom: 1rem; text-align: center;">Product Information</h3>
-                    <p style="color: #ffffff; font-size: 1.1rem; line-height: 1.8; text-align: center;">
-                        This product is available for both <strong style="color: #d4af37;">rent</strong> and <strong style="color: #d4af37;">sale</strong>.<br>
-                        For detailed pricing, specifications, and availability,<br>
-                        please contact us directly.
-                    </p>
-                    <div style="margin-top: 1.5rem; text-align: center; padding-top: 1rem; border-top: 1px solid rgba(212, 175, 55, 0.3);">
-                        <p style="color: #d4af37; font-weight: bold; margin-bottom: 0.5rem;">Contact Us:</p>
-                        <p style="color: #ffffff;">
-                            📧 Email: sales@nationalscaffolding.com<br>
-                            📞 Phone: +91-XXXXXXXXXX
-                        </p>
-                    </div>
-                </div>
+            <div style="background: linear-gradient(135deg,#001d3d,#003d7a); padding: 16px; border-radius:10px; color:#fff;">
+                <h3 style="color:#d4af37; text-align:center;">Product Information</h3>
+                <p style="text-align:center;">This product is available for both <strong>rent</strong> and <strong>sale</strong>. Please contact sales for pricing.</p>
             </div>
-            
-            {% elif product.category == 'accessories' %}
-            <div class="customization-section">
-                <div class="form-group">
-                    <label>Purchase Type</label>
-                    <select id="purchase_type" onchange="updateAccessoryPrice()">
-                        <option value="buy">Buy</option>
-                        <option value="rent">Rent</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>Quantity</label>
-                    <select id="quantity" onchange="updateAccessoryPrice()">
-                        {% for i in range(1, 51) %}
-                        <option value="{{ i }}" {% if i == 1 %}selected{% endif %}>{{ i }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                
-                <div class="product-price" id="final_price">₹{{ product.price }}</div>
-                <div id="deposit_display" style="color: #d4af37; margin-top: 1rem; font-size: 1.1rem; display: none;">
-                    <strong>Deposit Required:</strong> <span id="deposit_amount">₹0</span>
-                </div>
-            </div>
-            
+
             {% else %}
-            <div class="product-price">₹{{ product.price }}</div>
-            {% if product.rent_price %}
-            <p style="color: #4CAF50; margin-top: 1rem;">Rent: ₹{{ product.rent_price }}/month</p>
-            {% endif %}
-            
-            <div class="form-group" style="margin-top: 2rem;">
-                <label>Quantity</label>
-                <select id="quantity">
-                    {% for i in range(1, 51) %}
-                    <option value="{{ i }}" {% if i == 1 %}selected{% endif %}>{{ i }}</option>
-                    {% endfor %}
-                </select>
+            <div>
+                <div class="product-price">₹{{ product.price }}</div>
+                <div class="form-group" style="margin-top:12px;"><label for="quantity">Quantity</label>
+                    <select id="quantity">{% for i in range(1,51) %}<option value="{{ i }}" {% if i==1 %}selected{% endif %}>{{ i }}</option>{% endfor %}</select>
+                </div>
             </div>
             {% endif %}
-            
+
+            <!-- Add to cart button -->
             {% if product.category != 'cuplock' %}
                 {% if current_user.is_authenticated and session.get('user_type') == 'admin' %}
-                <div style="background: rgba(255, 165, 0, 0.2); padding: 1.5rem; border-radius: 8px; margin-top: 2rem; text-align: center;">
-                    <p style="color: #ffa500; font-weight: bold; margin: 0;">
-                        ℹ️ Admin accounts cannot make purchases. Please use a customer account to add items to cart.
-                    </p>
+                <div style="background: rgba(255, 165, 0, 0.12); padding: 12px; border-radius: 8px; margin-top: 12px;">
+                    <p style="margin:0; font-weight:700; color:#ffa500;">ℹ️ Admin accounts cannot make purchases.</p>
                 </div>
                 {% elif current_user.is_authenticated %}
-                <button class="btn-primary" onclick="addToCartCustom()" style="width: 100%; margin-top: 2rem; font-size: 1.1rem; padding: 1.2rem;">
-                    🛒 Add to Cart
-                </button>
+                <div style="margin-top: 16px;">
+                    <button class="btn-primary" id="addToCartBtn" onclick="addToCartCustom()">🛒 Add to Cart</button>
+                </div>
                 {% else %}
-                <button class="btn-primary" onclick="window.location.href='{{ url_for('login') }}'" style="width: 100%; margin-top: 2rem; font-size: 1.1rem; padding: 1.2rem;">
-                    🔐 Login to Purchase
-                </button>
+                <div style="margin-top: 16px;">
+                    <button class="btn-primary" onclick="window.location.href='{{ url_for('login') }}'">🔐 Login to Purchase</button>
+                </div>
                 {% endif %}
             {% endif %}
         </div>
     </div>
 </div>
+
+<!-- Modal -->
+<div id="imageModal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal()">✕</button>
+        <button class="modal-nav modal-prev" onclick="modalPrev()">‹</button>
+        <div class="modal-image-wrap">
+            <img id="modalImage" src="" alt="">
+        </div>
+        <button class="modal-nav modal-next" onclick="modalNext()">›</button>
+    </div>
+</div>
+
+<div id="toast" class="toast-notification"></div>
+
 {% endblock %}
 
 {% block scripts %}
-// Load pricing from pricing_matrix if available, otherwise use product fields
-const pricingMatrix = {{ product.customization_options.get('pricing_matrix', {})|tojson|safe if product.customization_options else '{}' }};
-const category = '{{ product.category }}';
+<script>
+(() => {
+    let galleryImages = [];
+    let totalImages = 0;
+    let currentIndex = 0;
 
-// For Accessories and H-Frames: Use pricing_matrix if available
+    {% if product.image_url %}
+    const rawImages = `{{ product.image_url }}`.split(',');
+    galleryImages = rawImages.map(s => s.trim()).filter(s => s !== '');
+    totalImages = galleryImages.length;
+    {% endif %}
+
+    const prevBtn = document.getElementById('galleryPrev');
+    const nextBtn = document.getElementById('galleryNext');
+    const counterEl = document.getElementById('currentImageNum');
+
+    function setActiveImage(index) {
+        index = Math.max(0, Math.min(index, totalImages - 1));
+        const mainItems = document.querySelectorAll('.gallery-main-image');
+        const thumbs = document.querySelectorAll('.gallery-thumbnail');
+
+        if (mainItems[currentIndex]) mainItems[currentIndex].classList.remove('active');
+        if (thumbs[currentIndex]) thumbs[currentIndex].classList.remove('active');
+
+        currentIndex = index;
+
+        if (mainItems[currentIndex]) mainItems[currentIndex].classList.add('active');
+        if (thumbs[currentIndex]) thumbs[currentIndex].classList.add('active');
+        if (counterEl) counterEl.textContent = (currentIndex + 1);
+    }
+
+    window.setMainImage = function(i) {
+        setActiveImage(parseInt(i));
+    };
+
+    function prevImage() { if (totalImages > 1) setActiveImage((currentIndex - 1 + totalImages) % totalImages); }
+    function nextImage() { if (totalImages > 1) setActiveImage((currentIndex + 1) % totalImages); }
+
+    if (prevBtn) prevBtn.addEventListener('click', prevImage);
+    if (nextBtn) nextBtn.addEventListener('click', nextImage);
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') prevImage();
+        if (e.key === 'ArrowRight') nextImage();
+        if (e.key === 'Escape') closeModal();
+    });
+
+    // Modal
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('modalImage');
+
+    window.openModal = function(index) {
+        if (!galleryImages || galleryImages.length === 0) return;
+        index = Math.max(0, Math.min(index, galleryImages.length - 1));
+        modal.classList.add('show');
+        modalImg.src = galleryImages[index];
+        modalCurrentIndex = index;
+    };
+
+    window.closeModal = function() {
+        modal.classList.remove('show');
+        modalImg.src = '';
+    };
+
+    let modalCurrentIndex = 0;
+    window.modalPrev = function() {
+        if (!galleryImages || galleryImages.length <= 1) return;
+        modalCurrentIndex = (modalCurrentIndex - 1 + galleryImages.length) % galleryImages.length;
+        modalImg.src = galleryImages[modalCurrentIndex];
+    };
+
+    window.modalNext = function() {
+        if (!galleryImages || galleryImages.length <= 1) return;
+        modalCurrentIndex = (modalCurrentIndex + 1) % galleryImages.length;
+        modalImg.src = galleryImages[modalCurrentIndex];
+    };
+
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) closeModal();
+    });
+})();
+
+// Pricing
+const category = '{{ product.category }}';
 let basePrice = {{ product.price }};
 let rentPrice = {{ product.rent_price if product.rent_price else 0 }};
 let depositAmount = {{ product.deposit_amount if product.deposit_amount else 0 }};
 
-// Override with pricing matrix if available (for accessories and h-frames)
-if (pricingMatrix && typeof pricingMatrix === 'object') {
-    if (category === 'accessories' || category === 'h-frames') {
-        if (pricingMatrix.buy !== undefined) basePrice = pricingMatrix.buy;
-        if (pricingMatrix.rent !== undefined) rentPrice = pricingMatrix.rent;
-        if (pricingMatrix.deposit !== undefined) depositAmount = pricingMatrix.deposit;
-    }
-}
-
-const weightPerUnit = {{ product.weight_per_unit if product.weight_per_unit else 5 }};
-
-// Aluminium Scaffolding Pricing Matrix (Load from Database)
-const aluminiumPricing = pricingMatrix;
-
-// Get aluminium price and deposit from pricing matrix (handles both old and new formats)
-function getAluminiumPriceData(width, height, purchaseType) {
-    const widthKey = width.toString();
-    const heightKey = height.toString();
-    
-    let price = basePrice;
-    let deposit = depositAmount;
-    
-    if (aluminiumPricing[widthKey] && aluminiumPricing[widthKey][heightKey]) {
-        const priceData = aluminiumPricing[widthKey][heightKey];
-        
-        // Handle both old format (single number) and new format (object with buy/rent/deposit)
-        if (typeof priceData === 'object') {
-            // New format: {buy: xxx, rent: yyy, deposit: zzz}
-            if (purchaseType === 'rent') {
-                // Use rent price if available, otherwise calculate as 20% of buy
-                price = priceData.rent || (priceData.buy ? priceData.buy * 0.2 : rentPrice);
-            } else {
-                price = priceData.buy || basePrice;
-            }
-            deposit = priceData.deposit || depositAmount;
-        } else {
-            // Old format: just a number (buy price)
-            const buyPrice = priceData;
-            price = purchaseType === 'rent' ? buyPrice * 0.2 : buyPrice;
-        }
-    } else {
-        // Fallback to base price if combination not found
-        price = purchaseType === 'buy' ? basePrice : rentPrice;
-    }
-    
-    return { price, deposit };
-}
-
 function updateAluminiumPrice() {
-    const width = parseFloat(document.getElementById('width').value);
-    const height = parseFloat(document.getElementById('height').value);
-    const purchaseType = document.getElementById('purchase_type').value;
     const quantity = parseInt(document.getElementById('quantity').value);
-    
-    // Disable heights > 5m for single width
-    if (width === 0.7) {
-        ['6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'].forEach(h => {
-            const opt = document.getElementById('height_' + h);
-            if (opt) opt.disabled = true;
-        });
-        if (height > 5) document.getElementById('height').value = '2';
-    } else {
-        ['6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'].forEach(h => {
-            const opt = document.getElementById('height_' + h);
-            if (opt) opt.disabled = false;
-        });
-    }
-    
-    const priceData = getAluminiumPriceData(width, height, purchaseType);
-    const total = priceData.price * quantity;
-    document.getElementById('final_price').textContent = '₹' + total.toFixed(2);
-    
-    // Show/hide deposit based on purchase type
-    const depositDisplay = document.getElementById('deposit_display');
-    if (purchaseType === 'rent' && priceData.deposit > 0) {
-        depositDisplay.style.display = 'block';
-        document.getElementById('deposit_amount').textContent = '₹' + priceData.deposit.toFixed(2);
-    } else {
-        depositDisplay.style.display = 'none';
-    }
-}
+    const purchaseType = document.getElementById('purchase_type').value;
+    const unit = purchaseType === 'rent' ? rentPrice : basePrice;
+    const total = unit * quantity;
+    document.getElementById('final_price_display').textContent = '₹' + total.toFixed(2);
 
-function updateHFramePrice() {
-    const quantity = parseInt(document.getElementById('quantity').value);
-    const purchaseType = document.getElementById('purchase_type').value;
-    const price = purchaseType === 'rent' ? rentPrice : basePrice;
-    const total = price * quantity;
-    document.getElementById('final_price').textContent = '₹' + total.toFixed(2);
-    
-    // Show/hide deposit based on purchase type
     const depositDisplay = document.getElementById('deposit_display');
     if (purchaseType === 'rent' && depositAmount > 0) {
         depositDisplay.style.display = 'block';
@@ -349,26 +501,13 @@ function updateHFramePrice() {
     }
 }
 
-// Initialize H-frame price on page load
-if (category === 'h-frames') {
-    updateHFramePrice();
-}
-
-function updateCuplockPrice() {
-    const quantity = parseInt(document.getElementById('quantity').value);
-    const pricePerKg = 78;
-    const total = pricePerKg * weightPerUnit * quantity;
-    document.getElementById('final_price').textContent = '₹' + total.toFixed(2);
-}
-
-function updateAccessoryPrice() {
+function updatePrice() {
     const quantity = parseInt(document.getElementById('quantity').value);
     const purchaseType = document.getElementById('purchase_type').value;
-    const price = purchaseType === 'rent' ? rentPrice : basePrice;
-    const total = price * quantity;
-    document.getElementById('final_price').textContent = '₹' + total.toFixed(2);
-    
-    // Show/hide deposit based on purchase type
+    const unit = purchaseType === 'rent' ? rentPrice : basePrice;
+    const total = unit * quantity;
+    document.getElementById('final_price_display').textContent = '₹' + total.toFixed(2);
+
     const depositDisplay = document.getElementById('deposit_display');
     if (purchaseType === 'rent' && depositAmount > 0) {
         depositDisplay.style.display = 'block';
@@ -378,99 +517,75 @@ function updateAccessoryPrice() {
     }
 }
 
-// Initialize accessory price on page load
-if (category === 'accessories') {
-    updateAccessoryPrice();
-}
+document.addEventListener('DOMContentLoaded', () => {
+    if (category === 'aluminium') updateAluminiumPrice();
+    else if (category === 'h-frames' || category === 'accessories') updatePrice();
+});
 
+// Add to cart
 function addToCartCustom() {
-    const quantity = parseInt(document.getElementById('quantity').value);
-    let customization = { quantity: quantity };
-    let finalPrice = 0;
-    let unitPrice = basePrice;
-    
+    const btn = document.getElementById('addToCartBtn');
+    if (!btn) return;
+    btn.disabled = true;
+    btn.innerHTML = 'Adding...';
+
+    const qty = parseInt(document.getElementById('quantity').value);
+    let customization = { quantity: qty };
+    let unit_price = basePrice;
+
     if (category === 'aluminium') {
-        const width = document.getElementById('width').value;
-        const height = document.getElementById('height').value;
         const purchaseType = document.getElementById('purchase_type').value;
-        customization = { width, height, purchaseType, quantity };
-        const priceData = getAluminiumPriceData(parseFloat(width), parseFloat(height), purchaseType);
-        unitPrice = priceData.price;
-        finalPrice = unitPrice * quantity;
-    } else if (category === 'h-frames') {
+        customization = { purchaseType, quantity: qty };
+        unit_price = purchaseType === 'rent' ? rentPrice : basePrice;
+    } else if (category === 'h-frames' || category === 'accessories') {
         const purchaseType = document.getElementById('purchase_type').value;
-        unitPrice = purchaseType === 'rent' ? rentPrice : basePrice;
-        finalPrice = unitPrice * quantity;
-        customization = { quantity, purchaseType };
-    } else if (category === 'cuplock') {
-        customization = {
-            vertical_size: document.getElementById('vertical_size').value,
-            cups: document.getElementById('cups').value,
-            custom_length: document.getElementById('custom_length').value,
-            ledger_size: document.getElementById('ledger_size').value,
-            quantity
-        };
-        unitPrice = 78 * weightPerUnit;
-        finalPrice = unitPrice * quantity;
-    } else if (category === 'accessories') {
-        const purchaseType = document.getElementById('purchase_type').value;
-        unitPrice = purchaseType === 'rent' ? rentPrice : basePrice;
-        finalPrice = unitPrice * quantity;
-        customization = { quantity, purchaseType };
-    } else {
-        unitPrice = basePrice;
-        finalPrice = unitPrice * quantity;
+        customization = { purchaseType, quantity: qty };
+        unit_price = purchaseType === 'rent' ? rentPrice : basePrice;
     }
-    
-    fetch('/add_to_cart', {
+
+    const payload = {
+        product_id: {{ product.id }},
+        quantity: qty,
+        customization: customization
+    };
+
+    fetch("{{ url_for('add_to_cart') }}", {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            product_id: {{ product.id }},
-            product_name: '{{ product.name }}',
-            price: unitPrice,
-            quantity: quantity,
-            customization: customization
-        })
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showToast('✅ Product added to cart successfully!');
-            setTimeout(() => {
-                window.location.href = '{{ url_for("cart") }}';
-            }, 1500);
+    .then(async res => {
+        const json = await res.json().catch(()=>({ success:false, message:'Invalid JSON' }));
+        if (!res.ok) {
+            showToast('❌ ' + (json.message || `Server error ${res.status}`));
+            btn.disabled = false;
+            btn.innerHTML = '🛒 Add to Cart';
+            return;
         }
+        if (json.success) {
+            showToast('✅ Added to cart!');
+            setTimeout(() => { window.location.href = '/qr_scanner'; }, 700);
+        } else {
+            showToast('❌ ' + (json.message || 'Failed'));
+            btn.disabled = false;
+            btn.innerHTML = '🛒 Add to Cart';
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        showToast('❌ Network error');
+        btn.disabled = false;
+        btn.innerHTML = '🛒 Add to Cart';
     });
 }
 
 function showToast(message) {
-    const toast = document.createElement('div');
-    toast.className = 'toast-notification';
-    toast.innerHTML = message;
-    document.body.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.classList.add('show');
-    }, 100);
-    
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => {
-            document.body.removeChild(toast);
-        }, 300);
-    }, 3000);
+    const t = document.getElementById('toast');
+    if (!t) return;
+    t.textContent = message;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
 }
-
-if (category === 'aluminium') {
-    updateAluminiumPrice();
-} else if (category === 'h-frames') {
-    updateHFramePrice();
-} else if (category === 'cuplock') {
-    updateCuplockPrice();
-} else if (category === 'accessories') {
-    updateAccessoryPrice();
-}
+</script>
 {% endblock %}

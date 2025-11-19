@@ -68,6 +68,7 @@
 {% endblock %}
 
 {% block scripts %}
+<script>
 function validateUPIID() {
     const upiId = document.getElementById('transaction_id').value.trim();
     const validationDiv = document.getElementById('upi_validation');
@@ -144,4 +145,5 @@ function completeOrder() {
         });
     }
 }
+</script>
 {% endblock %}

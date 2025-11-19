@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Debug Tool</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .product-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .product-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .image-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .image-item {
+            width: 120px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .image-item img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+        }
+        .image-url {
+            font-size: 12px;
+            color: #666;
+            word-break: break-all;
+            margin-top: 5px;
+        }
+        .status {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 5px;
+            display: inline-block;
+        }
+        .exists {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .missing {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .raw-data {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+        }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .btn:hover {
+            background-color: #0069d9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Product Images Debug Tool</h1>
+        <button class="btn" onclick="loadAllProducts()">Load All Products</button>
+        <button class="btn" onclick="window.location.href='/admin_scaffoldings'">Back to Admin</button>
+        
+        <div id="debug-output"></div>
+    </div>
+
+    <script>
+        function loadAllProducts() {
+            fetch('/debug/all_products')
+                .then(response => response.json())
+                .then(data => {
+                    let html = '';
+                    data.forEach(product => {
+                        html += `
+                            <div class="product-card">
+                                <div class="product-title">ID: ${product.id} - ${product.name} (${product.category})</div>
+                                <div>Image Count: ${product.image_count}</div>
+                                <div class="raw-data">Raw DB Value: ${product.image_url || 'NULL'}</div>
+                                <div class="image-list">
+                                    ${product.images.map(img => `
+                                        <div class="image-item">
+                                            <img src="${img}" alt="Product image" onerror="this.style.backgroundColor='#ffebee'; this.alt='Image not found';">
+                                            <div class="image-url">${img}</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    document.getElementById('debug-output').innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('debug-output').innerHTML = `<div class="product-card">Error loading data: ${error.message}</div>`;
+                });
+        }
+        
+        // Load data on page load
+        window.onload = function() {
+            loadAllProducts();
+        };
+    </script>
+</body>
+</html>

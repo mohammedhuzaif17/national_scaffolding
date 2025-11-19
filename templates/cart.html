@@ -3,8 +3,165 @@
 {% block title %}Cart - National Scaffolding{% endblock %}
 
 {% block content %}
+<style>
+.cart-container {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 1.5rem;
+}
+
+.page-header h1 {
+    font-size: 2rem;
+    color: #001d3d;
+    margin-bottom: 1.5rem;
+}
+
+.cart-item {
+    display: flex;
+    gap: 1.5rem;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-bottom: 1rem;
+}
+
+.cart-item-image-container {
+    width: 120px;
+    height: 120px;
+    flex-shrink: 0;
+}
+
+.cart-item-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.cart-item-placeholder {
+    width: 100%;
+    height: 100%;
+    background: #f0f0f0;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+}
+
+.cart-item-details {
+    flex: 1;
+}
+
+.cart-item-name {
+    font-size: 1.25rem;
+    color: #001d3d;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.cart-item-specs {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0.5rem 0;
+}
+
+.cart-item-price {
+    color: #001d3d;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.cart-item-deposit {
+    color: #d4af37;
+    font-weight: 500;
+    margin-top: 0.5rem;
+}
+
+.cart-summary {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-top: 2rem;
+}
+
+.cart-summary h2 {
+    color: #001d3d;
+    margin-bottom: 1rem;
+}
+
+.cart-summary h3 {
+    margin-top: 0.5rem;
+}
+
+.checkout-btn {
+    background: linear-gradient(135deg, #002855, #004080);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.checkout-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn {
+    background: #002855;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .cart-item {
+        flex-direction: column;
+    }
+    
+    .cart-item-image-container {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+
 <div class="cart-container">
-    <button class="btn btn-secondary mb-2" onclick="history.back()">← Back</button>
+    <button class="btn-secondary mb-2" onclick="history.back()">← Back</button>
     
     <div class="page-header">
         <h1>Shopping Cart</h1>
@@ -16,7 +173,8 @@
         <div class="cart-item">
             <div class="cart-item-image-container">
                 {% if item.image_url %}
-                <img src="{{ item.image_url }}" alt="{{ item.product_name }}" class="cart-item-image">
+                    {% set first_image = item.image_url.split(',')[0].strip() %}
+                    <img src="{{ first_image }}" alt="{{ item.product_name }}" class="cart-item-image">
                 {% else %}
                 <div class="cart-item-placeholder">
                     <span>📦</span>
@@ -29,41 +187,40 @@
                 {% if item.customization %}
                 <p class="cart-item-specs">
                     {% if item.customization.purchaseType %}
-                        {{ item.customization.purchaseType|title }} | Width: {{ item.customization.width }}m | Height: {{ item.customization.height }}m
-                    {% elif item.customization.discount_rate %}
-                        Discount Applied: {{ (item.customization.discount_rate * 100)|int }}%
-                    {% elif item.customization.type %}
-                        {{ item.customization.type|title }}
-                        {% if item.customization.size %} ({{ item.customization.size }}m){% endif %}
+                        {{ item.customization.purchaseType|title }}
+                        {% if item.customization.width and item.customization.height %}
+                         | Width: {{ item.customization.width }}m | Height: {{ item.customization.height }}m
+                        {% endif %}
                     {% endif %}
                 </p>
                 {% endif %}
                 <p class="cart-item-price">₹{{ "%.2f"|format(item.unit_price) }} x {{ item.quantity }} = ₹{{ "%.2f"|format(item.item_total) }}</p>
                 {% if item.deposit and item.deposit > 0 %}
-                <p class="cart-item-deposit" style="color: #d4af37; font-weight: 500;">Deposit: ₹{{ "%.2f"|format(item.deposit) }} x {{ item.quantity }} = ₹{{ "%.2f"|format(item.item_deposit) }}</p>
+                <p class="cart-item-deposit">Deposit: ₹{{ "%.2f"|format(item.deposit) }} x {{ item.quantity }} = ₹{{ "%.2f"|format(item.item_deposit) }}</p>
                 {% endif %}
             </div>
             <div>
-                <button class="btn btn-danger" onclick="removeItem({{ loop.index0 }})">Remove</button>
+                <button class="btn-danger" onclick="removeItem({{ loop.index0 }})">Remove</button>
             </div>
         </div>
         {% endfor %}
         
         <div class="cart-summary">
-            <h2>Subtotal: ₹{{ "%.2f"|format(total) }}</h2>
+            <h2>Subtotal: ₹{{ "%.2f"|format(total_before_gst) }}</h2>
             {% if total_deposit and total_deposit > 0 %}
             <h3 style="color: #d4af37;">Total Deposit: ₹{{ "%.2f"|format(total_deposit) }}</h3>
             {% endif %}
-            <p>GST (18%) will be added at checkout</p>
-            <button class="btn checkout-btn mt-3" onclick="window.location.href='{{ url_for('qr_scanner') }}'">
+            <p style="color: #666; margin-top: 0.5rem;">GST (18%): ₹{{ "%.2f"|format(gst) }}</p>
+            <h2 style="color: #002855; margin-top: 1rem;">Grand Total: ₹{{ "%.2f"|format(total_with_gst) }}</h2>
+            <button class="checkout-btn mt-3" onclick="window.location.href='{{ url_for('qr_scanner') }}'">
                 Proceed to Checkout
             </button>
         </div>
     </div>
     {% else %}
-    <p class="text-center mt-4">Your cart is empty</p>
+    <p class="text-center mt-4" style="color: #666;">Your cart is empty</p>
     <div class="text-center mt-4">
-        <button class="btn" onclick="window.location.href='{{ url_for('dashboard') }}'">
+        <button class="btn" onclick="window.location.href='{{ url_for('national_scaffoldings') }}'">
             Continue Shopping
         </button>
     </div>
@@ -72,7 +229,9 @@
 {% endblock %}
 
 {% block scripts %}
+<script>
 function removeItem(index) {
     window.location.href = '/remove_from_cart/' + index;
 }
+</script>
 {% endblock %}

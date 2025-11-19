@@ -11,44 +11,36 @@
     <h1 class="page-title">H-Frames Pricing Management</h1>
     <p style="color: #d4af37; margin-bottom: 2rem;">Set buy and rent prices for all H-Frame products organized by quantity sets</p>
     
-    <div style="background: rgba(212, 175, 55, 0.1); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
-        <h3 style="color: #d4af37; margin-bottom: 1rem;">ℹ️ How it works:</h3>
-        <ul style="color: #d4af37; line-height: 2;">
-            <li>For each H-Frame product, set BUY and RENT prices for different quantities (sets)</li>
-            <li>Prices shown are per set - customers can order from 1 to 200 sets</li>
-            <li>Set both buy and rent prices separately for maximum flexibility</li>
-            <li>Leave fields blank to use default product price</li>
-            <li>Common set quantities (1, 5, 10, 20, 50, 100) are shown below for easy access</li>
-        </ul>
-    </div>
-    
     <div id="hframesPricingForm">
-        {% for product in hframe_products %}
+        {% if hframe_products %}
         <div style="background: rgba(30, 58, 138, 0.2); padding: 2rem; border-radius: 10px; margin-bottom: 2rem;">
-            <h2 style="color: #ffa500; margin-bottom: 1.5rem;">{{ product.name }}</h2>
-            <p style="color: #d4af37; margin-bottom: 1.5rem;">{{ product.description }}</p>
-            
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem;">
-                {% for sets in [1, 5, 10, 20, 30, 40, 50, 75, 100, 150, 200] %}
-                <div style="background: rgba(212, 175, 55, 0.05); padding: 1rem; border-radius: 8px; border: 2px solid rgba(212, 175, 55, 0.2);">
-                    <h4 style="color: #d4af37; margin-bottom: 0.8rem;">{{ sets }} {% if sets == 1 %}Set{% else %}Sets{% endif %}</h4>
-                    <div class="form-group" style="margin-bottom: 0.5rem;">
+            <h2 style="color: #ffa500; margin-bottom: 1.5rem;">All H-Frame Products</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+                {% for product in hframe_products %}
+                <div style="background: rgba(212, 175, 55, 0.05); padding: 1.5rem; border-radius: 8px; border: 2px solid rgba(212, 175, 55, 0.2);">
+                    <h3 style="color: #d4af37; margin-bottom: 1rem;">{{ product.name }}</h3>
+                    <p style="color: #a0a0a0; font-size: 0.9rem; margin-bottom: 1rem;">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
+                    
+                    <div class="form-group">
                         <label for="buy_{{ product.id }}_{{ sets }}">Buy Price (₹/set)</label>
                         <input type="number" id="buy_{{ product.id }}_{{ sets }}" step="0.01" placeholder="₹5000" class="pricing-input" data-product-id="{{ product.id }}" data-sets="{{ sets }}">
                     </div>
-                    <div class="form-group" style="margin-bottom: 0.5rem;">
+                    <div class="form-group">
                         <label for="rent_{{ product.id }}_{{ sets }}">Rent Price (₹/set/month)</label>
-                        <input type="number" id="rent_{{ product.id }}_{{ sets }}" step="0.01" placeholder="₹1000" class="rent-pricing-input" data-product-id="{{ product.id }}" data-sets="{{ sets }}">
+                        <input type="number" id="rent_{{ product.id }}_{{ sets }}" step="0.01" placeholder="₹1000" class="pricing-input" data-product-id="{{ product.id }}" data-sets="{{ sets }}">
                     </div>
-                    <div class="form-group" style="margin-bottom: 0;">
+                    <div class="form-group">
                         <label for="deposit_{{ product.id }}_{{ sets }}">Deposit (₹/set)</label>
-                        <input type="number" id="deposit_{{ product.id }}_{{ sets }}" step="0.01" placeholder="₹500" class="deposit-pricing-input" data-product-id="{{ product.id }}" data-sets="{{ sets }}">
+                        <input type="number" id="deposit_{{ product.id }}_{{ sets }}" step="0.01" placeholder="₹500" class="pricing-input" data-product-id="{{ product.id }}" data-sets="{{ sets }}">
                     </div>
                 </div>
-                {% endfor %}
             </div>
         </div>
-        {% endfor %}
+        {% else %}
+        <div style="background: rgba(212, 175, 55, 0.1); padding: 2rem; border-radius: 10px; text-align: center;">
+            <p style="color: #d4af37; font-size: 1.1rem;">No H-Frame products found. Add products first from the Admin Panel.</p>
+        </div>
+        {% endif %}
         
         <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
             <button class="btn-primary" onclick="saveAllPricing()" style="padding: 1rem 3rem;">💾 Save All H-Frames Pricing</button>
@@ -56,9 +48,8 @@
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block scripts %}
+<script>
 const pricingData = {{ pricing_data|tojson|safe }};
 
 // Load existing pricing data
@@ -134,6 +125,9 @@ function saveAllPricing() {
             if (!allPricing[productId][sets]) {
                 allPricing[productId][sets] = {};
             }
+            if (!allPricing[productId][sets]) {
+                allPricing[productId][sets] = {};
+            }
             allPricing[productId][sets].rent = rentValue;
         }
     });
@@ -147,6 +141,9 @@ function saveAllPricing() {
         if (depositValue && depositValue > 0) {
             if (!allPricing[productId]) {
                 allPricing[productId] = {};
+            }
+            if (!allPricing[productId][sets]) {
+                allPricing[productId][sets] = {};
             }
             if (!allPricing[productId][sets]) {
                 allPricing[productId][sets] = {};

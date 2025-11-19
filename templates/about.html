@@ -8,6 +8,99 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600;700&family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* Fix for administrator images - Natural aspect ratio without any constraints */
+        .administrator-image {
+            width: 220px;
+            margin: 0 auto 20px;
+            border: 5px solid #f0c14b;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            display: block;
+            border-radius: 0;
+            padding: 0;
+            line-height: 0;
+        }
+        
+        .administrator-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 0;
+        }
+        
+        .administrator {
+            text-align: center;
+            padding: 20px;
+            transition: transform 0.3s ease;
+            flex: 1;
+            max-width: 300px;
+        }
+        
+        .administrator:hover {
+            transform: translateY(-10px);
+        }
+        
+        .administrator h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .administrator p {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #f0c14b;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            background-color: #d4a017;
+        }
+        
+        .single-icon {
+            justify-content: center;
+        }
+        
+        .administrators-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 40px;
+            flex-wrap: wrap;
+            padding: 20px;
+        }
+        
+        /* Ensure center photo stands out properly */
+        .administrators-container .administrator:nth-child(2) {
+            transform: scale(1.05);
+            z-index: 1;
+        }
+        
+        .administrators-container .administrator:nth-child(2) .administrator-image {
+            border-color: #d4a017;
+            border-width: 6px;
+        }
+    </style>
 </head>
 <body>
     <!-- Navigation -->
@@ -467,7 +560,7 @@
                 <h3>Usage:</h3>
                 <ul>
                     <li>Access and use the site solely for lawful and informational purposes.</li>
-                    <li>Do not attempt to disrupt or misuse the website in any way.</li>
+                    <li>Do not attempt to disrupt or misuse website in any way.</li>
                 </ul>
                 
                 <h3>Content Ownership:</h3>
