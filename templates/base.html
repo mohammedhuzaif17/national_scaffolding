@@ -14,7 +14,7 @@
 <body>
     <nav class="navbar">
         <a href="{% if current_user.is_authenticated %}{{ url_for('dashboard') }}{% else %}{{ url_for('national_scaffoldings') }}{% endif %}" class="navbar-brand">
-            THE NATIONAL SCAFFOLDING
+           Crest Technocrat
         </a>
 
         <ul class="navbar-links">

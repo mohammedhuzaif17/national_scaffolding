@@ -1,43 +1,556 @@
 {% extends "base.html" %}
 
-{% block title %}Fabrications - Products{% endblock %}
+{% block title %}National Scaffolding - Products{% endblock %}
 
 {% block content %}
-<div class="glass-container">
-    <h1 class="page-title">Fabrications</h1>
-    <p class="page-subtitle">Custom fabrication products including furniture and more</p>
+<!-- Welcome Popup -->
+<div id="welcomePopup" class="welcome-popup">
+    <div class="welcome-content">
+        <h1>Welcome to THE NATIONAL SCAFFOLDING</h1>
+        <p>We don't just build scaffolds — we build confidence. Explore our premium scaffolding and fabrication products for all your construction needs.</p>
+        <div class="popup-buttons">
+            <button class="btn-explore" onclick="closeWelcome()">Continue to Explore</button>
+            {% if not current_user.is_authenticated %}
+            <button class="btn-login" onclick="window.location.href='{{ url_for('login') }}'">Login / Register</button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.product-gallery {
+    position: relative;
+    width: 100%;
+    height: 250px;
+    overflow: hidden;
+    border-radius: 8px 8px 0 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    background: #f0f0f0;
+    cursor: pointer;
+}
+
+.gallery-images-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.gallery-item {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+.gallery-item.active {
+    opacity: 1;
+    z-index: 1;
+    pointer-events: auto;
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.gallery-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0,0,0,0.7);
+    color: white;
+    border: 2px solid rgba(255,255,255,0.8);
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.gallery-nav:hover {
+    background-color: rgba(0,0,0,0.9);
+    transform: translateY(-50%) scale(1.1);
+    border-color: white;
+}
+
+.gallery-prev {
+    left: 10px;
+}
+
+.gallery-next {
+    right: 10px;
+}
+
+.gallery-dots {
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    z-index: 10;
+}
+
+.gallery-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: rgba(255,255,255,0.5);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid rgba(0,0,0,0.3);
+}
+
+.gallery-dot.active {
+    background-color: white;
+    transform: scale(1.2);
+    border-color: rgba(0,0,0,0.5);
+}
+
+.gallery-dot:hover {
+    background-color: rgba(255,255,255,0.8);
+}
+
+.gallery-counter {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    z-index: 10;
+}
+
+/* FIXED: Two images side by side with + sign */
+.product-image-grid {
+    position: relative;
+    width: 100%;
+    height: 250px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    border-radius: 8px 8px 0 0;
+    overflow: hidden;
+    background: #f0f0f0;
+    cursor: pointer;
+}
+
+.product-image-grid img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background-color: #ffffff;
+}
+
+.product-image-more {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.8);
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.product-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+}
+
+.product-image-container {
+    width: 100%;
+    height: 260px; /* uniform height for all product images */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px; /* reduced padding */
+    background: #ffffff;
+    overflow: hidden;
+}
+
+.product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* changed from cover to contain */
+    transition: transform 0.3s ease;
+    cursor: pointer;
+    background-color: #ffffff;
+}
+
+.product-image:hover {
+    transform: scale(1.05);
+}
+
+.product-image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f0f0f0;
+    font-size: 3rem;
+    cursor: pointer;
+}
+
+.product-info {
+    padding: 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #001d3d;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.product-name:hover {
+    color: #004080;
+}
+
+.product-category {
+    display: inline-block;
+    background: #ffd966;
+    color: #001d3d;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+}
+
+.product-description {
+    color: #555;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+    flex: 1;
+}
+
+.product-price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.product-price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #001d3d;
+}
+
+.product-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #002855, #004080);
+    color: white;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.page-container {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+    object-fit: contain;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #001d3d;
+    margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+    color: #555;
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+}
+
+.category-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.category-btn {
+    padding: 0.75rem 1.5rem;
+    background: #f8f9fa;
+    border: 2px solid #dee2e6;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.category-btn.active {
+    background: #001d3d;
+    color: white;
+    border-color: #001d3d;
+}
+
+.category-btn:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+}
+
+.category-btn.active:hover {
+    background: #002855;
+}
+
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.view-cart-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: linear-gradient(135deg, #d4af37, #c29d2f);
+    color: #001d3d;
+    border: none;
+    padding: 15px 25px;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(212,175,55,0.4);
+    transition: all 0.3s ease;
+    z-index: 999;
+}
+
+.view-cart-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(212,175,55,0.6);
+}
+
+@media (max-width: 768px) {
+    .products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+    }
     
-    <div class="text-center mb-3">
-        <button class="btn btn-secondary" onclick="window.location.href='{{ url_for('national_scaffoldings') }}'">
-            🏗️ Go to National Scaffolding
+    .product-image-container {
+        height: 220px; /* slightly smaller on mobile */
+        padding: 3px; /* reduced padding for mobile */
+    }
+    
+    .product-image-grid {
+        height: 220px; /* matching the container height */
+    }
+    
+    .product-image-container img,
+    .product-image-grid img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain; /* keeps image fully visible */
+        display: block;
+        margin: 0 auto;
+    }
+    
+    .page-container {
+        padding: 1rem 0.5rem;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+    }
+}
+</style>
+
+<div class="page-container">
+    <header class="page-header">
+        <h1 class="page-title">The National Scaffolding</h1>
+        <p class="page-subtitle">Professional scaffolding services for all your construction needs</p>
+        
+        <div class="text-center mb-3">
+            <button class="btn btn-secondary" onclick="window.location.href='{{ url_for('fabrications') }}'">
+                Go to Fabrications
+            </button>
+        </div>
+    </header>
+    
+    <div class="category-buttons">
+        <button class="category-btn {% if request.args.get('category') == 'all' or request.args.get('category') == None %}active{% endif %}" 
+                onclick="window.location.href='{{ url_for('national_scaffoldings', category='all') }}'">
+            ALL PRODUCTS
+        </button>
+        <button class="category-btn {% if request.args.get('category') == 'aluminium' %}active{% endif %}" 
+                onclick="window.location.href='{{ url_for('national_scaffoldings', category='aluminium') }}'">
+            ALUMINIUM SCAFFOLDINGS
+        </button>
+        <button class="category-btn {% if request.args.get('category') == 'h-frames' %}active{% endif %}" 
+                onclick="window.location.href='{{ url_for('national_scaffoldings', category='h-frames') }}'">
+            H FRAMES
+        </button>
+        <button class="category-btn {% if request.args.get('category') == 'cuplock' %}active{% endif %}" 
+                onclick="window.location.href='{{ url_for('national_scaffoldings', category='cuplock') }}'">
+            CUPLOCK
+        </button>
+        <button class="category-btn {% if request.args.get('category') == 'accessories' %}active{% endif %}" 
+                onclick="window.location.href='{{ url_for('national_scaffoldings', category='accessories') }}'">
+            ACCESSORIES
         </button>
     </div>
     
-    <p class="text-center mb-4">
-        For inquiries, contact us at: <strong>+91 1234567890</strong>
-    </p>
+    <h2 class="mt-4">Our Products</h2>
     
     <div class="products-grid">
         {% for product in products %}
-        <div class="product-card" onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
-            {% if product.image_url %}
-            <img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-image">
-            {% else %}
-            <div class="product-image-placeholder">
-                <span>🔧</span>
-            </div>
-            {% endif %}
-            <div class="product-info">
-                <h3 class="product-name">{{ product.name }}</h3>
-                <p class="product-description">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
-                
-                {% if current_user.is_authenticated and session.get('user_type') != 'admin' %}
-                <button class="btn" onclick="event.stopPropagation(); window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
-                    View Details
-                </button>
-                {% elif not current_user.is_authenticated %}
-                <p class="text-center" style="color: var(--danger-red);">Please login to view details</p>
+        <div class="product-card">
+            <div class="product-image-container" onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
+                {% if product.image_url %}
+                    {% set images = product.image_url.split(',') %}
+                    {% set valid_images = [] %}
+                    {% for image in images %}
+                        {% if image.strip() %}
+                            {% set _ = valid_images.append(image.strip()) %}
+                        {% endif %}
+                    {% endfor %}
+            
+                    {% if valid_images | length >= 3 %}
+                        <!-- Show 2 images + more indicator -->
+                        <div class="product-image-grid">
+                            <img src="{{ valid_images[0] }}" alt="{{ product.name }} - Image 1" onerror="this.style.display='none';">
+                            <img src="{{ valid_images[1] }}" alt="{{ product.name }} - Image 2" onerror="this.style.display='none';">
+                            <div class="product-image-more">+{{ valid_images|length - 2 }}</div>
+                        </div>
+                    {% elif valid_images|length == 2 %}
+                        <!-- Show 2 images side by side -->
+                        <div class="product-image-grid">
+                            <img src="{{ valid_images[0] }}" alt="{{ product.name }} - Image 1" onerror="this.style.display='none';">
+                            <img src="{{ valid_images[1] }}" alt="{{ product.name }} - Image 2" onerror="this.style.display='none';">
+                        </div>
+                    {% elif valid_images|length == 1 %}
+                        <!-- Single image -->
+                        <img src="{{ valid_images[0] }}" alt="{{ product.name }}" class="product-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="product-image-placeholder" style="display: none;">
+                            <span>📦</span>
+                        </div>
+                    {% else %}
+                        <!-- No images -->
+                        <div class="product-image-placeholder">
+                            <span>📦</span>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="product-image-placeholder">
+                        <span>📦</span>
+                    </div>
                 {% endif %}
+            </div>
+            
+            <div class="product-info">
+                <h3 class="product-name" onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
+                    {{ product.name }}
+                </h3>
+                
+                {% if product.category %}
+                <span class="product-category">{{ product.category|replace('-', ' ') }}</span>
+                {% endif %}
+                
+                {% if product.description %}
+                <p class="product-description">
+                    {{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}
+                </p>
+                {% endif %}
+                
+                <!-- Fixed: Price display - moved price inside the styled span -->
+                <div class="product-price-row">
+                    <span class="product-price">₹{{ product.price|indian }}</span>
+                </div>
+                
+                <div class="product-actions">
+                    <button class="btn btn-secondary" 
+                            onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
+                        View Details
+                    </button>
+                    {% if current_user.is_authenticated and session.get('user_type') != 'admin' %}
+                        <button class="btn btn-primary" 
+                                onclick="event.stopPropagation(); addToCart({{ product.id }}, '{{ product.name|e }}', {{ product.price }})">
+                            🛒 Add to Cart
+                        </button>
+                    {% endif %}
+                </div>
             </div>
         </div>
         {% endfor %}
@@ -49,7 +562,60 @@
     🛒 View Cart
 </button>
 {% endif %}
+
 {% endblock %}
 
 {% block scripts %}
+<script>
+// Show welcome popup only for non-logged-in users
+window.addEventListener('DOMContentLoaded', () => {
+    const popup = document.getElementById('welcomePopup');
+    const isLoggedIn = {{ 'true' if current_user.is_authenticated else 'false' }};
+    
+    if (isLoggedIn) {
+        popup.style.display = 'none';
+        document.body.classList.remove('popup-active');
+    } else {
+        const popupShown = sessionStorage.getItem('welcomeShown');
+        
+        if (popupShown) {
+            popup.style.display = 'none';
+            document.body.classList.remove('popup-active');
+        } else {
+            popup.style.display = 'flex';
+            document.body.classList.add('popup-active');
+        }
+    }
+});
+
+function closeWelcome() {
+    document.getElementById('welcomePopup').style.display = 'none';
+    document.body.classList.remove('popup-active');
+    sessionStorage.setItem('welcomeShown', 'true');
+}
+
+function addToCart(productId, productName, price) {
+    fetch('/add_to_cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            product_id: productId,
+            quantity: 1,
+            customization: { quantity: 1 }
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ ' + productName + ' added to cart!');
+        } else {
+            alert('❌ Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('❌ Error adding to cart');
+    });
+}
+</script>
 {% endblock %}

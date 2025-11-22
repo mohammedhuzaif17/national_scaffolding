@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Admin - Scaffolding Products{% endblock %}
+{% block title %}Admin - Scaffolding Products & Orders{% endblock %}
 
 {% block content %}
 <style>
@@ -72,13 +72,11 @@ html body .content-wrapper {
 .image-gallery {
     position: relative;
     width: 60px;
-    height: 80px; /* Increased height to accommodate buttons below */
+    height: 80px;
     margin: 0 auto;
     border-radius: 4px;
-    overflow: visible; /* Changed from hidden to visible */
+    overflow: visible;
     background: #f0f0f0;
-    touch-action: pan-y;
-    cursor: pointer;
 }
 
 .image-gallery-image-container {
@@ -88,6 +86,7 @@ html body .content-wrapper {
     border-radius: 4px;
     overflow: hidden;
     background: #f0f0f0;
+    pointer-events: none;
 }
 
 .image-gallery img {
@@ -116,6 +115,8 @@ html body .content-wrapper {
     gap: 8px;
     margin-top: 4px;
     height: 20px;
+    position: relative;
+    z-index: 10;
 }
 
 .gallery-nav {
@@ -149,6 +150,7 @@ html body .content-wrapper {
     border-radius: 8px !important;
     z-index: 100 !important;
     font-weight: 600;
+    pointer-events: none;
 }
 
 /* Buttons */
@@ -203,6 +205,51 @@ html body .content-wrapper {
     box-shadow: 0 4px 12px rgba(220,53,69,0.3) !important; 
 }
 
+.btn-success {
+    background: #28a745 !important;
+    color: white !important;
+    border: none !important;
+    padding: 0.5rem 0.9rem !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    font-weight: 600 !important;
+}
+.btn-success:hover {
+    background: #218838 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(40,167,69,0.3) !important;
+}
+
+.btn-warning {
+    background: #ffc107 !important;
+    color: #212529 !important;
+    border: none !important;
+    padding: 0.5rem 0.9rem !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    font-weight: 600 !important;
+}
+.btn-warning:hover {
+    background: #e0a800 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(255,193,7,0.3) !important;
+}
+
+.btn-info {
+    background: #17a2b8 !important;
+    color: white !important;
+    border: none !important;
+    padding: 0.5rem 0.9rem !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    font-weight: 600 !important;
+}
+.btn-info:hover {
+    background: #138496 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(23,162,184,0.3) !important;
+}
+
 /* Page title */
 .page-title { font-size: 1.6rem; margin: 0 0 1.5rem 0; color: #ffd966; font-weight: 800; text-align: left; }
 
@@ -236,6 +283,20 @@ html body .content-wrapper {
     position: relative;
 }
 
+/* Order items modal */
+#orderItemsModal .modal-content {
+    width: 90vw;
+    max-width: 800px;
+    max-height: 80vh;
+    margin: auto;
+    padding: 2rem;
+    background-color: #001d3d;
+    color: white;
+    border-radius: 12px;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
 /* Prevent body scroll when modal is open */
 .modal-open { 
     overflow: hidden !important; 
@@ -245,7 +306,7 @@ html body .content-wrapper {
 }
 
 /* Additional modal positioning */
-#productModal {
+#productModal, #orderItemsModal {
     position: fixed;
     top: 0;
     left: 0;
@@ -303,6 +364,35 @@ input:focus, textarea:focus, select:focus { outline: none; box-shadow: 0 0 0 3px
 .admin-table img.product-thumbnail { border-radius: 6px; }
 .table-wrap { 
     overflow-x: auto;
+}
+
+/* Order status badge */
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-approved {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-rejected {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.status-paid {
+    background: #d1ecf1;
+    color: #0c5460;
 }
 
 /* Photo preview container */
@@ -442,6 +532,98 @@ input:focus, textarea:focus, select:focus { outline: none; box-shadow: 0 0 0 3px
     align-items: center !important;
 }
 
+/* Order items table */
+.order-items-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.order-items-table th {
+    background: rgba(255,255,255,0.1);
+    padding: 10px;
+    text-align: left;
+    border-bottom: 2px solid rgba(255,255,255,0.2);
+}
+
+.order-items-table td {
+    padding: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Tab styles */
+.tab-container {
+    margin-bottom: 1.5rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.tab-button {
+    padding: 0.75rem 1.5rem;
+    background: rgba(0, 29, 61, 0.7);
+    color: white;
+    border: none;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.tab-button.active {
+    background: linear-gradient(135deg, #002855, #004080);
+    transform: translateY(-2px);
+}
+
+.tab-button:hover:not(.active) {
+    background: rgba(0, 29, 61, 0.9);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Orders table */
+.orders-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 6px 24px rgba(2,24,63,0.06);
+    margin-top: 1.5rem;
+}
+
+.orders-table thead th {
+    text-align: left;
+    padding: 12px 16px;
+    background: linear-gradient(90deg, #001d3d, #002855);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.95rem;
+    white-space: nowrap;
+}
+
+.orders-table tbody td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+    color: #001d3d;
+}
+
+.orders-table tbody tr:hover {
+    background: #fbfcff;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
 /* Responsive tweaks */
 @media (max-width: 720px) { 
     .form-group input[type="text"], 
@@ -471,6 +653,14 @@ input:focus, textarea:focus, select:focus { outline: none; box-shadow: 0 0 0 3px
     .image-gallery {
         height: 75px;
     }
+    
+    .tab-container {
+        flex-direction: column;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
 }
 </style>
 
@@ -483,89 +673,147 @@ input:focus, textarea:focus, select:focus { outline: none; box-shadow: 0 0 0 3px
         </div>
     </div>
     
-    <h1 class="page-title">Admin Panel - Scaffolding Products</h1>
+    <h1 class="page-title">Admin Panel</h1>
     
-    <!-- Properly aligned Add Product button container -->
-    <div style="display: flex; justify-content: flex-start; align-items: center; margin-bottom: 2rem; padding: 0;">
-        <button class="btn-primary" id="addProductBtn" style="min-width: 200px; padding: 0.75rem 2rem; font-size: 1.05rem;">
-            <span style="margin-right: 8px;">+</span> Add New Product
-        </button>
+    <!-- Tab Navigation -->
+    <div class="tab-container">
+        <button class="tab-button active" onclick="switchTab('products', this)">Products</button>
+        <button class="tab-button" onclick="switchTab('orders', this)">Orders</button>
     </div>
     
-    <div class="table-wrap">
-        <table class="admin-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Image</th> 
-                    <th>Name</th>
-                    <th>Price</th>
-                    <th>Category</th>
-                    <th>Rent Price</th>
-                    <th>Deposit</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for product in products %}
-                <tr>
-                    <td>{{ product.id }}</td>
-                    <td style="text-align: center;">
-                        {% if product.image_url %}
-                            {% set images = product.image_url.split(',') %}
-                            {% if images|length > 1 %}
-                                <!-- FIXED: Multiple images - create carousel with better structure -->
-                                <div class="image-gallery" id="gallery-{{ product.id }}" data-product-id="{{ product.id }}">
-                                    <div class="image-gallery-image-container">
-                                        {% for image in images %}
-                                            <img src="{{ image.strip() }}" alt="{{ product.name }} image {{ loop.index }}" 
-                                                 class="{% if loop.first %}active{% endif %}" 
-                                                 onerror="this.style.display='none';">
-                                        {% endfor %}
+    <!-- Products Tab -->
+    <div id="products-tab" class="tab-content active">
+        <div style="display: flex; justify-content: flex-start; align-items: center; margin-bottom: 2rem; padding: 0;">
+            <button class="btn-primary" id="addProductBtn" style="min-width: 200px; padding: 0.75rem 2rem; font-size: 1.05rem;">
+                <span style="margin-right: 8px;">+</span> Add New Product
+            </button>
+        </div>
+        
+        <div class="table-wrap">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Image</th> 
+                        <th>Name</th>
+                        <th>Price</th>
+                        <th>Category</th>
+                        <th>Rent Price</th>
+                        <th>Deposit</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr data-product-id="{{ product.id }}" data-product-name="{{ product.name|e }}">
+                        <td>{{ product.id }}</td>
+                        <td style="text-align: center;">
+                            {% if product.image_url %}
+                                {% set images = product.image_url.split(',') %}
+                                {% if images|length > 1 %}
+                                    <!-- FIXED: Multiple images - create carousel with better structure -->
+                                    <div class="image-gallery" id="gallery-{{ product.id }}" data-product-id="{{ product.id }}">
+                                        <div class="image-gallery-image-container">
+                                            {% for image in images %}
+                                                <img src="{{ image.strip() }}" alt="{{ product.name }} image {{ loop.index }}" 
+                                                     class="{% if loop.first %}active{% endif %}" 
+                                                     onerror="this.style.display='none';">
+                                            {% endfor %}
+                                        </div>
+                                        <div class="gallery-nav-container">
+                                            <button class="gallery-nav gallery-prev" onclick="event.stopPropagation(); changeImage({{ product.id }}, -1)">‹</button>
+                                            <span class="gallery-indicator">1/{{ images|length }}</span>
+                                            <button class="gallery-nav gallery-next" onclick="event.stopPropagation(); changeImage({{ product.id }}, 1)">›</button>
+                                        </div>
                                     </div>
-                                    <div class="gallery-nav-container">
-                                        <button class="gallery-nav gallery-prev" onclick="event.stopPropagation(); changeImage({{ product.id }}, -1)">‹</button>
-                                        <span class="gallery-indicator">1/{{ images|length }}</span>
-                                        <button class="gallery-nav gallery-next" onclick="event.stopPropagation(); changeImage({{ product.id }}, 1)">›</button>
-                                    </div>
-                                </div>
-                            {% else %}
-                                <!-- Single image -->
-                                {% set first_image = product.image_url.strip() %}
-                                {% if first_image %}
-                                    <img src="{{ first_image }}" alt="{{ product.name }} thumbnail" class="product-thumbnail" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                                    <div style="display: none; color: #999;">No Image</div>
                                 {% else %}
-                                    N/A
+                                    <!-- Single image -->
+                                    {% set first_image = product.image_url.strip() %}
+                                    {% if first_image %}
+                                        <img src="{{ first_image }}" alt="{{ product.name }} thumbnail" class="product-thumbnail" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                        <div style="display: none; color: #999;">No Image</div>
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
                                 {% endif %}
+                            {% else %}
+                                N/A
                             {% endif %}
-                        {% else %}
-                            N/A
-                        {% endif %}
-                    </td>
-                    <td>{{ product.name }}</td>
-                    <td>₹{{ product.price }}</td>
-                    <td>{{ product.category|title if product.category else 'N/A' }}</td>
-                    <td>₹{{ product.rent_price if product.rent_price else 'N/A' }}</td>
-                    <td>₹{{ product.deposit_amount if product.deposit_amount else 'N/A' }}</td>
-                    <td>
-                        <button class="btn-secondary edit-btn" 
-                            data-product-id="{{ product.id }}"
-                            data-product-name="{{ product.name|e }}"
-                            data-product-price="{{ product.price }}"
-                            data-product-description="{{ product.description|e }}"
-                            data-product-category="{{ product.category }}"
-                            data-product-rent="{{ product.rent_price if product.rent_price else 0 }}"
-                            data-product-weight="{{ product.weight_per_unit if product.weight_per_unit else 0 }}"
-                            data-product-deposit="{{ product.deposit_amount if product.deposit_amount else 0 }}"
-                            data-product-images="{{ product.image_url|e if product.image_url else '' }}"
-                            style="padding: 0.5rem 1rem; margin-right: 0.5rem;">Edit</button>
-                        <button class="btn-danger delete-btn" data-product-id="{{ product.id }}">Delete</button>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                        </td>
+                        <td>{{ product.name }}</td>
+                        <td>₹{{ product.price }}</td>
+                        <td>{{ product.category|title if product.category else 'N/A' }}</td>
+                        <td>₹{{ product.rent_price if product.rent_price else 'N/A' }}</td>
+                        <td>₹{{ product.deposit_amount if product.deposit_amount else 'N/A' }}</td>
+                        <td>
+                            <button class="btn-secondary edit-btn" 
+                                data-product-id="{{ product.id }}"
+                                data-product-name="{{ product.name|e }}"
+                                data-product-price="{{ product.price }}"
+                                data-product-description="{{ product.description|e }}"
+                                data-product-category="{{ product.category }}"
+                                data-product-rent="{{ product.rent_price if product.rent_price else 0 }}"
+                                data-product-weight="{{ product.weight_per_unit if product.weight_per_unit else 0 }}"
+                                data-product-deposit="{{ product.deposit_amount if product.deposit_amount else 0 }}"
+                                data-product-images="{{ product.image_url|e if product.image_url else '' }}"
+                                style="padding: 0.5rem 1rem; margin-right: 0.5rem;">Edit</button>
+                            <button class="btn-danger delete-btn" data-product-id="{{ product.id }}" data-product-name="{{ product.name|e }}">Delete</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Orders Tab -->
+    <div id="orders-tab" class="tab-content">
+        <h2 style="color: #ffd966; margin-bottom: 1.5rem;">Order Management</h2>
+        
+        <div class="table-wrap">
+            <table class="orders-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Date & Time</th>
+                        <th>Total Amount</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>{{ order.id }}</td>
+                        <td>{{ order.customer_name }}</td>
+                        <td>
+                            {% if order.order_date %}
+                                {{ order.order_date.strftime('%Y-%m-%d %H:%M') }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td>₹{{ order.total_amount }}</td>
+                        <td>
+                            <span class="status-badge status-{{ order.status }}">{{ order.status }}</span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                {% if order.status == 'pending' %}
+                                    <button class="btn-success approve-btn" data-order-id="{{ order.id }}">Approve</button>
+                                    <button class="btn-danger reject-btn" data-order-id="{{ order.id }}">Reject</button>
+                                {% elif order.status == 'approved' %}
+                                    <button class="btn-info verify-payment-btn" data-order-id="{{ order.id }}">Verify Payment</button>
+                                {% endif %}
+                                <button class="btn-warning view-items-btn" data-order-id="{{ order.id }}">View Items</button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -651,153 +899,350 @@ input:focus, textarea:focus, select:focus { outline: none; box-shadow: 0 0 0 3px
     </div>
 </div>
 
+<!-- Order Items Modal -->
+<div id="orderItemsModal" class="modal">
+    <div class="modal-content">
+        <h2 style="color: #ffa500; margin-bottom: 1.5rem;">Order Items</h2>
+        <div id="orderItemsContent"></div>
+        <div class="modal-button-container">
+            <button type="button" class="btn-secondary" onclick="closeOrderItemsModal()" style="min-width: 120px; padding: 0.6rem 1.5rem;">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
 let editMode = false;
 let selectedFiles = []; // Stores NEW files to be uploaded
-let existingImageUrls = []; // Stores URLs of files already on the server
+let existingImageUrls = []; // Stores URLs of files already on server
 
 // Gallery state for table image carousels
 const galleryStates = {};
 
+// Tab switching function
+function switchTab(tabName, buttonElement) {
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Remove active class from all tab buttons
+    document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Show the selected tab
+    document.getElementById(`${tabName}-tab`).classList.add('active');
+    
+    // Add active class to the clicked button
+    buttonElement.classList.add('active');
+}
 
-// In your admin_scaffoldings.html script section, update the deleteProduct function:
-
-function deleteProduct(id) {
-    if (confirm('⚠️ Are you sure you want to delete this product?\n\nThis action cannot be undone.')) {
-        fetch('/admin_delete_product/' + id, {
+// ENHANCED: Delete product function with comprehensive error handling
+function deleteProduct(id, productName) {
+    console.log('Attempting to delete product:', id, productName);
+    
+    if (!id) {
+        console.error('No product ID provided for deletion');
+        alert('❌ Error: Product ID is missing');
+        return;
+    }
+    
+    // Sanitize the ID to handle any special characters (especially from |e filter)
+    const sanitizedId = String(id).trim();
+    console.log('Sanitized product ID:', sanitizedId);
+    
+    const confirmMessage = `⚠️ Are you sure you want to delete "${productName || 'this product'}"? (ID: ${sanitizedId})\n\nThis action cannot be undone.`;
+    
+    if (confirm(confirmMessage)) {
+        // Show loading state
+        const deleteBtn = document.querySelector(`.delete-btn[data-product-id="${sanitizedId}"]`);
+        if (deleteBtn) {
+            deleteBtn.disabled = true;
+            deleteBtn.textContent = 'Deleting...';
+        }
+        
+        // Use a more robust URL construction with proper encoding
+        const deleteUrl = `/admin_delete_product/${encodeURIComponent(sanitizedId)}`;
+        console.log('Delete URL:', deleteUrl);
+        
+        // Create proper headers
+        const headers = {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        };
+        
+        fetch(deleteUrl, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            }
+            headers: headers,
+            body: JSON.stringify({})
         })
-        .then(response => response.json())
+        .then(response => {
+            console.log('Delete response status:', response.status);
+            
+            // ⚠️ FIX: If response is NOT OK (e.g., 400), try to read the JSON error body
+            if (!response.ok) {
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    // Read the JSON body to get the custom message
+                    return response.json().then(data => {
+                        // Throw an error with the server's specific message
+                        throw new Error(data.message || `Server returned status ${response.status} with an unknown JSON error.`);
+                    });
+                } else {
+                     // Non-JSON error response
+                    throw new Error(`HTTP error! Status: ${response.status}. Server did not return a JSON error message.`);
+                }
+            }
+            // If response is OK (200), proceed to read the JSON data
+            return response.json();
+        })
         .then(data => {
+            console.log('Delete response data:', data);
+            
             if (data.success) {
                 alert('✅ Product deleted successfully!');
-                // Force a hard refresh to clear any cached images
-                window.location.href = window.location.href + '?t=' + new Date().getTime();
+                // Force a hard refresh to clear any cached images and update table
+                window.location.href = window.location.href.split('?')[0] + '?t=' + new Date().getTime();
             } else {
-                alert('❌ Error: ' + (data.message || 'Failed to delete product'));
+                // This path is for success: false in a 200 response, usually not reached
+                throw new Error(data.message || 'Failed to delete product (unknown reason)');
             }
         })
         .catch(error => {
+            console.error('Delete error:', error);
+            
+            let errorMessage = '❌ Error deleting product: ' + error.message;
+            alert(errorMessage);
+            
+            // Reset button state
+            if (deleteBtn) {
+                deleteBtn.disabled = false;
+                deleteBtn.textContent = 'Delete';
+            }
+        });
+    }
+}
+
+// FIXED: Order management functions
+function approveOrder(orderId) {
+    if (!orderId) {
+        console.error('No order ID provided for approval');
+        alert('❌ Error: Order ID is missing');
+        return;
+    }
+    
+    if (confirm('Are you sure you want to approve this order?')) {
+        fetch(`/admin_approve_order/${encodeURIComponent(orderId)}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                alert('✅ Order approved successfully!');
+                window.location.reload();
+            } else {
+                alert('❌ Error: ' + (data.message || 'Failed to approve order'));
+            }
+        })
+        .catch(error => {
+            console.error('Error approving order:', error);
             alert('❌ Error: ' + error.message);
         });
     }
 }
 
-// Also update the editProduct function to properly handle images:
-
-function editProduct(id, name, price, description, category, rentPrice, weight, deposit, imageUrl) {
-    editMode = true;
-    document.getElementById('modalTitle').textContent = 'Edit Product';
-    document.getElementById('productForm').reset();
-    
-    document.getElementById('productId').value = id;
-    document.getElementById('productName').value = name;
-    document.getElementById('productPrice').value = price;
-    document.getElementById('productRentPrice').value = rentPrice > 0 ? rentPrice : '';
-    document.getElementById('productDeposit').value = deposit > 0 ? deposit : '';
-    document.getElementById('productCategory').value = category;
-    document.getElementById('productDescription').value = description;
-    document.getElementById('productWeight').value = weight > 0 ? weight : '';
-
-    // Reset arrays before populating
-    selectedFiles = [];
-    existingImageUrls = [];
-    
-    if (imageUrl) {
-        // Debug: log the raw image URL
-        console.log('Raw image URL from database:', imageUrl);
-        
-        existingImageUrls = imageUrl.split(',').map(url => url.trim()).filter(url => url !== '');
-        console.log('Processed image URLs:', existingImageUrls);
-    } else {
-        existingImageUrls = [];
-    }
-    
-    // Show replace images checkbox for edit mode
-    const replaceContainer = document.getElementById('replaceImagesContainer');
-    if (replaceContainer) {
-        replaceContainer.style.display = existingImageUrls.length > 0 ? 'flex' : 'none';
-        document.getElementById('replaceExistingImages').checked = false;
-    }
-
-    document.getElementById('productModal').classList.add('show');
-    document.body.classList.add('modal-open');
-    document.documentElement.classList.add('modal-open');
-    updateCategoryFields();
-    
-    // Use requestAnimationFrame to ensure DOM is ready before rendering
-    requestAnimationFrame(() => {
-        setTimeout(() => {
-            renderImagePreviews();
-            
-            // Double-check if images are rendered
-            const previewContainer = document.getElementById('multiImagePreview');
-            if (previewContainer && previewContainer.children.length === 0 && existingImageUrls.length > 0) {
-                console.log('🔄 Images not rendered, trying again...');
-                renderImagePreviews();
-            }
-        }, 200);
-    });
-}
-// Add this function to your scripts
-function addCacheBust(url) {
-    if (!url) return url;
-    const separator = url.includes('?') ? '&' : '?';
-    return url + separator + 't=' + new Date().getTime();
-}
-
-// Update the renderImagePreviews function to use cache-busting
-function renderImagePreviews() {
-    const previewContainer = document.getElementById('multiImagePreview');
-    if (!previewContainer) {
-        console.error('❌ Preview container not found');
+function rejectOrder(orderId) {
+    if (!orderId) {
+        console.error('No order ID provided for rejection');
+        alert('❌ Error: Order ID is missing');
         return;
     }
     
-    previewContainer.innerHTML = '';
-    console.log('🔄 Rendering previews - Existing:', existingImageUrls.length, 'New:', selectedFiles.length);
-
-    // 1. Render existing (uploaded) images with "SAVED" badge
-    existingImageUrls.forEach((url, index) => {
-        const item = document.createElement('div');
-        item.className = 'preview-item existing-photo';
-        item.title = 'Existing image on server';
-
-        const img = document.createElement('img');
-        // Add cache-busting to prevent showing deleted images
-        img.src = addCacheBust(url.trim());
-        img.alt = `Existing Photo ${index + 1}`;
-        img.style.display = 'block';
-        img.style.visibility = 'visible';
-        img.style.opacity = '1';
-        
-        img.onerror = function() {
-            console.error('❌ Failed to load existing image:', url);
-            this.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="120" height="120"%3E%3Crect fill="%23ddd" width="120" height="120"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23999" font-size="14"%3EImage Error%3C/text%3E%3C/svg%3E';
-        };
-
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'remove-btn';
-        btn.innerHTML = '×';
-        btn.title = 'Remove this existing image';
-        btn.addEventListener('click', function(e) { 
-            e.preventDefault();
-            e.stopPropagation();
-            removeExistingImageByIndex(index); 
+    const reason = prompt('Please provide a reason for rejecting this order:');
+    if (reason === null) return; // User cancelled
+    
+    if (confirm('Are you sure you want to reject this order?')) {
+        fetch(`/admin_reject_order/${encodeURIComponent(orderId)}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ reason: reason })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                alert('✅ Order rejected successfully!');
+                window.location.reload();
+            } else {
+                alert('❌ Error: ' + (data.message || 'Failed to reject order'));
+            }
+        })
+        .catch(error => {
+            console.error('Error rejecting order:', error);
+            alert('❌ Error: ' + error.message);
         });
-
-        item.appendChild(img);
-        item.appendChild(btn);
-        previewContainer.appendChild(item);
-        console.log('✅ Added existing image preview:', url);
-    });
-
-    // Rest of the function remains the same...
+    }
 }
+
+function verifyPayment(orderId) {
+    if (!orderId) {
+        console.error('No order ID provided for payment verification');
+        alert('❌ Error: Order ID is missing');
+        return;
+    }
+    
+    if (confirm('Are you sure you want to mark this order as paid?')) {
+        fetch(`/admin_verify_payment/${encodeURIComponent(orderId)}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                alert('✅ Payment verified successfully!');
+                window.location.reload();
+            } else {
+                alert('❌ Error: ' + (data.message || 'Failed to verify payment'));
+            }
+        })
+        .catch(error => {
+            console.error('Error verifying payment:', error);
+            alert('❌ Error: ' + error.message);
+        });
+    }
+}
+
+function viewOrderItems(orderId) {
+    if (!orderId) {
+        console.error('No order ID provided for viewing items');
+        alert('❌ Error: Order ID is missing');
+        return;
+    }
+    
+    fetch(`/admin_order_items/${encodeURIComponent(orderId)}`, {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            displayOrderItems(data.order, data.items);
+        } else {
+            alert('❌ Error: ' + (data.message || 'Failed to load order items'));
+        }
+    })
+    .catch(error => {
+        console.error('Error loading order items:', error);
+        alert('❌ Error: ' + error.message);
+    });
+}
+
+// Format date and time for display
+function formatOrderDate(dateString) {
+    if (!dateString) return 'N/A';
+    
+    const date = new Date(dateString);
+    const options = {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+    };
+    
+    return date.toLocaleString('en-US', options);
+}
+
+function displayOrderItems(order, items) {
+    const content = document.getElementById('orderItemsContent');
+    
+    let html = `
+        <div style="margin-bottom: 1.5rem;">
+            <p><strong>Order ID:</strong> ${order.id}</p>
+            <p><strong>Customer:</strong> ${order.customer_name || 'N/A'}</p>
+            <p><strong>Date & Time:</strong> ${formatOrderDate(order.order_date)}</p>
+            <p><strong>Total Amount:</strong> ₹${order.total_amount}</p>
+            <p><strong>Status:</strong> <span class="status-badge status-${order.status}">${order.status}</span></p>
+        </div>
+        <table class="order-items-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+    
+    items.forEach(item => {
+        html += `
+            <tr>
+                <td>${item.product_name}</td>
+                <td>${item.quantity}</td>
+                <td>₹${item.price}</td>
+                <td>₹${(item.price * item.quantity).toFixed(2)}</td>
+            </tr>
+        `;
+    });
+    
+    html += `
+            </tbody>
+        </table>
+    `;
+    
+    content.innerHTML = html;
+    document.getElementById('orderItemsModal').classList.add('show');
+    document.body.classList.add('modal-open');
+    document.documentElement.classList.add('modal-open');
+}
+
+function closeOrderItemsModal() {
+    document.getElementById('orderItemsModal').classList.remove('show');
+    document.body.classList.remove('modal-open');
+    document.documentElement.classList.remove('modal-open');
+}
+
 // Initialize gallery states for products with multiple images
 document.addEventListener('DOMContentLoaded', function() {
     {% for product in products %}
@@ -811,6 +1256,23 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize swipe functionality for all galleries
     initializeSwipeGalleries();
+    
+    // Format all order dates in table
+    const orderDateCells = document.querySelectorAll('#orders-tab td:nth-child(3)');
+    orderDateCells.forEach(cell => {
+        const dateText = cell.textContent.trim();
+        if (dateText && dateText !== 'N/A') {
+            // Try to parse and reformat the date
+            try {
+                const date = new Date(dateText);
+                if (!isNaN(date.getTime())) {
+                    cell.textContent = formatOrderDate(date.toISOString());
+                }
+            } catch (e) {
+                console.warn('Could not format date:', dateText);
+            }
+        }
+    });
 });
 
 // FIXED: Function to handle image navigation in table
@@ -1241,39 +1703,19 @@ function editProduct(id, name, price, description, category, rentPrice, weight, 
     });
 }
 
-function deleteProduct(id) {
-    if (confirm('⚠️ Are you sure you want to delete this product?\n\nThis action cannot be undone.')) {
-        fetch('/admin_delete_product/' + id, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('✅ Product deleted successfully!');
-                location.reload();
-            } else {
-                alert('❌ Error: ' + (data.message || 'Failed to delete product'));
-            }
-        })
-        .catch(error => {
-            alert('❌ Error: ' + error.message);
-        });
-    }
-}
-
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🎯 Admin Scaffoldings page loaded');
     enforceFullWidth();
     removeBackgroundSlider();
     
-    // Event delegation for Edit and Delete buttons
+    // Event delegation for all buttons
     document.addEventListener('click', function(e) {
+        // Edit button
         const editBtn = e.target.closest && e.target.closest('.edit-btn');
         if (editBtn) {
+            e.preventDefault();
+            e.stopPropagation();
             const id = editBtn.dataset.productId;
             const name = editBtn.dataset.productName || '';
             const price = parseFloat(editBtn.dataset.productPrice) || 0;
@@ -1287,10 +1729,62 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        // Delete button
         const delBtn = e.target.closest && e.target.closest('.delete-btn');
         if (delBtn) {
+            e.preventDefault();
+            e.stopPropagation();
             const id = delBtn.dataset.productId;
-            if (id) deleteProduct(id);
+            const productName = delBtn.dataset.productName || '';
+            console.log('Delete button clicked for product:', id, productName);
+            
+            if (id) {
+                deleteProduct(id, productName);
+            } else {
+                console.error('No product ID found on delete button');
+                alert('❌ Error: Could not determine product ID for deletion');
+            }
+            return;
+        }
+        
+        // Approve button
+        const approveBtn = e.target.closest && e.target.closest('.approve-btn');
+        if (approveBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            const orderId = approveBtn.dataset.orderId;
+            approveOrder(orderId);
+            return;
+        }
+        
+        // Reject button
+        const rejectBtn = e.target.closest && e.target.closest('.reject-btn');
+        if (rejectBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            const orderId = rejectBtn.dataset.orderId;
+            rejectOrder(orderId);
+            return;
+        }
+        
+        // Verify payment button
+        const verifyPaymentBtn = e.target.closest && e.target.closest('.verify-payment-btn');
+        if (verifyPaymentBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            const orderId = verifyPaymentBtn.dataset.orderId;
+            verifyPayment(orderId);
+            return;
+        }
+        
+        // View items button
+        const viewItemsBtn = e.target.closest && e.target.closest('.view-items-btn');
+        if (viewItemsBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            const orderId = viewItemsBtn.dataset.orderId;
+            viewOrderItems(orderId);
+            return;
         }
     });
     
@@ -1332,7 +1826,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 
                 if (validFiles.length > 0) {
-                    // FIXED: Check if replace checkbox is checked in edit mode
+                    // Check if replace checkbox is checked in edit mode
                     const replaceCheckbox = document.getElementById('replaceExistingImages');
                     if (editMode && replaceCheckbox && replaceCheckbox.checked) {
                         // Clear existing images if replace is checked
@@ -1379,7 +1873,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 formDataObj.append('quantity', document.getElementById('productQuantity').value || '1');
             }
             
-            // FIXED: Check if user wants to replace all images
+            // Check if user wants to replace all images
             const replaceCheckbox = document.getElementById('replaceExistingImages');
             const shouldReplaceAll = editMode && replaceCheckbox && replaceCheckbox.checked;
             
@@ -1449,5 +1943,4 @@ setTimeout(function() {
     removeBackgroundSlider();
 }, 500);
 </script>
-
 {% endblock %}

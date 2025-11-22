@@ -1,213 +1,516 @@
 {% extends "base.html" %}
 
-{% block title %}Admin - All Orders{% endblock %}
+{% block title %}Admin - Orders{% endblock %}
 
 {% block content %}
-<div class="glass-container">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-        <button class="btn-primary" onclick="window.location.href='{{ url_for('admin_analytics') }}'" style="width: auto; background: linear-gradient(135deg, #4CAF50, #45a049);">📊 Business Analytics</button>
-        <button class="btn-danger" onclick="window.location.href='{{ url_for('admin_logout') }}'" style="width: auto;">Logout</button>
-    </div>
-    <h1 class="page-title">All Customer Orders</h1>
-    <p style="text-align: center; color: #d4af37; margin-bottom: 2rem;">
-        View all orders with payment verification details
-    </p>
-    
-    {% if orders %}
-    <div style="overflow-x: auto; margin-top: 2rem;">
-        <table class="admin-table">
-            <thead>
-                <tr>
-                    <th>Order ID</th>
-                    <th>Customer Details</th>
-                    <th>Date</th>
-                    <th>Total Amount</th>
-                    <th>Transaction ID</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                    <th>Items</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for order in orders %}
-                <tr>
-                    <td>#{{ order.id }}</td>
-                    <td style="min-width: 200px; max-width: 350px;">
-                        <div style="background: rgba(212, 175, 55, 0.1); padding: 0.8rem; border-radius: 8px; border-left: 3px solid #d4af37;">
-                            <div style="margin-bottom: 0.5rem;">
-                                <strong style="color: #d4af37; font-size: 1.05rem; display: block; margin-bottom: 0.3rem;">{{ order.user.full_name or order.user.username or 'N/A' }}</strong>
-                            </div>
-                            <div style="display: flex; flex-direction: column; gap: 0.3rem;">
-                                <span style="color: #001d3d; font-size: 0.9rem;"><strong style="color: #d4af37;">Email:</strong> {{ order.user.email or 'N/A' }}</span>
-                                <span style="color: #001d3d; font-size: 0.9rem;"><strong style="color: #d4af37;">Phone:</strong> {{ order.user.phone or 'N/A' }}</span>
-                                {% if order.user.address %}
-                                <span style="color: #001d3d; font-size: 0.9rem;"><strong style="color: #d4af37;">Address:</strong> {{ order.user.address }}</span>
-                                {% endif %}
-                                {% if order.user.organization %}
-                                <span style="color: #001d3d; font-size: 0.9rem;"><strong style="color: #d4af37;">Org:</strong> {{ order.user.organization }}</span>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </td>
-                    <td>{{ order.order_date.strftime('%b %d, %Y %I:%M %p') }}</td>
-                    <td style="color: #4CAF50; font-weight: bold;">₹{{ "%.2f"|format(order.total_price) }}</td>
-                    <td>
-                        {% if order.transaction_id %}
-                        <span style="color: #d4af37; font-family: monospace; font-size: 0.9rem;">{{ order.transaction_id }}</span>
-                        {% else %}
-                        <span style="color: #888;">N/A</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if order.status == 'completed' %}
-                        <span style="color: #4CAF50; font-weight: bold;">✓ Completed</span>
-                        {% elif order.status == 'pending_verification' %}
-                        <span style="color: #ffa500; font-weight: bold;">⏳ Pending Verification</span>
-                        {% elif order.status == 'rejected' %}
-                        <span style="color: #ff4444; font-weight: bold;">✗ Rejected</span>
-                        {% else %}
-                        <span style="color: #ccc;">{{ order.status|title }}</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if order.status == 'pending_verification' %}
-                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                            <button class="btn" onclick="verifyPayment({{ order.id }}, {{ order.total_price }})" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; background: #4CAF50;">
-                                ✓ Approve
-                            </button>
-                            <button class="btn-danger" onclick="rejectPayment({{ order.id }})" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
-                                ✗ Reject
-                            </button>
-                        </div>
-                        {% else %}
-                        <span style="color: #888;">-</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <button class="btn-secondary" onclick="showOrderDetails({{ order.id }})" style="padding: 0.4rem 0.8rem; font-size: 0.9rem;">
-                            View Items
-                        </button>
-                    </td>
-                </tr>
-                <tr id="order-details-{{ order.id }}" style="display: none;">
-                    <td colspan="8" style="background: rgba(255, 255, 255, 0.03); padding: 1.5rem;">
-                        <div style="max-width: 800px; margin: 0 auto;">
-                            <h4 style="color: #d4af37; margin-bottom: 1rem;">Order Items:</h4>
-                            {% for item in order.order_items %}
-                            <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px; margin-bottom: 0.8rem; border-left: 3px solid #d4af37;">
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <div>
-                                        <strong style="color: #001d3d; font-size: 1.1rem;">{{ item.product_name }}</strong>
-                                        <p style="color: #ccc; margin: 0.3rem 0; font-size: 0.9rem;">
-                                            Quantity: {{ item.quantity }} | Unit Price: ₹{{ "%.2f"|format(item.price) }}
-                                        </p>
-                                        {% if item.customization %}
-                                        <p style="color: #888; font-size: 0.85rem; margin-top: 0.3rem;">
-                                            Customization: 
-                                            {% for key, value in item.customization.items() %}
-                                                {{ key|replace('_', ' ')|title }}: {{ value }}{% if not loop.last %}, {% endif %}
-                                            {% endfor %}
-                                        </p>
-                                        {% endif %}
-                                    </div>
-                                    <div style="text-align: right;">
-                                        <p style="color: #4CAF50; font-size: 1.2rem; font-weight: bold; margin: 0;">
-                                            ₹{{ "%.2f"|format(item.price * item.quantity) }}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% else %}
-    <p style="text-align: center; color: #ccc; margin-top: 3rem; font-size: 1.2rem;">No orders found</p>
-    {% endif %}
-</div>
-{% endblock %}
+<style>
+/* Admin Orders Styles */
+.orders-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
 
-{% block scripts %}
-function showOrderDetails(orderId) {
-    const detailsRow = document.getElementById('order-details-' + orderId);
-    if (detailsRow.style.display === 'none') {
-        detailsRow.style.display = 'table-row';
-    } else {
-        detailsRow.style.display = 'none';
+.order-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.order-card:hover {
+    transform: translateY(-5px);
+}
+
+.order-header {
+    background: linear-gradient(135deg, #001d3d, #002855);
+    color: white;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.order-id {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.order-date {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.order-status {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+}
+
+.status-pending {
+    background-color: #ffc107;
+    color: #333;
+}
+
+.status-approved {
+    background-color: #28a745;
+    color: white;
+}
+
+.status-rejected {
+    background-color: #dc3545;
+    color: white;
+}
+
+.status-completed {
+    background-color: #007bff;
+    color: white;
+}
+
+.order-body {
+    padding: 1.5rem;
+}
+
+.customer-info {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.info-row {
+    display: flex;
+    margin-bottom: 0.5rem;
+}
+
+.info-label {
+    font-weight: bold;
+    width: 120px;
+    color: #555;
+}
+
+.info-value {
+    flex: 1;
+    color: #333;
+}
+
+.order-items {
+    margin-bottom: 1rem;
+}
+
+.item-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+}
+
+.item-table th {
+    background-color: #f1f3f4;
+    color: white;
+    text-align: left;
+    padding: 0.75rem;
+}
+
+.item-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.order-footer {
+    padding: 1rem 1.5rem;
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.payment-info {
+    text-align: right;
+}
+
+.payment-time {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 0.5rem;
+}
+
+.transaction-id {
+    font-family: monospace;
+    background-color: #e9ecef;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #0069d9;
+}
+
+.btn-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+.btn-warning {
+    background-color: #ffc107;
+    color: #333;
+}
+
+.btn-warning:hover {
+    background-color: #e0a800;
+}
+
+.filter-section {
+    margin-bottom: 2rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.filter-select {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: white;
+}
+
+.search-box {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 250px;
+}
+
+@media (max-width: 768px) {
+    .orders-container {
+        padding: 1rem;
+    }
+    
+    .order-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .info-row {
+        flex-direction: column;
+    }
+    
+    .info-label {
+        width: 100%;
+        margin-bottom: 0.25rem;
+    }
+}
+</style>
+
+<div class="glass-container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1 class="page-title">Admin Orders</h1>
+        <div style="display: flex; gap: 1rem;">
+            <button class="btn-primary" onclick="window.location.href='{{ url_for('admin_scaffoldings') }}'">📦 Products</button>
+            <button class="btn-primary" onclick="window.location.href='{{ url_for('admin_analytics') }}'">📊 Business Analytics</button>
+            <button class="btn-danger" onclick="window.location.href='{{ url_for('admin_logout') }}'">Logout</button>
+        </div>
+    </div>
+    
+    <div class="filter-section">
+        <select id="statusFilter" class="filter-select" onchange="filterOrders()">
+            <option value="all">All Orders</option>
+            <option value="pending_verification">Pending Verification</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+            <option value="completed">Completed</option>
+        </select>
+        
+        <input type="text" id="searchBox" class="search-box" placeholder="Search by Order ID, Customer Name, or Transaction ID" onkeyup="filterOrders()">
+    </div>
+    
+    <div class="orders-container">
+        {% for order in orders %}
+        <div class="order-card" data-status="{{ order.status }}" data-transaction-id="{{ order.transaction_id }}">
+            <div class="order-header">
+                <div>
+                    <div class="order-id">#{{ order.id }}</div>
+                    <div class="order-date">{{ order.order_date.strftime('%Y-%m-%d %H:%M') }}</div>
+                </div>
+                <div class="order-status status-{{ order.status }}">{{ order.status.replace('_', ' ').title() }}</div>
+            </div>
+            
+            <div class="order-body">
+                <div class="customer-info">
+                    <div class="info-row">
+                        <div class="info-label">Customer:</div>
+                        <div class="info-value">{{ order.user.full_name or order.user.username }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Email:</div>
+                        <div class="info-value">{{ order.user.email }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Phone:</div>
+                        <div class="info-value">{{ order.user.phone or 'N/A' }}</div>
+                    </div>
+                    {% if order.user.address %}
+                    <div class="info-row">
+                        <div class="info-label">Address:</div>
+                        <div class="info-value">{{ order.user.address }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="order-items">
+                    <h3>Order Items</h3>
+                    <table class="item-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order.items %}
+                            <tr>
+                                <td>{{ item.product_name }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>₹{{ "%.2f"|format(item.price) }}</td>
+                                <td>₹{{ "%.2f"|format(item.price * item.quantity) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="order-footer">
+                <div>
+                    <div class="info-row">
+                        <div class="info-label">Total Amount:</div>
+                        <div class="info-value">₹{{ "%.2f"|format(order.total_price) }}</div>
+                    </div>
+                    {% if order.amount_paid %}
+                    <div class="info-row">
+                        <div class="info-label">Amount Paid:</div>
+                        <div class="info-value">₹{{ "%.2f"|format(order.amount_paid) }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="payment-info">
+                    <div class="info-row">
+                        <div class="info-label">Transaction ID:</div>
+                        <div class="info-value transaction-id">{{ order.transaction_id }}</div>
+                    </div>
+                    {% if order.payment_time %}
+                    <div class="payment-time">
+                        Payment Time: {{ order.payment_time.strftime('%Y-%m-%d %H:%M:%S') }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div style="display: flex; gap: 0.5rem;">
+                    {% if order.status == 'pending_verification' %}
+                    <button class="btn-success" onclick="verifyPayment({{ order.id }}, '{{ order.transaction_id }}')">Verify Payment</button>
+                    <button class="btn-danger" onclick="rejectPayment({{ order.id }}, '{{ order.transaction_id }}')">Reject Payment</button>
+                    {% endif %}
+                    
+                    {% if order.status == 'approved' and not order.amount_paid %}
+                    <button class="btn-primary" onclick="confirmPayment({{ order.id }}, '{{ order.transaction_id }}')">Confirm Payment</button>
+                    {% endif %}
+                    
+                    {% if order.status == 'approved' and order.amount_paid %}
+                    <button class="btn-warning" onclick="completeOrder({{ order.id }}, '{{ order.transaction_id }}')">Complete Order</button>
+                    {% endif %}
+                    
+                    <button class="btn-secondary" onclick="viewOrderDetails({{ order.id }})">View Details</button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+function filterOrders() {
+    const statusFilter = document.getElementById('statusFilter').value;
+    const searchBox = document.getElementById('searchBox').value.toLowerCase();
+    const orderCards = document.querySelectorAll('.order-card');
+    
+    orderCards.forEach(card => {
+        const status = card.getAttribute('data-status');
+        const transactionId = card.getAttribute('data-transaction-id').toLowerCase();
+        const customerName = card.querySelector('.customer-info .info-value').textContent.toLowerCase();
+        
+        const statusMatch = statusFilter === 'all' || status === statusFilter;
+        const searchMatch = searchBox === '' || 
+                          transactionId.includes(searchBox) || 
+                          customerName.includes(searchBox);
+        
+        if (statusMatch && searchMatch) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+function verifyPayment(orderId, transactionId) {
+    if (confirm(`Are you sure you want to verify payment for Order #${orderId} with Transaction ID ${transactionId}?`)) {
+        fetch('/verify_payment/' + orderId, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'approve'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Payment verified successfully!');
+                location.reload();
+            } else {
+                alert(data.message || 'Failed to verify payment');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while verifying payment');
+        });
     }
 }
 
-function verifyPayment(orderId, totalPrice) {
-    const amountPaid = prompt(`Enter the amount received via PhonePe for Order #${orderId}:\n\nExpected Amount: ₹${totalPrice.toFixed(2)}`);
+function rejectPayment(orderId, transactionId) {
+    if (confirm(`Are you sure you want to reject payment for Order #${orderId} with Transaction ID ${transactionId}?`)) {
+        fetch('/verify_payment/' + orderId, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'reject'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Payment rejected successfully!');
+                location.reload();
+            } else {
+                alert(data.message || 'Failed to reject payment');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while rejecting payment');
+        });
+    }
+}
+
+function confirmPayment(orderId, transactionId) {
+    const amount = prompt(`Enter the payment amount received for Order #${orderId}:`);
+    if (!amount) return;
     
-    if (amountPaid === null) return; // User cancelled
-    
-    const amount = parseFloat(amountPaid);
-    
-    if (isNaN(amount) || amount <= 0) {
+    const amountPaid = parseFloat(amount);
+    if (isNaN(amountPaid) || amountPaid <= 0) {
         alert('Please enter a valid amount');
         return;
     }
     
-    if (amount < totalPrice) {
-        if (!confirm(`WARNING: Amount paid (₹${amount.toFixed(2)}) is LESS than required (₹${totalPrice.toFixed(2)})\n\nAre you sure you want to approve this order with partial payment?`)) {
-            return;
-        }
-    }
-    
-    fetch(`/verify_payment/${orderId}`, {
+    fetch('/verify_payment/' + orderId, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            action: 'approve',
-            amount_paid: amount
+            action: 'confirm',
+            amount_paid: amountPaid
         })
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert(data.message);
+            alert('Payment confirmed successfully!');
             location.reload();
         } else {
-            alert(data.message || 'Failed to verify payment');
+            alert(data.message || 'Failed to confirm payment');
         }
     })
     .catch(error => {
-        alert('Error verifying payment: ' + error);
+        console.error('Error:', error);
+        alert('An error occurred while confirming payment');
     });
 }
 
-function rejectPayment(orderId) {
-    if (!confirm(`Are you sure you want to REJECT Order #${orderId}?\n\nThis action will mark the order as rejected and cannot be undone.`)) {
-        return;
-    }
-    
-    fetch(`/verify_payment/${orderId}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            action: 'reject'
+function completeOrder(orderId, transactionId) {
+    if (confirm(`Are you sure you want to mark Order #${orderId} as completed?`)) {
+        fetch('/admin/complete_order/' + orderId, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
         })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert(data.message);
-            location.reload();
-        } else {
-            alert(data.message || 'Failed to reject order');
-        }
-    })
-    .catch(error => {
-        alert('Error rejecting order: ' + error);
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Order completed successfully!');
+                location.reload();
+            } else {
+                alert(data.message || 'Failed to complete order');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while completing the order');
+        });
+    }
 }
+
+function viewOrderDetails(orderId) {
+    window.location.href = '/order_details/' + orderId;
+}
+</script>
 {% endblock %}

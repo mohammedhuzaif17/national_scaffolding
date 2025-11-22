@@ -3,7 +3,181 @@
 {% block title %}Admin - Business Analytics{% endblock %}
 
 {% block content %}
-<div class="glass-container">
+<style>
+/* =========================
+   Admin Analytics Styles
+   ========================= */
+
+/* Force full page width with highest specificity */
+html body .glass-container,
+html body main .glass-container,
+html body section .glass-container,
+html body .container .glass-container,
+html body .container-fluid .glass-container,
+html body .content-wrapper .glass-container {
+    max-width: 100vw !important;
+    width: 100vw !important;
+    margin: 0 !important;
+    padding: 1.5rem !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+    left: 0 !important;
+    transform: none !important;
+}
+
+/* Override all parent containers */
+html body,
+html body main,
+html body section,
+html body .container,
+html body .container-fluid,
+html body .content-wrapper {
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Completely hide background slider and related elements */
+.hero-section,
+.slider,
+.background-slider,
+.carousel,
+.owl-carousel,
+.swiper-container,
+.slick-slider,
+.flexslider {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    width: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+}
+
+/* Page title */
+.page-title { 
+    font-size: 1.6rem; 
+    margin: 0 0 1.5rem 0; 
+    color: #ffd966; 
+    font-weight: 800; 
+    text-align: left; 
+}
+
+/* Buttons */
+.btn-primary {
+    background: linear-gradient(135deg, #002855, #004080);
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(2,24,63,0.25); }
+
+.btn-danger { 
+    background: #dc3545 !important; 
+    color: white !important; 
+    border: none !important; 
+    padding: 0.6rem 1.5rem !important; 
+    border-radius: 8px !important; 
+    cursor: pointer !important; 
+    font-weight: 600 !important;
+}
+.btn-danger:hover { 
+    background: #c82333 !important; 
+    transform: translateY(-1px) !important; 
+    box-shadow: 0 4px 12px rgba(220,53,69,0.3) !important; 
+}
+
+/* Metric Cards */
+.metric-card {
+    background: linear-gradient(135deg, #001d3d, #002855);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 24px rgba(0,29,61,0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid rgba(212,175,55,0.2);
+}
+
+.metric-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0,29,61,0.3);
+}
+
+.metric-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    color: #d4af37;
+}
+
+.metric-label {
+    color: #ffd966;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.metric-value {
+    color: #fff;
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+/* Chart Containers */
+.chart-container {
+    background: linear-gradient(135deg, #001d3d, #002855);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 24px rgba(0,29,61,0.2);
+    border: 1px solid rgba(212,175,55,0.2);
+}
+
+.chart-title {
+    color: #ffd966;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .metric-card {
+        padding: 1rem;
+    }
+    
+    .metric-icon {
+        font-size: 2rem;
+    }
+    
+    .metric-value {
+        font-size: 1.5rem;
+    }
+    
+    .chart-container {
+        padding: 1rem;
+    }
+    
+    .chart-title {
+        font-size: 1rem;
+    }
+}
+</style>
+
+<div class="glass-container" style="max-width: 100vw !important; width: 100vw !important; margin: 0 !important; padding: 1.5rem !important; box-sizing: border-box !important; position: relative !important; left: 0 !important; transform: none !important;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
         <h1 class="page-title" style="margin: 0;">📊 Business Analytics Dashboard</h1>
         <div style="display: flex; gap: 1rem;">
@@ -18,17 +192,12 @@
         <div class="metric-card">
             <div class="metric-icon">₹</div>
             <div class="metric-label">Total Revenue</div>
-            <div class="metric-value">₹{{ "{:,.2f}".format(total_revenue) }}</div>
-        </div>
-        <div class="metric-card">
-            <div class="metric-icon">📦</div>
-            <div class="metric-label">Total Orders</div>
-            <div class="metric-value">{{ total_orders }}</div>
+            <div class="metric-value">₹{{ "{:,.2f}".format(total_revenue) if total_revenue is not none else "0.00" }}</div>
         </div>
         <div class="metric-card">
             <div class="metric-icon">💰</div>
             <div class="metric-label">Average Order Value</div>
-            <div class="metric-value">₹{{ "{:,.2f}".format(avg_order_value) }}</div>
+            <div class="metric-value">₹{{ "{:,.2f}".format(avg_order_value) if avg_order_value is not none else "0.00" }}</div>
         </div>
     </div>
     
@@ -64,255 +233,348 @@
 {% endblock %}
 
 {% block scripts %}
-// Chart.js CDN is loaded in base.html
-const monthlyData = {{ monthly_data|tojson }};
-const yearlyData = {{ yearly_data|tojson }};
-const categoryData = {{ category_data|tojson }};
-const sortedMonths = {{ sorted_months|tojson }};
+<script>
+// Check if Chart.js is loaded
+if (typeof Chart === 'undefined') {
+    console.error('Chart.js is not loaded. Please include Chart.js in your base.html template.');
+} else {
+    // Chart.js is loaded, proceed with chart creation
+    const monthlyData = {{ monthly_data|tojson if monthly_data is not none else '{}' }};
+    const yearlyData = {{ yearly_data|tojson if yearly_data is not none else '{}' }};
+    const categoryData = {{ category_data|tojson if category_data is not none else '{}' }};
+    const sortedMonths = {{ sorted_months|tojson if sorted_months is not none else '[]' }};
 
-// Theme colors
-const goldColor = '#d4af37';
-const royalBlueColor = '#001d3d';
-const accentColors = [
-    '#d4af37', // Gold
-    '#4CAF50', // Green
-    '#9333ea', // Purple
-    '#FF6384', // Pink
-    '#36A2EB', // Blue
-    '#FFCE56', // Yellow
-];
+    // Theme colors
+    const goldColor = '#d4af37';
+    const royalBlueColor = '#001d3d';
+    const accentColors = [
+        '#d4af37', // Gold
+        '#4CAF50', // Green
+        '#9333ea', // Purple
+        '#FF6384', // Pink
+        '#36A2EB', // Blue
+        '#FFCE56', // Yellow
+    ];
 
-// Chart.js default configuration
-Chart.defaults.color = goldColor;
-Chart.defaults.font.family = "'Poppins', sans-serif";
-Chart.defaults.font.size = 13;
+    // Chart.js default configuration
+    Chart.defaults.color = goldColor;
+    Chart.defaults.font.family = "'Poppins', sans-serif";
+    Chart.defaults.font.size = 13;
 
-// Monthly Revenue Chart
-const monthlyRevenueCtx = document.getElementById('monthlyRevenueChart').getContext('2d');
-const monthlyRevenueChart = new Chart(monthlyRevenueCtx, {
-    type: 'line',
-    data: {
-        labels: sortedMonths.map(m => {
-            const date = new Date(m + '-01');
-            return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-        }),
-        datasets: [{
-            label: 'Revenue (₹)',
-            data: sortedMonths.map(m => monthlyData[m].revenue),
-            borderColor: goldColor,
-            backgroundColor: 'rgba(212, 175, 55, 0.1)',
-            borderWidth: 3,
-            fill: true,
-            tension: 0.4,
-            pointBackgroundColor: goldColor,
-            pointBorderColor: '#fff',
-            pointBorderWidth: 2,
-            pointRadius: 5,
-            pointHoverRadius: 7
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-            legend: {
-                display: true,
-                labels: {
-                    color: goldColor,
-                    font: { size: 14, weight: 'bold' }
-                }
+    // Monthly Revenue Chart
+    if (document.getElementById('monthlyRevenueChart') && sortedMonths.length > 0) {
+        const monthlyRevenueCtx = document.getElementById('monthlyRevenueChart').getContext('2d');
+        const monthlyRevenueChart = new Chart(monthlyRevenueCtx, {
+            type: 'line',
+            data: {
+                labels: sortedMonths.map(m => {
+                    const date = new Date(m + '-01');
+                    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                }),
+                datasets: [{
+                    label: 'Revenue (₹)',
+                    data: sortedMonths.map(m => monthlyData[m] ? monthlyData[m].revenue : 0),
+                    borderColor: goldColor,
+                    backgroundColor: 'rgba(212, 175, 55, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: goldColor,
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                }]
             },
-            tooltip: {
-                backgroundColor: royalBlueColor,
-                titleColor: goldColor,
-                bodyColor: '#fff',
-                borderColor: goldColor,
-                borderWidth: 2,
-                padding: 12,
-                displayColors: false,
-                callbacks: {
-                    label: function(context) {
-                        return '₹' + context.parsed.y.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                    }
-                }
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    color: goldColor,
-                    callback: function(value) {
-                        return '₹' + value.toLocaleString('en-IN');
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: {
+                            color: goldColor,
+                            font: { size: 14, weight: 'bold' }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: royalBlueColor,
+                        titleColor: goldColor,
+                        bodyColor: '#fff',
+                        borderColor: goldColor,
+                        borderWidth: 2,
+                        padding: 12,
+                        displayColors: false,
+                        callbacks: {
+                            label: function(context) {
+                                return '₹' + context.parsed.y.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                            }
+                        }
                     }
                 },
-                grid: {
-                    color: 'rgba(212, 175, 55, 0.1)'
-                }
-            },
-            x: {
-                ticks: { color: goldColor },
-                grid: {
-                    color: 'rgba(212, 175, 55, 0.1)'
-                }
-            }
-        }
-    }
-});
-
-// Yearly Revenue Chart
-const yearlyRevenueCtx = document.getElementById('yearlyRevenueChart').getContext('2d');
-const yearlyRevenueChart = new Chart(yearlyRevenueCtx, {
-    type: 'bar',
-    data: {
-        labels: Object.keys(yearlyData),
-        datasets: [{
-            label: 'Revenue (₹)',
-            data: Object.values(yearlyData).map(d => d.revenue),
-            backgroundColor: accentColors.slice(0, Object.keys(yearlyData).length),
-            borderColor: goldColor,
-            borderWidth: 2,
-            borderRadius: 8
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-            legend: {
-                display: false
-            },
-            tooltip: {
-                backgroundColor: royalBlueColor,
-                titleColor: goldColor,
-                bodyColor: '#fff',
-                borderColor: goldColor,
-                borderWidth: 2,
-                padding: 12,
-                callbacks: {
-                    label: function(context) {
-                        return '₹' + context.parsed.y.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: goldColor,
+                            callback: function(value) {
+                                return '₹' + value.toLocaleString('en-IN');
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(212, 175, 55, 0.1)'
+                        }
+                    },
+                    x: {
+                        ticks: { color: goldColor },
+                        grid: {
+                            color: 'rgba(212, 175, 55, 0.1)'
+                        }
                     }
                 }
             }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    color: goldColor,
-                    callback: function(value) {
-                        return '₹' + value.toLocaleString('en-IN');
+        });
+    }
+
+    // Yearly Revenue Chart
+    if (document.getElementById('yearlyRevenueChart') && Object.keys(yearlyData).length > 0) {
+        const yearlyRevenueCtx = document.getElementById('yearlyRevenueChart').getContext('2d');
+        const yearlyRevenueChart = new Chart(yearlyRevenueCtx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(yearlyData),
+                datasets: [{
+                    label: 'Revenue (₹)',
+                    data: Object.values(yearlyData).map(d => d ? d.revenue : 0),
+                    backgroundColor: accentColors.slice(0, Object.keys(yearlyData).length),
+                    borderColor: goldColor,
+                    borderWidth: 2,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: royalBlueColor,
+                        titleColor: goldColor,
+                        bodyColor: '#fff',
+                        borderColor: goldColor,
+                        borderWidth: 2,
+                        padding: 12,
+                        callbacks: {
+                            label: function(context) {
+                                return '₹' + context.parsed.y.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                            }
+                        }
                     }
                 },
-                grid: {
-                    color: 'rgba(212, 175, 55, 0.1)'
-                }
-            },
-            x: {
-                ticks: { color: goldColor },
-                grid: {
-                    display: false
-                }
-            }
-        }
-    }
-});
-
-// Category Chart
-const categoryCtx = document.getElementById('categoryChart').getContext('2d');
-const categoryChart = new Chart(categoryCtx, {
-    type: 'doughnut',
-    data: {
-        labels: Object.keys(categoryData).map(cat => cat.charAt(0).toUpperCase() + cat.slice(1)),
-        datasets: [{
-            data: Object.values(categoryData).map(d => d.revenue),
-            backgroundColor: accentColors,
-            borderColor: '#fff',
-            borderWidth: 3
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-            legend: {
-                position: 'bottom',
-                labels: {
-                    color: goldColor,
-                    font: { size: 12 },
-                    padding: 15
-                }
-            },
-            tooltip: {
-                backgroundColor: royalBlueColor,
-                titleColor: goldColor,
-                bodyColor: '#fff',
-                borderColor: goldColor,
-                borderWidth: 2,
-                padding: 12,
-                callbacks: {
-                    label: function(context) {
-                        return context.label + ': ₹' + context.parsed.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: goldColor,
+                            callback: function(value) {
+                                return '₹' + value.toLocaleString('en-IN');
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(212, 175, 55, 0.1)'
+                        }
+                    },
+                    x: {
+                        ticks: { color: goldColor },
+                        grid: {
+                            display: false
+                        }
                     }
                 }
             }
-        }
+        });
     }
+
+    // Category Chart
+    if (document.getElementById('categoryChart') && Object.keys(categoryData).length > 0) {
+        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+        const categoryChart = new Chart(categoryCtx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(categoryData).map(cat => cat.charAt(0).toUpperCase() + cat.slice(1)),
+                datasets: [{
+                    data: Object.values(categoryData).map(d => d ? d.revenue : 0),
+                    backgroundColor: accentColors,
+                    borderColor: '#fff',
+                    borderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: goldColor,
+                            font: { size: 12 },
+                            padding: 15
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: royalBlueColor,
+                        titleColor: goldColor,
+                        bodyColor: '#fff',
+                        borderColor: goldColor,
+                        borderWidth: 2,
+                        padding: 12,
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ₹' + context.parsed.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Monthly Orders Chart
+    if (document.getElementById('monthlyOrdersChart') && sortedMonths.length > 0) {
+        const monthlyOrdersCtx = document.getElementById('monthlyOrdersChart').getContext('2d');
+        const monthlyOrdersChart = new Chart(monthlyOrdersCtx, {
+            type: 'bar',
+            data: {
+                labels: sortedMonths.map(m => {
+                    const date = new Date(m + '-01');
+                    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                }),
+                datasets: [{
+                    label: 'Number of Orders',
+                    data: sortedMonths.map(m => monthlyData[m] ? monthlyData[m].orders : 0),
+                    backgroundColor: 'rgba(76, 175, 80, 0.8)',
+                    borderColor: '#4CAF50',
+                    borderWidth: 2,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: royalBlueColor,
+                        titleColor: goldColor,
+                        bodyColor: '#fff',
+                        borderColor: goldColor,
+                        borderWidth: 2,
+                        padding: 12
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: goldColor,
+                            stepSize: 1
+                        },
+                        grid: {
+                            color: 'rgba(212, 175, 55, 0.1)'
+                        }
+                    },
+                    x: {
+                        ticks: { color: goldColor },
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    }
+}
+
+// AGGRESSIVE FULL WIDTH ENFORCEMENT
+function enforceFullWidth() {
+    const elementsToOverride = [
+        document.querySelector('.glass-container'),
+        document.querySelector('.container'),
+        document.querySelector('.container-fluid'),
+        document.querySelector('main'),
+        document.querySelector('section'),
+        document.querySelector('.content-wrapper'),
+        document.querySelector('body'),
+        document.querySelector('html')
+    ];
+    
+    elementsToOverride.forEach(element => {
+        if (element) {
+            element.style.setProperty('max-width', '100vw', 'important');
+            element.style.setProperty('width', '100vw', 'important');
+            element.style.setProperty('margin-left', '0', 'important');
+            element.style.setProperty('margin-right', '0', 'important');
+            element.style.setProperty('padding-left', '0', 'important');
+            element.style.setProperty('padding-right', '0', 'important');
+            element.style.setProperty('position', 'relative', 'important');
+            element.style.setProperty('left', '0', 'important');
+            element.style.setProperty('transform', 'none', 'important');
+        }
+    });
+}
+
+// AGGRESSIVE BACKGROUND SLIDER REMOVAL
+function removeBackgroundSlider() {
+    const sliderSelectors = [
+        '.hero-section',
+        '.slider',
+        '.background-slider',
+        '.carousel',
+        '.owl-carousel',
+        '.swiper-container',
+        '.slick-slider',
+        '.flexslider'
+    ];
+    
+    sliderSelectors.forEach(selector => {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(element => {
+            element.style.setProperty('display', 'none', 'important');
+            element.style.setProperty('visibility', 'hidden', 'important');
+            element.style.setProperty('height', '0', 'important');
+            element.style.setProperty('width', '0', 'important');
+            element.style.setProperty('overflow', 'hidden', 'important');
+            element.style.setProperty('position', 'absolute', 'important');
+            element.style.setProperty('top', '-9999px', 'important');
+            element.style.setProperty('left', '-9999px', 'important');
+            if (element.parentNode) {
+                element.parentNode.removeChild(element);
+            }
+        });
+    });
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🎯 Admin Analytics page loaded');
+    enforceFullWidth();
+    removeBackgroundSlider();
 });
 
-// Monthly Orders Chart
-const monthlyOrdersCtx = document.getElementById('monthlyOrdersChart').getContext('2d');
-const monthlyOrdersChart = new Chart(monthlyOrdersCtx, {
-    type: 'bar',
-    data: {
-        labels: sortedMonths.map(m => {
-            const date = new Date(m + '-01');
-            return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-        }),
-        datasets: [{
-            label: 'Number of Orders',
-            data: sortedMonths.map(m => monthlyData[m].orders),
-            backgroundColor: 'rgba(76, 175, 80, 0.8)',
-            borderColor: '#4CAF50',
-            borderWidth: 2,
-            borderRadius: 8
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-            legend: {
-                display: false
-            },
-            tooltip: {
-                backgroundColor: royalBlueColor,
-                titleColor: goldColor,
-                bodyColor: '#fff',
-                borderColor: goldColor,
-                borderWidth: 2,
-                padding: 12
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    color: goldColor,
-                    stepSize: 1
-                },
-                grid: {
-                    color: 'rgba(212, 175, 55, 0.1)'
-                }
-            },
-            x: {
-                ticks: { color: goldColor },
-                grid: {
-                    display: false
-                }
-            }
-        }
-    }
+// Re-enforce on window resize
+window.addEventListener('resize', function() {
+    enforceFullWidth();
+    removeBackgroundSlider();
 });
+
+// Extra enforcement after a delay
+setTimeout(function() {
+    enforceFullWidth();
+    removeBackgroundSlider();
+}, 500);
+</script>
 {% endblock %}
