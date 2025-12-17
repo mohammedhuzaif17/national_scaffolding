@@ -4,11 +4,74 @@
 
 {% block content %}
 <style>
-/* Admin Orders Styles */
+/* =========================
+   Admin Orders Styles
+   AGGRESSIVE FULL WIDTH OVERRIDE
+   ========================= */
+
+/* Force full page width with highest specificity */
+html body .glass-container,
+html body main .glass-container,
+html body section .glass-container,
+html body .container .glass-container,
+html body .container-fluid .glass-container,
+html body .content-wrapper .glass-container {
+    max-width: 100vw !important;
+    width: 100vw !important;
+    margin: 0 !important;
+    padding: 1.5rem !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+    left: 0 !important;
+    transform: none !important;
+}
+
+/* Override all parent containers */
+html body,
+html body main,
+html body section,
+html body .container,
+html body .container-fluid,
+html body .content-wrapper {
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Completely hide background slider and related elements */
+.hero-section,
+.slider,
+.background-slider,
+.carousel,
+.owl-carousel,
+.swiper-container,
+.slick-slider,
+.flexslider {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    width: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+}
+
+/* Page title */
+.page-title { 
+    font-size: 1.6rem; 
+    margin: 0 0 1.5rem 0; 
+    color: #ffd966; 
+    font-weight: 800; 
+    text-align: left; 
+}
+
+/* Orders container */
 .orders-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 .order-card {
@@ -52,6 +115,11 @@
 }
 
 .status-pending {
+    background-color: #ffc107;
+    color: #333;
+}
+
+.status-pending_verification {
     background-color: #ffc107;
     color: #333;
 }
@@ -135,7 +203,7 @@
 
 .payment-time {
     font-size: 0.9rem;
-    color: #666;
+    color: #000;
     margin-top: 0.5rem;
 }
 
@@ -147,6 +215,7 @@
     font-size: 0.9rem;
 }
 
+/* Buttons */
 .btn {
     padding: 0.5rem 1rem;
     border: none;
@@ -154,51 +223,65 @@
     cursor: pointer;
     font-weight: 500;
     transition: all 0.2s;
+    margin-right: 0.5rem;
 }
 
 .btn-primary {
-    background-color: #007bff;
+    background: linear-gradient(135deg, #002855, #004080);
     color: white;
 }
 
 .btn-primary:hover {
-    background-color: #0069d9;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(2,24,63,0.25);
 }
 
 .btn-success {
-    background-color: #28a745;
-    color: white;
+    background: #28a745 !important;
+    color: white !important;
+    border: none !important;
 }
 
 .btn-success:hover {
-    background-color: #218838;
+    background: #218838 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(40,167,69,0.3);
 }
 
 .btn-danger {
-    background-color: #dc3545;
-    color: white;
+    background: #dc3545 !important;
+    color: white !important;
+    border: none !important;
 }
 
 .btn-danger:hover {
-    background-color: #c82333;
+    background: #c82333 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(220,53,69,0.3);
 }
 
 .btn-secondary {
-    background-color: #6c757d;
-    color: white;
+    background: #6c757d !important;
+    color: white !important;
+    border: none !important;
 }
 
 .btn-secondary:hover {
-    background-color: #5a6268;
+    background: #5a6268 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(108,117,125,0.3);
 }
 
 .btn-warning {
-    background-color: #ffc107;
-    color: #333;
+    background: #ffc107 !important;
+    color: #212529 !important;
+    border: none !important;
 }
 
 .btn-warning:hover {
-    background-color: #e0a800;
+    background: #e0a800 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255,193,7,0.3);
 }
 
 .filter-section {
@@ -206,6 +289,7 @@
     display: flex;
     gap: 1rem;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .filter-select {
@@ -241,13 +325,23 @@
         width: 100%;
         margin-bottom: 0.25rem;
     }
+    
+    .filter-section {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .search-box {
+        width: 100%;
+    }
 }
 </style>
 
-<div class="glass-container">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+<!-- Inline styles as fallback for full width -->
+<div class="glass-container" style="max-width: 100vw !important; width: 100vw !important; margin: 0 !important; padding: 1.5rem !important; box-sizing: border-box !important; position: relative !important; left: 0 !important; transform: none !important;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
         <h1 class="page-title">Admin Orders</h1>
-        <div style="display: flex; gap: 1rem;">
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
             <button class="btn-primary" onclick="window.location.href='{{ url_for('admin_scaffoldings') }}'">📦 Products</button>
             <button class="btn-primary" onclick="window.location.href='{{ url_for('admin_analytics') }}'">📊 Business Analytics</button>
             <button class="btn-danger" onclick="window.location.href='{{ url_for('admin_logout') }}'">Logout</button>
@@ -350,7 +444,7 @@
                     {% endif %}
                 </div>
                 
-                <div style="display: flex; gap: 0.5rem;">
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                     {% if order.status == 'pending_verification' %}
                     <button class="btn-success" onclick="verifyPayment({{ order.id }}, '{{ order.transaction_id }}')">Verify Payment</button>
                     <button class="btn-danger" onclick="rejectPayment({{ order.id }}, '{{ order.transaction_id }}')">Reject Payment</button>
@@ -373,6 +467,77 @@
 </div>
 
 <script>
+// AGGRESSIVE FULL WIDTH ENFORCEMENT
+function enforceFullWidth() {
+    const elementsToOverride = [
+        document.querySelector('.glass-container'),
+        document.querySelector('.container'),
+        document.querySelector('.container-fluid'),
+        document.querySelector('main'),
+        document.querySelector('section'),
+        document.querySelector('.content-wrapper'),
+        document.querySelector('body'),
+        document.querySelector('html')
+    ];
+    
+    elementsToOverride.forEach(element => {
+        if (element) {
+            element.style.setProperty('max-width', '100vw', 'important');
+            element.style.setProperty('width', '100vw', 'important');
+            element.style.setProperty('margin-left', '0', 'important');
+            element.style.setProperty('margin-right', '0', 'important');
+            element.style.setProperty('padding-left', '0', 'important');
+            element.style.setProperty('padding-right', '0', 'important');
+            element.style.setProperty('position', 'relative', 'important');
+            element.style.setProperty('left', '0', 'important');
+            element.style.setProperty('transform', 'none', 'important');
+        }
+    });
+    
+    const glassContainer = document.querySelector('.glass-container');
+    if (glassContainer) {
+        glassContainer.style.setProperty('max-width', '100vw', 'important');
+        glassContainer.style.setProperty('width', '100vw', 'important');
+        glassContainer.style.setProperty('margin', '0', 'important');
+        glassContainer.style.setProperty('padding', '1.5rem', 'important');
+        glassContainer.style.setProperty('box-sizing', 'border-box', 'important');
+        glassContainer.style.setProperty('position', 'relative', 'important');
+        glassContainer.style.setProperty('left', '0', 'important');
+        glassContainer.style.setProperty('transform', 'none', 'important');
+    }
+}
+
+// AGGRESSIVE BACKGROUND SLIDER REMOVAL
+function removeBackgroundSlider() {
+    const sliderSelectors = [
+        '.hero-section',
+        '.slider',
+        '.background-slider',
+        '.carousel',
+        '.owl-carousel',
+        '.swiper-container',
+        '.slick-slider',
+        '.flexslider'
+    ];
+    
+    sliderSelectors.forEach(selector => {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(element => {
+            element.style.setProperty('display', 'none', 'important');
+            element.style.setProperty('visibility', 'hidden', 'important');
+            element.style.setProperty('height', '0', 'important');
+            element.style.setProperty('width', '0', 'important');
+            element.style.setProperty('overflow', 'hidden', 'important');
+            element.style.setProperty('position', 'absolute', 'important');
+            element.style.setProperty('top', '-9999px', 'important');
+            element.style.setProperty('left', '-9999px', 'important');
+            if (element.parentNode) {
+                element.parentNode.removeChild(element);
+            }
+        });
+    });
+}
+
 function filterOrders() {
     const statusFilter = document.getElementById('statusFilter').value;
     const searchBox = document.getElementById('searchBox').value.toLowerCase();
@@ -397,28 +562,44 @@ function filterOrders() {
 }
 
 function verifyPayment(orderId, transactionId) {
-    if (confirm(`Are you sure you want to verify payment for Order #${orderId} with Transaction ID ${transactionId}?`)) {
+    const amountPaid = prompt(`Enter the amount paid for Order #${orderId}:`, '');
+    if (amountPaid === null) {
+        return; // User cancelled
+    }
+    
+    if (!amountPaid || isNaN(parseFloat(amountPaid))) {
+        alert('Please enter a valid amount');
+        return;
+    }
+    
+    if (parseFloat(amountPaid) <= 0) {
+        alert('Amount must be greater than zero');
+        return;
+    }
+    
+    if (confirm(`Are you sure you want to verify payment for Order #${orderId} with amount ₹${amountPaid}?`)) {
         fetch('/verify_payment/' + orderId, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                action: 'approve'
+                action: 'approve',
+                amount_paid: parseFloat(amountPaid)
             })
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('Payment verified successfully!');
+                alert('✅ Payment verified successfully!');
                 location.reload();
             } else {
-                alert(data.message || 'Failed to verify payment');
+                alert('❌ Error: ' + (data.message || 'Failed to verify payment'));
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred while verifying payment');
+            alert('❌ An error occurred while verifying payment');
         });
     }
 }
@@ -437,15 +618,15 @@ function rejectPayment(orderId, transactionId) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('Payment rejected successfully!');
+                alert('✅ Payment rejected successfully!');
                 location.reload();
             } else {
-                alert(data.message || 'Failed to reject payment');
+                alert('❌ Error: ' + (data.message || 'Failed to reject payment'));
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred while rejecting payment');
+            alert('❌ An error occurred while rejecting payment');
         });
     }
 }
@@ -473,15 +654,15 @@ function confirmPayment(orderId, transactionId) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('Payment confirmed successfully!');
+            alert('✅ Payment confirmed successfully!');
             location.reload();
         } else {
-            alert(data.message || 'Failed to confirm payment');
+            alert('❌ Error: ' + (data.message || 'Failed to confirm payment'));
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred while confirming payment');
+        alert('❌ An error occurred while confirming payment');
     });
 }
 
@@ -496,15 +677,15 @@ function completeOrder(orderId, transactionId) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('Order completed successfully!');
+                alert('✅ Order completed successfully!');
                 location.reload();
             } else {
-                alert(data.message || 'Failed to complete order');
+                alert('❌ Error: ' + (data.message || 'Failed to complete order'));
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred while completing the order');
+            alert('❌ An error occurred while completing the order');
         });
     }
 }
@@ -512,5 +693,24 @@ function completeOrder(orderId, transactionId) {
 function viewOrderDetails(orderId) {
     window.location.href = '/order_details/' + orderId;
 }
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🎯 Admin Orders page loaded');
+    enforceFullWidth();
+    removeBackgroundSlider();
+});
+
+// Re-enforce on window resize
+window.addEventListener('resize', function() {
+    enforceFullWidth();
+    removeBackgroundSlider();
+});
+
+// Extra enforcement after a delay
+setTimeout(function() {
+    enforceFullWidth();
+    removeBackgroundSlider();
+}, 500);
 </script>
 {% endblock %}

@@ -485,10 +485,9 @@ input:focus, textarea:focus, select:focus { outline: none; box-shadow: 0 0 0 3px
     
     <h1 class="page-title">Admin Panel - Fabrication Products</h1>
     
-    <!-- Properly aligned Add Product button container -->
-    <div style="display: flex; justify-content: flex-start; align-items: center; margin-bottom: 2rem; padding: 0;">
-        <button class="btn-primary" id="addProductBtn" style="min-width: 200px; padding: 0.75rem 2rem; font-size: 1.05rem;">
-            <span style="margin-right: 8px;">+</span> Add New Product
+    <div class="add-product-button-container" style="margin-bottom: 1.5rem; display: flex; gap: 1rem;">
+        <button class="btn-primary" onclick="showAddModal()" style="padding: 0.75rem 1.5rem; font-size: 1rem; background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; border-radius: 4px; cursor: pointer;">
+            ➕ Add Fabrication Product
         </button>
     </div>
     
@@ -517,7 +516,7 @@ input:focus, textarea:focus, select:focus { outline: none; box-shadow: 0 0 0 3px
                                 <div class="image-gallery" id="gallery-{{ product.id }}" data-product-id="{{ product.id }}">
                                     <div class="image-gallery-image-container">
                                         {% for image in images %}
-                                            <img src="{{ image.strip() }}" alt="{{ product.name }} image {{ loop.index }}" 
+                                            <img src="{{ url_for('static', filename=image.strip()) }}" alt="{{ product.name }} image {{ loop.index }}" 
                                                  class="{% if loop.first %}active{% endif %}" 
                                                  onerror="this.style.display='none';">
                                         {% endfor %}
@@ -532,7 +531,7 @@ input:focus, textarea:focus, select:focus { outline: none; box-shadow: 0 0 0 3px
                                 <!-- Single image -->
                                 {% set first_image = product.image_url.strip() %}
                                 {% if first_image %}
-                                    <img src="{{ first_image }}" alt="{{ product.name }} thumbnail" class="product-thumbnail" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                    <img src="{{ url_for('static', filename=first_image) }}" alt="{{ product.name }} thumbnail" class="product-thumbnail" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                                     <div style="display: none; color: #999;">No Image</div>
                                 {% else %}
                                     N/A

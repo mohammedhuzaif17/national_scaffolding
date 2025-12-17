@@ -1,0 +1,205 @@
+<!-- HERO SECTION WITH BACKGROUND IMAGE - TEMPLATE CODE -->
+
+<!-- This section has been added to national_scaffoldings.html -->
+<!-- It creates a full-width hero banner with background image at the top of the page -->
+
+<!-- CSS STYLING -->
+<style>
+/* ===== HERO SECTION WITH BACKGROUND IMAGE ===== */
+.hero-section {
+    position: relative;
+    width: 100%;
+    min-height: 450px;
+    /* Background image path - replace scaffolding-hero.jpg with your image name */
+    background: linear-gradient(rgba(0, 29, 61, 0.65), rgba(0, 29, 61, 0.65)), url('{{ url_for("static", filename="images/scaffolding-hero.jpg") }}');
+    background-size: cover;           /* Covers entire area without distortion */
+    background-position: center;      /* Centers the image */
+    background-attachment: fixed;    /* Creates parallax effect on scroll (desktop only) */
+    background-repeat: no-repeat;     /* No tiling */
+    display: flex;                    /* Flexbox for centering */
+    align-items: center;              /* Vertical center */
+    justify-content: center;          /* Horizontal center */
+    color: white;                     /* Text color */
+    text-align: center;               /* Center aligned text */
+    padding: 60px 20px;               /* Spacing around content */
+    margin-bottom: 40px;              /* Space below hero section */
+    overflow: hidden;                 /* Hide any overflow */
+}
+
+/* Overlay layer for better text readability */
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Dark gradient overlay */
+    background: linear-gradient(135deg, rgba(0, 29, 61, 0.4) 0%, rgba(0, 51, 102, 0.3) 100%);
+    z-index: 1;  /* Layer between background and content */
+}
+
+/* Content wrapper */
+.hero-content {
+    position: relative;
+    z-index: 2;  /* Appears above overlay and background */
+    max-width: 800px;
+    animation: fadeInDown 0.8s ease-out;  /* Fade-in animation on load */
+}
+
+/* Main heading */
+.hero-content h1 {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: white;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);  /* Text shadow for readability */
+    letter-spacing: 2px;  /* Wider letter spacing */
+}
+
+/* Subheading (e.g., "Since 2015") */
+.hero-content h3 {
+    font-size: 1.3rem;
+    color: #ffd966;  /* Gold color matching site theme */
+    margin-bottom: 0.8rem;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+    font-weight: 600;
+}
+
+/* Tagline/Description paragraph */
+.hero-tagline {
+    font-size: 1.1rem;
+    color: #e8e8e8;  /* Light gray text */
+    margin: 1.5rem 0;
+    line-height: 1.6;  /* Better readability */
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Call-to-action button */
+.hero-btn {
+    display: inline-block;
+    margin-top: 2rem;
+    padding: 12px 35px;
+    background: linear-gradient(135deg, #ffd966, #d4af37);  /* Gold gradient */
+    color: #001d3d;  /* Dark blue text */
+    text-decoration: none;
+    border: none;
+    border-radius: 50px;  /* Fully rounded button */
+    font-weight: 700;
+    font-size: 1.05rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);  /* Gold shadow */
+}
+
+/* Button hover effect */
+.hero-btn:hover {
+    transform: translateY(-3px);  /* Lift up on hover */
+    box-shadow: 0 8px 28px rgba(212, 175, 55, 0.6);
+    background: linear-gradient(135deg, #ffe082, #ffd966);
+}
+
+/* Fade-in animation */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);  /* Starts higher */
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);  /* Slides down into position */
+    }
+}
+
+/* RESPONSIVE: Tablet (768px and below) */
+@media (max-width: 768px) {
+    .hero-section {
+        min-height: 350px;
+        background-attachment: scroll;  /* Disable parallax on mobile */
+        padding: 40px 15px;
+        margin-bottom: 30px;
+    }
+    
+    .hero-content h1 {
+        font-size: 2.2rem;
+        letter-spacing: 1px;
+    }
+    
+    .hero-content h3 {
+        font-size: 1.1rem;
+    }
+    
+    .hero-tagline {
+        font-size: 0.95rem;
+    }
+}
+
+/* RESPONSIVE: Mobile (480px and below) */
+@media (max-width: 480px) {
+    .hero-section {
+        min-height: 300px;
+        padding: 30px 10px;
+    }
+    
+    .hero-content h1 {
+        font-size: 1.8rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .hero-content h3 {
+        font-size: 0.95rem;
+    }
+    
+    .hero-tagline {
+        font-size: 0.85rem;
+    }
+}
+</style>
+
+<!-- HTML STRUCTURE -->
+
+<!-- Hero Section with Background Image -->
+<div class="hero-section">
+    <div class="hero-content">
+        <h1>The National Scaffolding</h1>
+        <h3>Since 2015</h3>
+        <p class="hero-tagline">''The Wide Range Of Manufacturers In Aluminium , H-Frame And CupLock Scaffolding''</p>
+        <button class="hero-btn" onclick="window.location.href='{{ url_for('fabrications') }}'">
+            Go to Fabrications
+        </button>
+    </div>
+</div>
+
+<!-- Rest of page content below -->
+
+---
+
+## HOW TO USE THIS CODE
+
+1. **Add CSS to your <style> tag in the template**
+   - All the CSS above is included in national_scaffoldings.html
+   - It contains all responsive styles for different screen sizes
+
+2. **Add HTML structure**
+   - The hero-section div is inserted before the main page-container
+   - It appears at the very top of the page
+   - Content is centered and animated on load
+
+3. **Image Path**
+   - Default path: static/images/scaffolding-hero.jpg
+   - Flask auto-generates the correct URL using url_for()
+   - Just save your image with the correct name in that folder
+
+4. **Customization**
+   - Change hero-section min-height for different heights
+   - Adjust rgba(0, 29, 61, 0.65) values for overlay darkness
+   - Modify font sizes in hero-content h1, h3, etc.
+   - Change button colors by modifying #ffd966 (gold) values
+
+---
+
+## FILE LOCATIONS
+
+✓ CSS: templates/national_scaffoldings.html (lines 438-559)
+✓ HTML: templates/national_scaffoldings.html (lines 572-590)
+✓ Image: static/images/scaffolding-hero.jpg (to be added by you)

@@ -1,0 +1,453 @@
+{% extends "base.html" %}
+
+{% block title %}Vertical Cuplock - {{ product.name if product else 'Product' }}{% endblock %}
+
+{% block content %}
+<div class="product-container">
+    {% if product %}
+    <div class="product-header">
+        <h1>{{ product.name }}</h1>
+        <p class="product-description">
+            {{ product.description or 'High-quality Vertical Cuplock scaffolding system' }}
+        </p>
+    </div>
+
+    <!-- Product Image Section -->
+    {% if product.image_url %}
+    <div class="product-image-section" style="margin-bottom: 2rem; text-align: center;">
+        {% set images = product.image_url.split(',') %}
+        {% set valid_images = [] %}
+        {% for image in images %}
+            {% if image.strip() %}
+                {% set _ = valid_images.append(image.strip()) %}
+            {% endif %}
+        {% endfor %}
+        
+        {% if valid_images %}
+        <div class="product-image-display" style="max-width: 500px; margin: 0 auto; background: #f5f5f5; padding: 1rem; border-radius: 8px;">
+            <img src="{{ url_for('static', filename=valid_images[0]) }}" 
+                 alt="{{ product.name }}" 
+                 style="max-width: 100%; height: auto; border-radius: 8px; display: block;">
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="product-body">
+        <!-- Purchase Type -->
+        <div class="purchase-type-section">
+            <h3>Select Purchase Type</h3>
+            <div class="radio-group">
+                <label class="radio-option">
+                    <input type="radio" name="purchaseType" value="buy" checked onchange="updatePurchaseType()">
+                    <span>Buy</span>
+                </label>
+
+                <label class="radio-option">
+                    <input type="radio" name="purchaseType" value="rent" onchange="updatePurchaseType()">
+                    <span>Rent (per day)</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Size Selection -->
+        <div class="form-group">
+            <label>Select Size *</label>
+            <select id="sizeSelect" class="form-control" onchange="updateCupOptions()">
+                <option value="">-- Choose Size --</option>
+                {% if sizes %}
+                {% for size in sizes %}
+                <option value="{{ size.id }}"
+                        data-label="{{ size.size_label }}"
+                        data-weight="{{ size.weight }}"
+                        data-buy="{{ size.buy_price }}"
+                        data-rent="{{ size.rent_price }}"
+                        data-deposit="{{ size.deposit }}">
+                    {{ size.size_label }} ({{ size.weight }}kg)
+                </option>
+                {% endfor %}
+                {% endif %}
+            </select>
+        </div>
+
+        <!-- Cup Selection -->
+        <div id="cupSelection" class="form-group" style="display: none;">
+            <label>Select Cup Configuration *</label>
+            <div id="cupImagesContainer" class="cup-images-grid" style="margin-bottom: 1rem;"></div>
+            <select id="cupSelect" class="form-control" onchange="updatePrice()">
+                <option value="">-- Choose Cups --</option>
+            </select>
+        </div>
+
+        <!-- Quantity -->
+        <div class="form-group">
+            <label>Quantity *</label>
+            <input type="number" id="quantity" class="form-control" min="1" value="1" onchange="updatePrice()">
+        </div>
+
+        <!-- Price Calculation -->
+        <div class="price-display">
+            <div class="price-row">
+                <span>Unit Price:</span>
+                <span id="unitPrice" class="price-value">₹0.00</span>
+            </div>
+
+            <div class="price-row" id="depositRow" style="display: none;">
+                <span>Deposit (per unit):</span>
+                <span id="depositAmount" class="price-value">₹0.00</span>
+            </div>
+
+            <div class="price-row total-row">
+                <span>Total:</span>
+                <span id="totalPrice" class="price-value">₹0.00</span>
+            </div>
+        </div>
+
+        <!-- Add to Cart -->
+        <button class="btn btn-primary btn-large" onclick="addToCart()">
+            🛒 Add to Cart
+        </button>
+    </div>
+    {% else %}
+    <div class="error-message">
+        <h2>Product Not Found</h2>
+        <p>The requested product could not be found.</p>
+        <a href="{{ url_for('national_scaffoldings') }}" class="btn btn-primary">Back to Products</a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// SAFE JSON for cup options
+const cupOptions = {{ cup_options | default({}, true) | tojson }};
+
+// Price data object
+let currentPricing = {
+    buy: 0,
+    rent: 0,
+    deposit: 0
+};
+
+function updatePurchaseType() {
+    const type = document.querySelector("input[name='purchaseType']:checked").value;
+    document.getElementById('cupSelection').style.display = (type === 'buy') ? 'block' : 'none';
+    updatePrice();
+}
+
+// Build image card helper function
+function buildImageUrl(relativeImagePath) {
+    if (!relativeImagePath) return null;
+    return '{{ url_for("static", filename="__PLACEHOLDER__") }}'.replace('__PLACEHOLDER__', relativeImagePath);
+}
+
+function updateCupOptions() {
+    const sizeSelect = document.getElementById('sizeSelect');
+    const cupSelect = document.getElementById('cupSelect');
+    const selected = sizeSelect.options[sizeSelect.selectedIndex];
+
+    if (!selected.value) {
+        cupSelect.innerHTML = '<option value="">-- Choose Cups --</option>';
+        document.getElementById('cupImagesContainer').innerHTML = '';
+        updatePrice();
+        return;
+    }
+
+    const sizeId = selected.value;
+    const sizeLabel = selected.dataset.label;
+
+    currentPricing.buy = parseFloat(selected.dataset.buy || 0);
+    currentPricing.rent = parseFloat(selected.dataset.rent || 0);
+    currentPricing.deposit = parseFloat(selected.dataset.deposit || 0);
+
+    // Fetch cup configurations from API
+    fetch(`{{ url_for('cuplock.api_vertical_cups', size_id=0) }}`.replace('/0/cups', `/${sizeId}/cups`))
+        .then(r => r.json())
+        .then(cups => {
+            cupSelect.innerHTML = '<option value="">-- Choose Cups --</option>';
+            const imagesHtml = [];
+
+            cups.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.cup_count;
+                opt.dataset.imageUrl = c.image_url || '';
+                opt.dataset.price = c.buy_price || 0;
+                opt.textContent = `${c.cup_count} ${c.cup_count === 1 ? 'Cup' : 'Cups'} - ₹${parseFloat(c.buy_price || 0).toFixed(2)}`;
+                cupSelect.appendChild(opt);
+
+                // Build image card
+                const imageUrl = c.image_url ? buildImageUrl(c.image_url) : null;
+                const imageCard = `
+                    <div class="cup-image-card" data-cup-count="${c.cup_count}">
+                        ${imageUrl ? `<img src="${imageUrl}" alt="${c.cup_count} Cups">` : '<div class="no-image">🔗</div>'}
+                        <p>${c.cup_count} ${c.cup_count === 1 ? 'Cup' : 'Cups'}</p>
+                        <p class="cup-price">₹${parseFloat(c.buy_price || 0).toFixed(2)}</p>
+                    </div>
+                `;
+                imagesHtml.push(imageCard);
+            });
+
+            document.getElementById('cupImagesContainer').innerHTML = imagesHtml.join('');
+
+            // Add click handlers to image cards
+            document.querySelectorAll('.cup-image-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const cupCount = card.dataset.cupCount;
+                    cupSelect.value = cupCount;
+                    document.querySelectorAll('.cup-image-card').forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    updatePrice();
+                });
+            });
+
+            updatePrice();
+        })
+        .catch(err => {
+            console.error('Error fetching cups:', err);
+            cupSelect.innerHTML = '<option value="">-- Choose Cups --</option>';
+            document.getElementById('cupImagesContainer').innerHTML = '<p style="color: red;">Error loading cup options</p>';
+        });
+}
+
+function updatePrice() {
+    const type = document.querySelector("input[name='purchaseType']:checked").value;
+    const qty = parseInt(document.getElementById('quantity').value) || 0;
+    const sizeSelect = document.getElementById('sizeSelect');
+    const cupSelect = document.getElementById('cupSelect');
+
+    if (!sizeSelect.value || qty <= 0) {
+        document.getElementById('unitPrice').textContent = '₹0.00';
+        document.getElementById('depositAmount').textContent = '₹0.00';
+        document.getElementById('totalPrice').textContent = '₹0.00';
+        return;
+    }
+
+    if (type === 'buy' && !cupSelect.value) {
+        document.getElementById('unitPrice').textContent = '₹0.00';
+        document.getElementById('totalPrice').textContent = '₹0.00';
+        return;
+    }
+
+    const unit = (type === 'buy') ? currentPricing.buy : currentPricing.rent;
+    const deposit = (type === 'rent') ? currentPricing.deposit : 0;
+
+    const total = (unit * qty) + (deposit * qty);
+
+    document.getElementById('unitPrice').textContent = `₹${unit.toFixed(2)}`;
+    document.getElementById('depositAmount').textContent = `₹${deposit.toFixed(2)}`;
+    document.getElementById('totalPrice').textContent = `₹${total.toFixed(2)}`;
+
+    document.getElementById('depositRow').style.display =
+        (type === 'rent' && deposit > 0) ? 'flex' : 'none';
+}
+
+function addToCart() {
+    const sizeSelect = document.getElementById('sizeSelect');
+    const cupSelect = document.getElementById('cupSelect');
+    const qty = parseInt(document.getElementById('quantity').value);
+    const type = document.querySelector("input[name='purchaseType']:checked").value;
+
+    if (!sizeSelect.value) return alert('Please select a size');
+    if (type === 'buy' && !cupSelect.value) return alert('Please select cup configuration');
+    if (qty <= 0) return alert('Please enter valid quantity');
+
+    const selectedSize = sizeSelect.options[sizeSelect.selectedIndex];
+
+    const customization = {
+        purchaseType: type,
+        size: selectedSize.dataset.label,
+        size_id: sizeSelect.value,
+        weight: selectedSize.dataset.weight,
+        quantity: qty
+    };
+
+    if (type === 'buy') customization.cups = cupSelect.value;
+
+    fetch('/add_to_cart', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            product_id: {{ product.id if product else 0 }},
+            quantity: qty,
+            customization: customization
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alert("Added to cart!");
+            window.location.href = "/cart";
+        } else {
+            alert("Error: " + data.message);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Error adding to cart.");
+    });
+}
+
+document.addEventListener("DOMContentLoaded", updatePurchaseType);
+</script>
+
+<style>
+/* --- your styling kept exactly as you wrote it (cleaned version) --- */
+.product-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.product-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.product-header h1 {
+    color: #001d3d;
+    margin-bottom: .5rem;
+}
+
+.product-description {
+    color: #666;
+}
+
+.purchase-type-section {
+    margin-bottom: 2rem;
+}
+
+.radio-group {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .75rem 1.5rem;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.radio-option input:checked + span {
+    color: #002855;
+    font-weight: 600;
+}
+
+.radio-option:has(input:checked) {
+    background: #f0f7ff;
+    border-color: #002855;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.price-display {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+}
+
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    padding: .75rem 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.total-row {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-top: .5rem;
+    padding-top: 1rem;
+    border-top: 2px solid #001d3d;
+}
+
+.price-value {
+    color: #d4af37;
+    font-weight: 700;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #002855, #004a99);
+    color: white;
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.1rem;
+    border-radius: 8px;
+}
+
+.error-message {
+    text-align: center;
+    padding: 2rem;
+}
+
+.cup-images-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 1rem;
+}
+
+.cup-image-card {
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: white;
+}
+
+.cup-image-card:hover {
+    border-color: #002855;
+    box-shadow: 0 4px 12px rgba(0, 40, 85, 0.2);
+}
+
+.cup-image-card.selected {
+    border-color: #d4af37;
+    background: #f0f7ff;
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
+.cup-image-card img {
+    max-width: 100%;
+    height: 100px;
+    object-fit: contain;
+    margin-bottom: 0.5rem;
+}
+
+.cup-image-card .no-image {
+    width: 100%;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    background: #f0f0f0;
+    border-radius: 4px;
+}
+
+.cup-image-card p {
+    margin: 0.25rem 0;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.cup-image-card .cup-price {
+    font-weight: bold;
+    color: #d4af37;
+}
+</style>
+
+{% endblock %}

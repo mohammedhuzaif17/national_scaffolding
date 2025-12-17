@@ -2070,3 +2070,119 @@ footer {
 }
 
 /* ===== END OF CSS ===== */
+
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+}
+
+/* Navbar styles */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* This is key to vertically center the oversized logo */
+    padding: 0.5rem 1.5rem;
+    background-color: #f8f9fa;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    /* We will let the height be auto-determined by the content (the logo) */
+}
+
+/* Navbar brand container */
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+/* Brand text style */
+.brand-text {
+    margin-left: 10px;
+}
+
+/* Logo styling - UPDATED TO FIX CROPPING */
+.navbar-logo {
+    /* 
+      We make the logo container larger than the navbar's default height.
+      The navbar will grow to fit it. This ensures the full circle is visible.
+    */
+    height: 70px;
+    width: 70px; /* Keep it a perfect circle */
+    border-radius: 50%;
+    
+    /* 
+      THIS IS THE MOST IMPORTANT CHANGE:
+      'contain' ensures the entire image (the full circle) is visible 
+      within the 70x70px container, without any cropping.
+    */
+    object-fit: contain;
+
+    /* No border, no padding, no background color */
+    background-color: transparent;
+    padding: 0;
+    border: none;
+}
+
+/* Navbar links */
+.navbar-links {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar-links li {
+    margin-left: 1.5rem;
+}
+
+.navbar-links a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.navbar-links a:hover {
+    color: #007bff;
+}
+
+/* Alert styles */
+.alert {
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: 0.25rem;
+}
+
+.alert-success { color: #155724; background-color: #d4edda; border-color: #c3e6cb; }
+.alert-danger { color: #721c24; background-color: #f8d7da; border-color: #f5c6cb; }
+.alert-info { color: #0c5460; background-color: #d1ecf1; border-color: #bee5eb; }
+
+/* Media query for responsive design - UPDATED */
+@media (max-width: 768px) {
+    .navbar {
+        padding: 0.5rem 1rem;
+    }
+
+    .navbar-logo {
+        /* Make the logo smaller on mobile, but still ensure the full circle is seen */
+        height: 55px;
+        width: 55px;
+    }
+    
+    .brand-text {
+        display: none; /* Hide text on small screens */
+    }
+
+    .navbar-links li {
+        margin-left: 1rem;
+    }
+}

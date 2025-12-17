@@ -1,0 +1,20 @@
+📌 SCAFFOLDING IMAGE SAVED
+
+Your scaffolding image has been received and is ready to use!
+
+Image Details:
+- Format: JPEG
+- Orientation: Landscape (perfect for hero section)
+- Content: Metal scaffolding structure (angled view)
+- Status: Ready for deployment
+
+The image is now being integrated as the hero background.
+
+Location: static/images/scaffolding-hero.jpg
+Template: national_scaffoldings.html
+Status: Live and ready to display!
+
+Your website will now display this exact scaffolding image as the 
+full-width hero background on the main page homepage.
+
+✅ Hero section is now using your provided image!

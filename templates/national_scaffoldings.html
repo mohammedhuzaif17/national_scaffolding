@@ -435,20 +435,161 @@
         font-size: 2rem;
     }
 }
+
+/* ===== HERO SECTION WITH BACKGROUND IMAGE ===== */
+.hero-section {
+    position: relative;
+    width: 100%;
+    min-height: 450px;
+    background: linear-gradient(rgba(0, 29, 61, 0.65), rgba(0, 29, 61, 0.65)), url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAIBAQIBAQICAgICAgICAwUDAwwUAxUTAwsMCwwLDA8SDAwPDwwLDA4SEAwOExAREAxBEQEBAQEBAQEBAQEBAQEBAf/2wBDAQICAgICAwUDAwwLCAcIDwsICAsLDA4SEAwSDwwLCwwLDA4SEAwOExAREAxBEQEBAQEBAQEBAQEBAQEBAf/wAARCABkAZADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWm5ybnJ2eoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlbaWmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD9/KKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD/9k=');
+    background-size: contain;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-align: center;
+    padding: 60px 20px;
+    margin-bottom: 40px;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(0, 29, 61, 0.4) 0%, rgba(0, 51, 102, 0.3) 100%);
+    z-index: 1;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 800px;
+    animation: fadeInDown 0.8s ease-out;
+}
+
+.hero-content h1 {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: white;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+    letter-spacing: 2px;
+}
+
+.hero-content h3 {
+    font-size: 1.3rem;
+    color: #ffd966;
+    margin-bottom: 0.8rem;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+    font-weight: 600;
+}
+
+.hero-tagline {
+    font-size: 1.1rem;
+    color: #e8e8e8;
+    margin: 1.5rem 0;
+    line-height: 1.6;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+.hero-btn {
+    display: inline-block;
+    margin-top: 2rem;
+    padding: 12px 35px;
+    background: linear-gradient(135deg, #ffd966, #d4af37);
+    color: #001d3d;
+    text-decoration: none;
+    border: none;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 1.05rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+}
+
+.hero-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 28px rgba(212, 175, 55, 0.6);
+    background: linear-gradient(135deg, #ffe082, #ffd966);
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-section {
+        min-height: 350px;
+        background-attachment: scroll;
+        padding: 40px 15px;
+        margin-bottom: 30px;
+    }
+    
+    .hero-content h1 {
+        font-size: 2.2rem;
+        letter-spacing: 1px;
+    }
+    
+    .hero-content h3 {
+        font-size: 1.1rem;
+    }
+    
+    .hero-tagline {
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-section {
+        min-height: 300px;
+        padding: 30px 10px;
+    }
+    
+    .hero-content h1 {
+        font-size: 1.8rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .hero-content h3 {
+        font-size: 0.95rem;
+    }
+    
+    .hero-tagline {
+        font-size: 0.85rem;
+    }
+}
 </style>
+
+<!-- HERO SECTION WITH BACKGROUND IMAGE -->
+<div class="hero-section">
+    <div class="hero-content">
+        <h1>The National Scaffolding</h1>
+        <h3>Since 2015</h3>
+        <p class="hero-tagline">''The Wide Range Of Manufacturers In Aluminium , H-Frame And CupLock Scaffolding''</p>
+        <button class="hero-btn" onclick="window.location.href='{{ url_for('fabrications') }}'">
+            Go to Fabrications
+        </button>
+    </div>
+</div>
 
 <div class="page-container">
     <header class="page-header">
-        <h1 class="page-title">The National Scaffolding</h1>
-        <h3>Since 2015</h3>
-<h3>''The Wide Range Of Manufacturers In Aluminium , H-Frame And CupLock Scaffolding''</h3>
-        <!-- <p class="page-subtitle">Professional scaffolding services for all your construction needs</p> -->
-        
-        <div class="text-center mb-3">
-            <button class="btn btn-secondary" onclick="window.location.href='{{ url_for('fabrications') }}'">
-                Go to Fabrications
-            </button>
-        </div>
+        <h2 class="page-title">Our Products</h2>
     </header>
     
     <div class="category-buttons">
@@ -474,8 +615,6 @@
         </button>
     </div>
     
-    <h2 class="mt-4">Our Products</h2>
-    
     <div class="products-grid">
         {% for product in products %}
         <div class="product-card">
@@ -492,19 +631,19 @@
                     {% if valid_images | length >= 3 %}
                         <!-- Show 2 images + more indicator -->
                         <div class="product-image-grid">
-                            <img src="{{ valid_images[0] }}" alt="{{ product.name }} - Image 1" onerror="this.style.display='none';">
-                            <img src="{{ valid_images[1] }}" alt="{{ product.name }} - Image 2" onerror="this.style.display='none';">
+                            <img src="{{ url_for('static', filename=valid_images[0]) }}" alt="{{ product.name }} - Image 1" onerror="this.style.display='none';">
+                            <img src="{{ url_for('static', filename=valid_images[1]) }}" alt="{{ product.name }} - Image 2" onerror="this.style.display='none';">
                             <div class="product-image-more">+{{ valid_images|length - 2 }}</div>
                         </div>
                     {% elif valid_images|length == 2 %}
                         <!-- Show 2 images side by side -->
                         <div class="product-image-grid">
-                            <img src="{{ valid_images[0] }}" alt="{{ product.name }} - Image 1" onerror="this.style.display='none';">
-                            <img src="{{ valid_images[1] }}" alt="{{ product.name }} - Image 2" onerror="this.style.display='none';">
+                            <img src="{{ url_for('static', filename=valid_images[0]) }}" alt="{{ product.name }} - Image 1" onerror="this.style.display='none';">
+                            <img src="{{ url_for('static', filename=valid_images[1]) }}" alt="{{ product.name }} - Image 2" onerror="this.style.display='none';">
                         </div>
                     {% elif valid_images|length == 1 %}
                         <!-- Single image -->
-                        <img src="{{ valid_images[0] }}" alt="{{ product.name }}" class="product-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <img src="{{ url_for('static', filename=valid_images[0]) }}" alt="{{ product.name }}" class="product-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                         <div class="product-image-placeholder" style="display: none;">
                             <span>📦</span>
                         </div>
@@ -541,12 +680,12 @@
                 </div>
                 
                 <div class="product-actions">
-                    <button class="btn btn-secondary" 
+                    <button class="btn btn-secondary"
                             onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
                         View Details
                     </button>
                     {% if current_user.is_authenticated and session.get('user_type') != 'admin' %}
-                        <button class="btn btn-primary" 
+                        <button class="btn btn-primary"
                                 onclick="event.stopPropagation(); addToCart({{ product.id }}, '{{ product.name|e }}', {{ product.price }})">
                             🛒 Add to Cart
                         </button>
@@ -598,6 +737,7 @@ function closeWelcome() {
 function addToCart(productId, productName, price) {
     fetch('/add_to_cart', {
         method: 'POST',
+        credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             product_id: productId,
@@ -609,6 +749,7 @@ function addToCart(productId, productName, price) {
     .then(data => {
         if (data.success) {
             alert('✅ ' + productName + ' added to cart!');
+            window.location.href = '/cart';
         } else {
             alert('❌ Error: ' + data.message);
         }

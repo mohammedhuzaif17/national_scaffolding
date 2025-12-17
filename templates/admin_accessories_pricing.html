@@ -85,56 +85,32 @@ window.addEventListener('DOMContentLoaded', () => {
 
 function saveAllPricing() {
     const allPricing = {};
-    const buyInputs = document.querySelectorAll('.pricing-input');
-    const rentInputs = document.querySelectorAll('.rent-pricing-input');
-    const depositInputs = document.querySelectorAll('.deposit-pricing-input');
-    
-    // Collect buy prices
-    buyInputs.forEach(input => {
+    const allInputs = document.querySelectorAll('.pricing-input');
+
+    allInputs.forEach(input => {
         const productId = input.dataset.productId;
-        const buyValue = parseFloat(input.value);
-        
-        if (buyValue && buyValue > 0) {
+        const priceType = input.dataset.type; // 'buy', 'rent', or 'deposit'
+        const value = parseFloat(input.value);
+
+        if (!productId || !priceType) {
+            return;
+        }
+
+        if (!isNaN(value) && value > 0) {
             if (!allPricing[productId]) {
                 allPricing[productId] = {};
             }
-            allPricing[productId].buy = buyValue;
+            allPricing[productId][priceType] = value;
         }
     });
-    
-    // Collect rent prices
-    rentInputs.forEach(input => {
-        const productId = input.dataset.productId;
-        const rentValue = parseFloat(input.value);
-        
-        if (rentValue && rentValue > 0) {
-            if (!allPricing[productId]) {
-                allPricing[productId] = {};
-            }
-            allPricing[productId].rent = rentValue;
-        }
-    });
-    
-    // Collect deposit amounts
-    depositInputs.forEach(input => {
-        const productId = input.dataset.productId;
-        const depositValue = parseFloat(input.value);
-        
-        if (depositValue && depositValue > 0) {
-            if (!allPricing[productId]) {
-                allPricing[productId] = {};
-            }
-            allPricing[productId].deposit = depositValue;
-        }
-    });
-    
+
     if (Object.keys(allPricing).length === 0) {
-        alert('Please enter at least one price (buy or rent) for at least one product!');
+        alert('Please enter at least one price (buy, rent, or deposit) for at least one product!');
         return;
     }
-    
+
     console.log('Saving Accessories pricing:', allPricing);
-    
+
     fetch('/admin_update_accessories_pricing', {
         method: 'POST',
         headers: {
@@ -147,15 +123,15 @@ function saveAllPricing() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('✅ Accessories pricing updated successfully!');
+            alert(' Accessories pricing updated successfully!');
             window.location.href = '{{ url_for("admin_scaffoldings") }}';
         } else {
-            alert('❌ Error: ' + (data.message || 'Failed to update pricing'));
+            alert(' Error: ' + (data.message || 'Failed to update pricing'));
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('❌ Error updating Accessories pricing');
+        alert(' Error updating Accessories pricing');
     });
 }
 {% endblock %}

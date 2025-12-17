@@ -9,6 +9,87 @@
     
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
+        /* --- NEW NAVBAR STYLES --- */
+        /* These styles control the navigation bar with the logo */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 1.5rem;
+            background-color: #f8f9fa;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .brand-text {
+            margin-left: 10px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .navbar-logo {
+            height: 70px;
+            width: 70px;
+            border-radius: 50%;
+            object-fit: contain;
+            background-color: transparent;
+            padding: 0;
+            border: none;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-menu li {
+            margin-left: 1.5rem;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            font-family: 'Poppins', sans-serif;
+            transition: color 0.2s;
+        }
+
+        .nav-menu a:hover {
+            color: #007bff;
+        }
+        
+        .nav-menu a.active {
+            color: #f0c14b; /* Highlight for active page */
+        }
+
+        .cart-icon {
+            font-size: 1.2rem;
+        }
+
+        .hamburger {
+            display: none;
+            cursor: pointer;
+        }
+
+        .hamburger span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            margin: 5px auto;
+            background-color: #333;
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* --- EXISTING STYLES FROM YOUR FILE --- */
         /* Fix for administrator images - Natural aspect ratio without any constraints */
         .administrator-image {
             width: 220px;
@@ -51,7 +132,7 @@
         .administrator p {
             font-family: 'Poppins', sans-serif;
             font-size: 1rem;
-            color: #666;
+            color: #000;
             margin-bottom: 20px;
         }
         
@@ -100,27 +181,63 @@
             border-color: #d4a017;
             border-width: 6px;
         }
+        
+        /* --- RESPONSIVE DESIGN --- */
+        @media (max-width: 768px) {
+            .hamburger {
+                display: block;
+            }
+
+            .nav-menu {
+                position: fixed;
+                left: -100%;
+                top: 70px;
+                flex-direction: column;
+                background-color: #f8f9fa;
+                width: 100%;
+                text-align: center;
+                transition: 0.3s;
+                box-shadow: 0 10px 27px rgba(0, 0, 0, 0.05);
+                padding: 20px 0;
+            }
+
+            .nav-menu.active {
+                left: 0;
+            }
+
+            .nav-menu li {
+                margin: 1rem 0;
+            }
+            
+            .navbar-logo {
+                height: 55px;
+                width: 55px;
+            }
+            
+            .brand-text {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
+    <!-- Navigation with Logo -->
     <nav class="navbar">
-        <div class="nav-container">
-            <div class="nav-logo">
-                <a href="{{ url_for('cart') }}">THE NATIONAL SCAFFOLDING</a>
-            </div>
-            <ul class="nav-menu">
-                <li><a href="{{ url_for('index') }}">Home</a></li>
-                <li><a href="{{ url_for('about') }}" class="active">About Us</a></li>
-                <li><a href="#contact-section">Contact Us</a></li>
-                <li><a href="#user-manual">User Manual</a></li>
-                <li><a href="{{ url_for('cart') }}" class="cart-icon"><i class="fas fa-shopping-cart"></i></a></li>
-            </ul>
-            <div class="hamburger">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
+        <a href="{{ url_for('index') }}" class="navbar-brand">
+            <img src="{{ url_for('static', filename='images/logo.jpeg') }}" alt="THE NATIONAL SCAFFOLDING Logo" class="navbar-logo">
+            <span class="brand-text">THE NATIONAL SCAFFOLDING</span>
+        </a>
+        <ul class="nav-menu">
+            <li><a href="{{ url_for('index') }}">Home</a></li>
+            <li><a href="{{ url_for('about') }}" class="active">About Us</a></li>
+            <li><a href="#contact-section">Contact Us</a></li>
+            <li><a href="#user-manual">User Manual</a></li>
+            <li><a href="{{ url_for('cart') }}" class="cart-icon"><i class="fas fa-shopping-cart"></i></a></li>
+        </ul>
+        <div class="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
         </div>
     </nav>
 

@@ -62,7 +62,7 @@
 }
 
 .cart-item-specs {
-    color: #666;
+    color: #000;
     font-size: 0.9rem;
     margin: 0.5rem 0;
 }
@@ -174,7 +174,7 @@
             <div class="cart-item-image-container">
                 {% if item.image_url %}
                     {% set first_image = item.image_url.split(',')[0].strip() %}
-                    <img src="{{ first_image }}" alt="{{ item.product_name }}" class="cart-item-image">
+                    <img src="{{ url_for('static', filename=first_image) }}" alt="{{ item.product_name }}" class="cart-item-image">
                 {% else %}
                 <div class="cart-item-placeholder">
                     <span>📦</span>
@@ -210,7 +210,7 @@
             {% if total_deposit and total_deposit > 0 %}
             <h3 style="color: #d4af37;">Total Deposit: ₹{{ "%.2f"|format(total_deposit) }}</h3>
             {% endif %}
-            <p style="color: #666; margin-top: 0.5rem;">GST (18%): ₹{{ "%.2f"|format(gst) }}</p>
+            <p style="color: #000; margin-top: 0.5rem;">GST (18%): ₹{{ "%.2f"|format(gst) }}</p>
             <h2 style="color: #002855; margin-top: 1rem;">Grand Total: ₹{{ "%.2f"|format(total_with_gst) }}</h2>
             <button class="checkout-btn mt-3" onclick="window.location.href='{{ url_for('qr_scanner') }}'">
                 Proceed to Checkout
@@ -218,7 +218,7 @@
         </div>
     </div>
     {% else %}
-    <p class="text-center mt-4" style="color: #666;">Your cart is empty</p>
+    <p class="text-center mt-4" style="color: #000;">Your cart is empty</p>
     <div class="text-center mt-4">
         <button class="btn" onclick="window.location.href='{{ url_for('national_scaffoldings') }}'">
             Continue Shopping

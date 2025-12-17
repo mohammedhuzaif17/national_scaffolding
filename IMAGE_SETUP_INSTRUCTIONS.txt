@@ -1,0 +1,33 @@
+IMPORTANT: SAVE YOUR SCAFFOLDING IMAGE HERE
+============================================
+
+To complete the setup of the hero background image on the homepage:
+
+1. Save the scaffolding image (Image 2 from your screenshots) to this location:
+   📁 c:\Users\smary\Downloads\final\static\images\scaffolding-hero.jpg
+
+2. Make sure the image is:
+   - Named: scaffolding-hero.jpg
+   - Saved in the images folder above
+   - In landscape orientation (wide format)
+   - Optimized for web (ideally under 500KB)
+
+3. Supported formats:
+   - .jpg / .jpeg (recommended for photos)
+   - .png (if you prefer)
+   - .webp (for better compression)
+
+WHAT THIS DOES:
+- The hero background image will appear at the top of the main page
+- It will have a dark overlay to make text readable
+- It will display in landscape mode across the full width
+- On mobile devices, it will be slightly smaller for better performance
+
+Once you save the image in the correct location, refresh your website and the 
+background image will automatically display on the homepage!
+
+Need help? Make sure:
+✓ File is in: static/images/scaffolding-hero.jpg
+✓ Image is landscape (wider than tall)
+✓ File size is reasonable (< 1MB)
+✓ Filename is exactly: scaffolding-hero.jpg

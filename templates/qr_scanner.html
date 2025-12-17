@@ -141,6 +141,7 @@ function validateUPIID() {
 
 function completeOrder() {
     const transactionId = document.getElementById('transaction_id').value.trim();
+    const confirmButton = document.getElementById('payment_btn');
     
     if (!transactionId) {
         alert('Please enter your UPI Transaction ID to confirm payment');
@@ -150,6 +151,12 @@ function completeOrder() {
     if (transactionId.length < 12 || transactionId.length > 35 || !/^[a-zA-Z0-9]+$/.test(transactionId)) {
         alert('Please enter a valid UPI Transaction ID (12-35 alphanumeric characters)');
         return;
+    }
+    
+    // Disable the button to prevent multiple submissions
+    if (confirmButton) {
+        confirmButton.disabled = true;
+        confirmButton.textContent = 'Processing...';
     }
     
     // Stop the timer when payment is submitted
@@ -168,18 +175,51 @@ function completeOrder() {
             payment_time: paymentTime  // Send the payment timestamp
         })
     })
-    .then(response => response.json())
+    .then(response => {
+        // First, get the response text to handle both JSON and non-JSON responses
+        return response.text().then(text => {
+            try {
+                // Try to parse as JSON
+                const data = JSON.parse(text);
+                if (!response.ok) {
+                    throw new Error(data.message || 'Payment failed. Please try again.');
+                }
+                return data;
+            } catch (e) {
+                // If not JSON, use the text as error message
+                if (!response.ok) {
+                    throw new Error(text || 'Payment failed. Please try again.');
+                }
+                return text;
+            }
+        });
+    })
     .then(data => {
-        if (data.success) {
-            alert('Order submitted successfully! Your transaction ID: ' + transactionId + '\nYour order is now pending admin verification to confirm the payment amount. You will receive email confirmation once verified.');
-            window.location.href = '{{ url_for('my_orders') }}';
-        } else {
-            alert(data.message || 'Failed to complete order. Please try again.');
-        }
+        // Clear the transaction ID field
+        document.getElementById('transaction_id').value = '';
+        
+        // Show success message and redirect
+        alert('Order submitted successfully! Your transaction ID: ' + transactionId + '\nYour order is now pending admin verification to confirm the payment amount. You will receive email confirmation once verified.');
+        window.location.href = '{{ url_for('my_orders') }}';
     })
     .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred while processing your order. Please try again.');
+        console.error('Payment Error:', error);
+        // Show the error message to the user
+        alert('Error: ' + error.message);
+        
+        // Focus back on the transaction ID field for correction
+        const transactionField = document.getElementById('transaction_id');
+        if (transactionField) {
+            transactionField.focus();
+            transactionField.select();
+        }
+    })
+    .finally(() => {
+        // Always re-enable the button
+        if (confirmButton) {
+            confirmButton.disabled = false;
+            confirmButton.textContent = 'Confirm Payment & Complete Order';
+        }
     });
 }
 

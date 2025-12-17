@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 
 {% block title %}{{ product.name }} - National Scaffolding{% endblock %}
 
@@ -139,7 +139,7 @@
 /* Product info */
 .page-title { font-size: 1.6rem; margin: 0; color: var(--brand-900); }
 .product-meta { color: var(--accent); text-transform: uppercase; margin: 8px 0 16px; font-weight:700; }
-.product-description { color: var(--muted); line-height:1.6; margin-bottom: 1rem; }
+.product-description { color: #000; line-height:1.6; margin-bottom: 1rem; }
 
 .customization-section { margin-top: 10px; }
 .product-price { font-size: 1.3rem; font-weight: 900; color: var(--brand-900); margin-top: 8px; }
@@ -256,7 +256,7 @@
             <div class="gallery-main-container">
                 {% for img_url in valid_images %}
                 <div class="gallery-main-image {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}">
-                    <img src="{{ img_url }}" alt="{{ product.name }} - Image {{ loop.index }}" loading="lazy" onclick="openModal({{ loop.index0 }})">
+                    <img src="{{ url_for('static', filename=img_url) }}" alt="{{ product.name }} - Image {{ loop.index }}" loading="lazy" onclick="openModal({{ loop.index0 }})">
                 </div>
                 {% endfor %}
             </div>
@@ -273,7 +273,7 @@
         {% if valid_images|length > 1 %}
         <div class="gallery-thumbnails">
             {% for img_url in valid_images %}
-            <img src="{{ img_url }}" alt="{{ product.name }} thumbnail {{ loop.index }}" loading="lazy"
+            <img src="{{ url_for('static', filename=img_url) }}" alt="{{ product.name }} thumbnail {{ loop.index }}" loading="lazy"
                  class="gallery-thumbnail {% if loop.first %}active{% endif %}"
                  data-index="{{ loop.index0 }}"
                  onclick="setMainImage({{ loop.index0 }})">
@@ -282,11 +282,11 @@
         {% endif %}
 
     {% else %}
-        <div class="no-image-box"><p style="font-size: 2rem; color: #ffa500">📦</p><p>No Image Available</p></div>
+        <div class="no-image-box"><p style="font-size: 2rem; color: #ffa500">≡ƒôª</p><p>No Image Available</p></div>
     {% endif %}
 
 {% else %}
-    <div class="no-image-box"><p style="font-size: 2rem; color: #ffa500">📦</p><p>Product Image Not Set</p></div>
+    <div class="no-image-box"><p style="font-size: 2rem; color: #ffa500">≡ƒôª</p><p>Product Image Not Set</p></div>
 {% endif %}
 </div>
         <!-- Info -->
@@ -299,7 +299,7 @@
             {% if product.category == 'aluminium' %}
             <div class="customization-section">
                 <h3 style="color: var(--accent); margin-bottom: 8px;">Product Details</h3>
-                <p style="color: var(--muted); margin-bottom: 1rem;">Height and width specifications are included in product description.</p>
+                <p style="color: #000; margin-bottom: 1rem;">Height and width specifications are included in product description.</p>
 
                 <div class="form-group"><label for="purchase_type">Purchase Type</label>
                     <select id="purchase_type" onchange="updateAluminiumPrice()">
@@ -316,9 +316,9 @@
                     </select>
                 </div>
 
-                <div class="product-price" id="final_price_display">₹{{ product.price }}</div>
+                <div class="product-price" id="final_price_display">Γé╣{{ product.price }}</div>
                 <div id="deposit_display" style="color: #d4af37; margin-top: 1rem; display: none;">
-                    <strong>Deposit Required:</strong> <span id="deposit_amount">₹0</span>
+                    <strong>Deposit Required:</strong> <span id="deposit_amount">Γé╣0</span>
                 </div>
             </div>
 
@@ -348,7 +348,40 @@
             {% elif product.category == 'cuplock' %}
             <div style="background: linear-gradient(135deg,hsl(205, 36%, 68%),#6cb5fff1); padding: 16px; border-radius:10px; color:#fff;">
                 <h3 style="color:#d4af37; text-align:center;">Product Information</h3>
-                <p style="text-align:center;">This product is available for both <strong>rent</strong> and <strong>sale</strong>. Please contact sales for pricing.</p>
+                {% if product.price > 0 or product.rent_price > 0 %}
+                    <div style="text-align: center; margin-bottom: 15px;">
+                        {% if product.price > 0 %}
+                            <div style="margin-bottom: 8px;">
+                                <strong>Buy Price:</strong> ₹{{ "%.2f"|format(product.price) }}
+                            </div>
+                        {% endif %}
+                        {% if product.rent_price > 0 %}
+                            <div>
+                                <strong>Rent Price (per day):</strong> ₹{{ "%.2f"|format(product.rent_price) }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group" style="margin-top: 12px;">
+                        <label for="purchase_type" style="color: #fff;">Purchase Type</label>
+                        <select id="purchase_type" onchange="updatePrice()" style="background: #fff; color: #333; border: 1px solid #ddd; border-radius: 4px; padding: 8px; width: 100%;">
+                            {% if product.price > 0 %}<option value="buy">Buy</option>{% endif %}
+                            {% if product.rent_price > 0 %}<option value="rent">Rent</option>{% endif %}
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-top: 12px;">
+                        <label for="quantity" style="color: #fff;">Quantity</label>
+                        <select id="quantity" onchange="updatePrice()" style="background: #fff; color: #333; border: 1px solid #ddd; border-radius: 4px; padding: 8px; width: 100%;">
+                            {% for i in range(1, 51) %}
+                                <option value="{{ i }}">{{ i }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div id="final_price_display" style="font-size: 1.5rem; font-weight: bold; margin: 15px 0; text-align: center; color: #d4af37;">
+                        ₹{{ "%.2f"|format(product.price if product.price > 0 else product.rent_price) }}
+                    </div>
+                {% else %}
+                    <p style="text-align:center;">This product is available for both <strong>rent</strong> and <strong>sale</strong>. Please contact sales for pricing.</p>
+                {% endif %}
             </div>
 
             {% else %}
@@ -361,10 +394,10 @@
             {% endif %}
 
             <!-- Add to cart button -->
-            {% if product.category != 'cuplock' %}
+            {% if product.price > 0 or product.rent_price > 0 %}
                 {% if current_user.is_authenticated and session.get('user_type') == 'admin' %}
                 <div style="background: rgba(255, 165, 0, 0.12); padding: 12px; border-radius: 8px; margin-top: 12px;">
-                    <p style="margin:0; font-weight:700; color:#ffa500;">ℹ️ Admin accounts cannot make purchases.</p>
+                    <p style="margin:0; font-weight:700; color:#ffa500;">⚠️ Admin accounts cannot make purchases.</p>
                 </div>
                 {% elif current_user.is_authenticated %}
                 <div style="margin-top: 16px;">
@@ -403,9 +436,15 @@
     let totalImages = 0;
     let currentIndex = 0;
 
+    // Helper function to build proper image URLs
+    function buildImageUrl(relativePath) {
+        if (!relativePath) return '';
+        return '{{ url_for("static", filename="__PLACEHOLDER__") }}'.replace('__PLACEHOLDER__', relativePath);
+    }
+
     {% if product.image_url %}
     const rawImages = `{{ product.image_url }}`.split(',');
-    galleryImages = rawImages.map(s => s.trim()).filter(s => s !== '');
+    galleryImages = rawImages.map(s => s.trim()).filter(s => s !== '').map(url => buildImageUrl(url));
     totalImages = galleryImages.length;
     {% endif %}
 
@@ -564,8 +603,8 @@ function addToCartCustom() {
             return;
         }
         if (json.success) {
-            showToast('✅ Added to cart!');
-            setTimeout(() => { window.location.href = '/qr_scanner'; }, 700);
+            showToast('✓ Added to cart!');
+            setTimeout(() => { window.location.href = '/cart'; }, 700);
         } else {
             showToast('❌ ' + (json.message || 'Failed'));
             btn.disabled = false;

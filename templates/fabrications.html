@@ -440,7 +440,7 @@
 <div class="page-container">
     <header class="page-header">
         <h1 class="page-title">The National Scaffolding</h1>
-        <p class="page-subtitle">Professional scaffolding services for all your construction needs</p>
+        <!-- <p class="page-subtitle">Professional scaffolding services for all your construction needs</p> -->
         
         <div class="text-center mb-3">
             <button class="btn btn-secondary" onclick="window.location.href='{{ url_for('fabrications') }}'">
@@ -490,19 +490,19 @@
                     {% if valid_images | length >= 3 %}
                         <!-- Show 2 images + more indicator -->
                         <div class="product-image-grid">
-                            <img src="{{ valid_images[0] }}" alt="{{ product.name }} - Image 1" onerror="this.style.display='none';">
-                            <img src="{{ valid_images[1] }}" alt="{{ product.name }} - Image 2" onerror="this.style.display='none';">
+                            <img src="{{ url_for('static', filename=valid_images[0]) }}" alt="{{ product.name }} - Image 1" onerror="this.style.display='none';">
+                            <img src="{{ url_for('static', filename=valid_images[1]) }}" alt="{{ product.name }} - Image 2" onerror="this.style.display='none';">
                             <div class="product-image-more">+{{ valid_images|length - 2 }}</div>
                         </div>
                     {% elif valid_images|length == 2 %}
                         <!-- Show 2 images side by side -->
                         <div class="product-image-grid">
-                            <img src="{{ valid_images[0] }}" alt="{{ product.name }} - Image 1" onerror="this.style.display='none';">
-                            <img src="{{ valid_images[1] }}" alt="{{ product.name }} - Image 2" onerror="this.style.display='none';">
+                            <img src="{{ url_for('static', filename=valid_images[0]) }}" alt="{{ product.name }} - Image 1" onerror="this.style.display='none';">
+                            <img src="{{ url_for('static', filename=valid_images[1]) }}" alt="{{ product.name }} - Image 2" onerror="this.style.display='none';">
                         </div>
                     {% elif valid_images|length == 1 %}
                         <!-- Single image -->
-                        <img src="{{ valid_images[0] }}" alt="{{ product.name }}" class="product-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <img src="{{ url_for('static', filename=valid_images[0]) }}" alt="{{ product.name }}" class="product-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                         <div class="product-image-placeholder" style="display: none;">
                             <span>📦</span>
                         </div>
@@ -597,6 +597,7 @@ function closeWelcome() {
 function addToCart(productId, productName, price) {
     fetch('/add_to_cart', {
         method: 'POST',
+        credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             product_id: productId,
@@ -608,6 +609,7 @@ function addToCart(productId, productName, price) {
     .then(data => {
         if (data.success) {
             alert('✅ ' + productName + ' added to cart!');
+            window.location.href = '/cart';
         } else {
             alert('❌ Error: ' + data.message);
         }

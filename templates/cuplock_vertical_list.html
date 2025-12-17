@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+
+{% block title %}Vertical Cuplock Admin - Products List{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="page-header">
+        <h1>Vertical Cuplock Products</h1>
+        <a href="{{ url_for('admin_scaffoldings') }}" class="btn btn-secondary">← Back to Admin</a>
+    </div>
+
+    <div class="admin-controls">
+        <button class="btn btn-primary" onclick="window.location.href='{{ url_for('cuplock.vertical_create') }}'">
+            + Create New Vertical Cuplock Product
+        </button>
+    </div>
+
+    {% if products %}
+    <div class="products-grid">
+        {% for product in products %}
+        <div class="product-card">
+            <div class="card-header">
+                <h3>{{ product.name }}</h3>
+                <p class="description">{{ product.description or 'Vertical Cuplock System' }}</p>
+            </div>
+
+            {% if product.image_url %}
+            <div class="card-image">
+                {% set first_image = product.image_url.split(',')[0].strip() %}
+                <img src="{{ url_for('static', filename=first_image) }}" alt="{{ product.name }}" class="product-thumbnail">
+            </div>
+            {% endif %}
+
+            <div class="card-body">
+                <div class="product-info">
+                    <p><strong>Category:</strong> {{ product.category }}</p>
+                    <p><strong>Type:</strong> {{ product.cuplock_type }}</p>
+                    {% if product.vertical_sizes %}
+                    <p><strong>Sizes Configured:</strong> {{ product.vertical_sizes|length }}</p>
+                    <div class="sizes-list">
+                        {% for size in product.vertical_sizes %}
+                        <span class="size-badge">{{ size.size_label }}</span>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="no-config">No sizes configured yet</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card-actions">
+                <a href="{{ url_for('cuplock.vertical_edit', product_id=product.id) }}" class="btn btn-edit">
+                    ✏️ Edit & Configure
+                </a>
+                <button class="btn btn-delete" onclick="deleteProduct({{ product.id }})">
+                    🗑️ Delete
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="no-products">
+        <p>No Vertical Cuplock products found.</p>
+        <button class="btn btn-primary" onclick="window.location.href='{{ url_for('cuplock.vertical_create') }}'">
+            Create Your First Product
+        </button>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.admin-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.page-header h1 {
+    margin: 0;
+    color: #001d3d;
+}
+
+.btn-secondary {
+    background: #666;
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.btn-secondary:hover {
+    background: #555;
+}
+
+.admin-controls {
+    margin-bottom: 2rem;
+    text-align: right;
+}
+
+.btn.btn-primary {
+    background: #002855;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn.btn-primary:hover {
+    background: #001d3d;
+}
+
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.product-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: box-shadow 0.3s;
+}
+
+.product-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.card-header {
+    background: #f5f5f5;
+    padding: 1rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.card-header h3 {
+    margin: 0 0 0.5rem 0;
+    color: #001d3d;
+}
+
+.description {
+    margin: 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.card-image {
+    width: 100%;
+    height: 200px;
+    background: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.product-thumbnail {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.product-info p {
+    margin: 0.5rem 0;
+    color: #333;
+}
+
+.sizes-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.size-badge {
+    display: inline-block;
+    background: #e3f2fd;
+    color: #1565c0;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+}
+
+.no-config {
+    color: #999;
+    font-style: italic;
+}
+
+.card-actions {
+    display: flex;
+    gap: 0.5rem;
+    padding: 1rem;
+    border-top: 1px solid #e0e0e0;
+    background: #fafafa;
+}
+
+.btn {
+    flex: 1;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.btn-edit {
+    background: #4CAF50;
+    color: white;
+}
+
+.btn-edit:hover {
+    background: #45a049;
+}
+
+.btn-delete {
+    background: #f44336;
+    color: white;
+}
+
+.btn-delete:hover {
+    background: #da190b;
+}
+
+.no-products {
+    text-align: center;
+    padding: 3rem 2rem;
+    background: #f9f9f9;
+    border-radius: 8px;
+}
+
+.no-products p {
+    color: #666;
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+}
+</style>
+
+<script>
+function deleteProduct(productId) {
+    if (confirm('Are you sure you want to delete this Cuplock product and all its configurations?')) {
+        fetch(`/admin/vertical/product/${productId}/delete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Product deleted successfully!');
+                location.reload();
+            } else {
+                alert('Error deleting product: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error deleting product');
+        });
+    }
+}
+</script>
+
+{% endblock %}
