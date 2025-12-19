@@ -94,10 +94,11 @@ class CuplockVerticalSize(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer, db.ForeignKey('products.id', ondelete='CASCADE'), nullable=False)
     size_label = db.Column(db.String(50), nullable=False)
-    weight = db.Column(db.Float, nullable=True)
+    weight = db.Column(db.Numeric(10, 2), nullable=True)
     buy_price = db.Column(db.Numeric(10, 2), nullable=True)
     rent_price = db.Column(db.Numeric(10, 2), nullable=True)
     deposit = db.Column(db.Numeric(10, 2), nullable=True)
+    is_active = db.Column(db.Boolean, default=True)
     display_order = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -128,13 +129,10 @@ class CuplockLedgerSize(db.Model):
         nullable=False
     )
     size_label = db.Column(db.String(50), nullable=False)
-
-    # CORRECT FIELDS — MUST MATCH YOUR DATABASE
     weight_kg = db.Column(db.Numeric(10, 2), nullable=False)
     buy_price = db.Column(db.Numeric(10, 2), nullable=False)
     rent_price = db.Column(db.Numeric(10, 2), nullable=False)
     deposit_amount = db.Column(db.Numeric(10, 2), nullable=False)
-
     display_order = db.Column(db.Integer, default=0)
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -146,7 +144,6 @@ class CuplockLedgerSize(db.Model):
 
 # ===========================
 # CUPLOCK VERTICAL CUPS
-# (MATCHES YOUR SQL EXACTLY)
 # ===========================
 
 class CuplockVerticalCup(db.Model):
@@ -187,7 +184,8 @@ class Order(db.Model):
     total_price = db.Column(db.Numeric(10, 2), nullable=False)
     order_date = db.Column(db.DateTime, default=datetime.utcnow)
     status = db.Column(db.String(50), default='pending_verification')
-    transaction_id = db.Column(db.String(255), unique=True, nullable=False)
+    transaction_id = db.Column(db.String(100), unique=True, nullable=False)
+
     amount_paid = db.Column(db.Numeric(10, 2))
     payment_time = db.Column(db.DateTime)
 

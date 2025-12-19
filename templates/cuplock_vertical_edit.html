@@ -28,9 +28,15 @@
                 <div class="form-group">
                     <label for="image">Product Image</label>
                     <input type="file" id="image" name="image" accept="image/*" placeholder="Upload product image">
-                    {% if product.image_url %}
-                    <p style="margin-top: 0.5rem; color: #666; font-size: 0.9rem;">Current image: {{ product.image_url }}</p>
-                    {% endif %}
+                    <div style="margin-top: 1rem; padding: 1rem; background: #f9f9f9; border-radius: 4px;">
+                        <p style="margin: 0 0 0.5rem 0; color: #666; font-size: 0.9rem;">Current image:</p>
+                        {% if product.image_url %}
+                            <img src="{{ url_for('static', filename=product.image_url) }}" alt="{{ product.name }}" style="max-width: 200px; max-height: 200px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <div style="display: none; padding: 1rem; background: #ddd; border-radius: 4px; color: #666; text-align: center;">📦 Image failed to load</div>
+                        {% else %}
+                            <div style="padding: 1rem; background: #e8e8e8; border-radius: 4px; color: #999; text-align: center;">📦 No image uploaded yet<br><small>Upload an image above to display it here</small></div>
+                        {% endif %}
+                    </div>
                 </div>
 
                 <div class="button-group">
@@ -201,7 +207,7 @@ document.querySelectorAll('.size-form').forEach(form => {
         const productId = this.dataset.productId;
         const formData = new FormData(this);
 
-        const url = `/admin/cuplock/vertical/${productId}/size/add`;
+        const url = `/admin/vertical/${productId}/size/add`;
         
         fetch(url, {
             method: 'POST',
@@ -227,7 +233,7 @@ document.querySelectorAll('.cup-form').forEach(form => {
         const sizeId = this.dataset.sizeId;
         const formData = new FormData(this);
 
-        const url = `/admin/cuplock/vertical/size/${sizeId}/cup/add`;
+        const url = `/admin/vertical/size/${sizeId}/cup/add`;
         
         fetch(url, {
             method: 'POST',

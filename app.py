@@ -19,6 +19,9 @@ from sqlalchemy import text
 from models import Product
 # Import Cuplock blueprint
 from cuplock_routes import cuplock_bp
+from datetime import timezone
+from zoneinfo import ZoneInfo
+
 
 # Load environment variables from .env file
 load_dotenv()
@@ -26,6 +29,22 @@ load_dotenv()
 def ensure_columns_exist():
     """Add nullable columns if the PostgreSQL schema is missing them."""
     with db.engine.connect() as conn:
+        # Add is_active to products table
+        conn.execute(text("""
+            DO $$
+            BEGIN
+                IF NOT EXISTS (
+                    SELECT 1 FROM information_schema.columns
+                    WHERE table_name='products' AND column_name='is_active'
+                ) THEN
+                    ALTER TABLE products ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
+                    RAISE NOTICE 'Added is_active column to products table';
+                END IF;
+            END $$;
+        """))
+        conn.commit()
+        
+        # Add cuplock_type to products table
         conn.execute(text("""
             DO $$
             BEGIN
@@ -33,26 +52,14 @@ def ensure_columns_exist():
                     SELECT 1 FROM information_schema.columns
                     WHERE table_name='products' AND column_name='cuplock_type'
                 ) THEN
-                    BEGIN
-                        ALTER TABLE products ADD COLUMN cuplock_type VARCHAR(50);
-                    EXCEPTION
-                        WHEN duplicate_column THEN NULL;
-                    END;
-                END IF;
-
-                IF NOT EXISTS (
-                    SELECT 1 FROM information_schema.columns
-                    WHERE table_name='products' AND column_name='is_active'
-                ) THEN
-                    BEGIN
-                        ALTER TABLE products ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
-                    EXCEPTION
-                        WHEN duplicate_column THEN NULL;
-                    END;
+                    ALTER TABLE products ADD COLUMN cuplock_type VARCHAR(50);
+                    RAISE NOTICE 'Added cuplock_type column to products table';
                 END IF;
             END $$;
         """))
+        conn.commit()
 
+        # Add is_active to cuplock_ledger_sizes table
         conn.execute(text("""
             DO $$
             BEGIN
@@ -60,69 +67,64 @@ def ensure_columns_exist():
                     SELECT 1 FROM information_schema.columns
                     WHERE table_name='cuplock_ledger_sizes' AND column_name='is_active'
                 ) THEN
-                    BEGIN
-                        ALTER TABLE cuplock_ledger_sizes ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
-                    EXCEPTION
-                        WHEN duplicate_column THEN NULL;
-                    END;
+                    ALTER TABLE cuplock_ledger_sizes ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
+                    RAISE NOTICE 'Added is_active column to cuplock_ledger_sizes table';
                 END IF;
             END $$;
         """))
+        conn.commit()
 
+        # Add columns to cuplock_vertical_sizes table
         conn.execute(text("""
             DO $$
             BEGIN
+                -- weight column
                 IF NOT EXISTS (
                     SELECT 1 FROM information_schema.columns
                     WHERE table_name='cuplock_vertical_sizes' AND column_name='weight'
                 ) THEN
-                    BEGIN
-                        ALTER TABLE cuplock_vertical_sizes ADD COLUMN weight DECIMAL(10,2) NOT NULL DEFAULT 0;
-                    EXCEPTION WHEN duplicate_column THEN NULL;
-                    END;
+                    ALTER TABLE cuplock_vertical_sizes ADD COLUMN weight NUMERIC(10,2);
+                    RAISE NOTICE 'Added weight column to cuplock_vertical_sizes table';
                 END IF;
 
+                -- buy_price column
                 IF NOT EXISTS (
                     SELECT 1 FROM information_schema.columns
                     WHERE table_name='cuplock_vertical_sizes' AND column_name='buy_price'
                 ) THEN
-                    BEGIN
-                        ALTER TABLE cuplock_vertical_sizes ADD COLUMN buy_price DECIMAL(10,2) NOT NULL DEFAULT 0;
-                    EXCEPTION WHEN duplicate_column THEN NULL;
-                    END;
+                    ALTER TABLE cuplock_vertical_sizes ADD COLUMN buy_price NUMERIC(10,2);
+                    RAISE NOTICE 'Added buy_price column to cuplock_vertical_sizes table';
                 END IF;
 
+                -- rent_price column
                 IF NOT EXISTS (
                     SELECT 1 FROM information_schema.columns
                     WHERE table_name='cuplock_vertical_sizes' AND column_name='rent_price'
                 ) THEN
-                    BEGIN
-                        ALTER TABLE cuplock_vertical_sizes ADD COLUMN rent_price DECIMAL(10,2) NOT NULL DEFAULT 0;
-                    EXCEPTION WHEN duplicate_column THEN NULL;
-                    END;
+                    ALTER TABLE cuplock_vertical_sizes ADD COLUMN rent_price NUMERIC(10,2);
+                    RAISE NOTICE 'Added rent_price column to cuplock_vertical_sizes table';
                 END IF;
 
+                -- deposit column
                 IF NOT EXISTS (
                     SELECT 1 FROM information_schema.columns
                     WHERE table_name='cuplock_vertical_sizes' AND column_name='deposit'
                 ) THEN
-                    BEGIN
-                        ALTER TABLE cuplock_vertical_sizes ADD COLUMN deposit DECIMAL(10,2) NOT NULL DEFAULT 0;
-                    EXCEPTION WHEN duplicate_column THEN NULL;
-                    END;
+                    ALTER TABLE cuplock_vertical_sizes ADD COLUMN deposit NUMERIC(10,2);
+                    RAISE NOTICE 'Added deposit column to cuplock_vertical_sizes table';
                 END IF;
 
+                -- is_active column
                 IF NOT EXISTS (
                     SELECT 1 FROM information_schema.columns
                     WHERE table_name='cuplock_vertical_sizes' AND column_name='is_active'
                 ) THEN
-                    BEGIN
-                        ALTER TABLE cuplock_vertical_sizes ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
-                    EXCEPTION WHEN duplicate_column THEN NULL;
-                    END;
+                    ALTER TABLE cuplock_vertical_sizes ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
+                    RAISE NOTICE 'Added is_active column to cuplock_vertical_sizes table';
                 END IF;
             END $$;
         """))
+        conn.commit()
 
 def indian_format(number):
     x = str(int(number))
@@ -187,6 +189,17 @@ mail = Mail(app)
 
 # Register Jinja filters
 app.jinja_env.filters['indian'] = indian_format
+
+
+IST = ZoneInfo("Asia/Kolkata")
+
+def utc_to_ist(dt):
+    if dt is None:
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(IST)
+
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -271,168 +284,43 @@ def validate_price(price_value, field_name='Price'):
 # COMPLETE calculate_price FUNCTION WITH CUPLOCK SUPPORT
 # Replace your existing calculate_price function (around line 250) with this entire function
 # ============================================================================
-
 def calculate_price(product, customization):
-    """Enhanced calculate_price function with Cuplock support"""
-    quantity = customization.get('quantity', 1)
-    category = product.category
-    deposit = 0
-    
-    # ========== CUPLOCK LOGIC (NEW) ==========
-    if category == 'cuplock':
-        purchase_type = customization.get('purchaseType', 'buy')
-        size_id = customization.get('size_id')
-        
-        if not size_id:
-            return {'price': 0, 'deposit': 0}
-        
-        if product.cuplock_type == 'vertical':
-            from models import CuplockVerticalSize
-            try:
-                size = CuplockVerticalSize.query.get(int(size_id))
-            except (ValueError, TypeError):
-                return {'price': 0, 'deposit': 0}
-            
-            if not size:
-                return {'price': 0, 'deposit': 0}
-            
-            if purchase_type == 'rent':
-                unit_price = float(size.rent_price or 0)
-                deposit = float(size.deposit or 0)
-            else:  # buy
-                unit_price = float(size.buy_price or 0)
-                deposit = 0
-            
-            return {'price': unit_price, 'deposit': deposit}
-        
-        elif product.cuplock_type == 'ledger':
-            from models import CuplockLedgerSize
-            try:
-                size = CuplockLedgerSize.query.get(int(size_id))
-            except (ValueError, TypeError):
-                return {'price': 0, 'deposit': 0}
-            
-            if not size:
-                return {'price': 0, 'deposit': 0}
-            
-            if purchase_type == 'rent':
-                unit_price = float(size.rent_price or 0)
-                deposit = float(size.deposit_amount or 0)
-            else:  # buy
-                unit_price = float(size.buy_price or 0)
-                deposit = 0
-            
-            return {'price': unit_price, 'deposit': deposit}
-    
-    # ========== EXISTING ALUMINIUM LOGIC ==========
-    if category == 'aluminium':
-        purchase_type = customization.get('purchaseType', 'buy')
-        width = str(customization.get('width', ''))
-        height = str(customization.get('height', ''))
-        
-        if product.customization_options and 'pricing_matrix' in product.customization_options:
-            pricing_matrix = product.customization_options['pricing_matrix']
-            if width in pricing_matrix and height in pricing_matrix[width]:
-                price_data = pricing_matrix[width][height]
-                
-                if isinstance(price_data, dict):
-                    if purchase_type == 'rent':
-                        unit_price = price_data.get('rent')
-                        if unit_price is None and 'buy' in price_data:
-                            unit_price = price_data['buy'] * 0.2
-                        deposit = price_data.get('deposit', product.deposit_amount if product.deposit_amount else 0)
-                    else:
-                        unit_price = price_data.get('buy', product.price)
-                    
-                    if purchase_type == 'rent':
-                        deposit = price_data.get('deposit', product.deposit_amount if product.deposit_amount else 0)
-                        
-                    return {'price': unit_price, 'deposit': deposit}
-                else:
-                    buy_price = price_data
-                    unit_price = (buy_price * 0.2) if purchase_type == 'rent' else buy_price
-                    if purchase_type == 'rent':
-                        deposit = product.deposit_amount if product.deposit_amount else 0
-                    return {'price': unit_price, 'deposit': deposit}
-        
-        if purchase_type == 'rent':
-            unit_price = product.rent_price if product.rent_price else product.price
-            deposit = product.deposit_amount if product.deposit_amount else 0
-        else:
-            unit_price = product.price
-        return {'price': unit_price, 'deposit': deposit}
-    
-    # ========== EXISTING H-FRAMES LOGIC ==========
-    elif category == 'h-frames':
-        purchase_type = customization.get('purchaseType', 'buy')
-        
-        if product.customization_options and 'pricing_matrix' in product.customization_options:
-            pricing_matrix = product.customization_options['pricing_matrix']
-            quantity_key = str(quantity)
-            
-            if quantity_key in pricing_matrix:
-                price_data = pricing_matrix[quantity_key]
-                
-                if isinstance(price_data, dict):
-                    if purchase_type == 'rent':
-                        unit_price = price_data.get('rent', product.rent_price if product.rent_price else product.price * 0.2)
-                        deposit = price_data.get('deposit', product.deposit_amount if product.deposit_amount else 0)
-                    else:
-                        unit_price = price_data.get('buy', product.price)
-                    
-                    if purchase_type == 'rent':
-                        deposit = price_data.get('deposit', product.deposit_amount if product.deposit_amount else 0)
-                        
-                    return {'price': unit_price, 'deposit': deposit}
-                else:
-                    buy_price = price_data
-                    unit_price = (buy_price * 0.2) if purchase_type == 'rent' else buy_price
-                    if purchase_type == 'rent':
-                        deposit = product.deposit_amount if product.deposit_amount else 0
-                    return {'price': unit_price, 'deposit': deposit}
-        
-        if purchase_type == 'rent':
-            unit_price = product.rent_price if product.rent_price else product.price
-            deposit = product.deposit_amount if product.deposit_amount else 0
-        else:
-            unit_price = product.price
-        return {'price': unit_price, 'deposit': deposit}
-    
-    # ========== EXISTING ACCESSORIES LOGIC ==========
-    elif category == 'accessories':
-        purchase_type = customization.get('purchaseType', 'buy')
-        
-        if product.customization_options and 'pricing_matrix' in product.customization_options:
-            pricing_matrix = product.customization_options['pricing_matrix']
-            
-            if isinstance(pricing_matrix, dict):
-                if purchase_type == 'rent':
-                    unit_price = pricing_matrix.get('rent', product.rent_price if product.rent_price else product.price * 0.2)
-                    deposit = pricing_matrix.get('deposit', product.deposit_amount if product.deposit_amount else 0)
-                else:
-                    unit_price = pricing_matrix.get('buy', product.price)
-                
-                if purchase_type == 'rent':
-                    deposit = pricing_matrix.get('deposit', product.deposit_amount if product.deposit_amount else 0)
-                
-                return {'price': unit_price, 'deposit': deposit}
-            else:
-                buy_price = pricing_matrix
-                unit_price = (buy_price * 0.2) if purchase_type == 'rent' else buy_price
-                if purchase_type == 'rent':
-                    deposit = product.deposit_amount if product.deposit_amount else 0
-                return {'price': unit_price, 'deposit': deposit}
-        
-        if purchase_type == 'rent':
-            unit_price = product.rent_price if product.rent_price else product.price
-            deposit = product.deposit_amount if product.deposit_amount else 0
-        else:
-            unit_price = product.price
-        return {'price': unit_price, 'deposit': deposit}
-    
-    # ========== DEFAULT FALLBACK ==========
-    else:
-        return {'price': product.price, 'deposit': 0}
+    if product.category != 'cuplock':
+        return {'price': float(product.price or 0), 'deposit': 0}
+
+    component = customization.get('component')
+    purchase_type = customization.get('purchaseType')
+    size_label = customization.get('size')
+    cup_id = customization.get('cup_id')
+
+    if component != 'vertical':
+        return None
+
+    base_price = float(product.price or 0)
+
+    # BUY
+    if purchase_type == 'buy':
+        cup = CuplockVerticalCup.query.get(cup_id)
+        if not cup:
+            return None
+
+        return {
+            'price': base_price + float(cup.buy_price or 0),
+            'deposit': 0
+        }
+
+    # RENT
+    cup = CuplockVerticalCup.query.get(cup_id)
+    if not cup:
+        return None
+
+    return {
+        'price': float(cup.rent_price or 0),
+        'deposit': float(cup.deposit_amount or 0)
+    }
+
+
+
 
 # ============================================================================
 # COMPLETE product_detail ROUTE WITH CUPLOCK REDIRECT
@@ -769,21 +657,66 @@ create_default_admins()
 @app.route('/')
 def index():
     try:
-        category = request.args.get('category', 'all')
-        # Accept both old 'scaffolding' value and new product type names
-        valid_types = ['Aluminium Scaffolding', 'H-Frames', 'Cuplock', 'Accessories', 'scaffolding']
+        from cuplock_routes import get_image_url
         
+        category = request.args.get('category', 'all')
+
+        # Product types allowed on homepage
+        valid_types = [
+            'Aluminium Scaffolding',
+            'H-Frames',
+            'Cuplock',
+            'Accessories',
+            'scaffolding',
+            'cuplock_vertical',
+            'cuplock_ledger'
+        ]
+
         if category == 'all':
-            products = Product.query.filter(Product.product_type.in_(valid_types)).all()
-        else:
+            # ✅ LOAD ALL ACTIVE PRODUCTS (NO CATEGORY FILTER)
             products = Product.query.filter(
                 Product.product_type.in_(valid_types),
-                Product.category == category
+                Product.is_active == True
             ).all()
-        return render_template('national_scaffoldings.html', products=products, category=category)
+        else:
+            # Map button values → DB values
+            category_map = {
+                'aluminium': 'aluminium',
+                'h-frames': 'h-frames',
+                'cuplock': 'cuplock',
+                'accessories': 'accessories'
+            }
+
+            db_category = category_map.get(category.lower(), category)
+
+            products = Product.query.filter(
+                Product.product_type.in_(valid_types),
+                Product.category == db_category,
+                Product.is_active == True
+            ).all()
+
+        app.logger.info(
+            f"Homepage - Category: {category}, Products Found: {len(products)}"
+        )
+
+        # Attach image for frontend
+        for product in products:
+            product.display_image_url = get_image_url(product.image_url)
+
+        return render_template(
+            'national_scaffoldings.html',
+            products=products,
+            category=category
+        )
+
     except Exception as e:
-        app.logger.error(f"Index route error: {e}")
-        return render_template('national_scaffoldings.html', products=[], category='all')
+        app.logger.error(f"Index route error: {e}", exc_info=True)
+        return render_template(
+            'national_scaffoldings.html',
+            products=[],
+            category='all'
+        )
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -908,7 +841,14 @@ def admin_login():
 @app.route('/fabrications')
 def fabrications():
     try:
+        from cuplock_routes import get_image_url
+        
         products = Product.query.filter_by(product_type='fabrication').all()
+        
+        # Add display_image_url to each product for template rendering
+        for product in products:
+            product.display_image_url = get_image_url(product.image_url)
+        
         return render_template('fabrications.html', products=products)
     except Exception as e:
         app.logger.error(f"Fabrications route error: {e}")
@@ -958,21 +898,20 @@ def cuplock_vertical_product(product_id):
         flash('Error loading product', 'error')
         return redirect(url_for('national_scaffoldings'))
 
-    @app.route('/cuplock_ledger/<int:product_id>')
-    def cuplock_ledger_product(product_id):
-        """Display a Cuplock Ledger product for purchase"""
-        try:
-            product = Product.query.filter_by(
-                id=product_id,
-                category='cuplock',
-                cuplock_type='ledger'
-            ).get_or_404()
-            return render_template('cuplock_ledger.html', product=product)
-        except Exception as e:
-            app.logger.error(f"Cuplock ledger product error: {e}")
-            flash('Product not found', 'error')
-            return redirect(url_for('national_scaffoldings'))
-
+@app.route('/cuplock_ledger/<int:product_id>')
+def cuplock_ledger_product(product_id):
+    """Display a Cuplock Ledger product for purchase"""
+    try:
+        product = Product.query.filter_by(
+            id=product_id,
+            category='cuplock',
+            cuplock_type='ledger'
+        ).get_or_404()
+        return render_template('cuplock_ledger.html', product=product)
+    except Exception as e:
+        app.logger.error(f"Cuplock ledger product error: {e}")
+        flash('Product not found', 'error')
+        return redirect(url_for('national_scaffoldings'))
 
 @app.route('/logout')
 @login_required
@@ -1029,20 +968,71 @@ def switch_admin_panel(panel_type):
         app.logger.error(f"Switch admin panel error: {e}")
         return redirect(url_for('dashboard'))
     
+@app.route('/cuplock-shop')
+def cuplock_shop():
+    """Display all cuplock products - both vertical and ledger"""
+    try:
+        from cuplock_routes import get_image_url
+        
+        # Get vertical products
+        vertical_products = Product.query.filter_by(
+            category='cuplock',
+            cuplock_type='vertical',
+            is_active=True
+        ).all()
+        
+        # Get ledger products
+        ledger_products = Product.query.filter_by(
+            category='cuplock',
+            cuplock_type='ledger',
+            is_active=True
+        ).all()
+        
+        # Debug logging
+        app.logger.info(f"Cuplock Shop - Vertical: {len(vertical_products)}, Ledger: {len(ledger_products)}")
+        
+        # Add display_image_url to each product for template rendering
+        for product in vertical_products:
+            product.display_image_url = get_image_url(product.image_url)
+        
+        for product in ledger_products:
+            product.display_image_url = get_image_url(product.image_url)
+            app.logger.info(f"Ledger Product: {product.name}, Image: {product.display_image_url}")
+        
+        return render_template('cuplock_shop.html',
+                             vertical_products=vertical_products,
+                             ledger_products=ledger_products)
+    except Exception as e:
+        app.logger.error(f"Cuplock shop error: {e}")
+        import traceback
+        app.logger.error(traceback.format_exc())
+        return render_template('cuplock_shop.html', vertical_products=[], ledger_products=[])
+
 @app.route('/national_scaffoldings')
 def national_scaffoldings():
     try:
+        from cuplock_routes import get_image_url
+        
         category = request.args.get('category', 'all')
         # Accept both old 'scaffolding' value and new product type names
-        valid_types = ['Aluminium Scaffolding', 'H-Frames', 'Cuplock', 'Accessories', 'scaffolding']
+        valid_types = ['Aluminium Scaffolding', 'H-Frames', 'Cuplock', 'Accessories', 'scaffolding', 'cuplock_vertical', 'cuplock_ledger']
         
         if category == 'all':
-            products = Product.query.filter(Product.product_type.in_(valid_types)).all()
+            products = Product.query.filter(
+                Product.product_type.in_(valid_types),
+                Product.is_active == True
+            ).all()
         else:
             products = Product.query.filter(
                 Product.product_type.in_(valid_types),
-                Product.category == category
+                Product.category == category,
+                Product.is_active == True
             ).all()
+        
+        # Add display_image_url to all products for template rendering
+        for product in products:
+            product.display_image_url = get_image_url(product.image_url)
+        
         return render_template('national_scaffoldings.html', products=products, category=category)
     except Exception as e:
         app.logger.error(f"National scaffoldings error: {e}")
@@ -1055,133 +1045,359 @@ def about():
 @app.route('/add_to_cart', methods=['POST'])
 @login_required
 def add_to_cart():
-    """Add product to cart - FIXED for both JSON and form data"""
     try:
         if session.get('user_type') == 'admin':
-            return jsonify({'success': False, 'message': 'Admins cannot purchase items'}), 403
-        
-        # Handle both JSON and form data
-        if request.is_json:
-            data = request.json
-        else:
-            data = request.form.to_dict()
-            
-            # Convert customization from string to dict if needed
-            if 'customization' in data and isinstance(data['customization'], str):
-                try:
-                    data['customization'] = json.loads(data['customization'])
-                except json.JSONDecodeError:
-                    data['customization'] = {}
-        
+            return jsonify({
+                'success': False,
+                'message': 'Admins cannot purchase items'
+            }), 403
+
+        # -------------------------------
+        # READ REQUEST DATA
+        # -------------------------------
+        data = request.get_json() if request.is_json else request.form.to_dict()
+
+        if 'customization' in data and isinstance(data['customization'], str):
+            try:
+                data['customization'] = json.loads(data['customization'])
+            except json.JSONDecodeError:
+                data['customization'] = {}
+
         product_id = data.get('product_id')
-        quantity = data.get('quantity', 1)
+        quantity = int(data.get('quantity', 1))
         customization = data.get('customization', {})
-        
-        try:
-            quantity = int(quantity)
-            if quantity <= 0:
-                return jsonify({'success': False, 'message': 'Quantity must be a positive integer'}), 400
-        except (ValueError, TypeError):
-            return jsonify({'success': False, 'message': 'Invalid quantity'}), 400
-        
-        product = Product.query.get(product_id)
-        if not product:
-            return jsonify({'success': False, 'message': 'Product not found'}), 404
-        
-        customization['quantity'] = quantity
-        
+
+        # -------------------------------
+        # VALIDATION
+        # -------------------------------
+        if quantity <= 0:
+            return jsonify({
+                'success': False,
+                'message': 'Invalid quantity'
+            }), 400
+
+        product = Product.query.get_or_404(product_id)
+
+        # Debug logs (KEEP FOR NOW)
+        app.logger.warning("====== CUPLOCK DEBUG ======")
+        app.logger.warning(f"Product category: {product.category}")
+        app.logger.warning(f"Customization received: {customization}")
+
+        # H-frame restriction
         if product.category == 'h-frames' and quantity >= 100:
             return jsonify({
-                'success': False, 
-                'message': 'For orders of 100+ pieces, please contact us directly at sales@nationalscaffolding.com'
+                'success': False,
+                'message': 'For orders of 100+ pieces, please contact sales'
             }), 400
-        
+
+        # -------------------------------
+        # PRICE CALCULATION (BACKEND ONLY)
+        # -------------------------------
         price_data = calculate_price(product, customization)
-        if price_data is None:
-            return jsonify({'success': False, 'message': 'Cannot calculate price for this configuration'}), 400
-        
-        cart = session.get('cart', [])
+
+        if not price_data or float(price_data.get('price', 0)) <= 0:
+            return jsonify({
+                'success': False,
+                'message': 'Unable to calculate price'
+            }), 400
+
+        unit_price = float(price_data['price'])
+        deposit = float(price_data.get('deposit', 0))
+
+        # -------------------------------
+        # CREATE CART ITEM
+        # -------------------------------
         cart_item = {
-            'product_id': product_id, 
-            'product_name': product.name, 
-            'quantity': quantity, 
+            'product_id': product.id,
+            'product_name': product.name,
+            'category': product.category,
+            'quantity': quantity,
+            'unit_price': unit_price,
+            'item_total': unit_price * quantity,
+            'deposit': deposit,
+            'item_deposit': deposit * quantity,
             'customization': customization,
-            'image_url': product.image_url  # Added this line for cart display
+            'image_url': product.image_url
         }
+
+        cart = session.get('cart', [])
         cart.append(cart_item)
         session['cart'] = cart
         session.modified = True
-        
-        app.logger.info(f"User {current_user.id} added product {product_id} to cart. Cart size: {len(cart)}")
-        
+
+        app.logger.info(
+            f"[CART] User {current_user.id} added {product.name} | "
+            f"₹{unit_price} x {quantity}"
+        )
+
         return jsonify({
-            'success': True, 
+            'success': True,
             'cart_count': len(cart),
-            'message': 'Product added to cart successfully'
-        }), 200
+            'message': 'Product added to cart'
+        })
+
     except Exception as e:
-        app.logger.error(f"Add to cart error: {e}")
-        return jsonify({'success': False, 'message': 'Error adding to cart'}), 500
+        app.logger.error(f"Add to cart error: {e}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'message': 'Error adding to cart'
+        }), 500
+
 
 @app.route('/cart')
 @login_required
 def cart():
-    """Cart page - FIXED for better handling"""
+    try:
+        if session.get('user_type') == 'admin':
+            flash('Admins cannot make purchases', 'warning')
+            return redirect(url_for('admin_scaffoldings'))
+
+        cart_items = session.get('cart', [])
+        enriched_cart = []
+
+        total_items_price = 0.0
+        total_deposit = 0.0
+
+        for item in cart_items:
+            product = Product.query.get(item['product_id'])
+            if not product:
+                continue
+
+            unit_price = float(item.get('unit_price', 0))
+            item_total = float(item.get('item_total', 0))
+            deposit = float(item.get('deposit', 0))
+            item_deposit = float(item.get('item_deposit', 0))
+            quantity = item.get('quantity', 1)
+            customization = item.get('customization', {})
+
+            total_items_price += item_total
+            total_deposit += item_deposit
+
+            enriched_cart.append({
+                'product_name': product.name,
+                'quantity': quantity,
+                'unit_price': unit_price,
+                'item_total': item_total,
+                'deposit': deposit,
+                'item_deposit': item_deposit,
+                'customization': customization,
+                'image_url': product.image_url
+            })
+
+        # ✅ GST LOGIC (ONLY HERE)
+        GST_RATE = 0.18
+        gst = round(total_items_price * GST_RATE, 2)
+
+        # ✅ FINAL TOTAL
+        total_with_gst = round(total_items_price + gst + total_deposit, 2)
+
+        return render_template(
+            'cart.html',
+            cart_items=enriched_cart,
+            total_before_gst=total_items_price,
+            total_deposit=total_deposit,
+            gst=gst,
+            total_with_gst=total_with_gst
+        )
+
+    except Exception as e:
+        app.logger.error(f"Cart error: {e}", exc_info=True)
+        return render_template('cart.html', cart_items=[])
+
+
+@app.route('/qr_scanner')
+@login_required
+def qr_scanner():
+    """Payment page - reads stored prices"""
     try:
         if session.get('user_type') == 'admin':
             flash('Admins cannot make purchases', 'warning')
             return redirect(url_for('admin_scaffoldings'))
         
         cart_items = session.get('cart', [])
-        enriched_cart = []
+        
+        if not cart_items:
+            flash('Your cart is empty', 'warning')
+            return redirect(url_for('national_scaffoldings'))
+        
+        # Read stored values (never recalculate)
         total_items_price = 0.0
         total_deposit = 0.0
         
         for item in cart_items:
             product = Product.query.get(item['product_id'])
-            if product:
-                price_data = calculate_price(product, item['customization'])
-                if price_data is not None:
-                    unit_price = float(price_data['price'])
-                    deposit = float(price_data['deposit']) if price_data['deposit'] else 0
-                    item_price = unit_price * item['quantity']
-                    item_deposit = deposit * item['quantity'] if deposit > 0 else 0
-                    
-                    total_items_price += item_price
-                    total_deposit += item_deposit
-                    
-                    custom_info = item['customization']
-                    if 'purchaseType' not in custom_info:
-                        custom_info['purchaseType'] = 'buy'
-                    
-                    enriched_item = {
-                        'product_name': product.name, 
-                        'quantity': item['quantity'], 
-                        'unit_price': unit_price, 
-                        'deposit': deposit,
-                        'item_total': item_price, 
-                        'item_deposit': item_deposit, 
-                        'customization': custom_info, 
-                        'image_url': product.image_url
-                    }
-                    enriched_cart.append(enriched_item)
+            if not product:
+                continue
+            
+            item_total = float(item.get('item_total', 0))
+            item_deposit = float(item.get('item_deposit', 0))
+            
+            total_items_price += item_total
+            total_deposit += item_deposit
         
-        total_before_gst = total_items_price + total_deposit
+        # Validate totals
+        if total_items_price <= 0:
+            flash('Cart totals invalid. Please review your cart.', 'error')
+            return redirect(url_for('cart'))
+        
         gst = total_items_price * 0.18
-        total_with_gst = total_before_gst + gst
+        total_with_gst = total_items_price + total_deposit + gst
+        
+        # Generate QR code
+        qr_data = f"upi://pay?pa=nationalscaffolding@phonepe&pn=The National Scaffolding&am={total_with_gst:.2f}&cu=INR"
+        qr = qrcode.QRCode(version=1, box_size=10, border=5)
+        qr.add_data(qr_data)
+        qr.make(fit=True)
+        
+        img = qr.make_image(fill_color="black", back_color="white")
+        buffered = io.BytesIO()
+        img.save(buffered, format="PNG")
+        qr_code_base64 = base64.b64encode(buffered.getvalue()).decode()
+        
+        app.logger.info(
+            f"[PAYMENT] User {current_user.id} | Total: ₹{total_with_gst:.2f}"
+        )
         
         return render_template(
-            'cart.html', 
-            cart_items=enriched_cart, 
-            total_before_gst=total_items_price, 
-            total_deposit=total_deposit, 
-            gst=gst, 
-            total_with_gst=total_with_gst
+            'qr_scanner.html', 
+            total=total_items_price,
+            gst=gst,
+            total_deposit=total_deposit,
+            total_with_gst=total_with_gst,
+            qr_code=qr_code_base64,
+            cart_items=cart_items
         )
+        
     except Exception as e:
-        app.logger.error(f"Cart error: {e}")
-        return render_template('cart.html', cart_items=[])
+        app.logger.error(f"QR scanner error: {e}", exc_info=True)
+        flash('Error loading payment page', 'error')
+        return redirect(url_for('cart'))
 
+@app.route('/complete_order', methods=['POST'])
+@login_required
+def complete_order():
+    try:
+        data = request.get_json(silent=True) or {}
+        transaction_id = str(data.get('transaction_id', '')).strip()
+
+        GST_RATE = 0.18  # 18% GST
+
+        # -------------------------------
+        # VALIDATE TRANSACTION ID
+        # -------------------------------
+        if not transaction_id:
+            return jsonify({
+                'success': False,
+                'message': 'Transaction ID is required'
+            }), 400
+
+        # Prevent duplicate transaction IDs
+        existing = Order.query.filter_by(transaction_id=transaction_id).first()
+        if existing:
+            return jsonify({
+                'success': False,
+                'message': 'Transaction ID already used'
+            }), 400
+
+        # -------------------------------
+        # VALIDATE CART
+        # -------------------------------
+        cart = session.get('cart', [])
+        if not cart:
+            return jsonify({
+                'success': False,
+                'message': 'Cart is empty'
+            }), 400
+
+        # -------------------------------
+        # RE-CALCULATE TOTAL (BACKEND ONLY)
+        # -------------------------------
+        subtotal = 0.0
+        deposit_total = 0.0
+
+        for item in cart:
+            subtotal += float(item.get('item_total', 0))
+            deposit_total += float(item.get('item_deposit', 0))
+
+        gst_amount = subtotal * GST_RATE
+        total_price = subtotal + gst_amount + deposit_total
+
+        if total_price <= 0:
+            return jsonify({
+                'success': False,
+                'message': 'Invalid order amount'
+            }), 400
+
+        # -------------------------------
+        # CREATE ORDER (FINAL PAYABLE)
+        # -------------------------------
+        order = Order(
+            user_id=current_user.id,
+            total_price=total_price,        # ✅ includes GST + deposit
+            status='pending_verification',
+            transaction_id=transaction_id
+        )
+
+        db.session.add(order)
+        db.session.flush()  # get order.id
+
+        # -------------------------------
+        # SAVE ORDER ITEMS
+        # -------------------------------
+        for item in cart:
+            order_item = OrderItem(
+                order_id=order.id,
+                product_id=item.get('product_id'),
+                product_name=item.get('product_name'),
+                quantity=int(item.get('quantity', 1)),
+                price=float(item.get('unit_price', 0))
+            )
+            db.session.add(order_item)
+
+        db.session.commit()
+
+        # -------------------------------
+        # CLEAR CART (ONLY AFTER SUCCESS)
+        # -------------------------------
+        session.pop('cart', None)
+        session.modified = True
+
+        return jsonify({
+            'success': True,
+            'message': 'Order placed successfully',
+            'total_paid': round(total_price, 2),
+            'gst': round(gst_amount, 2)
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error("Complete order failed", exc_info=True)
+        return jsonify({
+            'success': False,
+            'message': 'Error completing order'
+        }), 500
+
+@app.route('/my_orders')
+@login_required
+def my_orders():
+    try:
+        if session.get('user_type') == 'admin':
+            return redirect(url_for('admin_scaffoldings'))
+
+        orders = Order.query.filter_by(user_id=current_user.id)\
+            .order_by(Order.order_date.desc())\
+            .all()
+
+        # Convert UTC to IST for display
+        for order in orders:
+            order.display_time = utc_to_ist(order.order_date)
+
+        return render_template('my_orders.html', orders=orders)
+
+    except Exception as e:
+        app.logger.error(f"My orders error: {e}", exc_info=True)
+        return render_template('my_orders.html', orders=[])
+    
 @app.route('/remove_from_cart/<int:index>')
 @login_required
 def remove_from_cart(index):
@@ -1196,103 +1412,41 @@ def remove_from_cart(index):
         app.logger.error(f"Remove from cart error: {e}")
         return redirect(url_for('cart'))
 
-@app.route('/qr_scanner')
-@login_required
-def qr_scanner():
-    """QR Scanner page - FIXED route without .html extension"""
-    try:
-        if session.get('user_type') == 'admin':
-            flash('Admins cannot make purchases', 'warning')
-            return redirect(url_for('admin_scaffoldings'))
-        
-        cart_items = session.get('cart', [])
-        
-        if not cart_items:
-            flash('Your cart is empty. Please add items before proceeding to payment.', 'warning')
-            return redirect(url_for('national_scaffoldings'))
-        
-        total_items_price = 0.0
-        total_deposit = 0.0
-        
-        for item in cart_items:
-            product = Product.query.get(item['product_id'])
-            if product:
-                price_data = calculate_price(product, item['customization'])
-                if price_data is not None:
-                    total_items_price += float(price_data['price']) * item['quantity']
-                    total_deposit += float(price_data['deposit']) * item['quantity'] if float(price_data['deposit']) > 0 else 0
-        
-        gst = total_items_price * 0.18
-        total_with_gst = total_items_price + gst + total_deposit
-        
-        # Generate QR code for payment
-        qr_data = f"upi://pay?pa=nationalscaffolding@phonepe&pn=The National Scaffolding&am={total_with_gst:.2f}&cu=INR"
-        qr = qrcode.QRCode(version=1, box_size=10, border=5)
-        qr.add_data(qr_data)
-        qr.make(fit=True)
-        
-        img = qr.make_image(fill_color="black", back_color="white")
-        buffered = io.BytesIO()
-        img.save(buffered, format="PNG")
-        qr_code_base64 = base64.b64encode(buffered.getvalue()).decode()
-        
-        return render_template(
-            'qr_scanner.html', 
-            total=total_items_price, 
-            gst=gst, 
-            total_deposit=total_deposit, 
-            total_with_gst=total_with_gst, 
-            qr_code=qr_code_base64,
-            cart_items=cart_items
-        )
-    except Exception as e:
-        app.logger.error(f"QR scanner error: {e}")
-        return redirect(url_for('national_scaffoldings'))
+
 
     
-@app.route('/my_orders')
-@login_required
-def my_orders():
-    try:
-        if session.get('user_type') == 'admin':
-            return redirect(url_for('admin_scaffoldings'))
-        orders = Order.query.filter_by(user_id=current_user.id).order_by(Order.order_date.desc()).all()
-        return render_template('my_orders.html', orders=orders)
-    except Exception as e:
-        app.logger.error(f"My orders error: {e}")
-        return render_template('my_orders.html', orders=[])
+
 
 
 @app.route('/admin/complete_order/<int:order_id>', methods=['POST'])
 @login_required
 def admin_complete_order(order_id):
-    """Admin function to mark an order as completed"""
+    """Admin marks an approved order as completed"""
     try:
-        # Check if user is admin
         if session.get('user_type') != 'admin':
             return jsonify({'success': False, 'message': 'Unauthorized'}), 403
-        
-        # Get the order
-        order = Order.query.get(order_id)
-        if not order:
-            return jsonify({'success': False, 'message': 'Order not found'}), 404
-        
-        # Check if order is in approved status
+
+        order = Order.query.get_or_404(order_id)
+
         if order.status != 'approved':
-            return jsonify({'success': False, 'message': 'Only approved orders can be completed'}), 400
-        
-        # Update order status to completed
+            return jsonify({
+                'success': False,
+                'message': 'Only approved orders can be completed'
+            }), 400
+
         order.status = 'completed'
         db.session.commit()
-        
+
         return jsonify({
-            'success': True, 
-            'message': 'Order marked as completed successfully'
+            'success': True,
+            'message': 'Order marked as completed'
         })
+
     except Exception as e:
         app.logger.error(f"Admin complete order error: {e}")
         db.session.rollback()
         return jsonify({'success': False, 'message': 'Error completing order'}), 500
+
     
 @app.route('/admin_scaffoldings')
 @login_required
@@ -1348,6 +1502,8 @@ def edit_scaffolding_product(product_id):
 def cuplock_products():
     """List all Cuplock products"""
     try:
+        from cuplock_routes import get_image_url
+        
         vertical_products = Product.query.filter_by(
             category='cuplock',
             cuplock_type='vertical',
@@ -1359,6 +1515,13 @@ def cuplock_products():
             cuplock_type='ledger',
             is_active=True
         ).all()
+        
+        # Add display_image_url to each product for template rendering
+        for product in vertical_products:
+            product.display_image_url = get_image_url(product.image_url)
+        
+        for product in ledger_products:
+            product.display_image_url = get_image_url(product.image_url)
 
         return render_template(
             'cuplock_products.html',
@@ -1464,6 +1627,59 @@ def admin_logout():
     except Exception as e:
         app.logger.error(f"Admin logout error: {e}")
         return redirect(url_for('dashboard'))
+    
+@app.route('/admin_add_fabrication_product', methods=['POST'])
+@login_required
+def admin_add_fabrication_product():
+    try:
+        if session.get('user_type') != 'admin':
+            return jsonify({'success': False, 'message': 'Unauthorized'}), 403
+
+        # Validate price
+        price_valid, price_error = validate_price(request.form.get('price'), 'Price')
+        if not price_valid:
+            return jsonify({'success': False, 'message': price_error}), 400
+
+        image_urls = []
+        uploaded_files = request.files.getlist('product_images')
+
+        if uploaded_files:
+            os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+            for file in uploaded_files:
+                if file and file.filename and allowed_file(file.filename):
+                    filename = secure_filename(file.filename)
+                    unique_name = f"{uuid.uuid4().hex}_{filename}"
+                    filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
+                    file.save(filepath)
+                    image_urls.append(f"uploads/{unique_name}")
+
+        image_url_string = ",".join(image_urls) if image_urls else 'images/no-image.png'
+
+        product = Product(
+            name=request.form.get('name'),
+            description=request.form.get('description', ''),
+            price=safe_float(request.form.get('price')) or 0.0,
+            category=request.form.get('category'),
+            product_type='fabrication',
+            image_url=image_url_string,
+            is_active=True
+        )
+
+        db.session.add(product)
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'Fabrication product added successfully'
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f"Admin fabrication add error: {e}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'message': 'Error adding fabrication product'
+        }), 500
 
 @app.route('/admin_add_product', methods=['GET', 'POST'])
 @login_required
@@ -1520,24 +1736,30 @@ def admin_add_product():
                     return jsonify({'success': False, 'message': 'One or more uploaded images are invalid or corrupted. Please try different files.'}), 500
 
         # Join with comma - NO SPACES
-        image_url_string = ",".join(image_urls) if image_urls else None
+        image_url_string = ",".join(image_urls) if image_urls else 'images/no-image.png'
+
         
         # DEBUG LOG
         app.logger.info(f"Creating product with images: {image_url_string}")
 
         # Create product
         product = Product(
-            name=request.form.get('name'),
-            price=safe_float(request.form.get('price')) or 0.0,
-            description=request.form.get('description', ''),
-            category=request.form.get('category'),
-            product_type=request.form.get('product_type', 'Aluminium Scaffolding'),
-            customization_options=None,
-            rent_price=safe_float(request.form.get('rent_price')),
-            deposit_amount=safe_float(request.form.get('deposit_amount')),
-            image_url=image_url_string,
-            weight_per_unit=safe_float(request.form.get('weight_per_unit'))
-        )
+    name=request.form.get('name'),
+    description=request.form.get('description', ''),
+    price=safe_float(request.form.get('price')) or 0.0,
+
+    category='cuplock',              # ✅ forced
+    product_type='Cuplock',           # ✅ consistent
+    cuplock_type='ledger',            # ✅ subtype
+
+    rent_price=safe_float(request.form.get('rent_price')),
+    deposit_amount=safe_float(request.form.get('deposit_amount')),
+    image_url=image_url_string,
+    weight_per_unit=safe_float(request.form.get('weight_per_unit')),
+    is_active=True
+)
+
+
 
         db.session.add(product)
         db.session.flush()
@@ -1631,7 +1853,8 @@ def admin_update_product(product_id):
                     app.logger.warning(f"Error removing old file {old_image_path}: {e}")
 
         merged_urls = existing_list + new_urls
-        product.image_url = ','.join(merged_urls) if merged_urls else None
+        product.image_url = ','.join(merged_urls) if merged_urls else 'images/no-image.png'
+
         
         product.name = request.form.get('name')
         new_price = safe_float(request.form.get('price'))
@@ -2019,7 +2242,7 @@ def admin_remove_photo(product_id):
 
         current = [u for u in (product.image_url or '').split(',') if u.strip()]
         if image_url in current:
-            old_image_path = image_url.replace('/static/', 'static/')
+            old_image_path = os.path.join(app.static_folder, image_url)
             if os.path.exists(old_image_path):
                 try:
                     os.remove(old_image_path)
@@ -2028,7 +2251,8 @@ def admin_remove_photo(product_id):
                     app.logger.error(f"Error removing file: {e}")
 
             current.remove(image_url)
-            product.image_url = ','.join(current) if current else None
+            product.image_url = ','.join(current) if current else 'images/no-image.png'
+
             db.session.commit()
             return jsonify({'success': True, 'message': 'Photo removed successfully'})
 
@@ -2362,179 +2586,51 @@ def verify_payment(order_id):
 @app.route('/check_payment_status')
 @login_required
 def check_payment_status():
-    """Check if user has a payment in progress"""
-    try:
-        if session.get('user_type') == 'admin':
-            return jsonify({'payment_in_progress': False})
-        
-        fifteen_minutes_ago = datetime.utcnow() - timedelta(minutes=15)
-        
-        # Use a try-except block to handle potential database schema issues
-        try:
-            recent_orders = Order.query.filter(
-                Order.user_id == current_user.id,
-                Order.order_date >= fifteen_minutes_ago,
-                Order.status.in_(['pending_verification', 'payment_initiated'])
-            ).all()
-        except Exception as db_error:
-            # If a query fails (e.g., due to a missing column), log it and rollback the session
-            app.logger.error(f"Database query failed in check_payment_status: {db_error}")
-            db.session.rollback()
-            # As a safe fallback, assume no payment is in progress
-            return jsonify({'payment_in_progress': False})
-        
-        return jsonify({'payment_in_progress': len(recent_orders) > 0})
-    except Exception as e:
-        app.logger.error(f"Check payment status error: {e}")
-        return jsonify({'payment_in_progress': False})
+    """
+    Always allow users to place new orders.
+    Multiple pending orders are allowed.
+    Admin verification is handled per order.
+    """
+    return jsonify({'payment_in_progress': False})
 
-@app.route('/complete_order', methods=['POST'])
+
+@app.route('/admin/verify_payment/<int:order_id>', methods=['POST'])
 @login_required
-def complete_order():
-    """Complete order after payment - FIXED"""
+def admin_verify_payment(order_id):
+    """Admin approves or rejects payment"""
     try:
-        if session.get('user_type') == 'admin':
-            return jsonify({'success': False, 'message': 'Admins cannot place orders'}), 403
-        
-        cart_items = session.get('cart', [])
-        if not cart_items:
-            return jsonify({'success': False, 'message': 'Cart is empty'}), 400
-        
-        data = request.json or {}
-        transaction_id = data.get('transaction_id', '').strip()
-        
-        if not transaction_id or len(transaction_id) < 12:
-            return jsonify({
-                'success': False, 
-                'message': 'Valid Transaction ID is required (minimum 12 characters)'
-            }), 400
-        
-        # Check if transaction ID already exists - with better error handling
-        try:
-            # Trim and normalize the transaction ID
-            transaction_id = transaction_id.strip()
-            
-            app.logger.info(f"DEBUG: Checking for duplicate transaction ID: '{transaction_id}' (length: {len(transaction_id)})")
-            
-            # Use case-insensitive comparison and explicitly check for the exact match
-            existing_order = Order.query.filter(
-                Order.transaction_id == transaction_id
-            ).first()
-            
-            if existing_order:
-                app.logger.warning(f"Duplicate transaction ID attempt: {transaction_id} (matches order {existing_order.id})")
-                return jsonify({
-                    'success': False, 
-                    'message': 'This Transaction ID has already been used. Each purchase requires a unique payment. Please make a new payment and enter a new Transaction ID.'
-                }), 400
-            else:
-                app.logger.info(f"Transaction ID '{transaction_id}' is unique - proceeding with order")
-        except Exception as e:
-            app.logger.error(f"Error checking transaction ID: {e}", exc_info=True)
-            return jsonify({
-                'success': False, 
-                'message': 'Error validating transaction ID. Please try again.'
-            }), 500
-        
-        total_items_price = 0
-        total_deposit = 0
-        order_items_list = []
-        
-        for item in cart_items:
-            try:
-                product = Product.query.get(item['product_id'])
-                if product:
-                    price_data = calculate_price(product, item['customization'])
-                    if price_data is not None:
-                        unit_price = price_data['price']
-                        deposit = price_data['deposit']
-                        total_items_price += unit_price * item['quantity']
-                        total_deposit += deposit * item['quantity'] if deposit > 0 else 0
-                        
-                        order_items_list.append({
-                            'product': product, 
-                            'quantity': item['quantity'], 
-                            'unit_price': unit_price, 
-                            'customization': item.get('customization', {})
-                        })
-            except Exception as e:
-                app.logger.error(f"Error processing cart item {item}: {e}")
-                return jsonify({
-                    'success': False, 
-                    'message': 'Error processing cart items. Please try again.'
-                }), 500
-        
-        from decimal import Decimal
-        gst = total_items_price * Decimal('0.18')
-        total_with_gst = total_items_price + gst + total_deposit
-        
-        # Create order without payment_time field
-        order = Order(
-            user_id=current_user.id, 
-            total_price=total_with_gst, 
-            status='pending_verification', 
-            transaction_id=transaction_id,
-            amount_paid=0
-        )
-        db.session.add(order)
-        db.session.flush()
-        
-        final_order_items = []
-        for item_data in order_items_list:
-            order_item = OrderItem(
-                order_id=order.id, 
-                product_id=item_data['product'].id, 
-                product_name=item_data['product'].name,
-                quantity=item_data['quantity'], 
-                price=item_data['unit_price'], 
-                customization=item_data['customization']
-            )
-            db.session.add(order_item)
-            final_order_items.append(order_item)
+        if session.get('user_type') != 'admin':
+            return jsonify({'success': False, 'message': 'Unauthorized'}), 403
 
-        try:
-            db.session.commit()
-        except Exception as db_error:
-            db.session.rollback()
-            error_str = str(db_error).lower()
-            app.logger.error(f"Database error during commit: {db_error}")
-            
-            # Handle unique constraint violation on transaction_id
-            if 'unique' in error_str and 'transaction_id' in error_str:
-                return jsonify({
-                    'success': False, 
-                    'message': 'This Transaction ID has already been used. Each purchase requires a unique payment. Please make a new payment and enter a new Transaction ID.'
-                }), 400
-            else:
-                return jsonify({
-                    'success': False, 
-                    'message': 'Error creating order. Please try again.'
-                }), 500
-        
-        # Clear cart after successful order
-        session['cart'] = []
-        session.modified = True
-        
-        # Send confirmation emails (non-blocking)
-        try:
-            send_order_confirmation_email(current_user, order, final_order_items) 
-            send_admin_notification_email(order, current_user, final_order_items)
-        except Exception as e:
-            app.logger.error(f"Error sending order emails: {e}")
-            # Don't fail the order if emails fail
-        
+        data = request.json or {}
+        action = data.get('action')  # approve / reject
+
+        order = Order.query.get_or_404(order_id)
+
+        if order.status != 'pending_verification':
+            return jsonify({
+                'success': False,
+                'message': 'Order is not pending verification'
+            }), 400
+
+        if action == 'approve':
+            order.status = 'approved'
+        elif action == 'reject':
+            order.status = 'rejected'
+        else:
+            return jsonify({'success': False, 'message': 'Invalid action'}), 400
+
+        db.session.commit()
+
         return jsonify({
-            'success': True, 
-            'order_id': order.id,
-            'message': 'Order placed successfully!'
-        }), 200
+            'success': True,
+            'message': f'Order {action}d successfully'
+        })
+
     except Exception as e:
-        app.logger.error(f"Complete order error: {e}", exc_info=True)
+        app.logger.error(f"Admin verify payment error: {e}")
         db.session.rollback()
-        return jsonify({
-            'success': False, 
-            'message': 'Error placing order. Please try again.'
-        }), 500
+        return jsonify({'success': False, 'message': 'Error verifying payment'}), 500
 
 
 if __name__ == '__main__':

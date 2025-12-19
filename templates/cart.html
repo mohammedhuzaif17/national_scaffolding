@@ -73,12 +73,6 @@
     font-size: 1.1rem;
 }
 
-.cart-item-deposit {
-    color: #d4af37;
-    font-weight: 500;
-    margin-top: 0.5rem;
-}
-
 .cart-summary {
     background: white;
     padding: 2rem;
@@ -87,13 +81,27 @@
     margin-top: 2rem;
 }
 
-.cart-summary h2 {
-    color: #001d3d;
-    margin-bottom: 1rem;
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 1rem 0;
+    font-size: 1.1rem;
 }
 
-.cart-summary h3 {
-    margin-top: 0.5rem;
+.summary-row.total {
+    font-weight: 700;
+    font-size: 1.3rem;
+    color: #001d3d;
+    border-top: 2px solid #e0e0e0;
+    padding-top: 1rem;
+    margin-top: 1.5rem;
+}
+
+.deposit-note {
+    color: #666;
+    font-size: 0.85rem;
+    font-style: italic;
+    margin-top: 0.25rem;
 }
 
 .checkout-btn {
@@ -106,12 +114,11 @@
     border: none;
     cursor: pointer;
     width: 100%;
-    transition: all 0.3s ease;
+    margin-top: 1.5rem;
 }
 
 .checkout-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    background: linear-gradient(135deg, #003366, #0059b3);
 }
 
 .btn-danger {
@@ -132,98 +139,108 @@
     background: #6c757d;
     color: white;
     border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
     cursor: pointer;
-}
-
-.btn {
-    background: #002855;
-    color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
     font-weight: 600;
-    cursor: pointer;
-}
-
-@media (max-width: 768px) {
-    .cart-item {
-        flex-direction: column;
-    }
-    
-    .cart-item-image-container {
-        width: 100%;
-        height: 200px;
-    }
 }
 </style>
 
 <div class="cart-container">
     <button class="btn-secondary mb-2" onclick="history.back()">← Back</button>
-    
+
     <div class="page-header">
         <h1>Shopping Cart</h1>
     </div>
-    
+
     {% if cart_items %}
-    <div class="cart-items mt-4">
+        <!-- Display cart items -->
         {% for item in cart_items %}
         <div class="cart-item">
             <div class="cart-item-image-container">
                 {% if item.image_url %}
                     {% set first_image = item.image_url.split(',')[0].strip() %}
-                    <img src="{{ url_for('static', filename=first_image) }}" alt="{{ item.product_name }}" class="cart-item-image">
+                    <img src="{{ url_for('static', filename=first_image) }}"
+                         class="cart-item-image"
+                         alt="{{ item.product_name }}">
                 {% else %}
-                <div class="cart-item-placeholder">
-                    <span>📦</span>
-                </div>
+                    <div class="cart-item-placeholder">📦</div>
                 {% endif %}
             </div>
+
             <div class="cart-item-details">
                 <h3 class="cart-item-name">{{ item.product_name }}</h3>
-                <p>Quantity: {{ item.quantity }}</p>
-                {% if item.customization %}
-                <p class="cart-item-specs">
-                    {% if item.customization.purchaseType %}
-                        {{ item.customization.purchaseType|title }}
-                        {% if item.customization.width and item.customization.height %}
-                         | Width: {{ item.customization.width }}m | Height: {{ item.customization.height }}m
-                        {% endif %}
-                    {% endif %}
-                </p>
+                <p><strong>Quantity:</strong> {{ item.quantity }}</p>
+
+                {% if item.customization and item.customization.purchaseType %}
+                    <p class="cart-item-specs">
+                        <strong>Type:</strong> {{ item.customization.purchaseType|title }}
+                    </p>
                 {% endif %}
-                <p class="cart-item-price">₹{{ "%.2f"|format(item.unit_price) }} x {{ item.quantity }} = ₹{{ "%.2f"|format(item.item_total) }}</p>
-                {% if item.deposit and item.deposit > 0 %}
-                <p class="cart-item-deposit">Deposit: ₹{{ "%.2f"|format(item.deposit) }} x {{ item.quantity }} = ₹{{ "%.2f"|format(item.item_deposit) }}</p>
+
+                <p class="cart-item-price">
+                    ₹{{ "%.2f"|format(item.unit_price) }}
+                    × {{ item.quantity }}
+                    = ₹{{ "%.2f"|format(item.item_total) }}
+                </p>
+
+                {% if item.item_deposit > 0 %}
+                    <p class="cart-item-specs" style="color: #666;">
+                        + Deposit: ₹{{ "%.2f"|format(item.item_deposit) }}
+                    </p>
                 {% endif %}
             </div>
+
             <div>
-                <button class="btn-danger" onclick="removeItem({{ loop.index0 }})">Remove</button>
+                <button class="btn-danger"
+                        onclick="removeItem({{ loop.index0 }})">
+                    Remove
+                </button>
             </div>
         </div>
         {% endfor %}
-        
+
+        <!-- Cart Summary (using backend-calculated values) -->
         <div class="cart-summary">
-            <h2>Subtotal: ₹{{ "%.2f"|format(total_before_gst) }}</h2>
-            {% if total_deposit and total_deposit > 0 %}
-            <h3 style="color: #d4af37;">Total Deposit: ₹{{ "%.2f"|format(total_deposit) }}</h3>
+            <h2 style="margin-bottom: 1rem;">Order Summary</h2>
+
+            <div class="summary-row">
+                <span>Subtotal (Products):</span>
+                <span>₹{{ "%.2f"|format(total_before_gst) }}</span>
+            </div>
+
+            {% if total_deposit > 0 %}
+            <div class="summary-row">
+                <span>Deposit (Refundable):</span>
+                <span>₹{{ "%.2f"|format(total_deposit) }}</span>
+            </div>
+            <p class="deposit-note">* Deposit will be refunded upon product return</p>
             {% endif %}
-            <p style="color: #000; margin-top: 0.5rem;">GST (18%): ₹{{ "%.2f"|format(gst) }}</p>
-            <h2 style="color: #002855; margin-top: 1rem;">Grand Total: ₹{{ "%.2f"|format(total_with_gst) }}</h2>
-            <button class="checkout-btn mt-3" onclick="window.location.href='{{ url_for('qr_scanner') }}'">
+
+            <div class="summary-row">
+                <span>GST (18%):</span>
+                <span>₹{{ "%.2f"|format(gst) }}</span>
+            </div>
+
+            <div class="summary-row total">
+                <span>Grand Total:</span>
+                <span>₹{{ "%.2f"|format(total_with_gst) }}</span>
+            </div>
+
+            <button class="checkout-btn"
+                    onclick="window.location.href='{{ url_for('qr_scanner') }}'">
                 Proceed to Checkout
             </button>
         </div>
-    </div>
+
     {% else %}
-    <p class="text-center mt-4" style="color: #000;">Your cart is empty</p>
-    <div class="text-center mt-4">
-        <button class="btn" onclick="window.location.href='{{ url_for('national_scaffoldings') }}'">
-            Continue Shopping
+        <div style="text-align: center; margin-top: 4rem;">
+            <p style="font-size: 1.2rem; color: #666;">Your cart is empty</p>
+            <button class="btn-secondary mt-3" 
+        onclick="window.location.href='{{ url_for('national_scaffoldings') }}'">
+        Continue Shopping
         </button>
-    </div>
+        </div>
     {% endif %}
 </div>
 {% endblock %}
@@ -231,7 +248,9 @@
 {% block scripts %}
 <script>
 function removeItem(index) {
-    window.location.href = '/remove_from_cart/' + index;
+    if (confirm('Remove this item from cart?')) {
+        window.location.href = '/remove_from_cart/' + index;
+    }
 }
 </script>
 {% endblock %}

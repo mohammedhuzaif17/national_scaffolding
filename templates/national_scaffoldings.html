@@ -441,8 +441,8 @@
     position: relative;
     width: 100%;
     min-height: 450px;
-    background: linear-gradient(rgba(0, 29, 61, 0.65), rgba(0, 29, 61, 0.65)), url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAIBAQIBAQICAgICAgICAwUDAwwUAxUTAwsMCwwLDA8SDAwPDwwLDA4SEAwOExAREAxBEQEBAQEBAQEBAQEBAQEBAf/2wBDAQICAgICAwUDAwwLCAcIDwsICAsLDA4SEAwSDwwLCwwLDA4SEAwOExAREAxBEQEBAQEBAQEBAQEBAQEBAf/wAARCABkAZADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWm5ybnJ2eoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlbaWmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD9/KKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD/9k=');
-    background-size: contain;
+    background: linear-gradient(rgba(68, 126, 201, 0.497), rgba(68, 126, 201, 0.497)), url('https://z-cdn-media.chatglm.cn/files/2af4d7dd-1f6c-4b9e-86ce-0180f97d348e.png?auth_key=1865978888-b1aaff406e684121af1a401a835364a6-0-d864c35fb16a75519fb1ea2792a889f2');
+    background-size: cover;
     background-position: center;
     background-attachment: fixed;
     background-repeat: no-repeat;
@@ -463,7 +463,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, rgba(0, 29, 61, 0.4) 0%, rgba(0, 51, 102, 0.3) 100%);
+    background: linear-gradient(135deg, rgba(198, 199, 255, 0.4) 0%, rgba(92, 111, 219, 0.958) 100%); */
     z-index: 1;
 }
 
@@ -619,44 +619,12 @@
         {% for product in products %}
         <div class="product-card">
             <div class="product-image-container" onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
-                {% if product.image_url %}
-                    {% set images = product.image_url.split(',') %}
-                    {% set valid_images = [] %}
-                    {% for image in images %}
-                        {% if image.strip() %}
-                            {% set _ = valid_images.append(image.strip()) %}
-                        {% endif %}
-                    {% endfor %}
-            
-                    {% if valid_images | length >= 3 %}
-                        <!-- Show 2 images + more indicator -->
-                        <div class="product-image-grid">
-                            <img src="{{ url_for('static', filename=valid_images[0]) }}" alt="{{ product.name }} - Image 1" onerror="this.style.display='none';">
-                            <img src="{{ url_for('static', filename=valid_images[1]) }}" alt="{{ product.name }} - Image 2" onerror="this.style.display='none';">
-                            <div class="product-image-more">+{{ valid_images|length - 2 }}</div>
-                        </div>
-                    {% elif valid_images|length == 2 %}
-                        <!-- Show 2 images side by side -->
-                        <div class="product-image-grid">
-                            <img src="{{ url_for('static', filename=valid_images[0]) }}" alt="{{ product.name }} - Image 1" onerror="this.style.display='none';">
-                            <img src="{{ url_for('static', filename=valid_images[1]) }}" alt="{{ product.name }} - Image 2" onerror="this.style.display='none';">
-                        </div>
-                    {% elif valid_images|length == 1 %}
-                        <!-- Single image -->
-                        <img src="{{ url_for('static', filename=valid_images[0]) }}" alt="{{ product.name }}" class="product-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                        <div class="product-image-placeholder" style="display: none;">
-                            <span>📦</span>
-                        </div>
-                    {% else %}
-                        <!-- No images -->
-                        <div class="product-image-placeholder">
-                            <span>📦</span>
-                        </div>
-                    {% endif %}
+                {% if product.display_image_url and product.display_image_url != 'images/no-image.png' %}
+                    <!-- Single image - simple and direct -->
+                    <img src="{{ url_for('static', filename=product.display_image_url) }}" alt="{{ product.name }}" class="product-image" onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}';">
                 {% else %}
-                    <div class="product-image-placeholder">
-                        <span>📦</span>
-                    </div>
+                    <!-- No image available - show placeholder -->
+                    <img src="{{ url_for('static', filename='images/no-image.png') }}" alt="No Image" class="product-image">
                 {% endif %}
             </div>
             
@@ -666,7 +634,12 @@
                 </h3>
                 
                 {% if product.category %}
-                <span class="product-category">{{ product.category|replace('-', ' ') }}</span>
+                <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;">
+                    <span class="product-category">{{ product.category|replace('-', ' ') }}</span>
+                    {% if product.cuplock_type %}
+                    <span style="background: #4CAF50; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: bold;">{{ product.cuplock_type|capitalize }}</span>
+                    {% endif %}
+                </div>
                 {% endif %}
                 
                 {% if product.description %}
@@ -734,7 +707,7 @@ function closeWelcome() {
     sessionStorage.setItem('welcomeShown', 'true');
 }
 
-function addToCart(productId, productName, price) {
+function addToCart(productId) {
     fetch('/add_to_cart', {
         method: 'POST',
         credentials: 'same-origin',
@@ -742,16 +715,15 @@ function addToCart(productId, productName, price) {
         body: JSON.stringify({
             product_id: productId,
             quantity: 1,
-            customization: { quantity: 1 }
+            customization: {}
         })
     })
-    .then(r => r.json())
+    .then(res => res.json())
     .then(data => {
         if (data.success) {
-            alert('✅ ' + productName + ' added to cart!');
             window.location.href = '/cart';
         } else {
-            alert('❌ Error: ' + data.message);
+            alert(data.message);
         }
     })
     .catch(error => {
@@ -759,5 +731,6 @@ function addToCart(productId, productName, price) {
         alert('❌ Error adding to cart');
     });
 }
+
 </script>
 {% endblock %}

@@ -3,40 +3,182 @@
 {% block title %}My Orders - National Scaffolding{% endblock %}
 
 {% block content %}
+<style>
+.order-card {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.order-info h3 {
+    color: #ffa500;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.3rem;
+}
+
+.order-date {
+    color: #ccc;
+    font-size: 0.9rem;
+}
+
+.order-total-section {
+    text-align: right;
+}
+
+.order-total {
+    color: #4CAF50;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+}
+
+.order-status {
+    padding: 0.3rem 0.8rem;
+    border-radius: 5px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.status-pending_verification {
+    background: rgba(255, 165, 0, 0.2);
+    color: #ffa500;
+}
+
+.status-approved {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4CAF50;
+}
+
+.status-rejected {
+    background: rgba(244, 67, 54, 0.2);
+    color: #f44336;
+}
+
+.order-items {
+    margin-top: 1rem;
+}
+
+.order-items h4 {
+    color: #ffa500;
+    margin: 0 0 1rem 0;
+    font-size: 1rem;
+}
+
+.order-item {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 0.8rem;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.item-details {
+    flex: 1;
+}
+
+.item-name {
+    color: #fff;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+}
+
+.item-meta {
+    color: #aaa;
+    font-size: 0.85rem;
+}
+
+.item-price {
+    color: #4CAF50;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.empty-state p {
+    color: #ccc;
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+}
+</style>
+
 <div class="glass-container">
-    <button class="btn-secondary" onclick="history.back()" style="margin-bottom: 1rem; width: auto;">← Back</button>
+    <button class="btn-secondary" onclick="history.back()" style="margin-bottom: 1rem; width: auto;">
+        ← Back
+    </button>
+    
     <h1 class="page-title">My Orders</h1>
     
     {% if orders %}
     <div style="margin-top: 2rem;">
         {% for order in orders %}
         <div class="order-card">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <h3 style="color: #ffa500;">Order #{{ order.id }}</h3>
-                    <p style="color: #ccc;">{{ order.order_date.strftime('%B %d, %Y at %I:%M %p') }}</p>
+            <div class="order-header">
+                <div class="order-info">
+                    <h3>Order #{{ order.id }}</h3>
+                    <p class="order-date">{{ order.display_time.strftime('%B %d, %Y at %I:%M %p') }}</p>
                 </div>
-                <div>
-                    <p style="color: #4CAF50; font-size: 1.5rem;">₹{{ order.total_price }}</p>
-                    <p style="color: #ccc; text-align: right;">Status: {{ order.status|title }}</p>
+                <div class="order-total-section">
+                    <p class="order-total">₹{{ "%.2f"|format(order.total_price) }}</p>
+                    <span class="order-status status-{{ order.status }}">
+                        {{ order.status.replace('_', ' ')|title }}
+                    </span>
                 </div>
             </div>
             
+            {% if order.order_items %}
             <div class="order-items">
-                <h4 style="color: #ffa500; margin-bottom: 1rem;">Items:</h4>
+                <h4>Items Ordered:</h4>
                 {% for item in order.order_items %}
                 <div class="order-item">
-                    <strong>{{ item.product_name }}</strong> - Quantity: {{ item.quantity }} - ₹{{ item.price }}
+                    <div class="item-details">
+                        <div class="item-name">{{ item.product_name }}</div>
+                        <div class="item-meta">
+                            Quantity: {{ item.quantity }}
+                            {% if item.deposit and item.deposit > 0 %}
+                            | Deposit: ₹{{ "%.2f"|format(item.deposit) }}/unit
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="item-price">
+                        ₹{{ "%.2f"|format(item.price * item.quantity) }}
+                    </div>
                 </div>
                 {% endfor %}
             </div>
+            {% endif %}
+            
+            {% if order.transaction_id %}
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                <span style="color: #030000; font-size: 0.85rem;">
+                    Transaction ID: <span style="color:#030000;">{{ order.transaction_id }}</span>
+                </span>
+            </div>
+            {% endif %}
         </div>
         {% endfor %}
     </div>
     {% else %}
-    <p style="text-align: center; color: #ccc; margin-top: 2rem;">You haven't placed any orders yet</p>
-    <div style="text-align: center; margin-top: 2rem;">
-        <button class="btn-primary" onclick="window.location.href='{{ url_for('dashboard') }}'">
+    <div class="empty-state">   
+        <p>You haven't placed any orders yet</p>
+        <button class="btn-primary" onclick="window.location.href='{{ url_for('customer_scaffoldings') }}'">
             Start Shopping
         </button>
     </div>

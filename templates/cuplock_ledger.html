@@ -10,25 +10,41 @@
     </div>
 
     <!-- Product Image Section -->
-    {% if product.image_url %}
     <div class="product-image-section" style="margin-bottom: 2rem; text-align: center;">
-        {% set images = product.image_url.split(',') %}
-        {% set valid_images = [] %}
-        {% for image in images %}
-            {% if image.strip() %}
-                {% set _ = valid_images.append(image.strip()) %}
+        {% if product.image_url %}
+            {% set images = product.image_url.split(',') %}
+            {% set valid_images = [] %}
+            {% for image in images %}
+                {% if image.strip() %}
+                    {% set _ = valid_images.append(image.strip()) %}
+                {% endif %}
+            {% endfor %}
+            
+            {% if valid_images %}
+            <div class="product-image-display" style="max-width: 500px; margin: 0 auto; background: #f5f5f5; padding: 1rem; border-radius: 8px;">
+                <img src="{{ url_for('static', filename=valid_images[0]) }}" 
+                     alt="{{ product.name }}" 
+                     style="max-width: 100%; height: auto; border-radius: 8px; display: block; object-fit: cover;"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div style="display: none; padding: 2rem; background: #ddd; border-radius: 8px; color: #666;">
+                    📦 Image not available<br><small>{{ product.name }}</small>
+                </div>
+            </div>
+            {% else %}
+            <div class="product-image-display" style="max-width: 500px; margin: 0 auto; background: #e8e8e8; padding: 3rem 1rem; border-radius: 8px; text-align: center; color: #666;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">📦</div>
+                <p>No image uploaded for this product</p>
+            </div>
             {% endif %}
-        {% endfor %}
-        
-        {% if valid_images %}
-        <div class="product-image-display" style="max-width: 500px; margin: 0 auto; background: #f5f5f5; padding: 1rem; border-radius: 8px;">
-            <img src="{{ url_for('static', filename=valid_images[0]) }}" 
-                 alt="{{ product.name }}" 
-                 style="max-width: 100%; height: auto; border-radius: 8px; display: block;">
+        {% else %}
+        <div class="product-image-display" style="max-width: 500px; margin: 0 auto; background: #e8e8e8; padding: 3rem 1rem; border-radius: 8px; text-align: center; color: #666;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">📦</div>
+            <p><strong>{{ product.name }}</strong></p>
+            <p>No image uploaded for this product</p>
+            <p style="font-size: 0.9rem; margin-top: 1rem; color: #999;">Upload an image from the admin panel to display it here</p>
         </div>
         {% endif %}
     </div>
-    {% endif %}
 
     <div class="purchase-type-selector">
         <button class="purchase-btn buy-btn active" data-type="buy" onclick="selectPurchaseType('buy')">
@@ -101,6 +117,8 @@
 
 <script>
 const PRODUCT_ID = {{ product.id }};
+// Server-provided sizes data to avoid client-side admin-API fetches
+const SIZES_DATA = {{ sizes_json | tojson | default('[]') }};
 let currentPurchaseType = 'buy';
 let currentSize = null;
 
@@ -117,18 +135,17 @@ function selectPurchaseType(type) {
     loadSizes();
 }
 
-async function loadSizes() {
+function loadSizes() {
     try {
-        const response = await fetch(`{{ url_for('cuplock.api_ledger_sizes', product_id='PRODUCT_ID') }}`.replace('PRODUCT_ID', PRODUCT_ID));
-        const sizes = await response.json();
-        
+        const sizes = Array.isArray(SIZES_DATA) ? SIZES_DATA : [];
+
         const select = document.getElementById('size');
         select.innerHTML = '<option value="">Choose a size...</option>';
-        
+
         sizes.forEach(size => {
             const option = document.createElement('option');
             option.value = JSON.stringify(size);
-            
+
             let label = size.label;
             if (currentPurchaseType === 'buy') {
                 label += ` (${size.weight} kg)`;
@@ -137,7 +154,7 @@ async function loadSizes() {
             select.appendChild(option);
         });
     } catch (error) {
-        console.error('Error loading sizes:', error);
+        console.error('Error loading sizes from server data:', error);
         showToast('Error loading sizes', 'error');
     }
 }

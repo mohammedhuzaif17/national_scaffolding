@@ -1,68 +1,87 @@
 {% extends "base.html" %}
 
-{% block title %}QR Scanner - Checkout{% endblock %}
+{% block title %}Checkout{% endblock %}
 
 {% block content %}
 <div class="glass-container">
-    <button class="btn-secondary" onclick="window.location.href='{{ url_for('cart') }}'" style="margin-bottom: 1rem; width: auto;">← Back to Cart</button>
+    <button class="btn-secondary"
+            onclick="window.location.href='{{ url_for('cart') }}'"
+            style="margin-bottom: 1rem;">
+        ← Back to Cart
+    </button>
+
     <h1 class="page-title">Checkout</h1>
-    
+
     <div class="qr-container">
-        <h2 style="color: #ffa500; margin-bottom: 1rem;">Payment Summary</h2>
-        
-        <div style="background: rgba(255, 255, 255, 0.05); padding: 1.5rem; border-radius: 10px; margin-bottom: 2rem;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+
+        <!-- PAYMENT SUMMARY -->
+        <h2 style="color:#ffa500;margin-bottom:1rem;">Payment Summary</h2>
+
+        <div style="background:rgba(255,255,255,0.05);padding:1.5rem;border-radius:10px;">
+            <div class="row-between">
                 <span>Subtotal:</span>
                 <span>₹{{ "%.2f"|format(total) }}</span>
             </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+
+            <div class="row-between">
                 <span>GST (18%):</span>
                 <span>₹{{ "%.2f"|format(gst) }}</span>
             </div>
+
             {% if total_deposit and total_deposit > 0 %}
-            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; color: #d4af37; font-weight: 500;">
+            <div class="row-between" style="color:#d4af37;">
                 <span>Rental Deposit:</span>
                 <span>₹{{ "%.2f"|format(total_deposit) }}</span>
             </div>
             {% endif %}
-            <hr style="border: 1px solid rgba(255, 255, 255, 0.1); margin: 1rem 0;">
-            <div style="display: flex; justify-content: space-between; font-size: 1.5rem; color: #4CAF50; font-weight: bold;">
+
+            <hr>
+            <div class="row-between total">
                 <span>Total Amount:</span>
                 <span>₹{{ "%.2f"|format(total_with_gst) }}</span>
             </div>
         </div>
-        
-        <p style="color: #ccc; margin-bottom: 1rem;">Payment Time Limit: <span id="payment-timer">15:00</span> minutes</p>
-        <p style="color: #ccc; margin-bottom: 2rem;">Scan the QR code below to complete your payment via PhonePe</p>
-        
-        <div style="text-align: center;">
-            <div class="qr-code" style="background: white; padding: 2rem; border-radius: 10px; display: inline-block; margin-bottom: 1rem; position: relative;">
-                <img src="{{ url_for('static', filename='phonepe_qr.png') }}" alt="PhonePe QR Code" style="width: 300px; height: 300px; object-fit: contain;">
-            </div>
+
+        <p style="margin-top:1rem;">
+            Payment Time Limit:
+            <strong id="payment-timer">15:00</strong>
+        </p>
+
+        <p>Scan the QR code below and pay the exact amount.</p>
+
+        <!-- QR -->
+        <div style="text-align:center;margin:2rem 0;">
+            <img src="{{ url_for('static', filename='phonepe_qr.png') }}"
+                 width="300" height="300">
         </div>
-        
-        <p style="color: #4CAF50; margin-top: 1rem; font-weight: bold; font-size: 1.8rem;">Pay ₹{{ "%.2f"|format(total_with_gst) }}</p>
-        <p style="color: #ccc; font-size: 0.9rem; margin-bottom: 2rem;">Please scan the QR code above and pay the exact amount shown</p>
-        
-        <div style="margin: 2rem 0;">
-            <h3 style="color: #ffa500; margin-bottom: 1rem;">Confirm Your Payment</h3>
-            <p style="color: #ccc; font-size: 0.9rem; margin-bottom: 1rem;">After completing the payment, enter your UPI Transaction ID below:</p>
-            
-            <div class="form-group">
-                <label>UPI Transaction ID / Payment Reference</label>
-                <div style="position: relative;">
-                    <input type="text" id="transaction_id" placeholder="Enter your UPI transaction ID" required style="padding: 0.8rem; font-size: 1rem; padding-right: 100px;" oninput="validateUPIID()">
-                    <div id="upi_validation" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); display: none; align-items: center; gap: 5px;">
-                        <span id="validation_icon"></span>
-                        <span id="validation_text" style="font-weight: bold; font-size: 0.85rem;"></span>
-                    </div>
-                </div>
-            </div>
+
+        <h2 style="color:#4CAF50;">Pay ₹{{ "%.2f"|format(total_with_gst) }}</h2>
+
+        <!-- TRANSACTION INPUT -->
+        <h3 style="color:#ffa500;margin-top:2rem;">Confirm Payment</h3>
+        <p>Enter your UPI Transaction ID after payment:</p>
+
+        <div class="form-group">
+            <label>UPI Transaction ID</label>
+            <input type="text"
+                   id="transaction_id"
+                   placeholder="Enter transaction ID"
+                   oninput="validateUPIID()">
         </div>
-        
-        <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center;">
-            <button id="payment_btn" class="btn-primary" onclick="completeOrder()" disabled style="opacity: 0.5; cursor: not-allowed;">Confirm Payment & Complete Order</button>
-            <button class="btn-secondary" onclick="window.location.href='{{ url_for('cart') }}'">Back to Cart</button>
+
+        <!-- ACTION BUTTONS -->
+        <div class="actions">
+            <button id="payment_btn"
+                    class="btn-primary"
+                    onclick="completeOrder()"
+                    disabled>
+                Confirm Payment & Complete Order
+            </button>
+
+            <button class="btn-secondary"
+                    onclick="window.location.href='{{ url_for('cart') }}'">
+                Back to Cart
+            </button>
         </div>
     </div>
 </div>
@@ -70,180 +89,82 @@
 
 {% block scripts %}
 <script>
-// Payment timer functionality
-let timeLeft = 900; // 15 minutes in seconds
-const timerElement = document.getElementById('payment-timer');
+/* ===========================
+   TIMER
+=========================== */
+let timeLeft = 900;
+const timerEl = document.getElementById("payment-timer");
 
-function updateTimer() {
+const timer = setInterval(() => {
     if (timeLeft <= 0) {
-        timerElement.textContent = "00:00";
-        timerElement.style.color = "#ff4444";
-        document.getElementById('payment_btn').disabled = true;
-        document.getElementById('payment_btn').textContent = "Payment Time Expired";
+        timerEl.textContent = "00:00";
+        document.getElementById("payment_btn").disabled = true;
+        clearInterval(timer);
         return;
     }
-    
-    const minutes = Math.floor(timeLeft / 60);
-    const seconds = timeLeft % 60;
-    timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    
-    if (timeLeft < 300) { // Less than 5 minutes
-        timerElement.style.color = "#ff4444";
-    }
-    
+    const m = Math.floor(timeLeft / 60);
+    const s = timeLeft % 60;
+    timerEl.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
     timeLeft--;
-}
+}, 1000);
 
-// Start the timer
-const timerInterval = setInterval(updateTimer, 1000);
-
+/* ===========================
+   VALIDATE UPI ID
+=========================== */
 function validateUPIID() {
-    const upiId = document.getElementById('transaction_id').value.trim();
-    const validationDiv = document.getElementById('upi_validation');
-    const validationIcon = document.getElementById('validation_icon');
-    const validationText = document.getElementById('validation_text');
-    const paymentBtn = document.getElementById('payment_btn');
-    
-    if (upiId.length === 0) {
-        validationDiv.style.display = 'none';
-        paymentBtn.disabled = true;
-        paymentBtn.style.opacity = '0.5';
-        paymentBtn.style.cursor = 'not-allowed';
-        return;
-    }
-    
-    const isValid = upiId.length >= 12 && upiId.length <= 35 && /^[a-zA-Z0-9]+$/.test(upiId);
-    
-    validationDiv.style.display = 'flex';
-    
-    if (isValid) {
-        validationIcon.innerHTML = '✓';
-        validationIcon.style.color = '#4CAF50';
-        validationIcon.style.fontSize = '1.5rem';
-        validationText.textContent = 'Valid';
-        validationText.style.color = '#4CAF50';
-        
-        paymentBtn.disabled = false;
-        paymentBtn.style.opacity = '1';
-        paymentBtn.style.cursor = 'pointer';
-    } else {
-        validationIcon.innerHTML = '✗';
-        validationIcon.style.color = '#ff4444';
-        validationIcon.style.fontSize = '1.5rem';
-        validationText.textContent = 'Invalid';
-        validationText.style.color = '#ff4444';
-        
-        paymentBtn.disabled = true;
-        paymentBtn.style.opacity = '0.5';
-        paymentBtn.style.cursor = 'not-allowed';
-    }
+    const val = document.getElementById("transaction_id").value.trim();
+    const btn = document.getElementById("payment_btn");
+
+    const valid =
+        val.length >= 12 &&
+        val.length <= 35 &&
+        /^[a-zA-Z0-9]+$/.test(val);
+
+    btn.disabled = !valid;
 }
 
+/* ===========================
+   COMPLETE ORDER (FIXED)
+=========================== */
 function completeOrder() {
-    const transactionId = document.getElementById('transaction_id').value.trim();
-    const confirmButton = document.getElementById('payment_btn');
-    
+    const transactionId = document.getElementById("transaction_id").value.trim();
+    const btn = document.getElementById("payment_btn");
+
     if (!transactionId) {
-        alert('Please enter your UPI Transaction ID to confirm payment');
+        alert("Please enter transaction ID");
         return;
     }
-    
-    if (transactionId.length < 12 || transactionId.length > 35 || !/^[a-zA-Z0-9]+$/.test(transactionId)) {
-        alert('Please enter a valid UPI Transaction ID (12-35 alphanumeric characters)');
-        return;
-    }
-    
-    // Disable the button to prevent multiple submissions
-    if (confirmButton) {
-        confirmButton.disabled = true;
-        confirmButton.textContent = 'Processing...';
-    }
-    
-    // Stop the timer when payment is submitted
-    clearInterval(timerInterval);
-    
-    // Record the payment time
-    const paymentTime = new Date().toISOString();
-    
+
+    btn.disabled = true;
+    btn.textContent = "Processing...";
+
     fetch('/complete_order', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            transaction_id: transactionId,
-            payment_time: paymentTime  // Send the payment timestamp
+            transaction_id: transactionId
         })
     })
-    .then(response => {
-        // First, get the response text to handle both JSON and non-JSON responses
-        return response.text().then(text => {
-            try {
-                // Try to parse as JSON
-                const data = JSON.parse(text);
-                if (!response.ok) {
-                    throw new Error(data.message || 'Payment failed. Please try again.');
-                }
-                return data;
-            } catch (e) {
-                // If not JSON, use the text as error message
-                if (!response.ok) {
-                    throw new Error(text || 'Payment failed. Please try again.');
-                }
-                return text;
-            }
-        });
-    })
+    .then(res => res.json())
     .then(data => {
-        // Clear the transaction ID field
-        document.getElementById('transaction_id').value = '';
-        
-        // Show success message and redirect
-        alert('Order submitted successfully! Your transaction ID: ' + transactionId + '\nYour order is now pending admin verification to confirm the payment amount. You will receive email confirmation once verified.');
-        window.location.href = '{{ url_for('my_orders') }}';
-    })
-    .catch(error => {
-        console.error('Payment Error:', error);
-        // Show the error message to the user
-        alert('Error: ' + error.message);
-        
-        // Focus back on the transaction ID field for correction
-        const transactionField = document.getElementById('transaction_id');
-        if (transactionField) {
-            transactionField.focus();
-            transactionField.select();
+        if (!data.success) {
+            throw new Error(data.message || "Payment failed");
         }
+
+        alert(
+            "Order submitted successfully!\n\n" +
+            "Transaction ID: " + transactionId + "\n" +
+            "Status: Pending admin verification"
+        );
+
+        window.location.href = "{{ url_for('my_orders') }}";
     })
-    .finally(() => {
-        // Always re-enable the button
-        if (confirmButton) {
-            confirmButton.disabled = false;
-            confirmButton.textContent = 'Confirm Payment & Complete Order';
-        }
+    .catch(err => {
+        alert(err.message);
+        btn.disabled = false;
+        btn.textContent = "Confirm Payment & Complete Order";
     });
 }
-
-// Check if payment is already in progress
-window.addEventListener('DOMContentLoaded', function() {
-    // Check if there's an existing payment in progress
-    fetch('/check_payment_status')
-    .then(response => response.json())
-    .then(data => {
-        if (data.payment_in_progress) {
-            // If payment is in progress, show a message and disable form
-            document.querySelector('.qr-container').innerHTML = `
-                <div style="text-align: center; padding: 2rem;">
-                    <h2>Payment in Progress</h2>
-                    <p>You have a payment that is currently being processed.</p>
-                    <p>Please complete the payment or wait for it to expire.</p>
-                    <button class="btn-secondary" onclick="window.location.href='{{ url_for('cart') }}'">Back to Cart</button>
-                </div>
-            `;
-        }
-    })
-    .catch(error => {
-        console.error('Error checking payment status:', error);
-    });
-});
 </script>
+
 {% endblock %}

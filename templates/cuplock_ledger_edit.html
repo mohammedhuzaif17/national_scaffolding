@@ -30,9 +30,16 @@
                     <input type="file" id="image" name="image" accept="image/*" placeholder="Upload product image">
                     <button type="submit" class="btn btn-sm btn-primary" style="margin-top: 0.5rem;">Upload Image</button>
                 </form>
-                {% if product.image_url %}
-                <p style="margin-top: 0.5rem; color: #666; font-size: 0.9rem;">Current image: {{ product.image_url }}</p>
-                {% endif %}
+                <div style="margin-top: 1rem; padding: 1rem; background: #f9f9f9; border-radius: 4px;">
+                    <p style="margin: 0 0 0.5rem 0; color: #666; font-size: 0.9rem;">Current image:</p>
+                    {% if product.image_url %}
+                        {% set first_image = product.image_url.split(',')[0].strip() %}
+                        <img src="{{ url_for('static', filename=first_image) }}" alt="{{ product.name }}" style="max-width: 200px; max-height: 200px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <div style="display: none; padding: 1rem; background: #ddd; border-radius: 4px; color: #666; text-align: center;">📦 Image failed to load</div>
+                    {% else %}
+                        <div style="padding: 1rem; background: #e8e8e8; border-radius: 4px; color: #999; text-align: center;">📦 No image uploaded yet<br><small>Upload an image above to display it here</small></div>
+                    {% endif %}
+                </div>
             </div>
 
             <p class="note">⚠️ Note: Product name and description are fixed during creation. To modify, please contact your administrator.</p>
@@ -150,7 +157,7 @@ function addSize(event, productId) {
     const form = event.target;
     const formData = new FormData(form);
 
-    const url = `/admin/cuplock/ledger/${productId}/size/add`;
+    const url = `/admin/ledger/${productId}/size/add`;
     
     fetch(url, {
         method: 'POST',
