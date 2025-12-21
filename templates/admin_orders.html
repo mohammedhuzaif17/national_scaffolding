@@ -343,7 +343,7 @@ html body .content-wrapper {
         <h1 class="page-title">📋 All Transactions & Orders</h1>
         <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
             <button class="btn-primary" onclick="window.location.href='{{ url_for('admin_scaffoldings') }}'" style="background: linear-gradient(135deg, #28a745, #20c997);">📦 Scaffolding Products</button>
-            <button class="btn-primary" onclick="window.location.href='{{ url_for('admin_analytics') }}'" style="background: linear-gradient(135deg, #7d96af, #002855);">📊 Business Analytics</button>
+            <button class="btn-primary" onclick="window.location.href='{{ url_for('admin_analytics') }}'" style="background: linear-gradient(135deg, #7d96af, #4f7db1);">📊 Business Analytics</button>
             <button class="btn-danger" onclick="window.location.href='{{ url_for('admin_logout') }}'">🚪 Logout</button>
         </div>
     </div>
@@ -372,7 +372,7 @@ html body .content-wrapper {
         <select id="statusFilter" class="filter-select" onchange="filterOrders()">
             <option value="all">All Orders</option>
             <option value="pending_verification">Pending Verification</option>
-            <option value="approved">Approved</option>
+            <!-- <option value="approved">Approved</option> -->
             <option value="rejected">Rejected</option>
             <option value="completed">Completed</option>
         </select>

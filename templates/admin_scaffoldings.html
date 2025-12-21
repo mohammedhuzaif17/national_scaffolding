@@ -26,7 +26,7 @@
             <button class="btn-primary" style="background: linear-gradient(135deg, #1976d2, #1565c0);" onclick="window.location.href='{{ url_for('admin_orders') }}'">
                 📋 View All Transactions
             </button>
-            <button class="btn-primary" style="background: linear-gradient(135deg, #001d3d, #002855);" onclick="window.location.href='{{ url_for('admin_analytics') }}'">
+            <button class="btn-primary" style="background: linear-gradient(135deg, #7098c3, #5e80a6);" onclick="window.location.href='{{ url_for('admin_analytics') }}'">
                 📊 Business Analytics
             </button>
         </div>
@@ -69,7 +69,15 @@
                     </td>
                     <td>{{ product.name }}</td>
                     <td>{{ product.price or 'N/A' }}</td>
-                    <td>{{ product.category or product.product_type }}</td>
+                 <td>
+    {{ product.category }}
+    {% if product.category == 'cuplock' and product.cuplock_type %}
+        <span style="color:#4CAF50; font-weight:bold;">
+            ({{ product.cuplock_type|capitalize }})
+        </span>
+    {% endif %}
+</td>
+
                     <td>{{ product.deposit_amount or 'N/A' }}</td>
                     <td>{{ product.rent_price or 'N/A' }}</td>
                     <td>
@@ -100,12 +108,12 @@
 }
 
 .admin-header h1 {
-    color: #a0a0a0;
+    color: #fffefe;
     margin: 0 0 0.5rem 0;
 }
 
 .subtitle {
-    color: #666;
+    color: #d8cfcf;
     margin: 0;
 }
 
@@ -147,7 +155,7 @@
 }
 
 .btn-primary {
-    background: #002855;
+    background: #6991c0;
     color: white;
     padding: 0.75rem 1.5rem;
     border: none;
@@ -157,7 +165,7 @@
 }
 
 .btn-primary:hover {
-    background: #001d3d;
+    background: #3e6691;
 }
 
 .products-table {

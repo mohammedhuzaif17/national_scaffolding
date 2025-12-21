@@ -41,7 +41,7 @@
             <div style="font-size: 3rem; margin-bottom: 1rem;">📦</div>
             <p><strong>{{ product.name }}</strong></p>
             <p>No image uploaded for this product</p>
-            <p style="font-size: 0.9rem; margin-top: 1rem; color: #999;">Upload an image from the admin panel to display it here</p>
+            <p style="font-size: 0.9rem; margin-top: 1rem; color: #999;">Upload an image from admin panel to display it here</p>
         </div>
         {% endif %}
     </div>
@@ -68,7 +68,7 @@
         <!-- Quantity -->
         <div class="form-section">
             <label for="quantity">Quantity *</label>
-            <input type="number" id="quantity" name="quantity" value="1" min="1" onchange="updatePrice()">
+            <input type="number" id="quantity" name="quantity" value="1" min="1" onchange="updateCuplockPrice()">
         </div>
 
         <!-- Price Display -->
@@ -89,12 +89,10 @@
                 <span>Subtotal:</span>
                 <strong id="subtotal">₹0</strong>
             </div>
-            {% if purchase_type == 'rent' %}
-            <div class="price-item">
+            <div class="price-item" id="deposit-row" style="display: none;">
                 <span>Deposit:</span>
                 <strong id="deposit-display">₹0</strong>
             </div>
-            {% endif %}
             <div class="price-item total">
                 <span>Total:</span>
                 <strong id="total-price">₹0</strong>
@@ -115,137 +113,6 @@
     </form>
 </div>
 
-<script>
-const PRODUCT_ID = {{ product.id }};
-// Server-provided sizes data to avoid client-side admin-API fetches
-const SIZES_DATA = {{ sizes_json | tojson | default('[]') }};
-let currentPurchaseType = 'buy';
-let currentSize = null;
-
-function selectPurchaseType(type) {
-    currentPurchaseType = type;
-    
-    // Update button states
-    document.querySelectorAll('.purchase-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    document.querySelector(`[data-type="${type}"]`).classList.add('active');
-    
-    // Reload sizes for new purchase type
-    loadSizes();
-}
-
-function loadSizes() {
-    try {
-        const sizes = Array.isArray(SIZES_DATA) ? SIZES_DATA : [];
-
-        const select = document.getElementById('size');
-        select.innerHTML = '<option value="">Choose a size...</option>';
-
-        sizes.forEach(size => {
-            const option = document.createElement('option');
-            option.value = JSON.stringify(size);
-
-            let label = size.label;
-            if (currentPurchaseType === 'buy') {
-                label += ` (${size.weight} kg)`;
-            }
-            option.textContent = label;
-            select.appendChild(option);
-        });
-    } catch (error) {
-        console.error('Error loading sizes from server data:', error);
-        showToast('Error loading sizes', 'error');
-    }
-}
-
-function selectSize() {
-    const sizeSelect = document.getElementById('size');
-    if (!sizeSelect.value) {
-        currentSize = null;
-        return;
-    }
-    
-    currentSize = JSON.parse(sizeSelect.value);
-    updatePrice();
-}
-
-function updatePrice() {
-    if (!currentSize) {
-        showToast('Please select a size', 'warning');
-        return;
-    }
-    
-    const quantity = parseInt(document.getElementById('quantity').value) || 1;
-    const price = currentPurchaseType === 'buy' ? currentSize.buy_price : currentSize.rent_price;
-    const deposit = currentPurchaseType === 'rent' ? currentSize.deposit : 0;
-    const weight = currentSize.weight;
-    
-    const subtotal = price * quantity;
-    const totalDeposit = deposit * quantity;
-    const total = subtotal + totalDeposit;
-    
-    document.getElementById('weight-display').textContent = weight + ' kg';
-    document.getElementById('unit-price').textContent = '₹' + price.toLocaleString('en-IN');
-    document.getElementById('qty-display').textContent = quantity;
-    document.getElementById('subtotal').textContent = '₹' + subtotal.toLocaleString('en-IN', {minimumFractionDigits: 2});
-    
-    if (currentPurchaseType === 'rent' && deposit > 0) {
-        document.getElementById('deposit-display').textContent = '₹' + totalDeposit.toLocaleString('en-IN', {minimumFractionDigits: 2});
-    }
-    
-    document.getElementById('total-price').textContent = '₹' + total.toLocaleString('en-IN', {minimumFractionDigits: 2});
-}
-
-function addToCart() {
-    if (!currentSize) {
-        showToast('Please select a size', 'warning');
-        return;
-    }
-    
-    const quantity = parseInt(document.getElementById('quantity').value) || 1;
-    const customization = {
-        product_type: 'cuplock_ledger',
-        size_label: currentSize.label,
-        purchase_type: currentPurchaseType,
-        quantity: quantity
-    };
-    
-    fetch('{{ url_for("add_to_cart") }}', {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            product_id: PRODUCT_ID,
-            quantity: quantity,
-            customization: customization
-        })
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            showToast('✓ Added to cart!');
-            setTimeout(() => { window.location.href = '{{ url_for("cart") }}'; }, 700);
-        } else {
-            showToast('❌ ' + (data.message || 'Failed to add to cart'), 'error');
-        }
-    })
-    .catch(err => {
-        console.error(err);
-        showToast('❌ Error adding to cart', 'error');
-    });
-}
-
-function showToast(message, type = 'success') {
-    const toast = document.getElementById('toast');
-    toast.textContent = message;
-    toast.className = 'toast show';
-    setTimeout(() => toast.classList.remove('show'), 3000);
-}
-
-// Load sizes on page load
-loadSizes();
-</script>
 
 <style>
 .cuplock-container {
@@ -432,4 +299,94 @@ loadSizes();
     }
 }
 </style>
+
+
+{% block scripts %}
+<script>
+console.log("✅ cuplock ledger JS loaded");
+
+const PRODUCT_ID = {{ product.id }};
+const SIZES_DATA = {{ sizes_json | tojson | default('[]') }};
+
+let currentPurchaseType = 'buy';
+let currentSize = null;
+
+function selectPurchaseType(type) {
+    currentPurchaseType = type;
+
+    document.querySelectorAll('.purchase-btn').forEach(btn =>
+        btn.classList.remove('active')
+    );
+    document.querySelector(`[data-type="${type}"]`).classList.add('active');
+
+    const depositRow = document.getElementById('deposit-row');
+    if (depositRow) {
+        depositRow.style.display = type === 'rent' ? 'flex' : 'none';
+    }
+
+    loadSizes();
+}
+
+function loadSizes() {
+    const select = document.getElementById('size');
+    if (!select) return;
+
+    select.innerHTML = '<option value="">Choose a size...</option>';
+
+    SIZES_DATA.forEach(size => {
+        const opt = document.createElement('option');
+        opt.value = JSON.stringify(size);
+        opt.textContent =
+            currentPurchaseType === 'buy'
+            ? `${size.label} (${size.weight} kg)`
+            : size.label;
+        select.appendChild(opt);
+    });
+}
+
+function selectSize() {
+    const sel = document.getElementById('size');
+    if (!sel || !sel.value) {
+        currentSize = null;
+        updateCuplockPrice();
+        return;
+    }
+    currentSize = JSON.parse(sel.value);
+    updateCuplockPrice();
+}
+
+function updateCuplockPrice() {
+    if (!currentSize) {
+        document.getElementById('weight-display').textContent = '-';
+        document.getElementById('unit-price').textContent = '₹0';
+        document.getElementById('subtotal').textContent = '₹0';
+        document.getElementById('total-price').textContent = '₹0';
+        return;
+    }
+
+    const qty = parseInt(document.getElementById('quantity').value) || 1;
+    const price =
+        currentPurchaseType === 'buy'
+        ? currentSize.buy_price
+        : currentSize.rent_price;
+
+    const deposit =
+        currentPurchaseType === 'rent'
+        ? currentSize.deposit
+        : 0;
+
+    const subtotal = price * qty;
+    const total = subtotal + (deposit * qty);
+
+    document.getElementById('weight-display').textContent = currentSize.weight + ' kg';
+    document.getElementById('unit-price').textContent = '₹' + price;
+    document.getElementById('qty-display').textContent = qty;
+    document.getElementById('subtotal').textContent = '₹' + subtotal;
+    document.getElementById('total-price').textContent = '₹' + total;
+}
+
+loadSizes();
+</script>
+{% endblock %}
+
 {% endblock %}

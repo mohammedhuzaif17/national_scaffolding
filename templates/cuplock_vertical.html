@@ -79,150 +79,397 @@
     </button>
 
 </div>
+
 <script>
-/* ================== GLOBALS ================== */
-const PRODUCT_BASE_PRICE = {{ product.price|default(0) }};
-let selectedCupPrice = 0;
-let rentPrice = 0;
-let depositPrice = 0;
-let selectedSizeLabel = null;
-let selectedCupId = null;
+// Wait for DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM fully loaded');
+    
+    /* ================== GLOBALS ================== */
+    const PRODUCT_BASE_PRICE = {{ product.price|default(0) }};
+    let selectedCupPrice = 0;
+    let rentPrice = 0;
+    let depositPrice = 0;
+    let selectedSizeLabel = null;
+    let selectedCupId = null;
 
-/* ================== PURCHASE TYPE ================== */
-function updatePurchaseType() {
-    const type = document.querySelector("input[name='purchaseType']:checked").value;
-    document.getElementById('cupSection').style.display =
-        (type === 'buy') ? 'block' : 'none';
-    updatePrice();
-}
-
-/* ================== LOAD CUP OPTIONS ================== */
-function loadCups() {
-    const select = document.getElementById('sizeSelect');
-    const option = select.selectedOptions[0];
-
-    if (!option || !option.value) {
-        selectedCupPrice = 0;
-        selectedCupId = null;
-        updatePrice();
-        return;
+    /* ================== PURCHASE TYPE ================== */
+    function updatePurchaseType() {
+        try {
+            const purchaseTypeRadios = document.querySelectorAll('input[name="purchaseType"]');
+            const cupSection = document.getElementById('cupSection');
+            
+            if (!purchaseTypeRadios || !cupSection) {
+                console.error('Required elements not found');
+                return;
+            }
+            
+            let isBuySelected = false;
+            purchaseTypeRadios.forEach(function(radio) {
+                if (radio.checked && radio.value === 'buy') {
+                    isBuySelected = true;
+                }
+            });
+            
+            cupSection.style.display = isBuySelected ? 'block' : 'none';
+            updatePrice();
+        } catch (error) {
+            console.error('Error in updatePurchaseType:', error);
+        }
     }
 
-    const sizeId = option.value;
-    selectedSizeLabel = option.dataset.label;
+    /* ================== LOAD CUP OPTIONS ================== */
+    function loadCups() {
+        try {
+            const sizeSelect = document.getElementById('sizeSelect');
+            if (!sizeSelect) {
+                console.error('Size select element not found');
+                return;
+            }
+            
+            const selectedOption = sizeSelect.options[sizeSelect.selectedIndex];
 
-    rentPrice = parseFloat(option.dataset.rent || 0);
-    depositPrice = parseFloat(option.dataset.deposit || 0);
-
-    fetch(`/api/vertical/size/${sizeId}/cups`)
-        .then(res => res.json())
-        .then(cups => {
-            const container = document.getElementById('cupImagesContainer');
-            container.innerHTML = '';
-            selectedCupPrice = 0;
-            selectedCupId = null;
-
-            if (!cups.length) {
-                container.innerHTML = '<p>No cup options available</p>';
+            // Clear selections if no option selected
+            if (!selectedOption || !selectedOption.value) {
+                selectedCupPrice = 0;
+                selectedCupId = null;
+                selectedSizeLabel = null;
+                rentPrice = 0;
+                depositPrice = 0;
                 updatePrice();
                 return;
             }
 
-            cups.forEach(c => {
-                const card = document.createElement('div');
-                card.className = 'cup-image-card';
+            const sizeId = selectedOption.value;
+            selectedSizeLabel = selectedOption.getAttribute('data-label') || '';
 
-                card.innerHTML = `
-                    <img src="/static/${c.image_url}">
-                    <p>${c.cup_count} Cups</p>
-                    <p class="cup-price">₹${c.buy_price}</p>
-                `;
+            // Safely get dataset values with fallbacks
+            const rentValue = selectedOption.getAttribute('data-rent');
+            const depositValue = selectedOption.getAttribute('data-deposit');
+            
+            rentPrice = rentValue ? parseFloat(rentValue) : 0;
+            depositPrice = depositValue ? parseFloat(depositValue) : 0;
 
-                card.onclick = () => {
-                    selectedCupPrice = parseFloat(c.buy_price);
-                    selectedCupId = c.id;
+            fetch('/cuplock/api/vertical/size/' + encodeURIComponent(sizeId) + '/cups')
+                .then(function(response) {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(function(data) {
+                    const container = document.getElementById('cupImagesContainer');
+                    if (container) {
+                        container.innerHTML = '';
+                    }
+                    selectedCupPrice = 0;
+                    selectedCupId = null;
 
-                    document.querySelectorAll('.cup-image-card')
-                        .forEach(el => el.classList.remove('selected'));
-                    card.classList.add('selected');
+                    if (!data.success || !data.cups || data.cups.length === 0) {
+                        if (container) {
+                            container.innerHTML = '<p>No cup options available</p>';
+                        }
+                        updatePrice();
+                        return;
+                    }
+
+                    const cups = data.cups;
+                    cups.forEach(function(c) {
+                        const card = document.createElement('div');
+                        card.className = 'cup-image-card';
+
+                        // Handle missing image_url
+                        const imageUrl = c.image_url || '/static/images/no-image.png';
+
+                        card.innerHTML = '<img src="/static/' + imageUrl + '" onerror="this.src=\'/static/images/no-image.png\'">' +
+                            '<p>' + c.cup_count + ' Cups</p>' +
+                            '<p class="cup-price">₹' + (c.buy_price || 0).toFixed(2) + '</p>';
+
+                        // Add click handler
+                        card.addEventListener('click', function() {
+                            selectedCupPrice = parseFloat(c.buy_price || 0);
+                            selectedCupId = c.id;
+
+                            // Remove selected class from all cards
+                            document.querySelectorAll('.cup-image-card').forEach(function(el) {
+                                el.classList.remove('selected');
+                            });
+                            card.classList.add('selected');
+
+                            updatePrice();
+                        });
+
+                        if (container) {
+                            container.appendChild(card);
+                        }
+                    });
 
                     updatePrice();
-                };
-
-                container.appendChild(card);
-            });
-
-            updatePrice();
-        });
-}
-
-/* ================== PRICE PREVIEW ================== */
-function updatePrice() {
-    const qty = parseInt(document.getElementById('quantity').value) || 1;
-    const type = document.querySelector("input[name='purchaseType']:checked").value;
-
-    let unit = 0;
-    let deposit = 0;
-
-    if (type === 'buy') {
-        unit = PRODUCT_BASE_PRICE + selectedCupPrice;
-    } else {
-        unit = rentPrice;
-        deposit = depositPrice;
+                })
+                .catch(function(error) {
+                    console.error('Error loading cups:', error);
+                    const container = document.getElementById('cupImagesContainer');
+                    if (container) {
+                        container.innerHTML = '<p style="color: red;">Error loading cup options</p>';
+                    }
+                    updatePrice();
+                });
+        } catch (error) {
+            console.error('Error in loadCups:', error);
+        }
     }
 
-    const total = (unit * qty) + (deposit * qty);
+    /* ================== PRICE PREVIEW ================== */
+    function updatePrice() {
+        try {
+            const qtyInput = document.getElementById('quantity');
+            const purchaseTypeRadios = document.querySelectorAll('input[name="purchaseType"]');
+            
+            // Get quantity with fallback
+            const qty = qtyInput ? (parseInt(qtyInput.value) || 1) : 1;
+            
+            // Get purchase type with fallback
+            let type = 'buy'; // default
+            if (purchaseTypeRadios) {
+                purchaseTypeRadios.forEach(function(radio) {
+                    if (radio.checked && radio.value === 'rent') {
+                        type = 'rent';
+                    }
+                });
+            }
 
-    document.getElementById('unitPrice').innerText = `₹${unit.toFixed(2)}`;
-    document.getElementById('depositAmount').innerText = `₹${deposit.toFixed(2)}`;
-    document.getElementById('totalPrice').innerText = `₹${total.toFixed(2)}`;
+            let unit = 0;
+            let deposit = 0;
 
-    document.getElementById('depositRow').style.display =
-        (type === 'rent' && deposit > 0) ? 'flex' : 'none';
-}
+            if (type === 'buy') {
+                unit = PRODUCT_BASE_PRICE + selectedCupPrice;
+            } else {
+                unit = rentPrice;
+                deposit = depositPrice;
+            }
 
-/* ================== ADD TO CART ================== */
-function addToCart() {
-    const qty = parseInt(document.getElementById('quantity').value) || 1;
-    const type = document.querySelector("input[name='purchaseType']:checked").value;
+            const total = (unit * qty) + (deposit * qty);
 
-    if (!selectedSizeLabel || (type === 'buy' && !selectedCupId)) {
-        alert("Please select size and cup configuration");
-        return;
+            // Update display with safety checks
+            const unitPriceEl = document.getElementById('unitPrice');
+            const depositAmountEl = document.getElementById('depositAmount');
+            const totalPriceEl = document.getElementById('totalPrice');
+            const depositRowEl = document.getElementById('depositRow');
+
+            if (unitPriceEl) unitPriceEl.innerText = '₹' + unit.toFixed(2);
+            if (depositAmountEl) depositAmountEl.innerText = '₹' + deposit.toFixed(2);
+            if (totalPriceEl) totalPriceEl.innerText = '₹' + total.toFixed(2);
+            if (depositRowEl) {
+                depositRowEl.style.display = (type === 'rent' && deposit > 0) ? 'flex' : 'none';
+            }
+        } catch (error) {
+            console.error('Error in updatePrice:', error);
+        }
     }
 
-    fetch('/add_to_cart', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            product_id: {{ product.id }},
-            quantity: qty,
-            customization: {
+    /* ================== ADD TO CART ================== */
+    function addToCart() {
+        try {
+            const qtyInput = document.getElementById('quantity');
+            const purchaseTypeRadios = document.querySelectorAll('input[name="purchaseType"]');
+            
+            const qty = qtyInput ? (parseInt(qtyInput.value) || 1) : 1;
+            
+            // Get purchase type with fallback
+            let type = 'buy'; // default
+            if (purchaseTypeRadios) {
+                purchaseTypeRadios.forEach(function(radio) {
+                    if (radio.checked && radio.value === 'rent') {
+                        type = 'rent';
+                    }
+                });
+            }
+
+            if (!selectedSizeLabel || (type === 'buy' && !selectedCupId)) {
+                alert("Please select size and cup configuration");
+                return;
+            }
+
+            const customization = {
                 component: "vertical",
-                purchaseType: type,
+                purchase_type: type,
                 size: selectedSizeLabel,
                 cup_id: selectedCupId
-            }
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            window.location.href = '/cart';
-        } else {
-            alert(data.message);
-        }
-    });
-}
+            };
 
-document.addEventListener("DOMContentLoaded", updatePurchaseType);
+            fetch('/add_to_cart', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    product_id: {{ product.id|tojson }},
+                    quantity: qty,
+                    customization: customization
+                })
+            })
+            .then(function(response) {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(function(data) {
+                if (data.success) {
+                    window.location.href = '/cart';
+                } else {
+                    alert(data.message || 'Failed to add to cart');
+                }
+            })
+            .catch(function(error) {
+                console.error('Error:', error);
+                alert('Error adding to cart');
+            });
+        } catch (error) {
+            console.error('Error in addToCart:', error);
+        }
+    }
+
+    // Initialize on page load
+    try {
+        updatePurchaseType();
+        updatePrice();
+        console.log('Page initialized successfully');
+    } catch (error) {
+        console.error('Error during initialization:', error);
+    }
+});
 </script>
 
+<style>
+.product-container { 
+    max-width: 800px; 
+    margin: 2rem auto; 
+    padding: 2rem; 
+    background: white; 
+    border-radius: 12px; 
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1); 
+}
 
+.purchase-type-section { 
+    margin-bottom: 2rem; 
+    display: flex; 
+    gap: 1rem; 
+}
 
+.purchase-type-section label { 
+    display: flex; 
+    align-items: center; 
+    gap: 0.5rem; 
+    padding: 0.5rem 1rem; 
+    border: 2px solid #ddd; 
+    border-radius: 8px; 
+    cursor: pointer; 
+}
 
+.purchase-type-section input:checked + label { 
+    background: #f0f7ff; 
+    border-color: #002855; 
+}
 
+.form-group { 
+    margin-bottom: 1.5rem; 
+}
 
-<style> /* --- your styling kept exactly as you wrote it (cleaned version) --- */ .product-container { max-width: 800px; margin: 2rem auto; padding: 2rem; background: white; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); } .product-header { text-align: center; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid #e0e0e0; } .product-header h1 { color: #001d3d; margin-bottom: .5rem; } .product-description { color: #666; } .purchase-type-section { margin-bottom: 2rem; } .radio-group { display: flex; gap: 1.5rem; } .radio-option { display: flex; align-items: center; gap: .5rem; padding: .75rem 1.5rem; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; } .radio-option input:checked + span { color: #002855; font-weight: 600; } .radio-option:has(input:checked) { background: #f0f7ff; border-color: #002855; } .form-group { margin-bottom: 1.5rem; } .price-display { background: #f8f9fa; border-radius: 8px; padding: 1.5rem; margin: 2rem 0; } .price-row { display: flex; justify-content: space-between; padding: .75rem 0; border-bottom: 1px solid #e0e0e0; } .total-row { font-size: 1.2rem; font-weight: bold; margin-top: .5rem; padding-top: 1rem; border-top: 2px solid #001d3d; } .price-value { color: #d4af37; font-weight: 700; } .btn-primary { background: linear-gradient(135deg, #002855, #004a99); color: white; width: 100%; padding: 1rem; font-size: 1.1rem; border-radius: 8px; } .error-message { text-align: center; padding: 2rem; } .cup-images-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 1rem; } .cup-image-card { border: 2px solid #ddd; border-radius: 8px; padding: 1rem; text-align: center; cursor: pointer; transition: all 0.3s; background: white; } .cup-image-card:hover { border-color: #002855; box-shadow: 0 4px 12px rgba(0, 40, 85, 0.2); } .cup-image-card.selected { border-color: #d4af37; background: #f0f7ff; box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3); } .cup-image-card img { max-width: 100%; height: 100px; object-fit: contain; margin-bottom: 0.5rem; } .cup-image-card .no-image { width: 100%; height: 100px; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin-bottom: 0.5rem; background: #f0f0f0; border-radius: 4px; } .cup-image-card p { margin: 0.25rem 0; font-size: 0.9rem; color: #333; } .cup-image-card .cup-price { font-weight: bold; color: #d4af37; } </style>
+.form-group label { 
+    display: block; 
+    margin-bottom: 0.5rem; 
+    font-weight: 600; 
+}
 
+.form-group select, 
+.form-group input { 
+    width: 100%; 
+    padding: 0.75rem; 
+    border: 1px solid #ddd; 
+    border-radius: 4px; 
+    font-size: 1rem; 
+}
+
+.cup-images-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); 
+    gap: 1rem; 
+    margin: 1rem 0; 
+}
+
+.cup-image-card { 
+    border: 2px solid #ddd; 
+    border-radius: 8px; 
+    padding: 1rem; 
+    text-align: center; 
+    cursor: pointer; 
+    transition: all 0.3s; 
+    background: white; 
+}
+
+.cup-image-card:hover { 
+    border-color: #002855; 
+    box-shadow: 0 4px 12px rgba(0, 40, 85, 0.2); 
+}
+
+.cup-image-card.selected { 
+    border-color: #d4af37; 
+    background: #f0f7ff; 
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3); 
+}
+
+.cup-image-card img { 
+    max-width: 100%; 
+    height: 100px; 
+    object-fit: contain; 
+    margin-bottom: 0.5rem; 
+}
+
+.cup-image-card p { 
+    margin: 0.25rem 0; 
+    font-size: 0.9rem; 
+    color: #333; 
+}
+
+.cup-image-card .cup-price { 
+    font-weight: bold; 
+    color: #d4af37; 
+}
+
+.price-display { 
+    background: #f8f9fa; 
+    border-radius: 8px; 
+    padding: 1.5rem; 
+    margin: 2rem 0; 
+}
+
+.price-row { 
+    display: flex; 
+    justify-content: space-between; 
+    padding: 0.75rem 0; 
+    border-bottom: 1px solid #e0e0e0; 
+}
+
+.total-row { 
+    font-size: 1.2rem; 
+    font-weight: bold; 
+    margin-top: 0.5rem; 
+    padding-top: 1rem; 
+    border-top: 2px solid #001d3d; 
+}
+
+.btn-warning { 
+    background: #f39c12; 
+    color: white; 
+    width: 100%; 
+    padding: 1rem; 
+    font-size: 1.1rem; 
+    border: none; 
+    border-radius: 8px; 
+    cursor: pointer; 
+}
+
+.btn-warning:hover { 
+    background: #e67e00; 
+}
+</style>
 {% endblock %}

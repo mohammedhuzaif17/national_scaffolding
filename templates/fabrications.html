@@ -1,22 +1,8 @@
 {% extends "base.html" %}
 
-{% block title %}National Scaffolding - Products{% endblock %}
+{% block title %}National Scaffolding - Fabrications{% endblock %}
 
 {% block content %}
-<!-- Welcome Popup -->
-<div id="welcomePopup" class="welcome-popup">
-    <div class="welcome-content">
-        <h1>Welcome to THE NATIONAL SCAFFOLDING</h1>
-        <p>We don't just build scaffolds — we build confidence. Explore our premium scaffolding and fabrication products for all your construction needs.</p>
-        <div class="popup-buttons">
-            <button class="btn-explore" onclick="closeWelcome()">Continue to Explore</button>
-            {% if not current_user.is_authenticated %}
-            <button class="btn-login" onclick="window.location.href='{{ url_for('login') }}'">Login / Register</button>
-            {% endif %}
-        </div>
-    </div>
-</div>
-
 <style>
 .product-gallery {
     position: relative;
@@ -439,122 +425,106 @@
 
 <div class="page-container">
     <header class="page-header">
-        <h1 class="page-title">The National Scaffolding</h1>
-        <!-- <p class="page-subtitle">Professional scaffolding services for all your construction needs</p> -->
+        <h1 class="page-title">Fabrications</h1>
+        <p class="page-subtitle">High-quality fabrication products for all your construction needs</p>
         
         <div class="text-center mb-3">
-            <button class="btn btn-secondary" onclick="window.location.href='{{ url_for('fabrications') }}'">
-                Go to Fabrications
+            <button class="btn btn-secondary" onclick="window.location.href='{{ url_for('national_scaffoldings') }}'">
+                Go to Scaffoldings
             </button>
         </div>
     </header>
     
-    <div class="category-buttons">
-        <button class="category-btn {% if request.args.get('category') == 'all' or request.args.get('category') == None %}active{% endif %}" 
-                onclick="window.location.href='{{ url_for('national_scaffoldings', category='all') }}'">
-            ALL PRODUCTS
-        </button>
-        <button class="category-btn {% if request.args.get('category') == 'aluminium' %}active{% endif %}" 
-                onclick="window.location.href='{{ url_for('national_scaffoldings', category='aluminium') }}'">
-            ALUMINIUM SCAFFOLDINGS
-        </button>
-        <button class="category-btn {% if request.args.get('category') == 'h-frames' %}active{% endif %}" 
-                onclick="window.location.href='{{ url_for('national_scaffoldings', category='h-frames') }}'">
-            H FRAMES
-        </button>
-        <button class="category-btn {% if request.args.get('category') == 'cuplock' %}active{% endif %}" 
-                onclick="window.location.href='{{ url_for('national_scaffoldings', category='cuplock') }}'">
-            CUPLOCK
-        </button>
-        <button class="category-btn {% if request.args.get('category') == 'accessories' %}active{% endif %}" 
-                onclick="window.location.href='{{ url_for('national_scaffoldings', category='accessories') }}'">
-            ACCESSORIES
-        </button>
-    </div>
+    <h2 class="mt-4">Our Fabrication Products</h2>
     
-    <h2 class="mt-4">Our Products</h2>
-    
-    <div class="products-grid">
-        {% for product in products %}
-        <div class="product-card">
-            <div class="product-image-container" onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
-                {% if product.image_url %}
-                    {% set images = product.image_url.split(',') %}
-                    {% set valid_images = [] %}
-                    {% for image in images %}
-                        {% if image.strip() %}
-                            {% set _ = valid_images.append(image.strip()) %}
+    {% if products %}
+        <div class="products-grid">
+            {% for product in products %}
+            <div class="product-card">
+                <div class="product-image-container" onclick="window.location.href='{{ url_for('fabrication_detail', product_id=product.id) }}'">
+                    {% if product.image_url %}
+                        {% set images = product.image_url.split(',') %}
+                        {% set valid_images = [] %}
+                        {% for image in images %}
+                            {% if image.strip() %}
+                                {% set _ = valid_images.append(image.strip()) %}
+                            {% endif %}
+                        {% endfor %}
+                
+                        {% if valid_images | length >= 3 %}
+                            <!-- Show 2 images + more indicator -->
+                            <div class="product-image-grid">
+                                <img src="{{ url_for('static', filename=valid_images[0]) }}" alt="{{ product.name }} - Image 1" onerror="this.style.display='none';">
+                                <img src="{{ url_for('static', filename=valid_images[1]) }}" alt="{{ product.name }} - Image 2" onerror="this.style.display='none';">
+                                <div class="product-image-more">+{{ valid_images|length - 2 }}</div>
+                            </div>
+                        {% elif valid_images|length == 2 %}
+                            <!-- Show 2 images side by side -->
+                            <div class="product-image-grid">
+                                <img src="{{ url_for('static', filename=valid_images[0]) }}" alt="{{ product.name }} - Image 1" onerror="this.style.display='none';">
+                                <img src="{{ url_for('static', filename=valid_images[1]) }}" alt="{{ product.name }} - Image 2" onerror="this.style.display='none';">
+                            </div>
+                        {% elif valid_images|length == 1 %}
+                            <!-- Single image -->
+                            <img src="{{ url_for('static', filename=valid_images[0]) }}" alt="{{ product.name }}" class="product-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="product-image-placeholder" style="display: none;">
+                                <span>📦</span>
+                            </div>
+                        {% else %}
+                            <!-- No images -->
+                            <div class="product-image-placeholder">
+                                <span>📦</span>
+                            </div>
                         {% endif %}
-                    {% endfor %}
-            
-                    {% if valid_images | length >= 3 %}
-                        <!-- Show 2 images + more indicator -->
-                        <div class="product-image-grid">
-                            <img src="{{ url_for('static', filename=valid_images[0]) }}" alt="{{ product.name }} - Image 1" onerror="this.style.display='none';">
-                            <img src="{{ url_for('static', filename=valid_images[1]) }}" alt="{{ product.name }} - Image 2" onerror="this.style.display='none';">
-                            <div class="product-image-more">+{{ valid_images|length - 2 }}</div>
-                        </div>
-                    {% elif valid_images|length == 2 %}
-                        <!-- Show 2 images side by side -->
-                        <div class="product-image-grid">
-                            <img src="{{ url_for('static', filename=valid_images[0]) }}" alt="{{ product.name }} - Image 1" onerror="this.style.display='none';">
-                            <img src="{{ url_for('static', filename=valid_images[1]) }}" alt="{{ product.name }} - Image 2" onerror="this.style.display='none';">
-                        </div>
-                    {% elif valid_images|length == 1 %}
-                        <!-- Single image -->
-                        <img src="{{ url_for('static', filename=valid_images[0]) }}" alt="{{ product.name }}" class="product-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                        <div class="product-image-placeholder" style="display: none;">
-                            <span>📦</span>
-                        </div>
                     {% else %}
-                        <!-- No images -->
                         <div class="product-image-placeholder">
                             <span>📦</span>
                         </div>
                     {% endif %}
-                {% else %}
-                    <div class="product-image-placeholder">
-                        <span>📦</span>
-                    </div>
-                {% endif %}
-            </div>
-            
-            <div class="product-info">
-                <h3 class="product-name" onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
-                    {{ product.name }}
-                </h3>
-                
-                {% if product.category %}
-                <span class="product-category">{{ product.category|replace('-', ' ') }}</span>
-                {% endif %}
-                
-                {% if product.description %}
-                <p class="product-description">
-                    {{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}
-                </p>
-                {% endif %}
-                
-                <!-- Fixed: Price display - moved price inside the styled span -->
-                <div class="product-price-row">
-                    <span class="product-price">₹{{ product.price|indian }}</span>
                 </div>
                 
-                <div class="product-actions">
-                    <button class="btn btn-secondary" 
-                            onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
-                        View Details
-                    </button>
-                    {% if current_user.is_authenticated and session.get('user_type') != 'admin' %}
-                        <button class="btn btn-primary" 
-                                onclick="event.stopPropagation(); addToCart({{ product.id }}, '{{ product.name|e }}', {{ product.price }})">
-                            🛒 Add to Cart
-                        </button>
+                <div class="product-info">
+                    <h3 class="product-name" onclick="window.location.href='{{ url_for('fabrication_detail', product_id=product.id) }}'">
+                        {{ product.name }}
+                    </h3>
+                    
+                    {% if product.category %}
+                    <span class="product-category">{{ product.category|replace('-', ' ') }}</span>
                     {% endif %}
+                    
+                    {% if product.description %}
+                    <p class="product-description">
+                        {{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}
+                    </p>
+                    {% endif %}
+                    
+                    <!-- Fixed: Price display - using proper formatting -->
+                    <div class="product-price-row">
+                        <span class="product-price">₹{{ "%.2f"|format(product.price|float) }}</span>
+                    </div>
+                    
+                    <div class="product-actions">
+                        <button class="btn btn-secondary" 
+                                onclick="window.location.href='{{ url_for('fabrication_detail', product_id=product.id) }}'">
+                            View Details
+                        </button>
+                        {% if current_user.is_authenticated and session.get('user_type') != 'admin' %}
+                            <button class="btn btn-primary" id="add-cart-btn-{{ product.id }}"
+                                    onclick="event.stopPropagation(); addToCart({{ product.id }}, '{{ product.name|e }}', {{ product.price }})">
+                                🛒 Add to Cart
+                            </button>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-    </div>
+    {% else %}
+        <div class="alert alert-warning text-center">
+            <h3>No Fabrication Products Available</h3>
+            <p>Please check back later or contact us for more information.</p>
+        </div>
+    {% endif %}
 </div>
 
 {% if current_user.is_authenticated and session.get('user_type') != 'admin' %}
@@ -567,34 +537,13 @@
 
 {% block scripts %}
 <script>
-// Show welcome popup only for non-logged-in users
-window.addEventListener('DOMContentLoaded', () => {
-    const popup = document.getElementById('welcomePopup');
-    const isLoggedIn = {{ 'true' if current_user.is_authenticated else 'false' }};
-    
-    if (isLoggedIn) {
-        popup.style.display = 'none';
-        document.body.classList.remove('popup-active');
-    } else {
-        const popupShown = sessionStorage.getItem('welcomeShown');
-        
-        if (popupShown) {
-            popup.style.display = 'none';
-            document.body.classList.remove('popup-active');
-        } else {
-            popup.style.display = 'flex';
-            document.body.classList.add('popup-active');
-        }
-    }
-});
-
-function closeWelcome() {
-    document.getElementById('welcomePopup').style.display = 'none';
-    document.body.classList.remove('popup-active');
-    sessionStorage.setItem('welcomeShown', 'true');
-}
-
 function addToCart(productId, productName, price) {
+    // Change button text to indicate processing
+    const button = document.getElementById('add-cart-btn-' + productId);
+    const originalText = button.innerHTML;
+    button.innerHTML = 'Adding...';
+    button.disabled = true;
+    
     fetch('/add_to_cart', {
         method: 'POST',
         credentials: 'same-origin',
@@ -602,14 +551,23 @@ function addToCart(productId, productName, price) {
         body: JSON.stringify({
             product_id: productId,
             quantity: 1,
-            customization: { quantity: 1 }
+            customization: { 
+                product_type: 'fabrication',
+                quantity: 1 
+            }
         })
     })
-    .then(r => r.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             alert('✅ ' + productName + ' added to cart!');
-            window.location.href = '/cart';
+            // Optionally redirect to cart
+            // window.location.href = '/cart';
         } else {
             alert('❌ Error: ' + data.message);
         }
@@ -617,6 +575,11 @@ function addToCart(productId, productName, price) {
     .catch(error => {
         console.error('Error:', error);
         alert('❌ Error adding to cart');
+    })
+    .finally(() => {
+        // Restore button state
+        button.innerHTML = originalText;
+        button.disabled = false;
     });
 }
 </script>

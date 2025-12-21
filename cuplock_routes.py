@@ -726,9 +726,7 @@ def calculate_vertical_price(product, size_id, cup_id, mode='buy'):
         'deposit': round(deposit, 2)
     }
 
-
 @cuplock_bp.route('/product/ledger/<int:product_id>')
-
 def ledger_product_page(product_id):
     """User page for Ledger Cuplock product"""
     try:
@@ -777,7 +775,6 @@ def ledger_product_page(product_id):
         logger.error(f"Error loading ledger product page: {e}", exc_info=True)
         flash('Error loading product', 'error')
         return redirect(url_for('national_scaffoldings'))
-
 
 # ===========================
 # API ENDPOINTS
@@ -843,32 +840,27 @@ def api_vertical_sizes(product_id):
 
 
 @cuplock_bp.route('/api/vertical/size/<int:size_id>/cups')
-def api_vertical_cups(size_id):
-    """Return all cup configurations belonging to a specific Vertical size."""
+def get_cups_for_size(size_id):
+    """API endpoint to get cups for a specific vertical size"""
     try:
         size = CuplockVerticalSize.query.get_or_404(size_id)
-
+        
         cups = CuplockVerticalCup.query.filter_by(
-            vertical_size_id=size_id
-        ).order_by(CuplockVerticalCup.display_order, CuplockVerticalCup.cup_count).all()
-
-        output = []
-        for c in cups:
-            # FIXED: Get display URL for cup images
-            image_url = get_image_url(c.cup_image_url)
-            
-            output.append({
-                "id": c.id,
-                "cup_count": c.cup_count,
-                "image_url": image_url,
-                "weight": float(c.weight_kg) if c.weight_kg else 0,
-                "buy_price": float(c.buy_price) if c.buy_price else 0,
-                "rent_price": float(c.rent_price) if c.rent_price else 0,
-                "deposit": float(c.deposit_amount) if c.deposit_amount else 0
+            product_id=size.product_id,
+            size_label=size.size_label
+        ).all()
+        
+        result = []
+        for cup in cups:
+            result.append({
+                'id': cup.id,
+                'cup_count': cup.cup_count,
+                'buy_price': float(cup.buy_price or 0),
+                'rent_price': float(cup.rent_price or 0),
+                'deposit_amount': float(cup.deposit_amount or 0),
+                'image_url': cup.image_url or '/static/images/no-image.png'
             })
-
-        return jsonify(output)
-
+        
+        return jsonify({'success': True, 'cups': result})
     except Exception as e:
-        logger.error(f"Error loading vertical cup API: {e}")
-        return jsonify({"error": True, "message": str(e)}), 500
+        return jsonify({'success': False, 'error': str(e)})

@@ -1,4 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_file
+from models import CuplockVerticalCup
+
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_mail import Mail, Message
 from models import db, User, Admin, Product, Order, OrderItem
@@ -31,8 +33,7 @@ def ensure_columns_exist():
     with db.engine.connect() as conn:
         # Add is_active to products table
         conn.execute(text("""
-            DO $$
-            BEGIN
+            DO $$             BEGIN
                 IF NOT EXISTS (
                     SELECT 1 FROM information_schema.columns
                     WHERE table_name='products' AND column_name='is_active'
@@ -46,8 +47,7 @@ def ensure_columns_exist():
         
         # Add cuplock_type to products table
         conn.execute(text("""
-            DO $$
-            BEGIN
+            DO $$             BEGIN
                 IF NOT EXISTS (
                     SELECT 1 FROM information_schema.columns
                     WHERE table_name='products' AND column_name='cuplock_type'
@@ -61,8 +61,7 @@ def ensure_columns_exist():
 
         # Add is_active to cuplock_ledger_sizes table
         conn.execute(text("""
-            DO $$
-            BEGIN
+            DO $$             BEGIN
                 IF NOT EXISTS (
                     SELECT 1 FROM information_schema.columns
                     WHERE table_name='cuplock_ledger_sizes' AND column_name='is_active'
@@ -76,8 +75,7 @@ def ensure_columns_exist():
 
         # Add columns to cuplock_vertical_sizes table
         conn.execute(text("""
-            DO $$
-            BEGIN
+            DO $$             BEGIN
                 -- weight column
                 IF NOT EXISTS (
                     SELECT 1 FROM information_schema.columns
@@ -187,6 +185,9 @@ app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER', os.env
 
 mail = Mail(app)
 
+# FIX: Initialize SQLAlchemy with the Flask app
+db.init_app(app)
+
 # Register Jinja filters
 app.jinja_env.filters['indian'] = indian_format
 
@@ -284,45 +285,63 @@ def validate_price(price_value, field_name='Price'):
 # COMPLETE calculate_price FUNCTION WITH CUPLOCK SUPPORT
 # Replace your existing calculate_price function (around line 250) with this entire function
 # ============================================================================
-def calculate_price(product, customization):
-    if product.category != 'cuplock':
-        return {'price': float(product.price or 0), 'deposit': 0}
+# ... (keep all your code from the top of the file up to the calculate_price function) ...
 
-    component = customization.get('component')
-    purchase_type = customization.get('purchaseType')
-    size_label = customization.get('size')
-    cup_id = customization.get('cup_id')
-
-    if component != 'vertical':
-        return None
-
-    base_price = float(product.price or 0)
-
-    # BUY
-    if purchase_type == 'buy':
-        cup = CuplockVerticalCup.query.get(cup_id)
-        if not cup:
-            return None
-
+# ============================================================================
+# CORRECTED calculate_price FUNCTION
+# ============================================================================
+def calculate_price(product, customization=None):
+    """Calculate price for a product with customization"""
+    try:
+        if customization is None:
+            customization = {}
+            
+        # Default price
+        base_price = float(product.price or 0)
+        
+        # For fabrication products, just return the base price
+        if product.product_type == 'fabrication':
+            return {
+                'price': base_price,
+                'deposit': 0  # No deposit for fabrication products
+            }
+        
+        # For other products (scaffolding, cuplock, etc.), use existing logic
+        # This is where you would put your logic for aluminium, h-frames, etc.
+        # For now, we will return the base price as a fallback.
+        # You can expand this section with your specific pricing rules.
+        
+        # Example for other product types (you can customize this)
+        if product.category == 'aluminium':
+            unit_price = customization.get('purchase_type') == 'rent' and product.rent_price or base_price
+            return {
+                'price': unit_price,
+                'deposit': product.deposit_amount if customization.get('purchase_type') == 'rent' else 0
+            }
+        
+        # Default case for other products
         return {
-            'price': base_price + float(cup.buy_price or 0),
+            'price': base_price,
+            'deposit': product.deposit_amount or 0
+        }
+        
+    except Exception as e:
+        app.logger.error(f"Price calculation error: {e}")
+        return {
+            'price': 0,
             'deposit': 0
         }
 
-    # RENT
-    cup = CuplockVerticalCup.query.get(cup_id)
-    if not cup:
-        return None
+# ... (keep the rest of your app.py code, but make sure to REMOVE the HTML block at the very end) ...
 
-    return {
-        'price': float(cup.rent_price or 0),
-        'deposit': float(cup.deposit_amount or 0)
-    }
-
-
-
-
-# ============================================================================
+# The following HTML block was at the end of your Python file and MUST BE DELETED:
+#
+# {% extends "base.html" %}
+#
+# {% block title %}National Scaffolding - Fabrications{% endblock %}
+#
+# ... (rest of the HTML code) ...
+#
 # COMPLETE product_detail ROUTE WITH CUPLOCK REDIRECT
 # Replace your existing @app.route('/product/<int:product_id>') (around line 350) with this
 # ============================================================================
@@ -336,7 +355,11 @@ def product_detail(product_id):
 
         product = Product.query.get_or_404(product_id)
 
-        # ========== CUPLOCK REDIRECT LOGIC (NEW) ==========
+        # ========== FABRICATION REDIRECT LOGIC (NEW) ==========
+        if product.product_type == 'fabrication':
+            return redirect(url_for('fabrication_detail', product_id=product_id))
+            
+        # ========== CUPLOCK REDIRECT LOGIC ==========
         if product.category == 'cuplock':
             # Redirect to specialized Cuplock product pages
             if product.cuplock_type == 'vertical':
@@ -346,13 +369,22 @@ def product_detail(product_id):
             
             # Fallback: If cuplock_type is not set properly, try to load sizes
             try:
-                sizes = []
+                cuplock_prices = []
                 if product.cuplock_type == 'vertical':
                     from models import CuplockVerticalSize
                     sizes = CuplockVerticalSize.query.filter_by(
                         product_id=product_id,
                         is_active=True
                     ).all()
+                    
+                    for size in sizes:
+                        cuplock_prices.append({
+                            'size_label': size.size_label,
+                            'buy_price': float(size.buy_price or 0),
+                            'rent_price': float(size.rent_price or 0),
+                            'deposit': float(size.deposit or 0)
+                        })
+                        
                 elif product.cuplock_type == 'ledger':
                     from models import CuplockLedgerSize
                     try:
@@ -363,30 +395,32 @@ def product_detail(product_id):
                     except Exception:
                         # Fallback for legacy tables missing is_active
                         sizes = CuplockLedgerSize.query.filter_by(product_id=product_id).all()
+                    
+                    for size in sizes:
+                        cuplock_prices.append({
+                            'size_label': size.size_label,
+                            'buy_price': float(size.buy_price or 0),
+                            'rent_price': float(size.rent_price or 0),
+                            'deposit': float(size.deposit_amount or 0)
+                        })
 
-                if sizes:
-                    size = sizes[0]
-                    size_buy = float(getattr(size, 'buy_price', 0) or 0)
-                    size_rent = float(getattr(size, 'rent_price', 0) or 0)
-                    if size_buy > 0:
-                        product.price = size_buy
-                    elif not product.price:
-                        product.price = 0
-
-                    if size_rent > 0:
-                        product.rent_price = size_rent
-                    elif product.rent_price is None:
-                        product.rent_price = 0
+                # Set the first price as default
+                if cuplock_prices:
+                    product.price = cuplock_prices[0]['buy_price']
+                    product.rent_price = cuplock_prices[0]['rent_price']
+                    product.deposit_amount = cuplock_prices[0]['deposit']
                 else:
                     product.price = 0
                     product.rent_price = 0
+                    product.deposit_amount = 0
             except Exception as size_error:
                 app.logger.error(f"Error loading Cuplock sizes: {size_error}")
                 product.price = 0
                 product.rent_price = 0
+                product.deposit_amount = 0
 
         # ========== EXISTING LOGIC FOR OTHER PRODUCTS ==========
-        return render_template('product_detail.html', product=product)
+        return render_template('product_detail.html', product=product, cuplock_prices=cuplock_prices if product.category == 'cuplock' else [])
 
     except Exception as e:
         if db.session.is_active:
@@ -394,182 +428,6 @@ def product_detail(product_id):
         app.logger.error(f"Error in product_detail: {e}", exc_info=True)
         flash('Error loading product details. Please try again.', 'error')
         return render_template('product_detail.html', product=None)
-
-def send_order_confirmation_email(user, order, order_items):
-    if not app.config['MAIL_USERNAME']:
-        return
-    
-    try:
-        items_html = ""
-        for item in order_items:
-            price_data = calculate_price(Product.query.get(item.product_id), item.customization or {})
-            unit_price = price_data['price']
-            item_total = unit_price * item.quantity
-            
-            items_html += f"""
-            <tr style="border-bottom: 1px solid #e0e0e0;">
-                <td style="padding: 15px; color: #333;">{item.product_name}</td>
-                <td style="padding: 15px; text-align: center; color: #333;">{item.quantity}</td>
-                <td style="padding: 15px; text-align: center; color: #333;">₹{unit_price:.2f}</td>
-                <td style="padding: 15px; text-align: right; color: #333;">₹{item_total:.2f}</td>
-            </tr>
-            """
-        
-        msg = Message(
-            subject='Order Confirmation - The National Scaffolding',
-            recipients=[user.email]
-        )
-        
-        msg.html = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <style>body {{ font-family: 'Poppins', Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }}
-            .container {{ max-width: 600px; margin: 30px auto; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }}
-            .header {{ background: linear-gradient(135deg, #1e3a8a, #d4af37); padding: 30px; text-align: center; }}
-            .header h1 {{ color: #ffffff; margin: 0; font-size: 28px; }}
-            .content {{ padding: 30px; }}
-            .order-details {{ background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0; }}
-            .order-table {{ width: 100%; border-collapse: collapse; margin-top: 20px; }}
-            .order-table th {{ background-color: #1e3a8a; color: #ffffff; padding: 12px; text-align: left; }}
-            .order-table td {{ padding: 15px; color: #333; }}
-            .total-row {{ background-color: #1e3a8a; color: #ffffff; font-weight: bold; }}
-            .footer {{ background-color: #1e3a8a; color: #ffffff; padding: 20px; text-align: center; font-size: 14px; }}</style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="header"><h1>✓ Order Confirmed!</h1><p style="color: #ffffff; margin: 10px 0 0;">Thank you for your order</p></div>
-                <div class="content">
-                    <h2 style="color: #1e3a8a;">Dear {user.full_name or user.username},</h2>
-                    <p style="color: #555; line-height: 1.6;">Thank you for choosing The National Scaffolding! Your order has been successfully placed and confirmed.</p>
-                    <div class="order-details">
-                        <h3 style="color: #1e3a8a;">Order Details</h3>
-                        <p style="margin: 5px 0; color: #555;"><strong>Order ID:</strong> #{order.id}</p>
-                        <p style="margin: 5px 0; color: #555;"><strong>Order Date:</strong> {order.order_date.strftime('%B %d, %Y at %I:%M %p')}</p>
-                        <p style="margin: 5px 0; color: #555;"><strong>Transaction ID:</strong> <span style="font-family: monospace; background-color: #e8f5e9; padding: 3px 8px; border-radius: 4px;">{order.transaction_id}</span></p>
-                        <p style="margin: 5px 0; color: #555;"><strong>Total Amount:</strong> <span style="color: #4CAF50; font-size: 18px; font-weight: bold;">₹{order.total_price:.2f}</span></p>
-                    </div>
-                    <h3 style="color: #1e3a8a;">Order Items</h3>
-                    <table class="order-table">
-                        <thead><tr><th style="padding: 15px;">Product</th><th style="padding: 15px; text-align: center;">Quantity</th><th style="padding: 15px; text-align: center;">Unit Price</th><th style="padding: 15px; text-align: right;">Item Total</th></tr></thead>
-                        <tbody>{items_html}
-                            <tr class="total-row"><td colspan="3" style="padding: 15px; text-align: right;">Total Amount:</td><td style="padding: 15px; text-align: right;">₹{order.total_price:.2f}</td></tr>
-                        </tbody>
-                    </table>
-                    <p style="color: #555; margin-top: 30px; line-height: 1.6;">We will process your order shortly. You can view your order status anytime by logging into your account and visiting "My Orders" section.</p>
-                    <p style="color: #555; margin-top: 20px;">If you have any questions, please don't hesitate to contact us.</p>
-                </div>
-                <div class="footer"><p style="margin: 0;">© 2025 The National Scaffolding. All rights reserved.</p><p style="margin: 10px 0 0;">Quality scaffolding solutions for your construction needs</p></div>
-            </div>
-        </body>
-        </html>
-        """
-        
-        mail.send(msg)
-    except Exception as e:
-        app.logger.error(f"Error sending customer email: {e}")
-
-def send_admin_notification_email(order, user, order_items):
-    if not app.config['MAIL_USERNAME']:
-        return
-    
-    admin_email = os.environ.get('ADMIN_EMAIL', app.config['MAIL_DEFAULT_SENDER'])
-    
-    try:
-        items_text = ""
-        for item in order_items:
-            price_data = calculate_price(Product.query.get(item.product_id), item.customization or {})
-            unit_price = price_data['price']
-            items_text += f"- {item.product_name} x {item.quantity} @ ₹{unit_price:.2f} = ₹{(unit_price * item.quantity):.2f}\n"
-        
-        msg = Message(
-            subject=f'🔔 New Order #{order.id} - The National Scaffolding',
-            recipients=[admin_email]
-        )
-        
-        msg.html = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <style>body {{ font-family: 'Poppins', Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }}
-            .container {{ max-width: 600px; margin: 30px auto; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }}
-            .header {{ background: linear-gradient(135deg, #d4af37, #1e3a8a); padding: 30px; text-align: center; }}
-            .header h1 {{ color: #ffffff; margin: 0; font-size: 28px; }}
-            .content {{ padding: 30px; }}
-            .alert-box {{ background-color: #fff3cd; border-left: 4px solid #d4af37; padding: 15px; margin: 20px 0; border-radius: 4px; }}
-            .customer-info {{ background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 20px 0; }}
-            .order-items {{ background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0; }}
-            .footer {{ background-color: #1e3a8a; color: #ffffff; padding: 20px; text-align: center; font-size: 14px; }}</style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="header"><h1>🔔 New Order Received!</h1><p style="color: #ffffff; margin: 10px 0 0;">Order #{order.id}</p></div>
-                <div class="content">
-                    <div class="alert-box"><p style="margin: 0; color: #856404; font-weight: bold;">⚠️ Action Required: Please verify payment and process this order</p></div>
-                    <h3 style="color: #1e3a8a;">Order Information</h3>
-                    <p style="color: #555;"><strong>Order ID:</strong> #{order.id}</p>
-                    <p style="color: #555;"><strong>Order Date:</strong> {order.order_date.strftime('%B %d, %Y at %I:%M %p')}</p>
-                    <p style="color: #555;"><strong>Transaction ID:</strong> <span style="font-family: monospace; background-color: #e8f5e9; padding: 3px 8px; border-radius: 4px;">{order.transaction_id}</span></p>
-                    <p style="color: #555;"><strong>Total Amount:</strong> <span style="color: #4CAF50; font-size: 20px; font-weight: bold;">₹{order.total_price:.2f}</span> (incl. 18% GST)</p>
-                    <div class="customer-info">
-                        <h3 style="color: #1e3a8a;">Customer Details</h3>
-                        <p style="color: #555;"><strong>Name:</strong> {user.full_name or user.username}</p>
-                        <p style="color: #555;"><strong>Email:</strong> {user.email}</p>
-                        <p style="color: #555;"><strong>Phone:</strong> {user.phone or 'N/A'}</p>
-                        {f'<p style="margin: 5px 0; color: #555;"><strong>Address:</strong> {user.address}</p>' if user.address else ''}
-                        {f'<p style="margin: 5px 0; color: #555;"><strong>Organization:</strong> {user.organization}</p>' if user.organization else ''}
-                    </div>
-                    <div class="order-items">
-                        <h3 style="color: #1e3a8a;">Order Items</h3>
-                        <pre style="background-color: #ffffff; padding: 10px; border-radius: 4px; overflow-x: auto; color: #333;">{items_text}</pre>
-                    </div>
-                    <p style="color: #555; margin-top: 20px;"><strong>Next Steps:</strong></p>
-                    <ol style="color: #555; line-height: 1.8;">
-                        <li>Verify transaction ID in your PhonePe account</li>
-                        <li>Confirm amount matches: ₹{order.total_price:.2f}</li>
-                        <li>Process order and prepare items for delivery</li>
-                        <li>Contact customer if needed</li>
-                    </ol>
-                </div>
-                <div class="footer"><p style="margin: 0;">The National Scaffolding - Admin Dashboard</p><p style="margin: 10px 0; font-size: 12px;">Log in to admin panel to view full order details</p></div>
-            </div>
-        </body>
-        </html>
-        """
-        
-        mail.send(msg)
-    except Exception as e:
-        app.logger.error(f"Error sending admin email: {e}")
-
-# Initialize database and login manager BEFORE app context
-db.init_app(app)
-
-# Ensure schema is in sync as soon as the app context is ready
-# Create app context and initialize database
-with app.app_context():
-    try:
-        # First, ensure all required columns exist in existing tables
-        ensure_columns_exist()
-        app.logger.info("Database columns verified/updated.")
-    except Exception as e:
-        app.logger.error(f"Schema sync error: {e}", exc_info=True)
-
-    try:
-        # IMPORTANT: Import ALL models here to ensure SQLAlchemy knows about them
-        # This includes the cuplock models before creating tables
-        from models import (
-            User, Admin, Product, Order, OrderItem,
-            CuplockVerticalSize, CuplockLedgerSize, CuplockVerticalCup
-        )
-        
-        # Now create all tables. This will create the cuplock tables if they don't exist.
-        db.create_all()
-        app.logger.info("All database tables created/verified successfully.")
-        
-    except Exception as e:
-        app.logger.error(f"Database creation error: {e}", exc_info=True)
-
-# Add session management and error handling
 @app.before_request
 def before_request():
     """Ensure each request starts with a clean session"""
@@ -837,23 +695,71 @@ def admin_login():
             flash('Login failed. Please try again.', 'error')
     
     return render_template('admin_login.html')
-
+  
+# =================================================================
+# PASTE THE FABRICATION_DETAIL FUNCTION HERE (at the top level)
+# =================================================================
+# =================================================================
+# FABRICATION ROUTES
+# =================================================================
 @app.route('/fabrications')
 def fabrications():
     try:
-        from cuplock_routes import get_image_url
+        # Query for active fabrication products
+        products = Product.query.filter_by(product_type='fabrication', is_active=True).all()
         
-        products = Product.query.filter_by(product_type='fabrication').all()
+        # Log number of products found
+        app.logger.info(f"Found {len(products)} fabrication products")
         
-        # Add display_image_url to each product for template rendering
+        # Make sure each product has the required properties
         for product in products:
-            product.display_image_url = get_image_url(product.image_url)
-        
+            # Ensure image_url is properly set
+            if not product.image_url:
+                product.image_url = ""
+                
+            # Ensure price is a number
+            if product.price is None:
+                product.price = 0.0
+            else:
+                product.price = float(product.price)
+                
         return render_template('fabrications.html', products=products)
     except Exception as e:
-        app.logger.error(f"Fabrications route error: {e}")
+        app.logger.error(f"Fabrications route error: {e}", exc_info=True)
+        flash('Error loading fabrication products.', 'error')
         return render_template('fabrications.html', products=[])
 
+@app.route('/fabrication/<int:product_id>')
+def fabrication_detail(product_id):
+    try:
+        # 1. Clear any stuck database sessions
+        if db.session.is_active:
+            db.session.rollback()
+
+        # 2. Fetch the product or return a 404
+        product = Product.query.get_or_404(product_id)
+        
+        # 3. Ensure it is actually a fabrication product
+        if product.product_type != 'fabrication' or not product.is_active:
+            flash('This product is not available.', 'warning')
+            return redirect(url_for('fabrications'))
+            
+        # 4. Handle numerical formatting for the template
+        product.price = float(product.price) if product.price else 0.0
+            
+        # 5. RENDER TEMPLATE
+        # IMPORTANT: We must pass 'cuplock_prices' even for fabrication 
+        # because the template has logic that checks if it exists.
+        return render_template('product_details.html', 
+                               product=product, 
+                               cuplock_prices=[]) # Empty list prevents template crash
+        
+    except Exception as e:
+        app.logger.error(f"CRITICAL ERROR in fabrication_detail: {e}", exc_info=True)
+        flash('Error loading product details. Please try again.', 'error')
+        return redirect(url_for('fabrications'))
+        
+    
 @app.route('/cuplock_vertical/<int:product_id>')
 def cuplock_vertical_product(product_id):
     """Display a Cuplock Vertical product for purchase"""
@@ -898,21 +804,46 @@ def cuplock_vertical_product(product_id):
         flash('Error loading product', 'error')
         return redirect(url_for('national_scaffoldings'))
 
-@app.route('/cuplock_ledger/<int:product_id>')
-def cuplock_ledger_product(product_id):
-    """Display a Cuplock Ledger product for purchase"""
-    try:
-        product = Product.query.filter_by(
-            id=product_id,
-            category='cuplock',
-            cuplock_type='ledger'
-        ).get_or_404()
-        return render_template('cuplock_ledger.html', product=product)
-    except Exception as e:
-        app.logger.error(f"Cuplock ledger product error: {e}")
-        flash('Product not found', 'error')
-        return redirect(url_for('national_scaffoldings'))
+# @app.route('/cuplock_ledger/<int:product_id>')
+# def cuplock_ledger_product(product_id):
+#     try:
+#         product = Product.query.filter_by(
+#             id=product_id,
+#             category='cuplock',
+#             cuplock_type='ledger',
+#             is_active=True
+#         ).first_or_404()
 
+#         from models import CuplockLedgerSize
+
+#         sizes = CuplockLedgerSize.query.filter_by(
+#             product_id=product_id,
+#             is_active=True
+#         ).order_by(CuplockLedgerSize.size_label).all()
+
+#         sizes_json = [
+#             {
+#                 "id": s.id,
+#                 "label": s.size_label,
+#                 "weight": float(s.weight_kg or 0),
+#                 "buy_price": float(s.buy_price or 0),
+#                 "rent_price": float(s.rent_price or 0),
+#                 "deposit": float(s.deposit_amount or 0)
+#             }
+#             for s in sizes
+#         ]
+
+#         return render_template(
+#             'cuplock_ledger.html',
+#             product=product,
+#             sizes=sizes,
+#             sizes_json=sizes_json
+#         )
+
+#     except Exception as e:
+#         app.logger.error(f"Cuplock ledger product error: {e}", exc_info=True)
+#         flash('Product not found', 'error')
+#         return redirect(url_for('national_scaffoldings'))
 @app.route('/logout')
 @login_required
 def logout():
@@ -1007,41 +938,49 @@ def cuplock_shop():
         import traceback
         app.logger.error(traceback.format_exc())
         return render_template('cuplock_shop.html', vertical_products=[], ledger_products=[])
-
 @app.route('/national_scaffoldings')
 def national_scaffoldings():
     try:
         from cuplock_routes import get_image_url
-        
+
         category = request.args.get('category', 'all')
-        # Accept both old 'scaffolding' value and new product type names
-        valid_types = ['Aluminium Scaffolding', 'H-Frames', 'Cuplock', 'Accessories', 'scaffolding', 'cuplock_vertical', 'cuplock_ledger']
-        
-        if category == 'all':
-            products = Product.query.filter(
-                Product.product_type.in_(valid_types),
-                Product.is_active == True
-            ).all()
-        else:
-            products = Product.query.filter(
-                Product.product_type.in_(valid_types),
-                Product.category == category,
-                Product.is_active == True
-            ).all()
-        
-        # Add display_image_url to all products for template rendering
+
+        # ONLY scaffolding categories — fabrication fully excluded
+        allowed_categories = ['aluminium', 'h-frames', 'cuplock', 'accessories']
+
+        query = Product.query.filter(
+            Product.is_active == True,
+            Product.category.in_(allowed_categories)
+        )
+
+        # Category filter
+        if category != 'all':
+            query = query.filter(Product.category == category)
+
+        products = query.order_by(Product.id.desc()).all()
+
         for product in products:
             product.display_image_url = get_image_url(product.image_url)
-        
-        return render_template('national_scaffoldings.html', products=products, category=category)
+
+        return render_template(
+            'national_scaffoldings.html',
+            products=products,
+            category=category
+        )
+
     except Exception as e:
-        app.logger.error(f"National scaffoldings error: {e}")
-        return render_template('national_scaffoldings.html', products=[], category='all')
+        app.logger.error(f"National scaffoldings error: {e}", exc_info=True)
+        return render_template(
+            'national_scaffoldings.html',
+            products=[],
+            category='all'
+        )
+
+
 
 @app.route('/about')
 def about():
     return render_template('about.html')
-
 @app.route('/add_to_cart', methods=['POST'])
 @login_required
 def add_to_cart():
@@ -1052,11 +991,9 @@ def add_to_cart():
                 'message': 'Admins cannot purchase items'
             }), 403
 
-        # -------------------------------
-        # READ REQUEST DATA
-        # -------------------------------
         data = request.get_json() if request.is_json else request.form.to_dict()
 
+        # Handle stringified JSON from forms
         if 'customization' in data and isinstance(data['customization'], str):
             try:
                 data['customization'] = json.loads(data['customization'])
@@ -1067,9 +1004,6 @@ def add_to_cart():
         quantity = int(data.get('quantity', 1))
         customization = data.get('customization', {})
 
-        # -------------------------------
-        # VALIDATION
-        # -------------------------------
         if quantity <= 0:
             return jsonify({
                 'success': False,
@@ -1078,21 +1012,9 @@ def add_to_cart():
 
         product = Product.query.get_or_404(product_id)
 
-        # Debug logs (KEEP FOR NOW)
-        app.logger.warning("====== CUPLOCK DEBUG ======")
-        app.logger.warning(f"Product category: {product.category}")
-        app.logger.warning(f"Customization received: {customization}")
+        app.logger.info(f"Adding to cart: Product={product.name}, Customization={customization}")
 
-        # H-frame restriction
-        if product.category == 'h-frames' and quantity >= 100:
-            return jsonify({
-                'success': False,
-                'message': 'For orders of 100+ pieces, please contact sales'
-            }), 400
-
-        # -------------------------------
-        # PRICE CALCULATION (BACKEND ONLY)
-        # -------------------------------
+        # Calculate price using the updated calculate_price function
         price_data = calculate_price(product, customization)
 
         if not price_data or float(price_data.get('price', 0)) <= 0:
@@ -1104,13 +1026,12 @@ def add_to_cart():
         unit_price = float(price_data['price'])
         deposit = float(price_data.get('deposit', 0))
 
-        # -------------------------------
-        # CREATE CART ITEM
-        # -------------------------------
+        # Create cart item with all necessary information
         cart_item = {
             'product_id': product.id,
             'product_name': product.name,
             'category': product.category,
+            'product_type': product.product_type,
             'quantity': quantity,
             'unit_price': unit_price,
             'item_total': unit_price * quantity,
@@ -1120,6 +1041,7 @@ def add_to_cart():
             'image_url': product.image_url
         }
 
+        # Get existing cart or create new one
         cart = session.get('cart', [])
         cart.append(cart_item)
         session['cart'] = cart
@@ -1127,13 +1049,20 @@ def add_to_cart():
 
         app.logger.info(
             f"[CART] User {current_user.id} added {product.name} | "
-            f"₹{unit_price} x {quantity}"
+            f"₹{unit_price} x {quantity} | Customization: {customization}"
         )
 
         return jsonify({
             'success': True,
             'cart_count': len(cart),
-            'message': 'Product added to cart'
+            'message': 'Product added to cart',
+            'item': {
+                'name': product.name,
+                'quantity': quantity,
+                'unit_price': unit_price,
+                'total': unit_price * quantity,
+                'deposit': deposit * quantity
+            }
         })
 
     except Exception as e:
@@ -1142,8 +1071,6 @@ def add_to_cart():
             'success': False,
             'message': 'Error adding to cart'
         }), 500
-
-
 @app.route('/cart')
 @login_required
 def cart():
@@ -1450,17 +1377,27 @@ def admin_complete_order(order_id):
     
 @app.route('/admin_scaffoldings')
 @login_required
-def     admin_scaffoldings():
+def admin_scaffoldings():
     try:
         if session.get('user_type') != 'admin' or session.get('panel_type') != 'scaffolding':
             return redirect(url_for('dashboard'))
-        # Accept both old 'scaffolding' value and new product type names
-        valid_types = ['Aluminium Scaffolding', 'H-Frames', 'Cuplock', 'Accessories', 'scaffolding']
-        products = Product.query.filter(Product.product_type.in_(valid_types)).all()
-        return render_template('admin_scaffoldings.html', products=products)
+
+        # ✅ SHOW ONLY ACTIVE NON-FABRICATION PRODUCTS
+        products = Product.query.filter(
+            Product.product_type != 'fabrication',
+            Product.is_active == True
+        ).order_by(Product.id.desc()).all()
+
+        return render_template(
+            'admin_scaffoldings.html',
+            products=products
+        )
+
     except Exception as e:
-        app.logger.error(f"Admin scaffoldings error: {e}")
+        app.logger.error(f"Admin scaffoldings error: {e}", exc_info=True)
         return render_template('admin_scaffoldings.html', products=[])
+
+
 
 
 @app.route('/admin/product/<int:product_id>/edit', methods=['GET', 'POST'])
@@ -1497,6 +1434,37 @@ def edit_scaffolding_product(product_id):
 
 
 # ... your other imports ...
+@app.route('/debug/cuplock_ledger/<int:product_id>')
+def debug_cuplock_ledger(product_id):
+    try:
+        product = Product.query.get_or_404(product_id)
+        sizes = CuplockLedgerSize.query.filter_by(
+            product_id=product_id,
+            is_active=True
+        ).all()
+        
+        sizes_data = []
+        for s in sizes:
+            sizes_data.append({
+                'id': s.id,
+                'label': s.size_label,
+                'weight': float(s.weight_kg or 0),
+                'buy_price': float(s.buy_price or 0),
+                'rent_price': float(s.rent_price or 0),
+                'deposit': float(s.deposit_amount or 0)
+            })
+        
+        return jsonify({
+            'product': {
+                'id': product.id,
+                'name': product.name,
+                'category': product.category,
+                'cuplock_type': product.cuplock_type
+            },
+            'sizes': sizes_data
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)})
 
 @app.route('/cuplock_products')
 def cuplock_products():
@@ -1539,11 +1507,22 @@ def admin_fabrication():
     try:
         if session.get('user_type') != 'admin' or session.get('panel_type') != 'fabrication':
             return redirect(url_for('dashboard'))
-        products = Product.query.filter_by(product_type='fabrication').all()
-        return render_template('admin_fabrication.html', products=products)
+
+        # ✅ SHOW ONLY ACTIVE FABRICATION PRODUCTS
+        products = Product.query.filter(
+            Product.product_type == 'fabrication',
+            Product.is_active == True
+        ).order_by(Product.id.desc()).all()
+
+        return render_template(
+            'admin_fabrication.html',
+            products=products
+        )
+
     except Exception as e:
-        app.logger.error(f"Admin fabrication error: {e}")
+        app.logger.error(f"Admin fabrication error: {e}", exc_info=True)
         return render_template('admin_fabrication.html', products=[])
+
 
 @app.route('/admin_orders')
 @login_required
@@ -1680,110 +1659,81 @@ def admin_add_fabrication_product():
             'success': False,
             'message': 'Error adding fabrication product'
         }), 500
-
 @app.route('/admin_add_product', methods=['GET', 'POST'])
 @login_required
 def admin_add_product():
     try:
         if session.get('user_type') != 'admin':
             return redirect(url_for('dashboard'))
-        
-        # GET request - show the form
+
         if request.method == 'GET':
             return render_template('add_scaffolding_product.html')
-        
-        # POST request - save the product
-        # Validate price first
+
+        # ✅ CATEGORY COMES DIRECTLY FROM DROPDOWN
+        category = request.form.get('category')
+
+        if category not in ['aluminium', 'h-frames', 'cuplock', 'accessories']:
+            flash('Invalid category selected', 'error')
+            return redirect(url_for('admin_add_product'))
+
+        # Price validation
         price_valid, price_error = validate_price(request.form.get('price'), 'Price')
         if not price_valid:
-            return jsonify({'success': False, 'message': price_error}), 400
-        
-        image_urls = []
-        saved_filepaths = []
-        uploaded_files = request.files.getlist('product_images') if request.files else []
+            flash(price_error, 'error')
+            return redirect(url_for('admin_add_product'))
 
-        # Save uploads first and validate files exist on disk before creating DB record
+        # Images
+        image_urls = []
+        uploaded_files = request.files.getlist('product_images')
         if uploaded_files:
             os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
             for file in uploaded_files:
-                if file and file.filename and allowed_file(file.filename):
+                if file and allowed_file(file.filename):
                     filename = secure_filename(file.filename)
-                    unique_name = f"{uuid.uuid4().hex}_{filename}"
-                    filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
-                    try:
-                        file.save(filepath)
-                        saved_filepaths.append(filepath)
-                        image_urls.append(f"uploads/{unique_name}")
-                        app.logger.info(f"Saved uploaded file for new product: {filepath}")
-                    except Exception as e:
-                        app.logger.error(f"Error saving uploaded file: {e}")
+                    unique = f"{uuid.uuid4().hex}_{filename}"
+                    file.save(os.path.join(app.config['UPLOAD_FOLDER'], unique))
+                    image_urls.append(f"uploads/{unique}")
 
-            # Validate saved files exist
-            for p in saved_filepaths:
-                try:
-                    if not os.path.exists(p):
-                        raise FileNotFoundError(p)
-                    with Image.open(p) as im:
-                        im.verify()
-                except Exception as e:
-                    for q in saved_filepaths:
-                        try:
-                            if os.path.exists(q):
-                                os.remove(q)
-                        except Exception:
-                            pass
-                    app.logger.error(f"Uploaded image validation failed for new product: {e}")
-                    return jsonify({'success': False, 'message': 'One or more uploaded images are invalid or corrupted. Please try different files.'}), 500
-
-        # Join with comma - NO SPACES
         image_url_string = ",".join(image_urls) if image_urls else 'images/no-image.png'
 
-        
-        # DEBUG LOG
-        app.logger.info(f"Creating product with images: {image_url_string}")
+        PRODUCT_TYPE_MAP = {
+            'aluminium': 'Aluminium Scaffolding',
+            'h-frames': 'H-Frames',
+            'cuplock': 'Cuplock',
+            'accessories': 'Accessories'
+        }
 
-        # Create product
         product = Product(
-    name=request.form.get('name'),
-    description=request.form.get('description', ''),
-    price=safe_float(request.form.get('price')) or 0.0,
+            name=request.form.get('name'),
+            description=request.form.get('description', ''),
+            price=safe_float(request.form.get('price')) or 0,
+            rent_price=safe_float(request.form.get('rent_price')),
+            deposit_amount=safe_float(request.form.get('deposit_amount')),
+            weight_per_unit=safe_float(request.form.get('weight_per_unit')),
+            category=category,                       # 🔑 USER FILTER
+            product_type=PRODUCT_TYPE_MAP[category], # DISPLAY ONLY
+            image_url=image_url_string,
+            is_active=True
+        )
 
-    category='cuplock',              # ✅ forced
-    product_type='Cuplock',           # ✅ consistent
-    cuplock_type='ledger',            # ✅ subtype
-
-    rent_price=safe_float(request.form.get('rent_price')),
-    deposit_amount=safe_float(request.form.get('deposit_amount')),
-    image_url=image_url_string,
-    weight_per_unit=safe_float(request.form.get('weight_per_unit')),
-    is_active=True
-)
-
-
+        if category == 'cuplock':
+            product.cuplock_type = request.form.get('cuplock_type')
+        else:
+            product.cuplock_type = None
 
         db.session.add(product)
-        db.session.flush()
-
-        pricing_matrix_str = request.form.get('pricing_matrix')
-        if pricing_matrix_str:
-            try:
-                pm = json.loads(pricing_matrix_str)
-                product.customization_options = product.customization_options or {}
-                product.customization_options['pricing_matrix'] = pm
-                flag_modified(product, 'customization_options')
-            except Exception as e:
-                app.logger.error('Failed to parse pricing_matrix: %s', e)
-
         db.session.commit()
 
-        app.logger.info(f"New product created id={product.id} image_url={product.image_url}")
         flash('Product added successfully!', 'success')
         return redirect(url_for('admin_scaffoldings'))
+
     except Exception as e:
-        app.logger.error(f"Admin add product error: {e}")
         db.session.rollback()
-        flash(f'Error adding product: {str(e)}', 'error')
+        app.logger.error(e, exc_info=True)
+        flash('Error adding product', 'error')
         return redirect(url_for('admin_scaffoldings'))
+
+
 
 @app.route('/admin_update_product/<int:product_id>', methods=['POST'])
 @login_required
@@ -2297,7 +2247,7 @@ def admin_delete_product(product_id):
                         app.logger.error(f"Error removing file {old_image_path}: {e}")
         
         # Delete product (This action now triggers CASCADE DELETE in database)
-        db.session.delete(product)
+        product.is_active = False
         db.session.commit()
         
         app.logger.info(f"Successfully deleted product: {product_name} (ID: {product.id}) and its associated order items.")

@@ -15,7 +15,7 @@
     max-width: 1100px;
     margin: 20px auto;
     padding: 18px;
-    font-family: Inter,  sans-serif;
+    font-family: Inter, sans-serif;
     color: #111827;
 }
 
@@ -51,7 +51,7 @@
 
 .gallery-main-image {
     position: absolute;
-    inset: 0;.
+    inset: 0;
     opacity: 0;
     transition: opacity 0.45s ease-in-out;
     pointer-events: none;
@@ -238,57 +238,57 @@
 </style>
 
 <div class="glass-container">
-    <button class="btn-secondary" onclick="history.back()" style="margin-bottom: 1rem;">← Back to Products</button>
+    <button class="btn-secondary" onclick="history.back()" style="margin-bottom: 1rem;">← Back to Fabrications</button>
 
     <div class="detail-grid">
         <!-- Gallery -->
         <div>
-        {% if product.image_url %}
-    {% set valid_images = product.image_url
-        .split(',')
-        | map('trim')
-        | reject('equalto', '')
-        | list %}
+            {% if product.image_url %}
+            {% set valid_images = product.image_url
+                .split(',')
+                | map('trim')
+                | reject('equalto', '')
+                | list %}
 
-    {% if valid_images|length > 0 %}
+            {% if valid_images|length > 0 %}
 
-        <div class="product-detail-gallery">
-            <div class="gallery-main-container">
-                {% for img_url in valid_images %}
-                <div class="gallery-main-image {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}">
-                    <img src="{{ url_for('static', filename=img_url) }}" alt="{{ product.name }} - Image {{ loop.index }}" loading="lazy" onclick="openModal({{ loop.index0 }})">
+                <div class="product-detail-gallery">
+                    <div class="gallery-main-container">
+                        {% for img_url in valid_images %}
+                            <div class="gallery-main-image {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}">
+                                <img src="{{ url_for('static', filename=img_url) }}" alt="{{ product.name }} - Image {{ loop.index }}" loading="lazy" onclick="openModal({{ loop.index0 }})">
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    {% if valid_images|length > 1 %}
+                        <div class="gallery-counter"><span id="currentImageNum">1</span> / {{ valid_images|length }}</div>
+                        <button class="gallery-navigation gallery-prev" id="galleryPrev">‹</button>
+                        <button class="gallery-navigation gallery-next" id="galleryNext">›</button>
+                    {% else %}
+                        <button class="gallery-navigation gallery-prev single-image" style="display:none;">‹</button>
+                        <button class="gallery-navigation gallery-next single-image" style="display:none;">›</button>
+                    {% endif %}
                 </div>
-                {% endfor %}
-            </div>
-
-            {% if valid_images|length > 1 %}
-                <div class="gallery-counter"><span id="currentImageNum">1</span> / {{ valid_images|length }}</div>
-                <button class="gallery-navigation gallery-prev" id="galleryPrev">‹</button>
-                <button class="gallery-navigation gallery-next" id="galleryNext">›</button>
+                {% if valid_images|length > 1 %}
+                    <div class="gallery-thumbnails">
+                        {% for img_url in valid_images %}
+                            <img src="{{ url_for('static', filename=img_url) }}" alt="{{ product.name }} thumbnail {{ loop.index }}" loading="lazy"
+                                 class="gallery-thumbnail {% if loop.first %}active{% endif %}"
+                                 data-index="{{ loop.index0 }}"
+                                 onclick="setMainImage({{ loop.index0 }})">
+                            {% endfor %}
+                    </div>
+                {% endif %}
             {% else %}
-                <button class="gallery-navigation gallery-prev single-image" style="display:none;">‹</button>
-                <button class="gallery-navigation gallery-next single-image" style="display:none;">›</button>
+                <div class="no-image-box"><p style="font-size: 2rem; color: #ffa500">≡ƒôª</p><p>No Image Available</p></div>
             {% endif %}
-        </div>
-        {% if valid_images|length > 1 %}
-        <div class="gallery-thumbnails">
-            {% for img_url in valid_images %}
-            <img src="{{ url_for('static', filename=img_url) }}" alt="{{ product.name }} thumbnail {{ loop.index }}" loading="lazy"
-                 class="gallery-thumbnail {% if loop.first %}active{% endif %}"
-                 data-index="{{ loop.index0 }}"
-                 onclick="setMainImage({{ loop.index0 }})">
-            {% endfor %}
-        </div>
+
+        {% else %}
+            <div class="no-image-box"><p style="font-size: 2rem; color: #ffa500">≡ƒôª</p><p>Product Image Not Set</p></div>
         {% endif %}
+        </div>
 
-    {% else %}
-        <div class="no-image-box"><p style="font-size: 2rem; color: #ffa500">≡ƒôª</p><p>No Image Available</p></div>
-    {% endif %}
-
-{% else %}
-    <div class="no-image-box"><p style="font-size: 2rem; color: #ffa500">≡ƒôª</p><p>Product Image Not Set</p></div>
-{% endif %}
-</div>
         <!-- Info -->
         <div>
             <h1 class="page-title">{{ product.name }}</h1>
@@ -297,117 +297,145 @@
 
             <!-- Product details and pricing -->
             {% if product.category == 'aluminium' %}
-            <div class="customization-section">
-                <h3 style="color: var(--accent); margin-bottom: 8px;">Product Details</h3>
-                <p style="color: #000; margin-bottom: 1rem;">Height and width specifications are included in product description.</p>
+                <div class="customization-section">
+                    <h3 style="color: var(--accent); margin-bottom: 8px;">Product Details</h3>
+                    <p style="color: #000; margin-bottom: 1rem;">Height and width specifications are included in product description.</p>
 
-                <div class="form-group"><label for="purchase_type">Purchase Type</label>
-                    <select id="purchase_type" onchange="updateAluminiumPrice()">
-                        <option value="buy">Buy</option>
-                        {% if product.rent_price %}<option value="rent">Rent</option>{% endif %}
-                    </select>
-                </div>
-
-                <div class="form-group"><label for="quantity">Quantity</label>
-                    <select id="quantity" onchange="updateAluminiumPrice()">
-                        {% for i in range(1,51) %}
-                        <option value="{{ i }}" {% if i == 1 %}selected{% endif %}>{{ i }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="product-price" id="final_price_display">Γé╣{{ product.price }}</div>
-                <div id="deposit_display" style="color: #d4af37; margin-top: 1rem; display: none;">
-                    <strong>Deposit Required:</strong> <span id="deposit_amount">Γé╣0</span>
-                </div>
-            </div>
-
-            {% elif product.category == 'h-frames' or product.category == 'accessories' %}
-            <div class="customization-section">
-                <div class="form-group"><label for="purchase_type">Purchase Type</label>
-                    <select id="purchase_type" onchange="updatePrice()">
-                        <option value="buy">Buy</option>
-                        {% if product.rent_price %}<option value="rent">Rent</option>{% endif %}
-                    </select>
-                </div>
-
-                <div class="form-group"><label for="quantity">Quantity</label>
-                    <select id="quantity" onchange="updatePrice()">
-                        {% for i in range(1,201) %}
-                        <option value="{{ i }}">{{ i }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="product-price" id="final_price_display">₹{{ product.price }}</div>
-                <div id="deposit_display" style="color: #d4af37; margin-top: 1rem; display:none;">
-                    <strong>Deposit Required:</strong> <span id="deposit_amount">₹0</span>
-                </div>
-            </div>
-
-            {% elif product.category == 'cuplock' %}
-            <div style="background: linear-gradient(135deg,hsl(205, 36%, 68%),#6cb5fff1); padding: 16px; border-radius:10px; color:#fff;">
-                <h3 style="color:#d4af37; text-align:center;">Product Information</h3>
-                {% if product.price > 0 or product.rent_price > 0 %}
-                    <div style="text-align: center; margin-bottom: 15px;">
-                        {% if product.price > 0 %}
-                            <div style="margin-bottom: 8px;">
-                                <strong>Buy Price:</strong> ₹{{ "%.2f"|format(product.price) }}
-                            </div>
-                        {% endif %}
-                        {% if product.rent_price > 0 %}
-                            <div>
-                                <strong>Rent Price (per day):</strong> ₹{{ "%.2f"|format(product.rent_price) }}
-                            </div>
-                        {% endif %}
-                    </div>
-                    <div class="form-group" style="margin-top: 12px;">
-                        <label for="purchase_type" style="color: #fff;">Purchase Type</label>
-                        <select id="purchase_type" onchange="updatePrice()" style="background: #fff; color: #333; border: 1px solid #ddd; border-radius: 4px; padding: 8px; width: 100%;">
-                            {% if product.price > 0 %}<option value="buy">Buy</option>{% endif %}
-                            {% if product.rent_price > 0 %}<option value="rent">Rent</option>{% endif %}
+                    <div class="form-group">
+                        <label for="purchase_type">Purchase Type</label>
+                        <select id="purchase_type" onchange="updateAluminiumPrice()">
+                            <option value="buy">Buy</option>
+                            {% if product.rent_price %}<option value="rent">Rent</option>{% endif %}
                         </select>
                     </div>
-                    <div class="form-group" style="margin-top: 12px;">
-                        <label for="quantity" style="color: #fff;">Quantity</label>
-                        <select id="quantity" onchange="updatePrice()" style="background: #fff; color: #333; border: 1px solid #ddd; border-radius: 4px; padding: 8px; width: 100%;">
-                            {% for i in range(1, 51) %}
-                                <option value="{{ i }}">{{ i }}</option>
+
+                    <div class="form-group">
+                        <label for="quantity">Quantity</label>
+                        <select id="quantity" onchange="updateAluminiumPrice()">
+                            {% for i in range(1,51) %}
+                            <option value="{{ i }}" {% if i == 1 %}selected{% endif %}>{{ i }}</option>
                             {% endfor %}
                         </select>
                     </div>
-                    <div id="final_price_display" style="font-size: 1.5rem; font-weight: bold; margin: 15px 0; text-align: center; color: #d4af37;">
-                        ₹{{ "%.2f"|format(product.price if product.price > 0 else product.rent_price) }}
-                    </div>
-                {% else %}
-                    <p style="text-align:center;">This product is available for both <strong>rent</strong> and <strong>sale</strong>. Please contact sales for pricing.</p>
-                {% endif %}
-            </div>
 
-            {% else %}
-            <div>
-                <div class="product-price">₹{{ product.price }}</div>
-                <div class="form-group" style="margin-top:12px;"><label for="quantity">Quantity</label>
-                    <select id="quantity">{% for i in range(1,51) %}<option value="{{ i }}" {% if i==1 %}selected{% endif %}>{{ i }}</option>{% endfor %}</select>
+                    <div class="product-price" id="final_price_display">₹{{ product.price }}</div>
+                    <div id="deposit_display" style="color: #d4af37; margin-top: 1rem; display: none;">
+                        <strong>Deposit Required:</strong> <span id="deposit_amount">₹0</span>
+                    </div>
                 </div>
-            </div>
+
+            {% elif product.category == 'h-frames' or product.category == 'accessories' %}
+                <div class="customization-section">
+                    <div class="form-group">
+                        <label for="purchase_type">Purchase Type</label>
+                        <select id="purchase_type" onchange="updatePrice()">
+                            <option value="buy">Buy</option>
+                            {% if product.rent_price %}<option value="rent">Rent</option>{% endif %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="quantity">Quantity</label>
+                        <select id="quantity" onchange="updatePrice()">
+                            {% for i in range(1,201) %}
+                            <option value="{{ i }}">{{ i }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="product-price" id="final_price_display">₹{{ product.price }}</div>
+                    <div id="deposit_display" style="color: #d4af37; margin-top: 1rem; display:none;">
+                        <strong>Deposit Required:</strong> <span id="deposit_amount">₹0</span>
+                    </div>
+                </div>
+
+            {% elif product.category == 'cuplock' %}
+                <div style="background: linear-gradient(135deg,hsl(205, 36%, 68%),#6cb5fff1); padding: 16px; border-radius:10px; color:#fff;">
+                    <h3 style="color:#d4af37; text-align:center;">Product Information</h3>
+
+                    {% if cuplock_prices and cuplock_prices|length > 0 %}
+                        {% set p = cuplock_prices[0] %}
+
+                        <div style="text-align:center; margin-bottom:15px;">
+                            {% if p.buy_price > 0 %}
+                                <div><strong>Buy Price:</strong> ₹{{ "%.2f"|format(p.buy_price) }}</div>
+                            {% endif %}
+                            {% if p.rent_price > 0 %}
+                                <div><strong>Rent Price:</strong> ₹{{ "%.2f"|format(p.rent_price) }}</div>
+                            {% endif %}
+                            {% if p.deposit > 0 %}
+                                <div><strong>Deposit:</strong> ₹{{ "%.2f"|format(p.deposit) }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label style="color:#fff;">Purchase Type</label>
+                            <select id="purchase_type" onchange="updatePrice()">
+                                {% if p.buy_price > 0 %}<option value="buy">Buy</option>{% endif %}
+                                {% if p.rent_price > 0 %}<option value="rent">Rent</option>{% endif %}
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label style="color:#fff;">Quantity</label>
+                            <select id="quantity" onchange="updatePrice()">
+                                {% for i in range(1,51) %}
+                                <option value="{{ i }}">{{ i }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div id="final_price_display" style="font-size:1.5rem;font-weight:bold;text-align:center;color:#d4af37;">
+                            ₹{{ "%.2f"|format(p.buy_price if p.buy_price > 0 else p.rent_price) }}
+                        </div>
+
+                        {% if p.deposit > 0 %}
+                            <div id="deposit_display" style="color:#fff; margin-top:10px; text-align:center; display:none;">
+                                <strong>Deposit Required:</strong> <span id="deposit_amount">₹0</span>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <p style="text-align:center;">
+                            This product is available for rent and sale.
+                            <br><strong>Please contact sales for pricing.</strong>
+                        </p>
+                    {% endif %}
+                </div>
+            
+            <!-- =========================================== -->
+            <!-- ADDED: New section for Fabrication products -->
+            <!-- =========================================== -->
+            {% elif product.product_type == 'fabrication' %}
+                <div class="customization-section">
+                    <h3 style="color: var(--accent); margin-bottom: 8px;">Product Details</h3>
+                    <p style="color: #000; margin-bottom: 1rem;">High-quality fabrication product for your construction needs.</p>
+
+                    <div class="form-group">
+                        <label for="quantity">Quantity</label>
+                        <select id="quantity" onchange="updateFabricationPrice()">
+                            {% for i in range(1,51) %}
+                            <option value="{{ i }}" {% if i == 1 %}selected{% endif %}>{{ i }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Price is displayed here -->
+                    <div class="product-price" id="final_price_display">₹{{ "%.2f"|format(product.price|float) }}</div>
+                </div>
             {% endif %}
 
-            <!-- Add to cart button -->
-            {% if product.price > 0 or product.rent_price > 0 %}
-                {% if current_user.is_authenticated and session.get('user_type') == 'admin' %}
+            {% if current_user.is_authenticated and session.get('user_type') == 'admin' %}
                 <div style="background: rgba(255, 165, 0, 0.12); padding: 12px; border-radius: 8px; margin-top: 12px;">
                     <p style="margin:0; font-weight:700; color:#ffa500;">⚠️ Admin accounts cannot make purchases.</p>
                 </div>
-                {% elif current_user.is_authenticated %}
+            {% elif current_user.is_authenticated %}
                 <div style="margin-top: 16px;">
                     <button class="btn-primary" id="addToCartBtn" onclick="addToCartCustom()">🛒 Add to Cart</button>
                 </div>
-                {% else %}
+            {% else %}
                 <div style="margin-top: 16px;">
                     <button class="btn-primary" onclick="window.location.href='{{ url_for('login') }}'">🔐 Login to Purchase</button>
                 </div>
-                {% endif %}
             {% endif %}
         </div>
     </div>
@@ -443,9 +471,9 @@
     }
 
     {% if product.image_url %}
-    const rawImages = `{{ product.image_url }}`.split(',');
-    galleryImages = rawImages.map(s => s.trim()).filter(s => s !== '').map(url => buildImageUrl(url));
-    totalImages = galleryImages.length;
+        const rawImages = `{{ product.image_url }}`.split(',');
+        galleryImages = rawImages.map(s => s.trim()).filter(s => s !== '').map(url => buildImageUrl(url));
+        totalImages = galleryImages.length;
     {% endif %}
 
     const prevBtn = document.getElementById('galleryPrev');
@@ -519,10 +547,36 @@
 })();
 
 // Pricing
+// Pricing Variables
 const category = '{{ product.category }}';
-let basePrice = {{ product.price }};
-let rentPrice = {{ product.rent_price if product.rent_price else 0 }};
-let depositAmount = {{ product.deposit_amount if product.deposit_amount else 0 }};
+const productType = '{{ product.product_type | lower }}'; 
+
+// FIX: Use the '| default(0)' filter to prevent Jinja2 from crashing 
+// when these scaffolding-specific fields are missing for fabrications.
+let basePrice = {{ product.price | default(0) | float }};
+let rentPrice = {{ product.rent_price | default(0) | float }};
+let depositAmount = {{ product.deposit_amount | default(0) | float }};
+
+// Safer initialization logic
+document.addEventListener('DOMContentLoaded', () => {
+    if (productType === 'fabrication') {
+        updateFabricationPrice();
+    } else if (category === 'aluminium') {
+        updateAluminiumPrice();
+    } else {
+        updatePrice();
+    }
+});
+
+// Cuplock pricing data
+const cuplockPrices = {{ cuplock_prices | tojson | default('[]') }};
+
+// ADDED: New function to update price for fabrication products
+function updateFabricationPrice() {
+    const quantity = parseInt(document.getElementById('quantity').value);
+    const total = basePrice * quantity;
+    document.getElementById('final_price_display').textContent = '₹' + total.toFixed(2);
+}
 
 function updateAluminiumPrice() {
     const quantity = parseInt(document.getElementById('quantity').value);
@@ -543,8 +597,20 @@ function updateAluminiumPrice() {
 function updatePrice() {
     const quantity = parseInt(document.getElementById('quantity').value);
     const purchaseType = document.getElementById('purchase_type').value;
-    const unit = purchaseType === 'rent' ? rentPrice : basePrice;
-    const total = unit * quantity;
+    
+    let unitPrice = basePrice;
+    if (category === 'cuplock' && cuplockPrices.length > 0) {
+        // For cuplock products, use the first price as default
+        if (purchaseType === 'buy') {
+            unitPrice = cuplockPrices[0].buy_price;
+        } else if (purchaseType === 'rent') {
+            unitPrice = cuplockPrices[0].rent_price;
+        }
+    } else if (category === 'h-frames' || category === 'accessories') {
+        unitPrice = purchaseType === 'rent' ? rentPrice : basePrice;
+    }
+    
+    const total = unitPrice * quantity;
     document.getElementById('final_price_display').textContent = '₹' + total.toFixed(2);
 
     const depositDisplay = document.getElementById('deposit_display');
@@ -556,11 +622,6 @@ function updatePrice() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    if (category === 'aluminium') updateAluminiumPrice();
-    else if (category === 'h-frames' || category === 'accessories') updatePrice();
-});
-
 // Add to cart
 function addToCartCustom() {
     const btn = document.getElementById('addToCartBtn');
@@ -569,17 +630,27 @@ function addToCartCustom() {
     btn.innerHTML = 'Adding...';
 
     const qty = parseInt(document.getElementById('quantity').value);
+    const purchaseType = document.getElementById('purchase_type') ? document.getElementById('purchase_type').value : 'buy';
+    
     let customization = { quantity: qty };
-    let unit_price = basePrice;
-
+    
     if (category === 'aluminium') {
-        const purchaseType = document.getElementById('purchase_type').value;
-        customization = { purchaseType, quantity: qty };
-        unit_price = purchaseType === 'rent' ? rentPrice : basePrice;
+        customization = { purchase_type: purchaseType, quantity: qty };
     } else if (category === 'h-frames' || category === 'accessories') {
-        const purchaseType = document.getElementById('purchase_type').value;
-        customization = { purchaseType, quantity: qty };
-        unit_price = purchaseType === 'rent' ? rentPrice : basePrice;
+        customization = { purchase_type: purchaseType, quantity: qty };
+    } else if (category === 'cuplock' && cuplockPrices.length > 0) {
+        customization = {
+            product_type: 'cuplock',
+            purchase_type: purchaseType,
+            size_label: cuplockPrices[0].size_label,
+            quantity: qty
+        };
+    // MODIFIED: Added else if for fabrication
+    } else if (productType === 'fabrication') {
+        customization = { 
+            product_type: 'fabrication', 
+            quantity: qty 
+        };
     }
 
     const payload = {
@@ -626,5 +697,13 @@ function showToast(message) {
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 3000);
 }
+
+// MODIFIED: Added call to updateFabricationPrice on page load
+document.addEventListener('DOMContentLoaded', () => {
+    if (category === 'aluminium') updateAluminiumPrice();
+    else if (category === 'h-frames' || category === 'accessories') updatePrice();
+    else if (category === 'cuplock') updatePrice();
+    else if (productType === 'fabrication') updateFabricationPrice(); // Added this line
+});
 </script>
 {% endblock %}
