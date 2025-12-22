@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_file
 from models import CuplockVerticalCup
-
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_mail import Mail, Message
 from models import db, User, Admin, Product, Order, OrderItem
@@ -23,7 +22,9 @@ from models import Product
 from cuplock_routes import cuplock_bp
 from datetime import timezone
 from zoneinfo import ZoneInfo
-
+from werkzeug.utils import secure_filename
+import uuid
+import os
 
 # Load environment variables from .env file
 load_dotenv()
@@ -1378,6 +1379,108 @@ def remove_from_cart(index):
 
     
 
+@app.route('/admin/vertical/product/<int:product_id>/delete', methods=['POST'])
+def vertical_delete(product_id):
+    product = VerticalProduct.query.get_or_404(product_id)
+    
+    # Delete image files
+    if product.image_url:
+        image_paths = product.image_url.split(',')
+        for image_path in image_paths:
+            if image_path.strip():
+                full_path = os.path.join(app.static_folder, image_path.strip())
+                if os.path.exists(full_path):
+                    os.remove(full_path)
+    
+    # Delete product from database
+    db.session.delete(product)
+    db.session.commit()
+    
+    return jsonify({'success': True})
+@app.route('/admin/vertical/product/create', methods=['GET', 'POST'])
+def vertical_create():
+    if request.method == 'POST':
+        # Handle other form fields
+        name = request.form.get('name')
+        description = request.form.get('description')
+        category = request.form.get('category')
+        cuplock_type = request.form.get('cuplock_type')
+        
+        # Handle multiple image uploads
+        image_paths = []
+        if 'images' in request.files:
+            files = request.files.getlist('images')
+            for file in files:
+                if file and file.filename:
+                    filename = secure_filename(file.filename)
+                    # Create unique filename to avoid overwrites
+                    unique_filename = f"{uuid.uuid4().hex}_{filename}"
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+                    file.save(file_path)
+                    # Store relative path for database
+                    image_paths.append(f"uploads/{unique_filename}")
+        
+        # Join all image paths with comma
+        image_url = ','.join(image_paths) if image_paths else None
+        
+        # Create product with all images
+        product = VerticalProduct(
+            name=name,
+            description=description,
+            category=category,
+            cuplock_type=cuplock_type,
+            image_url=image_url
+        )
+        
+        db.session.add(product)
+        db.session.commit()
+        
+        flash('Product created successfully!', 'success')
+        return redirect(url_for('cuplock.vertical_list'))
+    
+    return render_template('admin/vertical_create.html')
+
+@app.route('/admin/vertical/product/<int:product_id>/edit', methods=['GET', 'POST'])
+def vertical_edit(product_id):
+    product = VerticalProduct.query.get_or_404(product_id)
+    
+    if request.method == 'POST':
+        # Handle other form fields
+        product.name = request.form.get('name')
+        product.description = request.form.get('description')
+        product.category = request.form.get('category')
+        product.cuplock_type = request.form.get('cuplock_type')
+        
+        # Handle multiple image uploads
+        if 'images' in request.files:
+            files = request.files.getlist('images')
+            new_image_paths = []
+            
+            for file in files:
+                if file and file.filename:
+                    filename = secure_filename(file.filename)
+                    # Create unique filename to avoid overwrites
+                    unique_filename = f"{uuid.uuid4().hex}_{filename}"
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+                    file.save(file_path)
+                    # Store relative path for database
+                    new_image_paths.append(f"uploads/{unique_filename}")
+            
+            # Combine existing images with new ones
+            if product.image_url:
+                existing_images = product.image_url.split(',')
+                all_images = existing_images + new_image_paths
+            else:
+                all_images = new_image_paths
+            
+            # Update image_url with all images
+            product.image_url = ','.join(filter(None, all_images))
+        
+        db.session.commit()
+        flash('Product updated successfully!', 'success')
+        return redirect(url_for('cuplock.vertical_list'))
+    
+    return render_template('admin/vertical_edit.html', product=product)
 
 
 @app.route('/admin/complete_order/<int:order_id>', methods=['POST'])
