@@ -299,24 +299,66 @@ def calculate_price(product, customization=None):
         # Default price
         base_price = float(product.price or 0)
         
-        # For fabrication products, just return the base price
+        # For fabrication products
         if product.product_type == 'fabrication':
             return {
                 'price': base_price,
-                'deposit': 0  # No deposit for fabrication products
+                'deposit': 0
             }
         
-        # For other products (scaffolding, cuplock, etc.), use existing logic
-        # This is where you would put your logic for aluminium, h-frames, etc.
-        # For now, we will return the base price as a fallback.
-        # You can expand this section with your specific pricing rules.
+        # ✅ FOR VERTICAL CUPLOCK
+        if product.category == 'cuplock' and product.cuplock_type == 'vertical':
+            purchase_type = customization.get('purchase_type', 'buy')
+            
+            if purchase_type == 'buy':
+                # Buy = base price + cup price
+                cup_price = float(customization.get('cup_price', 0))
+                return {
+                    'price': base_price + cup_price,
+                    'deposit': 0
+                }
+            else:
+                # Rent = rent price from size + deposit
+                # You need to fetch the size rent price
+                size_label = customization.get('size')
+                if size_label:
+                    from models import CuplockVerticalSize
+                    size = CuplockVerticalSize.query.filter_by(
+                        product_id=product.id,
+                        size_label=size_label,
+                        is_active=True
+                    ).first()
+                    
+                    if size:
+                        return {
+                            'price': float(size.rent_price or 0),
+                            'deposit': float(size.deposit or 0)
+                        }
+                
+                return {'price': 0, 'deposit': 0}
         
-        # Example for other product types (you can customize this)
+        # ✅ FOR LEDGER CUPLOCK
+        if product.category == 'cuplock' and product.cuplock_type == 'ledger':
+            purchase_type = customization.get('purchase_type', 'buy')
+            
+            if purchase_type == 'buy':
+                return {
+                    'price': float(product.price or 0),
+                    'deposit': 0
+                }
+            else:
+                return {
+                    'price': float(product.rent_price or 0),
+                    'deposit': float(product.deposit_amount or 0)
+                }
+        
+        # For aluminium
         if product.category == 'aluminium':
-            unit_price = customization.get('purchase_type') == 'rent' and product.rent_price or base_price
+            purchase_type = customization.get('purchase_type', 'buy')
+            unit_price = product.rent_price if purchase_type == 'rent' else base_price
             return {
                 'price': unit_price,
-                'deposit': product.deposit_amount if customization.get('purchase_type') == 'rent' else 0
+                'deposit': product.deposit_amount if purchase_type == 'rent' else 0
             }
         
         # Default case for other products
@@ -732,32 +774,25 @@ def fabrications():
 @app.route('/fabrication/<int:product_id>')
 def fabrication_detail(product_id):
     try:
-        # 1. Clear any stuck database sessions
-        if db.session.is_active:
-            db.session.rollback()
-
-        # 2. Fetch the product or return a 404
         product = Product.query.get_or_404(product_id)
-        
-        # 3. Ensure it is actually a fabrication product
+
         if product.product_type != 'fabrication' or not product.is_active:
             flash('This product is not available.', 'warning')
             return redirect(url_for('fabrications'))
-            
-        # 4. Handle numerical formatting for the template
-        product.price = float(product.price) if product.price else 0.0
-            
-        # 5. RENDER TEMPLATE
-        # IMPORTANT: We must pass 'cuplock_prices' even for fabrication 
-        # because the template has logic that checks if it exists.
-        return render_template('product_details.html', 
-                               product=product, 
-                               cuplock_prices=[]) # Empty list prevents template crash
-        
+
+        product.price = float(product.price or 0)
+
+        return render_template(
+            'fabrication_detail.html',
+            product=product
+        )
+
     except Exception as e:
-        app.logger.error(f"CRITICAL ERROR in fabrication_detail: {e}", exc_info=True)
+        print("🔥 FABRICATION DETAIL ERROR:", repr(e))
         flash('Error loading product details. Please try again.', 'error')
         return redirect(url_for('fabrications'))
+
+
         
     
 @app.route('/cuplock_vertical/<int:product_id>')
@@ -2543,6 +2578,108 @@ def check_payment_status():
     """
     return jsonify({'payment_in_progress': False})
 
+
+@app.route('/admin/add_product', methods=['GET', 'POST'])
+@login_required
+def add_product():
+    """Add new product - handles ALL categories including cuplock"""
+    try:
+        if session.get('user_type') != 'admin':
+            flash('Admin access required', 'error')
+            return redirect(url_for('dashboard'))
+
+        if request.method == 'POST':
+            # Get form data
+            name = request.form.get('name')
+            description = request.form.get('description', '')
+            category = request.form.get('category')
+            cuplock_type = request.form.get('cuplock_type', '')  # Will be empty for non-cuplock
+            product_type = request.form.get('product_type', 'scaffolding')
+            
+            # Get pricing
+            price = float(request.form.get('price', 0))
+            rent_price = float(request.form.get('rent_price', 0))
+            deposit_amount = float(request.form.get('deposit_amount', 0))
+            weight_per_unit = float(request.form.get('weight_per_unit', 0))
+
+            # Validation
+            if not name or not category:
+                flash('Product name and category are required', 'error')
+                return render_template('add_product.html')
+
+            # ⚠️ CRITICAL: For cuplock products, cuplock_type is REQUIRED
+            if category == 'cuplock':
+                if not cuplock_type or cuplock_type not in ['ledger', 'vertical']:
+                    flash('For Cuplock products, you must select type (Ledger or Vertical)', 'error')
+                    return render_template('add_product.html')
+
+            # Create product
+            product = Product(
+                name=name,
+                description=description,
+                category=category,
+                cuplock_type=cuplock_type if category == 'cuplock' else None,  # Only set for cuplock
+                product_type=product_type,
+                price=price,
+                rent_price=rent_price,
+                deposit_amount=deposit_amount,
+                weight_per_unit=weight_per_unit,
+                is_active=True
+            )
+
+            # Handle image uploads
+            if 'product_images' in request.files:
+                files = request.files.getlist('product_images')
+                uploaded_images = []
+                
+                upload_folder = current_app.config.get('UPLOAD_FOLDER', 'static/uploads')
+                os.makedirs(upload_folder, exist_ok=True)
+                
+                for file in files:
+                    if file and file.filename and allowed_file(file.filename):
+                        try:
+                            unique_name = f"{uuid.uuid4().hex}_{secure_filename(file.filename)}"
+                            filepath = os.path.join(upload_folder, unique_name)
+                            file.save(filepath)
+                            uploaded_images.append(f'uploads/{unique_name}')
+                            logger.info(f"Uploaded image: uploads/{unique_name}")
+                        except Exception as e:
+                            logger.error(f"Error saving image: {e}")
+                
+                # Store as comma-separated list
+                if uploaded_images:
+                    product.image_url = ','.join(uploaded_images)
+
+            db.session.add(product)
+            db.session.commit()
+
+            # ✅ SUCCESS - Redirect based on product type
+            if category == 'cuplock':
+                if cuplock_type == 'ledger':
+                    flash(f'✅ Ledger product "{name}" created! Now add sizes and pricing.', 'success')
+                    return redirect(url_for('cuplock.ledger_edit', product_id=product.id))
+                elif cuplock_type == 'vertical':
+                    flash(f'✅ Vertical product "{name}" created! Now add sizes and cup configurations.', 'success')
+                    return redirect(url_for('cuplock.vertical_edit', product_id=product.id))
+            
+            # For non-cuplock products
+            flash(f'✅ Product "{name}" created successfully!', 'success')
+            return redirect(url_for('admin_scaffoldings'))
+
+        return render_template('add_product.html')
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error adding product: {e}", exc_info=True)
+        flash(f'Error creating product: {str(e)}', 'error')
+        return render_template('add_product.html')
+
+
+# Helper function (add if not exists)
+def allowed_file(filename):
+    """Check if file extension is allowed"""
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg'}
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/admin/verify_payment/<int:order_id>', methods=['POST'])
 @login_required

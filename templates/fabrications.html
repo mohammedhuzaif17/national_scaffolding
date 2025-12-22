@@ -423,164 +423,116 @@
 }
 </style>
 
+
 <div class="page-container">
     <header class="page-header">
         <h1 class="page-title">Fabrications</h1>
-        <p class="page-subtitle">High-quality fabrication products for all your construction needs</p>
-        
+        <p class="page-subtitle">
+            High-quality fabrication products for all your construction needs
+        </p>
+
         <div class="text-center mb-3">
-            <button class="btn btn-secondary" onclick="window.location.href='{{ url_for('national_scaffoldings') }}'">
+            <button class="btn btn-secondary"
+                onclick="window.location.href='{{ url_for('national_scaffoldings') }}'">
                 Go to Scaffoldings
             </button>
         </div>
     </header>
-    
-    <h2 class="mt-4">Our Fabrication Products</h2>
-    
+
     {% if products %}
-        <div class="products-grid">
-            {% for product in products %}
-            <div class="product-card">
-                <div class="product-image-container" onclick="window.location.href='{{ url_for('fabrication_detail', product_id=product.id) }}'">
-                    {% if product.image_url %}
-                        {% set images = product.image_url.split(',') %}
-                        {% set valid_images = [] %}
-                        {% for image in images %}
-                            {% if image.strip() %}
-                                {% set _ = valid_images.append(image.strip()) %}
-                            {% endif %}
-                        {% endfor %}
-                
-                        {% if valid_images | length >= 3 %}
-                            <!-- Show 2 images + more indicator -->
-                            <div class="product-image-grid">
-                                <img src="{{ url_for('static', filename=valid_images[0]) }}" alt="{{ product.name }} - Image 1" onerror="this.style.display='none';">
-                                <img src="{{ url_for('static', filename=valid_images[1]) }}" alt="{{ product.name }} - Image 2" onerror="this.style.display='none';">
-                                <div class="product-image-more">+{{ valid_images|length - 2 }}</div>
-                            </div>
-                        {% elif valid_images|length == 2 %}
-                            <!-- Show 2 images side by side -->
-                            <div class="product-image-grid">
-                                <img src="{{ url_for('static', filename=valid_images[0]) }}" alt="{{ product.name }} - Image 1" onerror="this.style.display='none';">
-                                <img src="{{ url_for('static', filename=valid_images[1]) }}" alt="{{ product.name }} - Image 2" onerror="this.style.display='none';">
-                            </div>
-                        {% elif valid_images|length == 1 %}
-                            <!-- Single image -->
-                            <img src="{{ url_for('static', filename=valid_images[0]) }}" alt="{{ product.name }}" class="product-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                            <div class="product-image-placeholder" style="display: none;">
-                                <span>📦</span>
-                            </div>
-                        {% else %}
-                            <!-- No images -->
-                            <div class="product-image-placeholder">
-                                <span>📦</span>
-                            </div>
-                        {% endif %}
-                    {% else %}
-                        <div class="product-image-placeholder">
-                            <span>📦</span>
-                        </div>
-                    {% endif %}
+    <div class="products-grid">
+
+        {% for product in products %}
+        <div class="product-card">
+
+            <!-- IMAGE -->
+            <div class="product-image-container"
+                 onclick="window.location.href='{{ url_for('fabrication_detail', product_id=product.id) }}'">
+
+                {% if product.image_url %}
+                    {% set images = product.image_url.split(',') %}
+                    <img src="{{ url_for('static', filename=images[0].strip()) }}"
+                         class="product-image"
+                         alt="{{ product.name }}"
+                         onerror="this.style.display='none'">
+                {% else %}
+                    <div class="product-image-placeholder">📦</div>
+                {% endif %}
+            </div>
+
+            <!-- INFO -->
+            <div class="product-info">
+                <h3 class="product-name"
+                    onclick="window.location.href='{{ url_for('fabrication_detail', product_id=product.id) }}'">
+                    {{ product.name }}
+                </h3>
+
+                {% if product.category %}
+                <span class="product-category">
+                    {{ product.category|replace('-', ' ') }}
+                </span>
+                {% endif %}
+
+                {% if product.description %}
+                <p class="product-description">
+                    {{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}
+                </p>
+                {% endif %}
+
+                <div class="product-price-row">
+                    <span class="product-price">
+                        ₹{{ "%.2f"|format(product.price|float) }}
+                    </span>
                 </div>
-                
-                <div class="product-info">
-                    <h3 class="product-name" onclick="window.location.href='{{ url_for('fabrication_detail', product_id=product.id) }}'">
-                        {{ product.name }}
-                    </h3>
-                    
-                    {% if product.category %}
-                    <span class="product-category">{{ product.category|replace('-', ' ') }}</span>
+
+                <div class="product-actions">
+                    <button class="btn btn-secondary"
+                        onclick="window.location.href='{{ url_for('fabrication_detail', product_id=product.id) }}'">
+                        View Details
+                    </button>
+
+                    {% if current_user.is_authenticated and session.get('user_type') != 'admin' %}
+                    <button class="btn btn-primary"
+                        onclick="addToCart({{ product.id }}, '{{ product.name|e }}')">
+                        🛒 Add to Cart
+                    </button>
                     {% endif %}
-                    
-                    {% if product.description %}
-                    <p class="product-description">
-                        {{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}
-                    </p>
-                    {% endif %}
-                    
-                    <!-- Fixed: Price display - using proper formatting -->
-                    <div class="product-price-row">
-                        <span class="product-price">₹{{ "%.2f"|format(product.price|float) }}</span>
-                    </div>
-                    
-                    <div class="product-actions">
-                        <button class="btn btn-secondary" 
-                                onclick="window.location.href='{{ url_for('fabrication_detail', product_id=product.id) }}'">
-                            View Details
-                        </button>
-                        {% if current_user.is_authenticated and session.get('user_type') != 'admin' %}
-                            <button class="btn btn-primary" id="add-cart-btn-{{ product.id }}"
-                                    onclick="event.stopPropagation(); addToCart({{ product.id }}, '{{ product.name|e }}', {{ product.price }})">
-                                🛒 Add to Cart
-                            </button>
-                        {% endif %}
-                    </div>
                 </div>
             </div>
-            {% endfor %}
+
         </div>
+        {% endfor %}
+
+    </div>
     {% else %}
         <div class="alert alert-warning text-center">
-            <h3>No Fabrication Products Available</h3>
-            <p>Please check back later or contact us for more information.</p>
+            No Fabrication Products Available
         </div>
     {% endif %}
 </div>
-
-{% if current_user.is_authenticated and session.get('user_type') != 'admin' %}
-<button class="view-cart-btn" onclick="window.location.href='{{ url_for('cart') }}'">
-    🛒 View Cart
-</button>
-{% endif %}
 
 {% endblock %}
 
 {% block scripts %}
 <script>
-function addToCart(productId, productName, price) {
-    // Change button text to indicate processing
-    const button = document.getElementById('add-cart-btn-' + productId);
-    const originalText = button.innerHTML;
-    button.innerHTML = 'Adding...';
-    button.disabled = true;
-    
+function addToCart(productId, productName) {
     fetch('/add_to_cart', {
         method: 'POST',
-        credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
             product_id: productId,
             quantity: 1,
-            customization: { 
-                product_type: 'fabrication',
-                quantity: 1 
-            }
+            customization: { product_type: 'fabrication' }
         })
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
+    .then(r => r.json())
+    .then(d => {
+        if (d.success) alert('✅ ' + productName + ' added to cart');
+        else alert('❌ ' + d.message);
     })
-    .then(data => {
-        if (data.success) {
-            alert('✅ ' + productName + ' added to cart!');
-            // Optionally redirect to cart
-            // window.location.href = '/cart';
-        } else {
-            alert('❌ Error: ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('❌ Error adding to cart');
-    })
-    .finally(() => {
-        // Restore button state
-        button.innerHTML = originalText;
-        button.disabled = false;
-    });
+    .catch(() => alert('❌ Error adding to cart'));
 }
 </script>
+
+
 {% endblock %}

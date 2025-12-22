@@ -1,0 +1,531 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} – Fabrication{% endblock %}
+
+{% block content %}
+<style>
+:root{
+    --brand-900: #001d3d;
+    --brand-700: #002855;
+    --accent: #ffd966;
+    --muted: #666;
+}
+
+.glass-container {
+    max-width: 1100px;
+    margin: 20px auto;
+    padding: 18px;
+    font-family: Inter, sans-serif;
+    color: #111827;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+@media (max-width: 880px) {
+    .detail-grid { grid-template-columns: 1fr; }
+}
+
+/* Gallery */
+.product-detail-gallery {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.gallery-main-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.gallery-main-image {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.45s ease-in-out;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fafafa;
+}
+
+.gallery-main-image.active {
+    opacity: 1;
+    z-index: 1;
+    pointer-events: auto;
+}
+
+.gallery-main-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 10px;
+    cursor: zoom-in;
+}
+
+.gallery-thumbnails {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+}
+
+.gallery-thumbnail {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: all 0.18s ease;
+    flex-shrink: 0;
+}
+.gallery-thumbnail:hover { transform: scale(1.03); border-color: rgba(0,0,0,0.06); }
+.gallery-thumbnail.active { border-color: #d4af37; transform: scale(1.05); }
+
+.gallery-navigation {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.65);
+    color: white;
+    border: 2px solid rgba(255,255,255,0.8);
+    width: 48px;
+    height: 48px;
+    cursor: pointer;
+    font-size: 26px;
+    border-radius: 50%;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.gallery-prev { left: 14px; }
+.gallery-next { right: 14px; }
+.gallery-navigation.single-image { display: none !important; }
+
+.gallery-counter {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(0,0,0,0.66);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-weight: 700;
+    z-index: 30;
+}
+
+.no-image-box {
+    background: rgba(255,255,255,0.06);
+    padding: 3.5rem;
+    text-align: center;
+    border-radius: 10px;
+}
+
+/* Product info */
+.page-title { font-size: 1.6rem; margin: 0; color: var(--brand-900); }
+.product-meta { color: var(--accent); text-transform: uppercase; margin: 8px 0 16px; font-weight:700; }
+.product-description { color: #000; line-height:1.6; margin-bottom: 1rem; }
+
+.customization-section { margin-top: 10px; }
+.product-price { font-size: 1.3rem; font-weight: 900; color: var(--brand-900); margin-top: 8px; }
+.form-group { margin-bottom: 10px; }
+.form-group label { display:block; margin-bottom:6px; font-weight:700; color:var(--brand-700); }
+.form-group select { width:100%; padding:8px 10px; border-radius:6px; border:1px solid #e6e9ee; }
+
+.btn-primary {
+    background: linear-gradient(135deg,var(--brand-700),var(--brand-900));
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: 800;
+    width: 100%;
+    cursor: pointer;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.toast-notification {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background-color: rgba(0,0,0,0.82);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 6px;
+    z-index: 2000;
+    opacity: 0;
+    transition: all .28s ease;
+}
+.toast-notification.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+    padding: 18px;
+}
+.modal-overlay.show { display: flex; }
+
+.modal-content {
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    max-height: 95vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-image-wrap {
+    width: 100%;
+    height: 0;
+    padding-bottom: 56%;
+    position: relative;
+}
+.modal-image-wrap img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.modal-close, .modal-nav {
+    position: absolute;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    border: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 3050;
+}
+.modal-close { right: 18px; top: 18px; }
+.modal-nav { top: 50%; transform: translateY(-50%); width: 56px; height: 56px; font-size: 28px; }
+.modal-prev { left: 12px; }
+.modal-next { right: 12px; }
+
+@media (max-width: 480px) {
+    .gallery-thumbnail { width: 56px; height:56px; }
+    .product-detail-gallery { height: 260px; }
+}
+</style>
+
+<div class="glass-container">
+    <button class="btn-secondary" onclick="history.back()" style="margin-bottom: 1rem;">← Back to Products</button>
+
+    <div class="detail-grid">
+        <div>
+            {% if product.image_url %}
+                {% set valid_images = product.image_url
+                    .split(',')
+                    | map('trim')
+                    | reject('equalto', '')
+                    | list %}
+
+                {% if valid_images|length > 0 %}
+                    <div class="product-detail-gallery">
+                        <div class="gallery-main-container">
+                            {% for img_url in valid_images %}
+                                <div class="gallery-main-image {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}">
+                                    <img src="{{ url_for('static', filename=img_url) }}"
+                                         alt="{{ product.name }} - Image {{ loop.index }}"
+                                         loading="lazy"
+                                         onclick="openModal({{ loop.index0 }})">
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        {% if valid_images|length > 1 %}
+                            <div class="gallery-counter">
+                                <span id="currentImageNum">1</span> / {{ valid_images|length }}
+                            </div>
+                            <button class="gallery-navigation gallery-prev" id="galleryPrev">‹</button>
+                            <button class="gallery-navigation gallery-next" id="galleryNext">›</button>
+                        {% endif %}
+                    </div>
+
+                    {% if valid_images|length > 1 %}
+                        <div class="gallery-thumbnails">
+                            {% for img_url in valid_images %}
+                                <img src="{{ url_for('static', filename=img_url) }}"
+                                     class="gallery-thumbnail {% if loop.first %}active{% endif %}"
+                                     onclick="setMainImage({{ loop.index0 }})">
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="no-image-box">
+                        <p style="font-size:2rem;color:#ffa500">📷</p>
+                        <p>No Image Available</p>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="no-image-box">
+                    <p style="font-size:2rem;color:#ffa500">📷</p>
+                    <p>Product Image Not Set</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Info -->
+        <div>
+            <h1 class="page-title">{{ product.name }}</h1>
+            <p class="product-meta">{{ product.category|title if product.category else 'N/A' }}</p>
+            <p class="product-description">{{ product.description }}</p>
+
+            <!-- Fabrication specific section -->
+            <div class="customization-section">
+                <h3 style="color: var(--accent); margin-bottom: 8px;">Product Details</h3>
+                <p style="color: #000; margin-bottom: 1rem;">High-quality fabrication product for your construction needs.</p>
+
+                <div class="form-group">
+                    <label for="quantity">Quantity</label>
+                    <select id="quantity" onchange="updateFabricationPrice()">
+                        {% for i in range(1,51) %}
+                        <option value="{{ i }}" {% if i == 1 %}selected{% endif %}>{{ i }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="product-price" id="final_price_display">₹{{ "%.2f"|format(product.price|float) }}</div>
+            </div>
+
+            <div class="product-note" style="background: rgba(255,217,102,0.25); padding: 14px 16px; border-left: 6px solid var(--accent); border-radius: 8px; font-weight: 600; margin: 18px 0;">
+                <strong>Fabrication Product</strong><br>
+                Custom sizes and specifications are available on request.
+            </div>
+
+            {% if current_user.is_authenticated and session.get('user_type') == 'admin' %}
+                <div style="background: rgba(255, 165, 0, 0.12); padding: 12px; border-radius: 8px; margin-top: 12px;">
+                    <p style="margin:0; font-weight:700; color:#ffa500;">⚠️ Admin accounts cannot make purchases.</p>
+                </div>
+            {% elif current_user.is_authenticated %}
+                <div style="margin-top: 16px;">
+                    <button class="btn-primary" id="addToCartBtn" onclick="addToCartCustom()">🛒 Add to Cart</button>
+                </div>
+            {% else %}
+                <div style="margin-top: 16px;">
+                    <button class="btn-primary" onclick="window.location.href='{{ url_for('login') }}'">🔐 Login to Purchase</button>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div id="imageModal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal()">✕</button>
+        <button class="modal-nav modal-prev" onclick="modalPrev()">‹</button>
+        <div class="modal-image-wrap">
+            <img id="modalImage" src="" alt="">
+        </div>
+        <button class="modal-nav modal-next" onclick="modalNext()">›</button>
+    </div>
+</div>
+
+<div id="toast" class="toast-notification"></div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Gallery functionality
+let galleryImages = [];
+let totalImages = 0;
+let currentIndex = 0;
+
+function buildImageUrl(relativePath) {
+    if (!relativePath) return '';
+    return '{{ url_for("static", filename="__PLACEHOLDER__") }}'.replace('__PLACEHOLDER__', relativePath);
+}
+
+{% if product.image_url %}
+    const rawImages = `{{ product.image_url }}`.split(',');
+    galleryImages = rawImages.map(s => s.trim()).filter(s => s !== '').map(url => buildImageUrl(url));
+    totalImages = galleryImages.length;
+{% endif %}
+
+const prevBtn = document.getElementById('galleryPrev');
+const nextBtn = document.getElementById('galleryNext');
+const counterEl = document.getElementById('currentImageNum');
+
+function setActiveImage(index) {
+    index = Math.max(0, Math.min(index, totalImages - 1));
+    const mainItems = document.querySelectorAll('.gallery-main-image');
+    const thumbs = document.querySelectorAll('.gallery-thumbnail');
+
+    if (mainItems[currentIndex]) mainItems[currentIndex].classList.remove('active');
+    if (thumbs[currentIndex]) thumbs[currentIndex].classList.remove('active');
+
+    currentIndex = index;
+
+    if (mainItems[currentIndex]) mainItems[currentIndex].classList.add('active');
+    if (thumbs[currentIndex]) thumbs[currentIndex].classList.add('active');
+    if (counterEl) counterEl.textContent = (currentIndex + 1);
+}
+
+window.setMainImage = function(i) {
+    setActiveImage(parseInt(i));
+};
+
+function prevImage() { 
+    if (totalImages > 1) setActiveImage((currentIndex - 1 + totalImages) % totalImages); 
+}
+
+function nextImage() { 
+    if (totalImages > 1) setActiveImage((currentIndex + 1) % totalImages); 
+}
+
+if (prevBtn) prevBtn.addEventListener('click', prevImage);
+if (nextBtn) nextBtn.addEventListener('click', nextImage);
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') prevImage();
+    if (e.key === 'ArrowRight') nextImage();
+    if (e.key === 'Escape') closeModal();
+});
+
+// Modal functionality
+const modal = document.getElementById('imageModal');
+const modalImg = document.getElementById('modalImage');
+
+window.openModal = function(index) {
+    if (!galleryImages || galleryImages.length === 0) return;
+    index = Math.max(0, Math.min(index, galleryImages.length - 1));
+    modal.classList.add('show');
+    modalImg.src = galleryImages[index];
+    modalCurrentIndex = index;
+};
+
+window.closeModal = function() {
+    modal.classList.remove('show');
+    modalImg.src = '';
+};
+
+let modalCurrentIndex = 0;
+window.modalPrev = function() {
+    if (!galleryImages || galleryImages.length <= 1) return;
+    modalCurrentIndex = (modalCurrentIndex - 1 + galleryImages.length) % galleryImages.length;
+    modalImg.src = galleryImages[modalCurrentIndex];
+};
+
+window.modalNext = function() {
+    if (!galleryImages || galleryImages.length <= 1) return;
+    modalCurrentIndex = (modalCurrentIndex + 1) % galleryImages.length;
+    modalImg.src = galleryImages[modalCurrentIndex];
+};
+
+modal.addEventListener('click', function(e) {
+    if (e.target === modal) closeModal();
+});
+
+// Fabrication pricing
+let basePrice = {{ product.price | default(0) | float }};
+
+window.updateFabricationPrice = function() {
+    const quantity = parseInt(document.getElementById('quantity').value);
+    const total = basePrice * quantity;
+    document.getElementById('final_price_display').textContent = '₹' + total.toFixed(2);
+};
+
+// Add to cart functionality
+window.addToCartCustom = function() {
+    const btn = document.getElementById('addToCartBtn');
+    if (!btn) return;
+    btn.disabled = true;
+    btn.innerHTML = 'Adding...';
+
+    const qty = parseInt(document.getElementById('quantity').value);
+    
+    const customization = { 
+        product_type: 'fabrication', 
+        quantity: qty 
+    };
+
+    const payload = {
+        product_id: {{ product.id }},
+        quantity: qty,
+        customization: customization
+    };
+
+    fetch("{{ url_for('add_to_cart') }}", {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(async res => {
+        const json = await res.json().catch(()=>({ success:false, message:'Invalid JSON' }));
+        if (!res.ok) {
+            showToast('❌ ' + (json.message || `Server error ${res.status}`));
+            btn.disabled = false;
+            btn.innerHTML = '🛒 Add to Cart';
+            return;
+        }
+        if (json.success) {
+            showToast('✓ Added to cart!');
+            setTimeout(() => { window.location.href = '/cart'; }, 700);
+        } else {
+            showToast('❌ ' + (json.message || 'Failed'));
+            btn.disabled = false;
+            btn.innerHTML = '🛒 Add to Cart';
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        showToast('❌ Network error');
+        btn.disabled = false;
+        btn.innerHTML = '🛒 Add to Cart';
+    });
+};
+
+window.showToast = function(message) {
+    const t = document.getElementById('toast');
+    if (!t) return;
+    t.textContent = message;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+};
+
+// Initialize pricing on load
+updateFabricationPrice();
+</script>
+{% endblock %}

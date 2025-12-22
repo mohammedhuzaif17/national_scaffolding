@@ -725,51 +725,39 @@ def calculate_vertical_price(product, size_id, cup_id, mode='buy'):
         'price': round(unit_price, 2),
         'deposit': round(deposit, 2)
     }
-
 @cuplock_bp.route('/product/ledger/<int:product_id>')
 def ledger_product_page(product_id):
-    """User page for Ledger Cuplock product"""
+    """
+    User page for Ledger Cuplock product
+    Uses ONLY admin-defined prices from product table:
+    - product.price (buy price)
+    - product.rent_price (rent price)
+    - product.deposit_amount (deposit for rent)
+    
+    Formula: (price × quantity) + (deposit × quantity if renting)
+    """
     try:
         logger.info(f"Loading ledger product page for product_id: {product_id}")
         
+        # Fetch product
         product = Product.query.get_or_404(product_id)
         
-        # FIXED: Get display URL for template
+        # Verify this is actually a ledger product
+        if product.category != 'cuplock' or product.cuplock_type != 'ledger':
+            logger.warning(f"Product {product_id} is not a ledger - redirecting")
+            flash('Invalid product type', 'error')
+            return redirect(url_for('national_scaffoldings'))
+
+        # Set display image
         product.display_image_url = get_image_url(product.image_url)
-        
-        logger.info(f"Found product: {product.name}, Image: {product.display_image_url}")
+        logger.info(f"Ledger product: {product.name}")
+        logger.info(f"Buy Price: ₹{product.price}, Rent: ₹{product.rent_price}, Deposit: ₹{product.deposit_amount}")
 
-        sizes = CuplockLedgerSize.query.filter_by(
-            product_id=product_id,
-            is_active=True
-        ).all()
-        logger.info(f"Found {len(sizes)} sizes for this product")
-
-        # Prepare a JSON-serializable structure for client-side use
-        sizes_json = []
-        for s in sizes:
-            try:
-                size_data = {
-                    'id': s.id,
-                    'label': s.size_label,
-                    'weight': float(s.weight_kg or 0),
-                    'buy_price': float(s.buy_price or 0),
-                    'rent_price': float(s.rent_price or 0),
-                    'deposit': float(s.deposit_amount or 0)
-                }
-                sizes_json.append(size_data)
-                logger.debug(f"Added size data: {size_data}")
-            except Exception as size_error:
-                logger.error(f"Error processing size {s.id}: {size_error}")
-                raise
-
-        logger.info(f"Successfully prepared {len(sizes_json)} sizes for JSON")
-
-        return render_template('cuplock_ledger.html',
-                               product=product,
-                               sizes=sizes,
-                               sizes_json=sizes_json,
-                               ledger_sizes=LEDGER_SIZES)
+        # Render dedicated ledger template
+        return render_template(
+            'cuplock_ledger.html',
+            product=product
+        )
 
     except Exception as e:
         logger.error(f"Error loading ledger product page: {e}", exc_info=True)
@@ -839,28 +827,36 @@ def api_vertical_sizes(product_id):
         return jsonify({"error": True, "message": str(e)}), 500
 
 
-@cuplock_bp.route('/api/vertical/size/<int:size_id>/cups')
-def get_cups_for_size(size_id):
-    """API endpoint to get cups for a specific vertical size"""
+@cuplock_bp.route('/cuplock/api/vertical/size/<int:size_id>/cups', methods=['GET'])
+def get_cups_by_size(size_id):
+    """API endpoint to fetch cup options for a specific vertical size"""
     try:
-        size = CuplockVerticalSize.query.get_or_404(size_id)
+        cups = CuplockVerticalCup.query.filter_by(vertical_size_id=size_id).all()
         
-        cups = CuplockVerticalCup.query.filter_by(
-            product_id=size.product_id,
-            size_label=size.size_label
-        ).all()
-        
-        result = []
+        cup_list = []
         for cup in cups:
-            result.append({
+            # ✅ Use the helper function that already handles all edge cases!
+            image_url = get_image_url(cup.cup_image_url) if cup.cup_image_url else 'images/no-image.png'
+            
+            cup_list.append({
                 'id': cup.id,
+                'size_id': cup.vertical_size_id,
                 'cup_count': cup.cup_count,
-                'buy_price': float(cup.buy_price or 0),
-                'rent_price': float(cup.rent_price or 0),
-                'deposit_amount': float(cup.deposit_amount or 0),
-                'image_url': cup.image_url or '/static/images/no-image.png'
+                'buy_price': float(cup.buy_price) if cup.buy_price else 0,
+                'image_url': image_url
             })
         
-        return jsonify({'success': True, 'cups': result})
+        logger.info(f"✅ Loaded {len(cup_list)} cups for size {size_id}")
+        
+        return jsonify({
+            'success': True,
+            'cups': cup_list
+        })
+        
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
+        logger.error(f"❌ Error fetching cups: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'message': str(e),
+            'cups': []
+        }), 500
