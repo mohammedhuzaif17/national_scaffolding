@@ -1,0 +1,2134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - THE NATIONAL SCAF</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600;700&family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- GLOBAL STYLES --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #fff;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* --- WELCOME POPUP STYLES --- */
+        .welcome-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .welcome-popup.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .welcome-content {
+            background-color: white;
+            border-radius: 10px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transform: translateY(30px);
+            transition: transform 0.3s ease;
+        }
+
+        .welcome-popup.active .welcome-content {
+            transform: translateY(0);
+        }
+
+        .welcome-content h1 {
+            font-family: 'Playfair Display', serif;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2.2rem;
+        }
+
+        .welcome-content p {
+            margin-bottom: 30px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .popup-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .btn-explore, .btn-login {
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .btn-explore {
+            background-color: #f0c14b;
+            color: white;
+        }
+
+        .btn-explore:hover {
+            background-color: #d4a017;
+            transform: translateY(-3px);
+        }
+
+        .btn-login {
+            background-color: transparent;
+            color: #f0c14b;
+            border: 2px solid #f0c14b;
+        }
+
+        .btn-login:hover {
+            background-color: #f0c14b;
+            color: white;
+        }
+
+        /* --- NAVBAR STYLES --- */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 1.5rem;
+            background-color: #f8f9fa;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .brand-text {
+            margin-left: 10px;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .navbar-logo {
+            height: 70px;
+            width: 70px;
+            border-radius: 50%;
+            object-fit: contain;
+            background-color: transparent;
+            padding: 0;
+            border: none;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-menu li {
+            margin-left: 1.5rem;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            font-family: 'Poppins', sans-serif;
+            transition: color 0.2s;
+        }
+
+        .nav-menu a:hover {
+            color: #007bff;
+        }
+        
+        .nav-menu a.active {
+            color: #090909; /* Highlight for active page */
+        }
+
+        .cart-icon {
+            font-size: 1.2rem;
+        }
+
+        .hamburger {
+            display: none;
+            cursor: pointer;
+        }
+
+        .hamburger span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            margin: 5px auto;
+            background-color: #333;
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* --- HERO SECTION STYLES --- */
+        .hero {
+            position: relative;
+            height: 90vh;
+            background: url('https://z-cdn-media.chatglm.cn/files/fdc4a27f-cba6-4933-a2a0-38b8651cd4e9.jpg?auth_key=1866425064-d549a68b7b0c435b9633a2b1d4704d46-0-2a122b52219c4c6acb83ebfc3d2ef4d0') center/cover no-repeat;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+        
+
+        .hero-title {
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: "Roboto", sans-serif;
+            font-optical-sizing: auto;
+            font-weight: 700;
+            font-style: normal;
+            font-variation-settings: "wdth" 100;
+            font-size: 5rem;
+            color:#f3df9e;
+            text-align: center;
+            z-index: 3;
+            letter-spacing: 3px;
+            text-shadow: 
+                0px 0px 10px rgba(0, 0, 0, 0.7),
+                0px 0px 20px rgba(0, 0, 0, 0.5),
+                0px 0px 30px rgba(0, 0, 0, 0.3),
+                0px 2px 40px rgba(0, 0, 0, 0.2),
+                0px 4px 50px rgba(0, 0, 0, 0.1),
+                0px 6px 60px rgba(0, 0, 0, 0.05),
+                0px 8px 70px rgba(0, 0, 0, 0.02);
+            white-space: nowrap;
+            width: 100%;
+            max-width: 100vw;
+            overflow: hidden;
+            /* Professional Animation */
+            opacity: 0;
+            transform: translateX(-50%) translateY(-30px) scale(0.8);
+            animation: professionalEntrance 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            transition: all 0.3s ease;
+        }
+
+        @keyframes professionalEntrance {
+            0% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-30px) scale(0.8);
+                filter: blur(10px);
+            }
+            20% {
+                opacity: 0.3;
+                transform: translateX(-50%) translateY(-20px) scale(0.9);
+                filter: blur(5px);
+            }
+            40% {
+                opacity: 0.6;
+                transform: translateX(-50%) translateY(-10px) scale(0.95);
+                filter: blur(2px);
+            }
+            60% {
+                opacity: 0.8;
+                transform: translateX(-50%) translateY(-5px) scale(1);
+                filter: blur(0px);
+            }
+            80% {
+                opacity: 0.95;
+                transform: translateX(-50%) translateY(0px) scale(1.05);
+                filter: blur(0px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0px) scale(1);
+                filter: blur(0px);
+                text-shadow: 
+                    0px 0px 10px rgba(0, 0, 0, 0.7),
+                    0px 0px 20px rgba(0, 0, 0, 0.5),
+                    0px 0px 30px rgba(0, 0, 0, 0.3),
+                    0px 2px 40px rgba(0, 0, 0, 0.2),
+                    0px 4px 50px rgba(0, 0, 0, 0.1),
+                    0px 6px 60px rgba(0, 0, 0, 0.05),
+                    0px 8px 70px rgba(0, 0, 0, 0.02);
+            }
+        }
+
+        .hero-quote {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 1000px;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            font-weight: 500;
+            color: #f3df9e;
+            text-align: center;
+            line-height: 1.6;
+            z-index:4;
+            padding: 30px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .hero-quote-text {
+            display: inline-block;
+            overflow: hidden;
+            white-space: nowrap;
+            animation: typewriter 12s steps(150, end) infinite;
+            width: 0;
+        }
+
+        @keyframes typewriter {
+            0% {
+                width: 0;
+            }
+            5% {
+                width: 5%;
+            }
+            10% {
+                width: 10%;
+            }
+            15% {
+                width: 15%;
+            }
+            20% {
+                width: 20%;
+            }
+            25% {
+                width: 25%;
+            }
+            30% {
+                width: 30%;
+            }
+            35% {
+                width: 35%;
+            }
+            40% {
+                width: 40%;
+            }
+            45% {
+                width: 45%;
+            }
+            50% {
+                width: 50%;
+            }
+            55% {
+                width: 55%;
+            }
+            60% {
+                width: 60%;
+            }
+            65% {
+                width: 65%;
+            }
+            70% {
+                width: 70%;
+            }
+            75% {
+                width: 75%;
+            }
+            80% {
+                width: 80%;
+            }
+            85% {
+                width: 85%;
+            }
+            90% {
+                width: 90%;
+            }
+            95% {
+                width: 95%;
+            }
+            100% {
+                width: 100%;
+            }
+        }
+
+        .hero-container {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 1200px;
+            padding: 0 20px;
+        }
+
+        .hero-image {
+            display: none; /* Hide original image */
+        }
+
+        /* --- BRAND SHOWCASE SECTION STYLES --- */
+        .brand-showcase {
+            padding: 60px 0;
+            background-color: #f9f9f9;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .brand-showcase-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+        }
+
+        .brand-showcase-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .brand-showcase-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            color: #333;
+            margin-bottom: 15px;
+            position: relative;
+            display: inline-block;
+            padding-bottom: 15px;
+        }
+
+        .brand-showcase-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background-color: #f0c14b;
+        }
+
+        .brand-showcase-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .brand-arrow {
+            background-color: #f0c14b;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 18px;
+        }
+
+        .brand-arrow:hover {
+            background-color: #d4a017;
+            transform: scale(1.1);
+        }
+
+        .brand-arrow:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .brand-showcase-window {
+            overflow: hidden;
+            position: relative;
+            height: 180px;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .brand-showcase-track {
+            display: flex;
+            transition: transform 0.5s ease;
+            height: 100%;
+        }
+
+        .brand-showcase-slide {
+            min-width: 200px;
+            height: 100%;
+            flex-shrink: 0;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            margin: 0 10px;
+        }
+
+        .brand-logo-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .brand-logo {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .view-all-btn {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .view-all-btn button {
+            background-color: #f0c14b;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .view-all-btn button:hover {
+            background-color: #d4a017;
+            transform: translateY(-3px);
+        }
+
+        /* --- IMAGE GALLERY SECTION STYLES --- */
+        .image-gallery {
+            padding: 60px 0;
+            background-color: #fff;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .gallery-container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 0;
+            position: relative;
+        }
+
+        .gallery-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 0 20px;
+        }
+
+        .gallery-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            color: #333;
+            margin-bottom: 15px;
+            position: relative;
+            display: inline-block;
+            padding-bottom: 15px;
+        }
+
+        .gallery-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background-color: #f0c14b;
+        }
+
+        .gallery-window {
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+            height: 500px;
+            margin: 0 auto;
+        }
+
+        .gallery-track {
+            display: flex;
+            transition: transform 0.8s ease;
+            height: 100%;
+        }
+
+        .gallery-slide {
+            min-width: calc(100% / 3);
+            height: 100%;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+            padding: 10px;
+        }
+
+        .gallery-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Changed from contain to cover for better fitting */
+            transition: transform 0.5s ease;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .gallery-slide:hover img {
+            transform: scale(1.02);
+        }
+
+        .gallery-caption {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            border-radius: 5px;
+        }
+
+        .gallery-slide:hover .gallery-caption {
+            transform: translateY(0);
+        }
+
+        .gallery-controls {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 10;
+        }
+
+        .gallery-arrow {
+            background-color: rgba(240, 193, 75, 0.8);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 18px;
+        }
+
+        .gallery-arrow:hover {
+            background-color: rgba(240, 193, 75, 1);
+            transform: scale(1.1);
+        }
+
+        .gallery-indicators {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .gallery-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .gallery-indicator.active {
+            background-color: #f0c14b;
+        }
+
+        /* --- SECTION TITLE STYLES --- */
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-title h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: #333;
+            position: relative;
+            display: inline-block;
+            padding-bottom: 15px;
+        }
+
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background-color: #f0c14b;
+        }
+
+        /* --- EXPERTISE SECTION STYLES --- */
+        .expertise-new {
+            padding: 80px 0;
+            background-color: #f9f9f9;
+        }
+
+        .expertise-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .expertise-item {
+            text-align: center;
+            padding: 30px 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .expertise-item:hover {
+            transform: translateY(-10px);
+        }
+
+        .expertise-icon {
+            font-size: 3rem;
+            color: #f0c14b;
+            margin-bottom: 20px;
+        }
+
+        .expertise-item h3 {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .expertise-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        .expertise-percentage {
+            height: 100%;
+            background: linear-gradient(90deg, #f0c14b, #d4a017);
+            border-radius: 5px;
+            transition: width 1s ease-in-out;
+        }
+
+        .expertise-item p {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #f0c14b;
+        }
+
+        /* --- JOURNEY SECTION STYLES --- */
+        .journey {
+            padding: 80px 0;
+            background-color: white;
+        }
+
+        .journey-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .clients-section, .projects-section {
+            background-color: #f9f9f9;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .clients-section h3, .projects-section h3 {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            color: #333;
+            text-align: center;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .clients-section h3::after, .projects-section h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background-color: #f0c14b;
+        }
+
+        .clients-grid, .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .client-item, .project-item {
+            padding: 15px 10px;
+            background-color: white;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 500;
+            color: #555;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .client-item:hover, .project-item:hover {
+            background-color: #f0c14b;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(240, 193, 75, 0.3);
+        }
+
+        /* --- FOOTER STYLES --- */
+        footer {
+            background-color: #000a1a;
+            color: #ecf0f1;
+            padding: 60px 0 20px;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .footer-main {
+            display: grid;
+            grid-template-columns: 1fr 1fr 2fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-column h3 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #f0c14b;
+        }
+
+        .footer-column h4 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #f0c14b;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .footer-column h4::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background-color: #f0c14b;
+        }
+
+        .footer-logo p {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-column ul li a {
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-column ul li a:hover {
+            color: #f0c14b;
+        }
+
+        .services-contact-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .contact-info {
+            list-style: none;
+        }
+
+        .contact-info li {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .contact-info li i {
+            color: #f0c14b;
+            margin-right: 15px;
+            font-size: 1.1rem;
+            margin-top: 5px;
+        }
+
+        .contact-info li span {
+            flex: 1;
+        }
+
+        .contact-map-item {
+            flex-direction: column;
+        }
+
+        .inline-map-container {
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .view-map-link {
+            display: inline-block;
+            margin-top: 10px;
+            color: #f0c14b;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .view-map-link:hover {
+            text-decoration: underline;
+        }
+
+        .footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 20px;
+            border-top: 1px solid #34495e;
+        }
+
+        .footer-bottom-links a {
+            color: #ecf0f1;
+            text-decoration: none;
+            margin-left: 20px;
+            transition: color 0.3s ease;
+        }
+
+        .footer-bottom-links a:hover {
+            color: #f0c14b;
+        }
+
+        /* --- SOCIAL LINKS STYLES --- */
+        .social-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #f0c14b;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+
+        .social-links a:hover {
+            background-color: #d4a017;
+        }
+
+        .single-icon {
+            justify-content: center;
+        }
+
+        /* --- POLICY SECTION STYLES --- */
+        .policy-section {
+            padding: 60px 0;
+            background-color: #f9f9f9;
+        }
+
+        .policy-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .policy-content h2 {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            color: #333;
+            text-align: center;
+        }
+
+        .policy-content h3 {
+            font-size: 1.3rem;
+            margin: 25px 0 15px;
+            color: #333;
+        }
+
+        .policy-content p {
+            margin-bottom: 20px;
+            line-height: 1.7;
+        }
+
+        .policy-content ul {
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+
+        .policy-content li {
+            margin-bottom: 10px;
+        }
+
+        .back-to-footer {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 10px 20px;
+            background-color: #f0c14b;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .back-to-footer:hover {
+            background-color: #d4a017;
+        }
+
+        /* --- MODAL STYLES --- */
+        .brand-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 10px;
+            max-width: 900px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-header h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: #333;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #333;
+        }
+        
+        .all-brands-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .all-brand-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+        }
+        
+        .all-brand-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .all-brand-logo-container {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        
+        .all-brand-logo {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        .all-brand-name {
+            font-weight: 600;
+            color: #333;
+            text-align: center;
+        }
+
+        /* --- RESPONSIVE DESIGN --- */
+        @media (max-width: 992px) {
+            .hero-container {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .journey-container {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-main {
+                grid-template-columns: 1fr;
+            }
+
+            .services-contact-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .gallery-slide {
+                min-width: calc(100% / 2);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hamburger {
+                display: block;
+            }
+
+            .nav-menu {
+                position: fixed;
+                left: -100%;
+                top: 70px;
+                flex-direction: column;
+                background-color: #f8f9fa;
+                width: 100%;
+                text-align: center;
+                transition: 0.3s;
+                box-shadow: 0 10px 27px rgba(0, 0, 0, 0.05);
+                padding: 20px 0;
+            }
+
+            .nav-menu.active {
+                left: 0;
+            }
+
+            .nav-menu li {
+                margin: 1rem 0;
+            }
+            
+            .navbar-logo {
+                height: 55px;
+                width: 55px;
+            }
+            
+            .brand-text {
+                display: none;
+            }
+
+            .hero-title {
+                font-size: 3.5rem;
+                top: 20px;
+            }
+
+            .section-title h2 {
+                font-size: 2rem;
+            }
+
+            .expertise-container {
+                grid-template-columns: 1fr;
+            }
+
+            .clients-grid, .projects-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-bottom-links {
+                margin-top: 20px;
+            }
+
+            .footer-bottom-links a {
+                margin: 0 10px;
+            }
+
+            .brand-showcase-slide {
+                min-width: 150px;
+            }
+
+            .gallery-window {
+                height: 400px;
+            }
+            
+            .gallery-slide {
+                min-width: 100%;
+            }
+            
+            .hero-quote {
+                width: 95%;
+                font-size: 1.5rem;
+                padding: 20px;
+            }
+            
+            .welcome-content {
+                padding: 30px 20px;
+            }
+            
+            .welcome-content h1 {
+                font-size: 1.8rem;
+            }
+            
+            .popup-buttons {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hero-title {
+                font-size: 2.5rem;
+                top: 15px;
+            }
+
+            .clients-section, .projects-section {
+                padding: 30px 20px;
+            }
+
+            .policy-content {
+                padding: 30px 20px;
+            }
+
+            .brand-showcase-slide {
+                min-width: 120px;
+            }
+
+            .all-brands-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+
+            .gallery-window {
+                height: 300px;
+            }
+            
+            .hero-quote {
+                width: 90%;
+                font-size: 1.3rem;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Welcome Popup -->
+    <div id="welcomePopup" class="welcome-popup">
+        <div class="welcome-content">
+            <h1>Welcome to THE NATIONAL SCAFFOLDING</h1>
+            <p>We don't just build scaffolds — we build confidence. Explore our premium scaffolding and fabrication products for all your construction needs.</p>
+            <div class="popup-buttons">
+                <button class="btn-explore" onclick="closeWelcome()">Continue to Explore</button>
+                {% if not current_user.is_authenticated %}
+                <button class="btn-login" onclick="window.location.href='{{ url_for('login') }}'">Login / Register</button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation with Logo -->
+    <nav class="navbar">
+        <a href="home.html" class="navbar-brand">
+            <img src="{{ url_for('static', filename='images/logo.jpeg') }}" alt="Crest Technocrat Logo" class="navbar-logo">
+            <span class="brand-text">Crest Technocrat</span>
+        </a>
+        <ul class="nav-menu">
+            <!-- <li><a href="home.html" class="active">Home</a></li> -->
+            <!-- <li><a href="#" class="cart-icon"><i class="fas fa-shopping-cart"></i></a></li>
+     -->
+            {% if current_user.is_authenticated %}
+                {% if session.get('user_type') == 'admin' %}
+                    <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                    <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('national_scaffoldings') }}">Products</a></li>
+                    <li><a href="{{ url_for('cart') }}">Cart</a></li>
+                    <li><a href="{{ url_for('my_orders') }}">My Orders</a></li>
+                    <li><a href="{{ url_for('about') }}">About</a></li>
+                    <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                {% endif %}
+            {% else %}
+                <li><a href="{{ url_for('national_scaffoldings') }}">Products</a></li>
+                <li><a href="{{ url_for('about') }}">About</a></li>
+                <li><a href="{{ url_for('login') }}">Login</a></li>
+                <li><a href="{{ url_for('register') }}">Register</a></li>
+            {% endif %}
+        
+        </ul>
+        <div class="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </nav>
+
+    <!-- Hero Section with Background Image and Title -->
+    <section id="hero" class="hero">
+        <div class="hero-overlay"></div>
+        <h1 class="hero-title">The National Scaffolding</h1>
+        
+        <div class="hero-quote">
+            <div class="hero-quote-text">"The National Scaffolding — Strength, Safety, Reliability Built Higher."</div>
+        </div>
+    </section>
+
+    <!-- Brand Showcase Section -->
+    <section class="brand-showcase">
+        <div class="brand-showcase-container">
+            <div class="brand-showcase-header">
+                <h2 class="brand-showcase-title">Clientele</h2>
+                <div class="brand-showcase-controls">
+                    <button class="brand-arrow" id="brand-prev">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="brand-arrow" id="brand-next">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="brand-showcase-window">
+                <div class="brand-showcase-track" id="brand-track">
+                    <!-- Brand logos will be dynamically added here -->
+                </div>
+            </div>
+            
+            <div class="view-all-btn">
+                <button onclick="showAllBrands()">View All</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Image Gallery Section -->
+    <section class="image-gallery">
+        <div class="gallery-container">
+            <div class="gallery-header">
+                <h2 class="gallery-title">Our Gallery</h2>
+            </div>
+            
+            <div class="gallery-window">
+                <div class="gallery-track" id="gallery-track">
+                    <!-- Gallery images will be dynamically added here -->
+                </div>
+                
+                <div class="gallery-controls">
+                    <button class="gallery-arrow" id="gallery-prev">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="gallery-arrow" id="gallery-next">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                
+                <div class="gallery-indicators" id="gallery-indicators">
+                    <!-- Indicators will be dynamically added here -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Attractive Expertise Section -->
+    <section id="expertise" class="expertise-new">
+        <div class="section-title">
+            <h2>Our Expertise</h2>
+        </div>
+        <div class="expertise-container">
+            <div class="expertise-item">
+                <div class="expertise-icon">
+                    <i class="fas fa-drafting-compass"></i>
+                </div>
+                <h3>Scaffolding<br>Design</h3>
+                <div class="expertise-bar">
+                    <div class="expertise-percentage" style="width: 95%;"></div>
+                </div>
+                <p>95%</p>
+            </div>
+            <div class="expertise-item">
+                <div class="expertise-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3>Safety<br>Compliance</h3>
+                <div class="expertise-bar">
+                    <div class="expertise-percentage" style="width: 100%;"></div>
+                </div>
+                <p>100%</p>
+            </div>
+            <div class="expertise-item">
+                <div class="expertise-icon">
+                    <i class="fas fa-project-diagram"></i>
+                </div>
+                <h3>Project<br>Management</h3>
+                <div class="expertise-bar">
+                    <div class="expertise-percentage" style="width: 90%;"></div>
+                </div>
+                <p>90%</p>
+            </div>
+            <div class="expertise-item">
+                <div class="expertise-icon">
+                    <i class="fas fa-headset"></i>
+                </div>
+                <h3>Client<br>Support</h3>
+                <div class="expertise-bar">
+                    <div class="expertise-percentage" style="width: 85%;"></div>
+                </div>
+                <p>85%</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact-section">
+        <div class="footer-container">
+            <div class="footer-main">
+                <div class="footer-column">
+                    <div class="footer-logo">
+                        <h3>THE NATIONAL SCAFFOLDING</h3>
+                        <p>Providing safe, reliable scaffolding solutions for all your construction needs</p>
+                    </div>
+                    <div class="social-links">
+                        <a href="https://www.instagram.com/the_national_scaffolding?igsh=NWI3MnRhY3RrMm52" target="_blank"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-column">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="home.html">Home</a></li>
+                    </ul>
+                </div>
+                
+                <div class="services-contact-container">
+                    <div class="footer-column services-column">
+                        <h4>Our Services</h4>
+                        <ul>
+                            <li><a href="#">Scaffolding Design</a></li>
+                            <li><a href="#">Erection & Dismantling</a></li>
+                            <li><a href="#">Safety Inspections</a></li>
+                            <li><a href="#">Project Management</a></li>
+                            <li><a href="#">Consultation</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="footer-column contact-column">
+                        <h4>Contact Us</h4>
+                        <div class="contact-details">
+                            <ul class="contact-info">
+                                <li class="contact-map-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <div class="inline-map-container">
+                                        <iframe 
+                                            src="https://www.google.com/maps/embed?pb=!1m26!1m12!1m3!1d48650.51245197565!2d77.57826172834972!3d13.054063076572426!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m11!3e9!4m3!3m2!1d13.0356729!2d77.62225889999999!4m5!1s0x3bae1791e1e304a3%3A0x8ef57a85ae449b9c!2sRoyal%20heritage%20furniture%20factory!3m2!1d13.0489068!2d77.6268223!5e0!3m2!1sen!2sin!4v1760948910624!5m2!1sen!2sin" 
+                                            width="180" 
+                                            height="100" 
+                                            style="border:0; border-radius: 4px;" 
+                                            allowfullscreen="" 
+                                            loading="lazy" 
+                                            referrerpolicy="no-referrer-when-downgrade">
+                                        </iframe>
+                                        <a href="https://www.google.com/maps/dir/?api=1&destination=13.04886358727369,77.62424417507776" target="_blank" class="view-map-link">
+                                            <i class="fas fa-external-link-alt"></i> View Directions
+                                        </a>
+                                    </div>
+                                </li>
+                                <li>
+                                    <i class="fas fa-phone"></i>
+                                    <span>
+                                        <div>+918105934759</div>
+                                        <div>+919035415933</div>
+                                        <div>+919900186637</div>
+                                    </span>
+                                </li>
+                                <li>
+                                    <i class="fas fa-envelope"></i>
+                                    <span>cresttechnocrat@gmail.com</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <div class="copyright">
+                    <p>&copy; 2023 THE NATIONAL SCAFFOLDING. All Rights Reserved.</p>
+                </div>
+                <div class="footer-bottom-links">
+                    <a href="javascript:void(0)" onclick="togglePolicy('privacy-policy')">Privacy Policy</a>
+                    <a href="javascript:void(0)" onclick="togglePolicy('terms-of-use')">Terms of Use</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Privacy Policy Section -->
+    <section id="privacy-policy" class="policy-section" style="display: none;">
+        <div class="container">
+            <div class="policy-content">
+                <h2>🔒 Privacy Policy</h2>
+                <p>At The National Scaffolding, your privacy matters to us. We collect only essential information required to enhance your experience and respond to your inquiries effectively.</p>
+                
+                <h3>What We Collect:</h3>
+                <ul>
+                    <li>Basic details you provide voluntarily (e.g., via forms).</li>
+                    <li>Technical data like browser type or visit duration for analytics.</li>
+                </ul>
+                
+                <h3>How We Use It:</h3>
+                <ul>
+                    <li>To improve our products, services, and website performance.</li>
+                    <li>To respond to user requests promptly and efficiently.</li>
+                </ul>
+                
+                <p>We never sell, rent, or misuse your information. Cookies may be used for better navigation—you can disable them anytime in your browser settings.</p>
+                
+                <p>All data is handled securely and confidentially in line with best practices.</p>
+                
+                <a href="javascript:void(0)" onclick="togglePolicy('privacy-policy')" class="back-to-footer">Close</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Terms of Use Section -->
+    <section id="terms-of-use" class="policy-section" style="display: none;">
+        <div class="container">
+            <div class="policy-content">
+                <h2>⚖️ Terms of Use</h2>
+                <p>By using this website, you agree to following terms:</p>
+                
+                <h3>Usage:</h3>
+                <ul>
+                    <li>Access and use the site solely for lawful and informational purposes.</li>
+                    <li>Do not attempt to disrupt or misuse the website in any way.</li>
+                </ul>
+                
+                <h3>Content Ownership:</h3>
+                <p>All designs, images, and text are exclusive property of The National Scaffolding. Unauthorized use, copying, or modification is prohibited.</p>
+                
+                <h3>Disclaimer:</h3>
+                <p>While we strive for accuracy, product details and visuals are subject to change without prior notice. We are not responsible for any direct or indirect damages arising from site usage.</p>
+                
+                <h3>External Links:</h3>
+                <p>Third-party links are provided for convenience; we are not liable for their content or privacy practices.</p>
+                
+                <p>By continuing to use this site, you acknowledge and agree to these Privacy and Usage Terms.</p>
+                
+                <a href="javascript:void(0)" onclick="togglePolicy('terms-of-use')" class="back-to-footer">Close</a>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Brand showcase data with all the logo images provided
+        const brands = [
+            { name: "BOSCH", logo: "https://z-cdn-media.chatglm.cn/files/e9b30493-15bc-48af-aa69-6e2f330231e2.png?auth_key=1866471458-614c35e6524f41f3871d222e37c5f008-0-acf0592ac5a2658a21add30c281d0c95" },
+            { name: "Asian Paints", logo: "https://z-cdn-media.chatglm.cn/files/dee02f60-85cb-431c-8079-19084e481451.jpg?auth_key=1866471458-cd19b805b3ea4bb585ca89f3c8de8a52-0-f31448b0b6811a8bb2690d564c186b99" },
+            { name: "Toyota", logo: "https://z-cdn-media.chatglm.cn/files/884693a9-a18e-45c2-9ad7-8a6b1dbd3716.png?auth_key=1866471458-b74749ea517541518a66676bbfce9f23-0-cd786db801f5776bcecd18efd84f71fe" },
+            { name: "Hyatt Centric", logo: "https://z-cdn-media.chatglm.cn/files/a6211610-740c-4cd1-b3ef-6e9871f074f6.png?auth_key=1866471458-d280d0d005ec42c5bee249e5af198929-0-459ee1ed7272878cad4d8537b9cac592" },
+            { name: "Cisco", logo: "https://z-cdn-media.chatglm.cn/files/ca27f46d-0a46-4550-acee-42a8380f6c48.png?auth_key=1866471458-8dc8f62370ea4761afa0f08c6c829bbb-0-d58002820041cf3e3488dc92f600288b" },
+            { name: "Kia Motors", logo: "https://z-cdn-media.chatglm.cn/files/0e5b27db-cebb-49f4-9f5d-007114ce9e1f.jpg?auth_key=1866471924-539ab1a9c828462eb01c84497c4881a1-0-83ec63d35ac332d2a0c6834b01f899cc" },
+            { name: "Mall of Asia", logo: "https://z-cdn-media.chatglm.cn/files/08272ece-7e0c-4b52-99a2-67358b1a9152.png?auth_key=1866471924-af10e392a3ad4881a5d91d9c72530009-0-71c07334f3835076af0f2144c389da11" },
+            { name: "Forum Mall", logo: "https://z-cdn-media.chatglm.cn/files/c6c9ff76-b3f3-4558-981a-7a5d08612f49.png?auth_key=1866471924-43747ae535ff4a04a44795c1ad369a68-0-a5304a130785b310f70e43d8dc6d5513" },
+            { name: "TVS", logo: "https://z-cdn-media.chatglm.cn/files/50332f7c-fa71-408a-a3d8-38b6b791cf73.png?auth_key=1866471924-965d6012e6694128aea4e4f14d815acc-0-2cc588497a3e3fc1d1be32febe3d8227" },
+            { name: "Swiggy Instamart", logo: "https://z-cdn-media.chatglm.cn/files/c8ffd6e7-8afc-4cdd-b7c8-7d051ac273ad.png?auth_key=1866471924-d306b004f5244c4ba2c4b3dfd485bbbc-0-be9902ac235b260f1cca75e34f7aebb6" },
+            { name: "Mantri Mall", logo: "https://z-cdn-media.chatglm.cn/files/acc655d8-6bc2-43db-9a4f-f12f621bbd54.jpg?auth_key=1866469494-4781927f63a14c40af6f552d3402d0e6-0-147061806efb1c77a3b180cd78866740" },
+            { name: "Orion Mall", logo: "https://z-cdn-media.chatglm.cn/files/65282cef-7beb-405a-9e41-f5aace2ed7ae.png?auth_key=1866472455-1c97edb42b4d471fae75fbfb5030a516-0-c6f17121b40dd7863274a66994cbe8c1" },
+            { name: "Shobha Mall", logo: "https://z-cdn-media.chatglm.cn/files/14122e38-d1b7-4d48-b849-a989d5d4ff5f.png?auth_key=1866472455-a4042a108563416198018417bd87077b-0-69031ee1f595073c8c32122459bb3b08" },
+            { name: "M5 Mall", logo: "https://z-cdn-media.chatglm.cn/files/45ca867d-adfc-4f44-80e1-5a5aaf2a907f.png?auth_key=1866472455-74640acf50244d228161c5db98558535-0-8e868550a342f5549d2e7bd41afee92a" },
+            { name: "Galeria Mall", logo: "https://z-cdn-media.chatglm.cn/files/13e08f0b-d518-4da4-b2b8-7a402848d3e3.png?auth_key=1866472455-557f0aa81bef4bb6a495e077990308dc-0-ca75220f5317b8ecd9e151d42bd8f080" }
+        ];
+
+        // Gallery images data - Updated with provided images
+        const galleryImages = [
+            { 
+                url: "https://z-cdn-media.chatglm.cn/files/af567a38-524d-493b-9fcf-8d6090629eb3.png?auth_key=1866477041-3adbe02991b549a7b1edb1a35f6b203b-0-55b363af4440b046ac05b136fcf03563", 
+                caption: "Industrial Scaffolding Setup with Safety Measures" 
+            },
+            { 
+                url: "https://z-cdn-media.chatglm.cn/files/84bea3ca-5035-4253-a36e-5657b2a1680e.png?auth_key=1866477041-bbecd8383dfe4d85a7cd583fd143f3e0-0-713d9fe1a03a9a398bde9e46723c9747", 
+                caption: "Building Construction with Metal Scaffolding Framework" 
+            },
+            { 
+                url: "https://z-cdn-media.chatglm.cn/files/5fcd995e-e09b-4525-b84b-7aee8b74a752.png?auth_key=1866477041-0572f6ab55d2434fb5258d00b85f9e2c-0-5775d60c72d40436a7970e3b5713da54", 
+                caption: "Art Installation with Specialized Scaffolding Support" 
+            },
+            { 
+                url: "https://z-cdn-media.chatglm.cn/files/3e59c2bd-9e7a-455b-b9e3-7c55d8006f46.png?auth_key=1866477041-2bedffc7889341c58a03d7b67af738f3-0-e244a07aaf48571b5b7b44de556f8e17", 
+                caption: "Construction Site with Safety Scaffolding and Equipment" 
+            },
+            { 
+                url: "https://z-cdn-media.chatglm.cn/files/402b539d-9970-4c92-9fac-6c3e5553b378.png?auth_key=1866477041-32cb68d34eaa40d18a9d4e2c78473e46-0-2c62ce5402b57ccee71ee64c02e26c65", 
+                caption: "Interior Space with Advanced Scaffolding Structure" 
+            },
+            { 
+                url: "https://z-cdn-media.chatglm.cn/files/0fb18cf2-0900-41bd-82cd-6b76e7759dc1.png?auth_key=1866475431-8978c1d1f077416aa32829d5e261638a-0-3524523ffda3351e50794c1837f1f0fe", 
+                caption: "Warehouse Construction with Professional Scaffolding" 
+            },
+            { 
+                url: "https://z-cdn-media.chatglm.cn/files/b4d03ec7-6a8e-4a4f-8aea-dbc64e5cfe2f.png?auth_key=1866475431-a47ba96ce2d6498d85b8c0d2af3c7848-0-ae9f8f7b370d9efa65b7f04518cac1c9", 
+                caption: "Historic Building Restoration with Specialized Scaffolding" 
+            },
+            { 
+                url: "https://z-cdn-media.chatglm.cn/files/447ab608-ddbc-4476-8b4b-697dbf431d97.png?auth_key=1866475431-600529442fd74a7cab6de546a6443b5b-0-6bec1e28449e9e237881976ed9bd5f0b", 
+                caption: "Industrial Interior Construction with Multi-Level Scaffolding" 
+            },
+            { 
+                url: "https://z-cdn-media.chatglm.cn/files/7672da52-ccc7-4014-863e-a6679b9738cf.png?auth_key=1866475431-4507891ab4de421fa41599dab0c14bb3-0-56acb870d073708ecd464f1c0f00f9b7", 
+                caption: "Grand Space Maintenance with Custom Scaffolding Solutions" 
+            },
+            { 
+                url: "https://z-cdn-media.chatglm.cn/files/5f988756-a70f-4353-afd4-395bc588696f.png?auth_key=1866475431-010b6e27ece548e492d2bb79c9dd07b8-0-96cc0d43ec5e0a57fb499c6bdd6543f3", 
+                caption: "Event Setup with Specialized Stage Scaffolding" 
+            },
+            { 
+                url: "https://z-cdn-media.chatglm.cn/files/854c6a0a-6b89-49ab-994f-a32091ade229.png?auth_key=1866475431-28dc28292cf24d02ab5e40afebaa85ce-0-7916854071d22bb1f664992177849a74", 
+                caption: "Modern Interior Renovation with Decorative Scaffolding" 
+            },
+            { 
+                url: "https://z-cdn-media.chatglm.cn/files/fa816256-759f-4e5f-807d-92510bd19f64.png?auth_key=1866475431-95bd21e22bd34e1a83a151eea89881bb-0-85f4a898e6b4ea72cec0b0d46b11cf78", 
+                caption: "Building Exterior Maintenance with Safety Scaffolding" 
+            }
+        ];
+
+        let brandCurrentIndex = 0;
+        let galleryCurrentIndex = 0;
+        let galleryInterval;
+        let itemsPerSlide = 3; // Show 3 images at a time
+
+        // Initialize brand showcase
+        function initBrandShowcase() {
+            renderBrands();
+            setupBrandNavigationControls();
+        }
+
+        // Initialize image gallery
+        function initImageGallery() {
+            renderGallery();
+            setupGalleryNavigationControls();
+            startGalleryAutoSlide();
+        }
+
+        // Render brands in showcase
+        function renderBrands() {
+            const track = document.getElementById('brand-track');
+            track.innerHTML = '';
+            
+            // Calculate how many items to show based on available space
+            const windowWidth = window.innerWidth;
+            const containerWidth = document.querySelector('.brand-showcase-window').offsetWidth;
+            const itemWidth = 220; // item width + margin
+            itemsPerSlide = Math.floor(containerWidth / itemWidth) || 1;
+            
+            const endIndex = Math.min(brandCurrentIndex + itemsPerSlide, brands.length);
+            
+            for (let i = brandCurrentIndex; i < endIndex; i++) {
+                const brand = brands[i];
+                const slide = document.createElement('div');
+                slide.className = 'brand-showcase-slide';
+                
+                const logoContainer = document.createElement('div');
+                logoContainer.className = 'brand-logo-container';
+                
+                const logo = document.createElement('img');
+                logo.src = brand.logo;
+                logo.alt = brand.name;
+                logo.className = 'brand-logo';
+                
+                logoContainer.appendChild(logo);
+                slide.appendChild(logoContainer);
+                track.appendChild(slide);
+            }
+            
+            // Update navigation buttons
+            updateBrandNavigationButtons();
+        }
+
+        // Setup brand navigation controls
+        function setupBrandNavigationControls() {
+            const prevBtn = document.getElementById('brand-prev');
+            const nextBtn = document.getElementById('brand-next');
+            
+            prevBtn.onclick = () => {
+                if (brandCurrentIndex > 0) {
+                    brandCurrentIndex -= itemsPerSlide;
+                    renderBrands();
+                }
+            };
+            
+            nextBtn.onclick = () => {
+                if (brandCurrentIndex < brands.length - itemsPerSlide) {
+                    brandCurrentIndex += itemsPerSlide;
+                    renderBrands();
+                }
+            };
+            
+            updateBrandNavigationButtons();
+        }
+
+        // Update brand navigation buttons state
+        function updateBrandNavigationButtons() {
+            const prevBtn = document.getElementById('brand-prev');
+            const nextBtn = document.getElementById('brand-next');
+            
+            // Disable previous button if at the beginning
+            prevBtn.disabled = brandCurrentIndex <= 0;
+            prevBtn.classList.toggle('disabled', brandCurrentIndex <= 0);
+            
+            // Disable next button if at the end
+            nextBtn.disabled = brandCurrentIndex >= brands.length - itemsPerSlide;
+            nextBtn.classList.toggle('disabled', brandCurrentIndex >= brands.length - itemsPerSlide);
+        }
+
+        // Render gallery images
+        // function renderGallery() {
+        //     const track = document.getElementById('gallery-track');
+        //     const indicators = document.getElementById('gallery-indicators');
+            
+        //     track.innerHTML = '';
+        //     indicators.innerHTML = '';
+            
+        //     // Fixed: Always create exactly 3 slides regardless of image count
+        //     const slidesCount = 3;
+            
+        //     for (let i = 0; i < slidesCount; i++) {
+        //         // Create slide container
+        //         const slide = document.createElement('div');
+        //         slide.className = 'gallery-slide';
+                
+        //         // Create image container for this slide
+        //         const imageContainer = document.createElement('div');
+        //         imageContainer.style.display = 'flex';
+        //         imageContainer.style.height = '100%';
+        //         imageContainer.style.gap = '20px';
+                
+        //         // Calculate range of images for this slide
+        //         const imagesPerSlide = Math.ceil(galleryImages.length / slidesCount);
+        //         const startIndex = i * imagesPerSlide;
+        //         const endIndex = Math.min(startIndex + imagesPerSlide, galleryImages.length);
+                
+        //         // Add images to this slide
+        //         for (let j = startIndex; j < endIndex; j++) {
+        //             const image = galleryImages[j];
+                    
+        //             const imageWrapper = document.createElement('div');
+        //             imageWrapper.style.flex = '1';
+        //             imageWrapper.style.position = 'relative';
+        //             imageWrapper.style.overflow = 'hidden';
+        //             imageWrapper.style.borderRadius = '8px';
+        //             imageWrapper.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+                    
+        //             const img = document.createElement('img');
+        //             img.src = image.url;
+        //             img.alt = image.caption;
+        //             img.style.width = '100%';
+        //             img.style.height = '100%';
+        //             img.style.objectFit = 'cover'; // Changed from contain to cover for better fitting
+                    
+        //             // Add error handling for images
+        //             img.onerror = function() {
+        //                 // Replace with a placeholder if image fails to load
+        //                 this.src = 'https://picsum.photos/seed/scaffolding' + j + '/400/300.jpg';
+        //                 console.error('Failed to load image:', image.url);
+        //             };
+                    
+        //             const caption = document.createElement('div');
+        //             caption.className = 'gallery-caption';
+        //             caption.textContent = image.caption;
+                    
+        //             imageWrapper.appendChild(img);
+        //             imageWrapper.appendChild(caption);
+        //             imageContainer.appendChild(imageWrapper);
+        //         }
+                
+        //         slide.appendChild(imageContainer);
+        //         track.appendChild(slide);
+                
+        //         // Create indicator
+        //         const indicator = document.createElement('div');
+        //         indicator.className = 'gallery-indicator';
+        //         if (i === 0) indicator.classList.add('active');
+        //         indicator.onclick = () => goToSlide(i);
+        //         indicators.appendChild(indicator);
+        //     }
+            
+        //     updateGalleryPosition();
+        // }
+        
+function renderGallery() {
+    const track = document.getElementById('gallery-track');
+    const indicators = document.getElementById('gallery-indicators');
+    
+    track.innerHTML = '';
+    indicators.innerHTML = '';
+    
+    // Calculate how many images to show per slide based on screen size
+    let imagesPerSlide;
+    if (window.innerWidth < 768) {
+        imagesPerSlide = 1; // Mobile: 1 image per slide
+    } else if (window.innerWidth < 992) {
+        imagesPerSlide = 2; // Tablet: 2 images per slide
+    } else {
+        imagesPerSlide = 3; // Desktop: 3 images per slide
+    }
+    
+    // Calculate total slides needed
+    totalSlides = Math.ceil(galleryImages.length / imagesPerSlide);
+    
+    for (let i = 0; i < totalSlides; i++) {
+        // Create slide container
+        const slide = document.createElement('div');
+        slide.className = 'gallery-slide';
+        
+        // Create image container for this slide
+        const imageContainer = document.createElement('div');
+        imageContainer.style.display = 'flex';
+        imageContainer.style.height = '100%';
+        imageContainer.style.gap = '20px';
+        
+        // Calculate range of images for this slide
+        const startIndex = i * imagesPerSlide;
+        const endIndex = Math.min(startIndex + imagesPerSlide, galleryImages.length);
+        
+        // Add images to this slide
+        for (let j = startIndex; j < endIndex; j++) {
+            const image = galleryImages[j];
+            
+            const imageWrapper = document.createElement('div');
+            imageWrapper.style.flex = '1';
+            imageWrapper.style.position = 'relative';
+            imageWrapper.style.overflow = 'hidden';
+            imageWrapper.style.borderRadius = '8px';
+            imageWrapper.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+            
+            const img = document.createElement('img');
+            img.src = image.url;
+            img.alt = image.caption;
+            img.style.width = '100%';
+            img.style.height = '100%';
+            img.style.objectFit = 'cover';
+            
+            // Add error handling for images
+            img.onerror = function() {
+                this.src = 'https://picsum.photos/seed/scaffolding' + j + '/400/300.jpg';
+                console.error('Failed to load image:', image.url);
+            };
+            
+            const caption = document.createElement('div');
+            caption.className = 'gallery-caption';
+            caption.textContent = image.caption;
+            
+            imageWrapper.appendChild(img);
+            imageWrapper.appendChild(caption);
+            imageContainer.appendChild(imageWrapper);
+        }
+        
+        slide.appendChild(imageContainer);
+        track.appendChild(slide);
+        
+        // Create indicator
+        const indicator = document.createElement('div');
+        indicator.className = 'gallery-indicator';
+        if (i === 0) indicator.classList.add('active');
+        indicator.onclick = () => goToSlide(i);
+        indicators.appendChild(indicator);
+    }
+    
+    updateGalleryPosition();
+}
+        // Setup gallery navigation controls
+        function setupGalleryNavigationControls() {
+            const prevBtn = document.getElementById('gallery-prev');
+            const nextBtn = document.getElementById('gallery-next');
+            
+            prevBtn.onclick = () => {
+                // Fixed: Use 3 slides instead of calculating based on image count
+                galleryCurrentIndex = (galleryCurrentIndex - 1 + 3) % 3;
+                updateGalleryPosition();
+                resetGalleryAutoSlide();
+            };
+            
+            nextBtn.onclick = () => {
+                // Fixed: Use 3 slides instead of calculating based on image count
+                galleryCurrentIndex = (galleryCurrentIndex + 1) % 3;
+                updateGalleryPosition();
+                resetGalleryAutoSlide();
+            };
+        }
+
+        // Update gallery position and indicators
+        function updateGalleryPosition() {
+            const track = document.getElementById('gallery-track');
+            const indicators = document.querySelectorAll('.gallery-indicator');
+            
+            track.style.transform = `translateX(-${galleryCurrentIndex * 100}%)`;
+            
+            indicators.forEach((indicator, index) => {
+                if (index === galleryCurrentIndex) {
+                    indicator.classList.add('active');
+                } else {
+                    indicator.classList.remove('active');
+                }
+            });
+        }
+
+        // Go to specific slide
+        function goToSlide(index) {
+            galleryCurrentIndex = index;
+            updateGalleryPosition();
+            resetGalleryAutoSlide();
+        }
+
+        // Start automatic gallery sliding
+        function startGalleryAutoSlide() {
+            galleryInterval = setInterval(() => {
+                // Fixed: Use 3 slides instead of calculating based on image count
+                galleryCurrentIndex = (galleryCurrentIndex + 1) % 3;
+                updateGalleryPosition();
+            }, 4000); // Changed from 3000 to 4000ms (4 seconds)
+        }
+
+        // Reset automatic gallery sliding
+        function resetGalleryAutoSlide() {
+            clearInterval(galleryInterval);
+            startGalleryAutoSlide();
+        }
+
+        // Show all brands
+        function showAllBrands() {
+            const showcaseSection = document.querySelector('.brand-showcase');
+            const viewAllBtn = document.querySelector('.view-all-btn button');
+            
+            // Create a modal overlay to show all brands
+            const modal = document.createElement('div');
+            modal.className = 'brand-modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>All Our Prestigious Clients</h3>
+                        <button class="close-modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="all-brands-grid">
+                            ${brands.map(brand => `
+                                <div class="all-brand-item">
+                                    <div class="all-brand-logo-container">
+                                        <img src="${brand.logo}" alt="${brand.name}" class="all-brand-logo">
+                                    </div>
+                                    <div class="all-brand-name">${brand.name}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Close modal when clicking outside or on close button
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal || e.target.classList.contains('close-modal')) {
+                    document.body.removeChild(modal);
+                }
+            });
+        }
+
+        // Toggle Policy Sections
+        function togglePolicy(policyId) {
+            const section = document.getElementById(policyId);
+            if (section.style.display === 'none' || section.style.display === '') {
+                section.style.display = 'block';
+                // Smooth scroll to policy section
+                setTimeout(() => {
+                    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            } else {
+                section.style.display = 'none';
+                // Smooth scroll back to footer
+                const footer = document.getElementById('contact-section');
+                if (footer) {
+                    footer.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }
+            }
+        }
+
+        // Welcome popup functions
+        function closeWelcome() {
+            const popup = document.getElementById('welcomePopup');
+            popup.classList.remove('active');
+            document.body.classList.remove('popup-active');
+            sessionStorage.setItem('welcomeShown', 'true');
+        }
+
+        // Simple JavaScript for hamburger menu toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const hamburger = document.querySelector('.hamburger');
+            const navMenu = document.querySelector('.nav-menu');
+            const popup = document.getElementById('welcomePopup');
+            
+            // Check if user is logged in and if popup was already shown
+            const isLoggedIn = {{ 'true' if current_user.is_authenticated else 'false' }};
+            
+            if (isLoggedIn) {
+                popup.style.display = 'none';
+                document.body.classList.remove('popup-active');
+            } else {
+                const popupShown = sessionStorage.getItem('welcomeShown');
+                
+                if (popupShown) {
+                    popup.style.display = 'none';
+                    document.body.classList.remove('popup-active');
+                } else {
+                    // Show popup with animation
+                    setTimeout(() => {
+                        popup.style.display = 'flex';
+                        setTimeout(() => {
+                            popup.classList.add('active');
+                            document.body.classList.add('popup-active');
+                        }, 100);
+                    }, 500);
+                }
+            }
+            
+            hamburger.addEventListener('click', function() {
+                navMenu.classList.toggle('active');
+            });
+            
+            // Close menu when clicking on a link
+            const navLinks = document.querySelectorAll('.nav-menu a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    navMenu.classList.remove('active');
+                });
+            });
+            
+            // Initialize brand showcase and image gallery on page load
+            initBrandShowcase();
+            initImageGallery();
+            
+            // Re-render brands on window resize
+            window.addEventListener('resize', function() {
+                renderBrands();
+                
+                // Adjust gallery for mobile
+                if (window.innerWidth < 768) {
+                    itemsPerSlide = 1;
+                } else if (window.innerWidth < 992) {
+                    itemsPerSlide = 2;
+                } else {
+                    itemsPerSlide = 3;
+                }
+                
+                renderGallery();
+            });
+            
+            // Pause auto-slide when user hovers over gallery
+            const galleryWindow = document.querySelector('.gallery-window');
+            galleryWindow.addEventListener('mouseenter', () => {
+                clearInterval(galleryInterval);
+            });
+            
+            galleryWindow.addEventListener('mouseleave', () => {
+                startGalleryAutoSlide();
+            });
+        });
+    </script>
+</body>
+</html>

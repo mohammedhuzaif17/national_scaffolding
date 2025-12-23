@@ -4,18 +4,7 @@
 
 {% block content %}
 <!-- Welcome Popup -->
-<div id="welcomePopup" class="welcome-popup">
-    <div class="welcome-content">
-        <h1>Welcome to THE NATIONAL SCAFFOLDING</h1>
-        <p>We don't just build scaffolds — we build confidence. Explore our premium scaffolding and fabrication products for all your construction needs.</p>
-        <div class="popup-buttons">
-            <button class="btn-explore" onclick="closeWelcome()">Continue to Explore</button>
-            {% if not current_user.is_authenticated %}
-            <button class="btn-login" onclick="window.location.href='{{ url_for('login') }}'">Login / Register</button>
-            {% endif %}
-        </div>
-    </div>
-</div>
+
 
 <style>
 .product-gallery {
@@ -481,7 +470,7 @@
 .hero-content h1 {
     font-size: 3.5rem;
     font-weight: 900;
-    color: rgb(255, 255, 255);
+    color: rgb(193, 158, 45);
     margin-bottom: 1rem;
     text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9); /* Increased shadow for better contrast */
     letter-spacing: 2px;
@@ -592,7 +581,7 @@
     <div class="hero-content">
         <h1>The National Scaffolding</h1>
         <h3>Since 2015</h3>
-        <p class="hero-tagline">"The Wide Range Of Manufacturers In Aluminium, H-Frame And CupLock Scaffolding and Rental Services"</p>
+        <p class="hero-tagline">"The Wide Range Of Manufacturers and Rental Services In Aluminium, H-Frame And CupLock Scaffolding"</p>
     </div>
 </div>
 
@@ -780,31 +769,7 @@
 {% block scripts %}
 <script>
 // Show welcome popup only for non-logged-in users
-window.addEventListener('DOMContentLoaded', () => {
-    const popup = document.getElementById('welcomePopup');
-    const isLoggedIn = {{ 'true' if current_user.is_authenticated else 'false' }};
-    
-    if (isLoggedIn) {
-        popup.style.display = 'none';
-        document.body.classList.remove('popup-active');
-    } else {
-        const popupShown = sessionStorage.getItem('welcomeShown');
-        
-        if (popupShown) {
-            popup.style.display = 'none';
-            document.body.classList.remove('popup-active');
-        } else {
-            popup.style.display = 'flex';
-            document.body.classList.add('popup-active');
-        }
-    }
-});
 
-function closeWelcome() {
-    document.getElementById('welcomePopup').style.display = 'none';
-    document.body.classList.remove('popup-active');
-    sessionStorage.setItem('welcomeShown', 'true');
-}
 
 function addToCart(productId) {
     fetch('/add_to_cart', {

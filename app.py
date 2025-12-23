@@ -37,7 +37,7 @@ import os
 load_dotenv()
 
 def ensure_columns_exist():
-    """Add nullable columns if the PostgreSQL schema is missing them."""
+    """Add nullable columns if PostgreSQL schema is missing them."""
     with db.engine.connect() as conn:
         # Add is_active to products table
         conn.execute(text("""
@@ -193,7 +193,7 @@ app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER', os.env
 
 mail = Mail(app)
 
-# FIX: Initialize SQLAlchemy with the Flask app
+# FIX: Initialize SQLAlchemy with Flask app
 db.init_app(app)
 
 # Register Jinja filters
@@ -579,32 +579,92 @@ with app.app_context():
         app.logger.error(f"Database creation error: {e}")
 
 def create_default_admins():
+    """
+    Create admin accounts ONLY if credentials are provided in .env file
+    """
     with app.app_context():
         try:
-            admin_scaffolding = Admin.query.filter_by(username='admin_scaffolding').first()
-            admin_fabrication = Admin.query.filter_by(username='admin_fabrication').first()
+            # Get admin credentials from environment
+            scaffolding_user = os.environ.get('SCAFFOLDING_ADMIN_USER')
+            scaffolding_pass = os.environ.get('SCAFFOLDING_ADMIN_PASS')
+            fabrication_user = os.environ.get('FABRICATION_ADMIN_USER')
+            fabrication_pass = os.environ.get('FABRICATION_ADMIN_PASS')
             
-            if not admin_scaffolding:
-                admin_scaffolding = Admin(username='admin_scaffolding', panel_type='scaffolding')
-                admin_scaffolding.set_password('admin123')
-                db.session.add(admin_scaffolding)
+            app.logger.info(f"=== Creating Admins ===")
+            app.logger.info(f"Scaffolding admin user: {scaffolding_user}")
+            app.logger.info(f"Fabrication admin user: {fabrication_user}")
             
-            if not admin_fabrication:
-                admin_fabrication = Admin(username='admin_fabrication', panel_type='fabrication')
-                admin_fabrication.set_password('admin123')
-                db.session.add(admin_fabrication)
+            # Create scaffolding admin if credentials exist
+            if scaffolding_user and scaffolding_pass:
+                admin_scaffolding = Admin.query.filter_by(username=scaffolding_user).first()
+                if not admin_scaffolding:
+                    admin_scaffolding = Admin(
+                        username=scaffolding_user,
+                        panel_type='scaffolding'
+                    )
+                    admin_scaffolding.set_password(scaffolding_pass)
+                    db.session.add(admin_scaffolding)
+                    app.logger.info(f"✅ Created scaffolding admin: {scaffolding_user}")
+                else:
+                    app.logger.info(f"ℹ️ Scaffolding admin already exists: {scaffolding_user}")
+            else:
+                app.logger.warning("⚠️ Scaffolding admin credentials not found in .env")
+            
+            # Create fabrication admin if credentials exist
+            if fabrication_user and fabrication_pass:
+                admin_fabrication = Admin.query.filter_by(username=fabrication_user).first()
+                if not admin_fabrication:
+                    admin_fabrication = Admin(
+                        username=fabrication_user,
+                        panel_type='fabrication'
+                    )
+                    admin_fabrication.set_password(fabrication_pass)
+                    db.session.add(admin_fabrication)
+                    app.logger.info(f"✅ Created fabrication admin: {fabrication_user}")
+                else:
+                    app.logger.info(f"ℹ️ Fabrication admin already exists: {fabrication_user}")
+            else:
+                app.logger.warning("⚠️ Fabrication admin credentials not found in .env")
             
             db.session.commit()
+            app.logger.info("✅ Admin creation process completed")
+            
         except Exception as e:
-            app.logger.error(f"Error creating default admins: {e}")
+            app.logger.error(f"❌ Error creating admins: {e}")
             db.session.rollback()
 
-create_default_admins()
+# Add route to handle Chrome DevTools requests
+@app.route('/.well-known/<path:path>')
+def well_known(path):
+    """Handle Chrome DevTools and other well-known requests"""
+    if path == 'appspecific/com.chrome.devtools.json':
+        # Return empty JSON for Chrome DevTools
+        return jsonify({})
+    # For other well-known paths, return 404
+    return "", 404
 
+# Welcome popup and home page routes
 @app.route('/')
 def index():
-    return redirect(url_for('national_scaffoldings', category='all'))
+    """Render home page with welcome popup"""
+    # Check if user is authenticated
+    is_authenticated = current_user.is_authenticated
+    
+    # Get user type if authenticated
+    user_type = session.get('user_type') if is_authenticated else None
+    
+    return render_template(
+        'home.html', 
+        current_user=current_user,
+        is_authenticated=is_authenticated,
+        user_type=user_type
+    )
 
+@app.route('/home')
+def home():
+    """Redirect to index to show welcome popup"""
+    return redirect(url_for('index'))
+# ... keep the rest of your app.py code unchanged ...
     # try:
     #     from cuplock_routes import get_image_url
         
@@ -702,39 +762,43 @@ def login():
         try:
             identifier = request.form.get('identifier')
             password = request.form.get('password')
-            
-            if identifier in ['admin_scaffolding', 'admin_fabrication']:
-                panel_type = 'scaffolding' if identifier == 'admin_scaffolding' else 'fabrication'
-                admin = Admin.query.filter_by(username=identifier, panel_type=panel_type).first()
-                if admin and admin.check_password(password):
-                    login_user(admin)
-                    session['user_type'] = 'admin'
-                    session['panel_type'] = admin.panel_type  # Ensure panel_type is set
-                    session.permanent = True  # Make session permanent
-                    
-                    if admin.panel_type == 'scaffolding':
-                        return redirect(url_for('admin_scaffoldings'))
-                    else:
-                        return redirect(url_for('admin_fabrication'))
+
+            # 🔹 1. CHECK ADMIN FIRST
+            admin = Admin.query.filter_by(username=identifier).first()
+            if admin and admin.check_password(password):
+                login_user(admin)
+                session['user_type'] = 'admin'
+                session['panel_type'] = admin.panel_type
+                session.permanent = True
+
+                if admin.panel_type == 'scaffolding':
+                    return redirect(url_for('admin_scaffoldings'))
                 else:
-                    flash('Invalid admin credentials', 'error')
-                    return render_template('login.html')
-            
-            # Regular user login logic remains the same
-            user = User.query.filter((User.username == identifier) | (User.email == identifier) | (User.phone == identifier)).first()
+                    return redirect(url_for('admin_fabrication'))
+
+            # 🔹 2. CHECK NORMAL USER
+            user = User.query.filter(
+                (User.username == identifier) |
+                (User.email == identifier) |
+                (User.phone == identifier)
+            ).first()
+
             if user and user.check_password(password):
                 login_user(user)
                 session['user_type'] = 'user'
                 session['cart'] = session.get('cart', [])
-                session.permanent = True  # Make session permanent
+                session.permanent = True
                 return redirect(url_for('dashboard'))
-            
+
+            # 🔴 INVALID
             flash('Invalid credentials', 'error')
+
         except Exception as e:
             app.logger.error(f"Login error: {e}")
             flash('Login failed. Please try again.', 'error')
-    
+
     return render_template('login.html')
+
 
 @app.route('/admin_login', methods=['GET', 'POST'])
 def admin_login():
