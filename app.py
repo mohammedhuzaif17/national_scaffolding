@@ -1912,11 +1912,12 @@ def admin_add_fabrication_product():
         
         app.logger.info(f"Adding product: {name}, category: {category}")
         
-        # Create new product - SIMPLIFIED
+        # Create new product - FIXED: Set product_type to 'fabrication'
         new_product = Product(
             name=name,
             price=price,
             category='fabrication',  # ALWAYS set to 'fabrication'
+            product_type='fabrication',  # FIXED: This was missing!
             description=description,
             is_active=True
         )
@@ -1951,6 +1952,143 @@ def admin_add_fabrication_product():
         db.session.rollback()
         app.logger.error(f"Error adding fabrication product: {e}", exc_info=True)
         return jsonify({'success': False, 'message': str(e)})
+# @app.route('/admin_add_product', methods=['GET', 'POST'])
+# @login_required
+# def admin_add_product():
+#     """Add new scaffolding product with cuplock support (FIXED)"""
+#     try:
+#         # Admin check
+#         if session.get('user_type') != 'admin' or session.get('panel_type') != 'scaffolding':
+#             return redirect(url_for('dashboard'))
+
+#         # -------------------------------
+#         # GET REQUEST
+#         # -------------------------------
+#         if request.method == 'GET':
+#             return render_template('add_scaffolding_product.html')
+
+#         # -------------------------------
+#         # 1. READ FORM DATA (SAFE)
+#         # -------------------------------
+#         name = request.form.get('name')
+#         description = request.form.get('description', '')
+#         category = request.form.get('category')
+#         cuplock_type = request.form.get('cuplock_type', '')
+#         product_type = request.form.get('product_type', 'scaffolding')
+
+#         price = safe_float(request.form.get('price')) or 0.0
+#         rent_price = safe_float(request.form.get('rent_price')) or 0.0
+#         deposit_amount = safe_float(request.form.get('deposit_amount')) or 0.0
+#         weight_per_unit = safe_float(request.form.get('weight_per_unit')) or 0.0
+
+#         app.logger.info(
+#             f"[ADD PRODUCT] name={name}, category={category}, cuplock_type={cuplock_type}"
+#         )
+
+#         # -------------------------------
+#         # 2. VALIDATION
+#         # -------------------------------
+#         if not name or not category:
+#             flash('Product name and category are required', 'error')
+#             return render_template('add_scaffolding_product.html')
+
+#         if category == 'cuplock' and cuplock_type not in ['ledger', 'vertical']:
+#             flash('Please select Cuplock type (Ledger or Vertical)', 'error')
+#             return render_template('add_scaffolding_product.html')
+
+#         # -------------------------------
+#         # 3. LEDGER SAFETY
+#         # -------------------------------
+#         if category == 'cuplock' and cuplock_type == 'ledger':
+#             price = 0.0
+#             rent_price = 0.0
+#             deposit_amount = 0.0
+
+#         # -------------------------------
+#         # 4. CREATE PRODUCT
+#         # -------------------------------
+#         product = Product(
+#             name=name,
+#             description=description,
+#             category=category,
+#             cuplock_type=cuplock_type if category == 'cuplock' else None,
+#             product_type=product_type,
+#             price=price,
+#             rent_price=rent_price,
+#             deposit_amount=deposit_amount,
+#             weight_per_unit=weight_per_unit,
+#             is_active=True
+#         )
+
+#         # -------------------------------
+#         # 5. IMAGE UPLOAD
+#         # -------------------------------
+#         image_urls = []
+#         uploaded_files = request.files.getlist('product_images')
+
+#         if uploaded_files:
+#             os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+#             for file in uploaded_files:
+#                 if file and file.filename and allowed_file(file.filename):
+#                     filename = f"{uuid.uuid4().hex}_{secure_filename(file.filename)}"
+#                     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+#                     file.save(filepath)
+#                     image_urls.append(f"uploads/{filename}")
+
+#         product.image_url = ','.join(image_urls) if image_urls else 'images/no-image.png'
+
+#         db.session.add(product)
+#         db.session.flush()  # get product.id
+
+#         # -------------------------------
+#         # 6. HANDLE CUPLOCK LEDGER SIZES
+#         # -------------------------------
+#                # ... inside admin_add_product function ...
+
+#         # -------------------------------
+#         # 6. HANDLE CUPLOCK LEDGER SIZES
+#         # -------------------------------
+#                # -------------------------------
+#         # 8. REDIRECT
+#         # -------------------------------
+#         if category == 'cuplock' and cuplock_type == 'ledger':
+#             flash('✅ Ledger product created! Please add or edit sizes.', 'success')
+#             # ❌ THIS LINE IS CAUSING THE 404 ERROR:
+#             return redirect(url_for('edit_ledger_sizes', product_id=product.id))
+
+#         flash(f'✅ Product "{name}" created successfully!', 'success')
+#         return redirect(url_for('admin_scaffoldings'))
+
+#             # if size_count == 0:
+#             #     flash('Ledger product created, but no sizes were added.', 'warning')
+
+#         # -------------------------------
+#         # 7. COMMIT
+#         # -------------------------------
+#         db.session.commit()
+
+#         # -------------------------------
+#         # 8. REDIRECT
+#         # -------------------------------
+#                # -------------------------------
+#         # 8. REDIRECT
+#         # -------------------------------
+#         if category == 'cuplock' and cuplock_type == 'ledger':
+#             flash('✅ Ledger product created! Please add or edit sizes.', 'success')
+#             # ✅ FIXED: Redirect to the Cuplock Blueprint route (which exists)
+#             return redirect(url_for('cuplock.ledger_edit', product_id=product.id))
+
+#         flash(f'✅ Product "{name}" created successfully!', 'success')
+#         return redirect(url_for('admin_scaffoldings'))
+
+#     except Exception as e:
+#         db.session.rollback()
+#         app.logger.error(f"admin_add_product error: {e}", exc_info=True)
+#         flash(f'Error creating product: {str(e)}', 'error')
+#         return render_template('add_scaffolding_product.html')
+
+
+
 @app.route('/admin_add_product', methods=['GET', 'POST'])
 @login_required
 def admin_add_product():
@@ -2040,7 +2178,7 @@ def admin_add_product():
         db.session.flush()  # get product.id
 
         # -------------------------------
-        # 6. HANDLE CUPLOCK LEDGER SIZES
+        # 6. HANDLE CUPLOCK LEDGER SIZES (FIXED)
         # -------------------------------
         if category == 'cuplock' and cuplock_type == 'ledger':
             from models import CuplockLedgerSize
@@ -2052,6 +2190,11 @@ def admin_add_product():
                 size_name = request.form.get(f'size_name_{index}')
                 if not size_name:
                     break
+
+                # ✅ FIX 1: Truncate size_name to 50 characters to prevent DB error
+                if len(size_name) > 50:
+                    size_name = size_name[:50]
+                    app.logger.warning(f"Size name truncated to 50 chars: {size_name}")
 
                 ledger_size = CuplockLedgerSize(
                     product_id=product.id,
@@ -2076,11 +2219,12 @@ def admin_add_product():
         db.session.commit()
 
         # -------------------------------
-        # 8. REDIRECT
+        # 8. REDIRECT (FIXED)
         # -------------------------------
         if category == 'cuplock' and cuplock_type == 'ledger':
             flash('✅ Ledger product created! Please add or edit sizes.', 'success')
-            return redirect(url_for('edit_ledger_sizes', product_id=product.id))
+            # ✅ FIX 2: Redirect to the Blueprint route (cuplock.ledger_edit) instead of the local broken route
+            return redirect(url_for('cuplock.ledger_edit', product_id=product.id))
 
         flash(f'✅ Product "{name}" created successfully!', 'success')
         return redirect(url_for('admin_scaffoldings'))
@@ -2090,7 +2234,6 @@ def admin_add_product():
         app.logger.error(f"admin_add_product error: {e}", exc_info=True)
         flash(f'Error creating product: {str(e)}', 'error')
         return render_template('add_scaffolding_product.html')
-
 @app.route('/check_categories')
 def check_categories():
     try:

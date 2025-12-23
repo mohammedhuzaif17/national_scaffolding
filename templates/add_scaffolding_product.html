@@ -206,8 +206,9 @@ function handleCuplockTypeChange() {
 }
 
 // This function adds a new size option to the form.
+// This function adds a new size option to the form.
 function addSizeOption() {
-    sizeCount++; // Increment the global counter
+    sizeCount++; 
     const sizesContainer = document.getElementById('sizesContainer');
     
     const sizeDiv = document.createElement('div');
@@ -223,7 +224,8 @@ function addSizeOption() {
         <div class="form-row">
             <div class="form-group">
                 <label for="size_name_${sizeCount}">Size Name *</label>
-                <input type="text" id="size_name_${sizeCount}" name="size_name_${sizeCount}" placeholder="e.g., 0.9m, 1m, 1.2m" required>
+                <!-- ADDED maxlength="50" TO THIS LINE BELOW -->
+                <input type="text" id="size_name_${sizeCount}" name="size_name_${sizeCount}" placeholder="e.g., 0.9m, 1m, 1.2m" required maxlength="50">
             </div>
             <div class="form-group">
                 <label for="size_price_${sizeCount}">Buy Price (₹) *</label>
