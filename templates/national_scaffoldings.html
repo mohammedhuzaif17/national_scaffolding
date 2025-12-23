@@ -441,7 +441,7 @@
     position: relative;
     width: 100%;
     min-height: 500px;
-    background:url('https://z-cdn-media.chatglm.cn/files/2af4d7dd-1f6c-4b9e-86ce-0180f97d348e.png?auth_key=1865978888-b1aaff406e684121af1a401a835364a6-0-d864c35fb16a75519fb1ea2792a889f2');
+    background:url('{{ url_for('static', filename='images/background.png') }}');
     background-size: cover;
     background-position: right center; /* Changed to show more of the right side */
     background-attachment: fixed;
@@ -593,9 +593,6 @@
         <h1>The National Scaffolding</h1>
         <h3>Since 2015</h3>
         <p class="hero-tagline">"The Wide Range Of Manufacturers In Aluminium, H-Frame And CupLock Scaffolding and Rental Services"</p>
-        <button class="hero-btn" onclick="window.location.href='{{ url_for('fabrications') }}'">
-            Go to Fabrications
-        </button>
     </div>
 </div>
 
@@ -603,6 +600,12 @@
     <header class="page-header">
         <h2 class="page-title">Our Products</h2>
     </header>
+
+    <div style="text-align: center; margin-bottom: 30px;">
+        <button class="hero-btn" onclick="window.location.href='{{ url_for('fabrications') }}'">
+            Go to Fabrications
+        </button>
+    </div>
     
     <div class="category-buttons">
         <button class="category-btn {% if request.args.get('category') == 'all' or request.args.get('category') == None %}active{% endif %}" 

@@ -1025,36 +1025,35 @@ def national_scaffoldings():
     )
 
 
-@app.route('/fabrications')
-def fabrications():
-    try:
-        # Query for active fabrication products - use category instead of product_type
-        products = Product.query.filter(
-            Product.category == 'fabrication',
-            Product.is_active == True
-        ).all()
-        
-        # Log number of products found
-        app.logger.info(f"Found {len(products)} fabrication products")
-        
-        # Make sure each product has the required properties
-        for product in products:
-            # Ensure image_url is properly set
-            if not product.image_url:
-                product.image_url = ""
-                
-            # Ensure price is a number
-            if product.price is None:
-                product.price = 0.0
-            else:
-                product.price = float(product.price)
-                
-        return render_template('fabrications.html', products=products)
-    except Exception as e:
-        app.logger.error(f"Fabrications route error: {e}", exc_info=True)
-        flash('Error loading fabrication products.', 'error')
-        return render_template('fabrications.html', products=[])
 
+@app.route('/fix_old_fabrication_products')
+def fix_old_fabrication_products():
+    try:
+        # Find products that might be fabrication products
+        # Update these patterns based on what you find in debug_all_products
+        possible_patterns = ['steel', 'aluminium', 'custom', 'parts']
+        
+        updated_count = 0
+        for pattern in possible_patterns:
+            products = Product.query.filter(
+                Product.category == pattern,
+                Product.is_active == True
+            ).all()
+            
+            for product in products:
+                product.category = 'fabrication'
+                updated_count += 1
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Updated {updated_count} products to category=fabrication'
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)})
+    
 @app.route('/fabrication/<int:product_id>')
 def fabrication_detail(product_id):
     try:
@@ -1726,22 +1725,34 @@ def admin_fabrication():
         if session.get('user_type') != 'admin' or session.get('panel_type') != 'fabrication':
             return redirect(url_for('dashboard'))
 
-        # ✅ SHOW ONLY ACTIVE FABRICATION PRODUCTS
+        # ✅ ONLY TRUE FABRICATION CATEGORIES (exclude aluminium scaffolding)
+        fabrication_only_categories = ['steel', 'custom', 'parts', 'fabrication', 'fabrications']
+        
         products = Product.query.filter(
-            Product.product_type == 'fabrication',
+            Product.category.in_(fabrication_only_categories),
             Product.is_active == True
         ).order_by(Product.id.desc()).all()
 
+        # Group products by category for display
+        products_by_category = {}
+        for product in products:
+            cat = product.category or 'other'
+            if cat not in products_by_category:
+                products_by_category[cat] = []
+            products_by_category[cat].append(product)
+
+        app.logger.info(f"Admin fabrication - Found {len(products)} products in categories: {list(products_by_category.keys())}")
+
         return render_template(
             'admin_fabrication.html',
-            products=products
+            products=products,
+            products_by_category=products_by_category
         )
 
     except Exception as e:
         app.logger.error(f"Admin fabrication error: {e}", exc_info=True)
-        return render_template('admin_fabrication.html', products=[])
-
-
+        return render_template('admin_fabrication.html', products=[], products_by_category={})
+    
 @app.route('/admin_orders')
 @login_required
 def admin_orders():
@@ -1825,59 +1836,57 @@ def admin_logout():
         app.logger.error(f"Admin logout error: {e}")
         return redirect(url_for('dashboard'))
     
+
 @app.route('/admin_add_fabrication_product', methods=['POST'])
-@login_required
 def admin_add_fabrication_product():
     try:
-        if session.get('user_type') != 'admin':
-            return jsonify({'success': False, 'message': 'Unauthorized'}), 403
-
-        # Validate price
-        price_valid, price_error = validate_price(request.form.get('price'), 'Price')
-        if not price_valid:
-            return jsonify({'success': False, 'message': price_error}), 400
-
-        image_urls = []
-        uploaded_files = request.files.getlist('product_images')
-
-        if uploaded_files:
-            os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-            for file in uploaded_files:
-                if file and file.filename and allowed_file(file.filename):
-                    filename = secure_filename(file.filename)
-                    unique_name = f"{uuid.uuid4().hex}_{filename}"
-                    filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
-                    file.save(filepath)
-                    image_urls.append(f"uploads/{unique_name}")
-
-        image_url_string = ",".join(image_urls) if image_urls else 'images/no-image.png'
-
-        product = Product(
-            name=request.form.get('name'),
-            description=request.form.get('description', ''),
-            price=safe_float(request.form.get('price')) or 0.0,
-            category=request.form.get('category'),
-            product_type='fabrication',
-            image_url=image_url_string,
+        # Get form data
+        name = request.form.get('name')
+        price = request.form.get('price')
+        category = request.form.get('category')  # steel, aluminium, etc.
+        description = request.form.get('description')
+        
+        app.logger.info(f"Adding product: {name}, category: {category}")
+        
+        # Create new product - SIMPLIFIED
+        new_product = Product(
+            name=name,
+            price=price,
+            category='fabrication',  # ALWAYS set to 'fabrication'
+            description=description,
             is_active=True
         )
-
-        db.session.add(product)
+        
+        # Handle image uploads
+        if 'product_images' in request.files:
+            images = request.files.getlist('product_images')
+            image_urls = []
+            
+            for image in images:
+                if image and image.filename:
+                    filename = secure_filename(image.filename)
+                    unique_filename = f"{uuid.uuid4().hex}_{filename}"
+                    if not os.path.exists(app.config['UPLOAD_FOLDER']):
+                        os.makedirs(app.config['UPLOAD_FOLDER'])
+                    
+                    image_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+                    image.save(image_path)
+                    image_urls.append(f"uploads/{unique_filename}")
+            
+            if image_urls:
+                new_product.image_url = ','.join(image_urls)
+        
+        # Save to database
+        db.session.add(new_product)
         db.session.commit()
-
-        return jsonify({
-            'success': True,
-            'message': 'Fabrication product added successfully'
-        })
-
+        
+        app.logger.info(f"Added new fabrication product: {name}")
+        return jsonify({'success': True, 'message': 'Product added successfully'})
+    
     except Exception as e:
         db.session.rollback()
-        app.logger.error(f"Admin fabrication add error: {e}", exc_info=True)
-        return jsonify({
-            'success': False,
-            'message': 'Error adding fabrication product'
-        }), 500
-
+        app.logger.error(f"Error adding fabrication product: {e}", exc_info=True)
+        return jsonify({'success': False, 'message': str(e)})
 @app.route('/admin_add_product', methods=['GET', 'POST'])
 @login_required
 def admin_add_product():
@@ -2017,6 +2026,317 @@ def admin_add_product():
         app.logger.error(f"admin_add_product error: {e}", exc_info=True)
         flash(f'Error creating product: {str(e)}', 'error')
         return render_template('add_scaffolding_product.html')
+
+@app.route('/check_categories')
+def check_categories():
+    try:
+        # Get all unique categories
+        categories = db.session.query(Product.category).distinct().all()
+        categories = [c[0] for c in categories if c[0]]
+        
+        # Count products in each category
+        category_counts = {}
+        for cat in categories:
+            count = Product.query.filter_by(category=cat).count()
+            category_counts[cat] = count
+        
+        return jsonify({
+            'categories': categories,
+            'counts': category_counts
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+@app.route('/debug_all_products')
+def debug_all_products():
+    try:
+        # Get all products with their details
+        products = Product.query.all()
+        
+        # Group products by category
+        by_category = {}
+        for p in products:
+            cat = p.category or 'NULL'
+            if cat not in by_category:
+                by_category[cat] = []
+            by_category[cat].append({
+                'id': p.id,
+                'name': p.name,
+                'category': p.category,
+                'product_type': p.product_type,
+                'is_active': p.is_active
+            })
+        
+        # Get all unique categories
+        categories = list(by_category.keys())
+        
+        return jsonify({
+            'total_products': len(products),
+            'categories': categories,
+            'products_by_category': by_category
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)})
+    
+@app.route('/debug_products')
+def debug_products():
+    try:
+        # Get all products
+        all_products = Product.query.all()
+        
+        # Get products with category = 'fabrication'
+        fabrication_products = Product.query.filter_by(category='fabrication').all()
+        
+        # Get all unique categories
+        categories = db.session.query(Product.category).distinct().all()
+        categories = [c[0] for c in categories if c[0]]
+        
+        debug_info = {
+            'total_products': len(all_products),
+            'fabrication_products': len(fabrication_products),
+            'all_categories': categories,
+            'sample_products': []
+        }
+        
+        # Get sample of products with their details
+        for p in all_products[:5]:
+            debug_info['sample_products'].append({
+                'id': p.id,
+                'name': p.name,
+                'category': p.category,
+                'product_type': p.product_type,
+                'is_active': p.is_active
+            })
+        
+        return jsonify(debug_info)
+    except Exception as e:
+        return jsonify({'error': str(e)})
+    
+# ============================================
+# DEBUG AND FIX ROUTES FOR FABRICATION
+# Add these to your app.py
+# ============================================
+@app.route('/debug_fabrication_vs_scaffolding')
+def debug_fabrication_vs_scaffolding():
+    """Debug route to see the separation between fabrication and scaffolding"""
+    try:
+        scaffolding_categories = ['aluminium', 'h-frames', 'cuplock', 'accessories']
+        
+        all_products = Product.query.filter(Product.is_active == True).all()
+        
+        fabrication_products = []
+        scaffolding_products = []
+        
+        for product in all_products:
+            if product.category in scaffolding_categories:
+                scaffolding_products.append({
+                    'id': product.id,
+                    'name': product.name,
+                    'category': product.category
+                })
+            else:
+                fabrication_products.append({
+                    'id': product.id,
+                    'name': product.name,
+                    'category': product.category
+                })
+        
+        return jsonify({
+            'total_active_products': len(all_products),
+            'fabrication_products': fabrication_products,
+            'scaffolding_products': scaffolding_products,
+            'fabrication_categories': list(set(p['category'] for p in fabrication_products)),
+            'scaffolding_categories_found': list(set(p['category'] for p in scaffolding_products))
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)})
+    
+@app.route('/debug_fabrication_products')
+def debug_fabrication_products():
+    """Check all products in database"""
+    try:
+        all_products = Product.query.all()
+        
+        by_category = {}
+        for p in all_products:
+            cat = p.category or 'NULL'
+            if cat not in by_category:
+                by_category[cat] = []
+            by_category[cat].append({
+                'id': p.id,
+                'name': p.name,
+                'category': p.category,
+                'product_type': p.product_type,
+                'is_active': p.is_active,
+                'price': float(p.price) if p.price else 0
+            })
+        
+        return jsonify({
+            'total_products': len(all_products),
+            'products_by_category': by_category,
+            'fabrication_count': len([p for p in all_products if p.category == 'fabrication']),
+            'active_fabrication_count': len([p for p in all_products if p.category == 'fabrication' and p.is_active]),
+            'all_categories': list(by_category.keys())
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+
+# Replace your existing fabrications route with this one
+@app.route('/fabrications')
+def fabrications():
+    try:
+        # Get category filter from URL
+        category_filter = request.args.get('category', 'all')
+        
+        app.logger.info(f"Fabrications route - Category filter: {category_filter}")
+        
+        # IMPORTANT: Exclude scaffolding categories from fabrication
+        scaffolding_categories = ['aluminium', 'h-frames', 'cuplock', 'accessories']
+        
+        # Base query - ONLY fabrication products (exclude scaffolding)
+        query = Product.query.filter(
+            Product.category.notin_(scaffolding_categories),  # Exclude scaffolding
+            Product.is_active == True
+        )
+        
+        # Apply subcategory filter if specified
+        if category_filter != 'all':
+            query = query.filter(Product.category == category_filter)
+        
+        products = query.order_by(Product.id.desc()).all()
+        
+        app.logger.info(f"Found {len(products)} fabrication products")
+        
+        # Log what categories we actually found
+        found_categories = set()
+        for product in products:
+            found_categories.add(product.category)
+        app.logger.info(f"Categories found: {list(found_categories)}")
+        
+        return render_template(
+            'fabrications.html',
+            products=products,
+            category=category_filter
+        )
+        
+    except Exception as e:
+        app.logger.error(f"Fabrications route error: {e}", exc_info=True)
+        return render_template(
+            'fabrications.html',
+            products=[],
+            category='all'
+        )
+
+# Replace the duplicate function with this one
+@app.route('/fix_fabrication_categories')
+def fix_fabrication_categories():
+    """Fix products that should be fabrication"""
+    try:
+        # Define patterns that should be fabrication
+        fabrication_patterns = ['steel', 'aluminium', 'custom', 'parts', 'fabrications']
+        
+        updated_count = 0
+        updated_products = []
+        
+        # Check products with category matching fabrication patterns
+        for pattern in fabrication_patterns:
+            products = Product.query.filter(
+                Product.category == pattern,
+                Product.is_active == True
+            ).all()
+            
+            for product in products:
+                old_category = product.category
+                product.category = 'fabrication'
+                updated_count += 1
+                updated_products.append({
+                    'id': product.id,
+                    'name': product.name,
+                    'old_category': old_category,
+                    'new_category': 'fabrication'
+                })
+        
+        if updated_count > 0:
+            db.session.commit()
+            return jsonify({
+                'success': True,
+                'message': f'Updated {updated_count} products to category=fabrication',
+                'updated_products': updated_products
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'No products found to update. You may need to create fabrication products manually.',
+                'hint': 'Go to admin panel and add products with category=fabrication'
+            })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)})
+
+
+@app.route('/create_test_fabrication_products')
+def create_test_fabrication_products():
+    """Create sample fabrication products for testing"""
+    try:
+        test_products = [
+            {
+                'name': 'Steel Gate',
+                'price': 5000.00,
+                'category': 'fabrication',
+                'product_type': 'steel',
+                'description': 'Custom steel gate fabrication',
+                'image_url': 'images/no-image.png'
+            },
+            {
+                'name': 'Aluminium Window Frame',
+                'price': 3000.00,
+                'category': 'fabrication',
+                'product_type': 'aluminium',
+                'description': 'Custom aluminium window frames',
+                'image_url': 'images/no-image.png'
+            },
+            {
+                'name': 'Custom Steel Structure',
+                'price': 15000.00,
+                'category': 'fabrication',
+                'product_type': 'custom',
+                'description': 'Custom steel structure fabrication',
+                'image_url': 'images/no-image.png'
+            }
+        ]
+        
+        created_products = []
+        for prod_data in test_products:
+            # Check if already exists
+            existing = Product.query.filter_by(name=prod_data['name']).first()
+            if not existing:
+                new_product = Product(
+                    name=prod_data['name'],
+                    price=prod_data['price'],
+                    category=prod_data['category'],
+                    product_type=prod_data['product_type'],
+                    description=prod_data['description'],
+                    image_url=prod_data['image_url'],
+                    is_active=True
+                )
+                db.session.add(new_product)
+                created_products.append(prod_data['name'])
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Created {len(created_products)} test fabrication products',
+            'created_products': created_products
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)})
+    
+# DEBUG ROUTE - Add this temporarily to check your data
 
 
 @app.route('/debug_form_submission', methods=['GET', 'POST'])
@@ -2291,7 +2611,7 @@ def debug_images_page():
 
 
 @app.route('/debug/all_products')
-def debug_all_products():
+def debug_all_products_images():
     """Debug route to see all products and their images - FIXED"""
     try:
         products = Product.query.all()
