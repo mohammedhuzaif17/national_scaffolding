@@ -9,8 +9,18 @@
         <a href="{{ url_for('admin_scaffoldings') }}" class="btn btn-secondary">← Back to Admin</a>
     </div>
 
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
     <div class="form-container">
-        <form method="POST" enctype="multipart/form-data" class="admin-form" id="productForm">
+        <!-- The action attribute is crucial. It tells the form where to submit the data. -->
+        <form method="POST" action="{{ url_for('admin_add_product') }}" enctype="multipart/form-data" class="admin-form" id="productForm">
             <div class="form-section">
                 <h3>Product Information</h3>
                 
@@ -40,19 +50,10 @@
                     <!-- Cuplock Type (only shown for Cuplock category) -->
                     <div class="form-group" id="cuplockTypeGroup" style="display: none;">
                         <label for="cuplock_type">Cuplock Type *</label>
-                        <select id="cuplock_type" name="cuplock_type">
+                        <select id="cuplock_type" name="cuplock_type" onchange="handleCuplockTypeChange()">
                             <option value="">-- Select Type --</option>
                             <option value="ledger">Ledger</option>
                             <option value="vertical">Vertical</option>
-                        </select>
-                    </div>
-
-                    <!-- Legacy product_type field (can be removed if not used) -->
-                    <div class="form-group" id="productTypeGroup">
-                        <label for="product_type">Product Type</label>
-                        <select id="product_type" name="product_type">
-                            <option value="Scaffolding">Scaffolding</option>
-                            <!-- <option value="fabrication">Fabrication</option> -->
                         </select>
                     </div>
                 </div>
@@ -62,22 +63,39 @@
                     <input type="number" id="weight_per_unit" name="weight_per_unit" step="0.01" value="0">
                 </div>
 
-                <h3>Pricing Information</h3>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="price">Buy Price (₹) *</label>
-                        <input type="number" id="price" name="price" step="0.01" required>
+                <!-- Cuplock Ledger Sizes Section -->
+                <div id="cuplockLedgerSizes" style="display: none;">
+                    <h3>Ledger Sizes & Pricing</h3>
+                    <div class="info-box">
+                        <p>Add different sizes for this Cuplock Ledger product with individual pricing.</p>
                     </div>
-                    <div class="form-group">
-                        <label for="rent_price">Rent Price (₹/day)</label>
-                        <input type="number" id="rent_price" name="rent_price" step="0.01" value="0">
+                    
+                    <div id="sizesContainer">
+                        <!-- Sizes will be dynamically added here -->
                     </div>
+                    
+                    <button type="button" id="addSizeBtn" class="btn btn-secondary">+ Add Another Size</button>
                 </div>
 
-                <div class="form-group">
-                    <label for="deposit_amount">Deposit Amount (₹)</label>
-                    <input type="number" id="deposit_amount" name="deposit_amount" step="0.01" value="0">
+                <!-- Standard Pricing Section (for non-ledger products) -->
+                <div id="standardPricing">
+                    <h3>Pricing Information</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="price">Buy Price (₹) *</label>
+                            <input type="number" id="price" name="price" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="rent_price">Rent Price (₹/day)</label>
+                            <input type="number" id="rent_price" name="rent_price" step="0.01" value="0">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="deposit_amount">Deposit Amount (₹)</label>
+                        <input type="number" id="deposit_amount" name="deposit_amount" step="0.01" value="0">
+                    </div>
                 </div>
 
                 <h3>Product Images</h3>
@@ -112,46 +130,172 @@
 </div>
 
 <script>
-// Show/hide cuplock type based on category selection
+    function setStandardPricingRequired(isRequired) {
+    const price = document.getElementById('price');
+    const rent = document.getElementById('rent_price');
+    const deposit = document.getElementById('deposit_amount');
+
+    if (isRequired) {
+        price.setAttribute('required', 'required');
+    } else {
+        price.removeAttribute('required');
+        price.value = '';
+        rent.value = '';
+        deposit.value = '';
+    }
+}
+
+// Track the number of size options added. This is a global variable.
+let sizeCount = 0;
+
+// This function runs when the main category dropdown changes.
 function handleCategoryChange() {
     const category = document.getElementById('category').value;
     const cuplockTypeGroup = document.getElementById('cuplockTypeGroup');
     const cuplockTypeSelect = document.getElementById('cuplock_type');
     const cuplockInfo = document.getElementById('cuplockInfo');
+    const cuplockLedgerSizes = document.getElementById('cuplockLedgerSizes');
+    const standardPricing = document.getElementById('standardPricing');
     
     if (category === 'cuplock') {
-        // Show cuplock type selector
+        // Show cuplock type selector and info box
         cuplockTypeGroup.style.display = 'block';
         cuplockTypeSelect.required = true;
         cuplockInfo.style.display = 'block';
+        // IMPORTANT: We do NOT hide/show pricing sections here. 
+        // handleCuplockTypeChange() will do that based on the cuplock type.
+    }else {
+    cuplockTypeGroup.style.display = 'none';
+    cuplockTypeSelect.required = false;
+    cuplockTypeSelect.value = '';
+    cuplockInfo.style.display = 'none';
+    cuplockLedgerSizes.style.display = 'none';
+    standardPricing.style.display = 'block';
+
+    // 🔥 REQUIRED for non-cuplock products
+    setStandardPricingRequired(true);
+}
+
+}
+
+// This function runs when the cuplock type dropdown changes.
+function handleCuplockTypeChange() {
+    const cuplockType = document.getElementById('cuplock_type').value;
+    const cuplockLedgerSizes = document.getElementById('cuplockLedgerSizes');
+    const standardPricing = document.getElementById('standardPricing');
+
+    if (cuplockType === 'ledger') {
+        // Ledger → sizes only
+        cuplockLedgerSizes.style.display = 'block';
+        standardPricing.style.display = 'none';
+
+        // 🔥 FIX: disable required on hidden pricing
+        setStandardPricingRequired(false);
+
+        if (sizeCount === 0) {
+            addSizeOption();
+        }
     } else {
-        // Hide cuplock type selector
-        cuplockTypeGroup.style.display = 'none';
-        cuplockTypeSelect.required = false;
-        cuplockTypeSelect.value = '';
-        cuplockInfo.style.display = 'none';
+        // Non-ledger → normal pricing
+        cuplockLedgerSizes.style.display = 'none';
+        standardPricing.style.display = 'block';
+
+        // 🔥 FIX: enable required back
+        setStandardPricingRequired(true);
     }
 }
 
-// Validate form before submission
+// This function adds a new size option to the form.
+function addSizeOption() {
+    sizeCount++; // Increment the global counter
+    const sizesContainer = document.getElementById('sizesContainer');
+    
+    const sizeDiv = document.createElement('div');
+    sizeDiv.className = 'size-option';
+    sizeDiv.id = `size-${sizeCount}`;
+    
+    // Use template literals to build the HTML for the new size
+    sizeDiv.innerHTML = `
+        <div class="size-header">
+            <h4>Size Option ${sizeCount}</h4>
+            ${sizeCount > 1 ? `<button type="button" class="btn btn-remove" onclick="removeSizeOption(${sizeCount})">Remove</button>` : ''}
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="size_name_${sizeCount}">Size Name *</label>
+                <input type="text" id="size_name_${sizeCount}" name="size_name_${sizeCount}" placeholder="e.g., 0.9m, 1m, 1.2m" required>
+            </div>
+            <div class="form-group">
+                <label for="size_price_${sizeCount}">Buy Price (₹) *</label>
+                <input type="number" id="size_price_${sizeCount}" name="size_price_${sizeCount}" step="0.01" required>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="size_rent_price_${sizeCount}">Rent Price (₹/day)</label>
+                <input type="number" id="size_rent_price_${sizeCount}" name="size_rent_price_${sizeCount}" step="0.01" value="0">
+            </div>
+            <div class="form-group">
+                <label for="size_deposit_${sizeCount}">Deposit Amount (₹)</label>
+                <input type="number" id="size_deposit_${sizeCount}" name="size_deposit_${sizeCount}" step="0.01" value="0">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="size_weight_${sizeCount}">Weight (kg)</label>
+            <input type="number" id="size_weight_${sizeCount}" name="size_weight_${sizeCount}" step="0.01" value="0">
+        </div>
+    `;
+    
+    sizesContainer.appendChild(sizeDiv);
+}
+
+// This function removes a size option.
+function removeSizeOption(id) {
+    const sizeDiv = document.getElementById(`size-${id}`);
+    if (sizeDiv) {
+        sizeDiv.remove();
+        // Optional: Decrement the counter if you want, but it's not strictly necessary
+        // sizeCount--; 
+    }
+}
+
+// This is the key validation function that runs on form submission.
 document.getElementById('productForm').addEventListener('submit', function(e) {
     const category = document.getElementById('category').value;
     const cuplockType = document.getElementById('cuplock_type').value;
     
+    // IMPORTANT: Check if category is cuplock but no type is selected
     if (category === 'cuplock' && !cuplockType) {
-        e.preventDefault();
+        e.preventDefault(); // Stop the form from submitting
         alert('⚠️ Please select a Cuplock Type (Ledger or Vertical)');
         document.getElementById('cuplock_type').focus();
-        return false;
+        return false; // Explicitly return false
     }
     
+    // IMPORTANT: Check if category is cuplock ledger but no sizes were added
+    if (category === 'cuplock' && cuplockType === 'ledger' && sizeCount === 0) {
+        e.preventDefault(); // Stop the form from submitting
+        alert('⚠️ Please add at least one size option for the Cuplock Ledger product');
+        return false; // Explicitly return false
+    }
+    
+    // If all checks pass, the form will submit normally.
+    console.log("Form validation passed. Submitting...");
     return true;
 });
 
-// Initialize on page load
-handleCategoryChange();
+// Event listener for the add size button
+document.getElementById('addSizeBtn').addEventListener('click', function() {
+    addSizeOption();
+});
+
+// Initialize the form state on page load
+document.addEventListener('DOMContentLoaded', function() {
+    handleCategoryChange();
+});
 </script>
 
+<!-- The CSS is the same as before, just included for completeness -->
 <style>
 .admin-container {
     max-width: 1000px;
@@ -254,15 +398,89 @@ handleCategoryChange();
     color: white;
 }
 
+.btn-remove {
+    background: #dc3545;
+    color: white;
+    padding: 8px 15px;
+    font-size: 14px;
+}
+
 .btn:hover {
     opacity: 0.9;
     transform: translateY(-2px);
     transition: all 0.3s ease;
 }
 
+.size-option {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #e0e0e0;
+}
+
+.size-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.size-header h4 {
+    margin: 0;
+    color: #555;
+}
+
+.info-box {
+    background: #f0f7ff;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid #2196F3;
+}
+
+.info-box p {
+    margin: 0;
+    color: #555;
+}
+
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+.alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.alert-error {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+.alert-warning {
+    color: #856404;
+    background-color: #fff3cd;
+    border-color: #ffeaa7;
+}
+
 @media (max-width: 768px) {
     .form-row {
         grid-template-columns: 1fr;
+    }
+    
+    .size-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .btn-remove {
+        margin-top: 10px;
     }
 }
 </style>

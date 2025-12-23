@@ -436,14 +436,14 @@
     }
 }
 
-/* ===== HERO SECTION WITH BACKGROUND IMAGE ===== */
+/* ===== HERO SECTION WITH BACKGROUND IMAGE - MODIFIED ===== */
 .hero-section {
     position: relative;
     width: 100%;
-    min-height: 450px;
+    min-height: 500px;
     background:url('https://z-cdn-media.chatglm.cn/files/2af4d7dd-1f6c-4b9e-86ce-0180f97d348e.png?auth_key=1865978888-b1aaff406e684121af1a401a835364a6-0-d864c35fb16a75519fb1ea2792a889f2');
     background-size: cover;
-    background-position: center;
+    background-position: right center; /* Changed to show more of the right side */
     background-attachment: fixed;
     background-repeat: no-repeat;
     display: flex;
@@ -451,11 +451,12 @@
     justify-content: center;
     color: white;
     text-align: center;
-    padding: 60px 20px;
+    padding: 80px 20px;
     margin-bottom: 40px;
     overflow: hidden;
 }
 
+/* REMOVED: The blue overlay that was applied with ::before pseudo-element */
 .hero-section::before {
     content: '';
     position: absolute;
@@ -463,7 +464,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    /* background: linear-gradient(135deg, rgba(198, 199, 255, 0.4) 0%, rgba(92, 111, 219, 0.958) 100%); */ */
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.5) 100%); /* Reduced opacity for better visibility */
     z-index: 1;
 }
 
@@ -472,6 +473,9 @@
     z-index: 2;
     max-width: 800px;
     animation: fadeInDown 0.8s ease-out;
+    padding: 20px;
+    border-radius: 10px;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background for better text contrast */
 }
 
 .hero-content h1 {
@@ -479,7 +483,7 @@
     font-weight: 900;
     color: rgb(255, 255, 255);
     margin-bottom: 1rem;
-    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9); /* Increased shadow for better contrast */
     letter-spacing: 2px;
 }
 
@@ -487,7 +491,7 @@
     font-size: 1.3rem;
     color: #ffd966;
     margin-bottom: 0.8rem;
-    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.9); /* Increased shadow for better contrast */
     font-weight: 600;
 }
 
@@ -496,7 +500,7 @@
     color: #ffffff;
     margin: 1.5rem 0;
     line-height: 1.6;
-    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.9); /* Increased shadow for better contrast */
 }
 
 .hero-btn {
@@ -534,10 +538,14 @@
 
 @media (max-width: 768px) {
     .hero-section {
-        min-height: 350px;
+        min-height: 400px;
         background-attachment: scroll;
-        padding: 40px 15px;
+        padding: 60px 15px;
         margin-bottom: 30px;
+    }
+    
+    .hero-content {
+        padding: 15px;
     }
     
     .hero-content h1 {
@@ -556,8 +564,12 @@
 
 @media (max-width: 480px) {
     .hero-section {
-        min-height: 300px;
-        padding: 30px 10px;
+        min-height: 350px;
+        padding: 40px 10px;
+    }
+    
+    .hero-content {
+        padding: 10px;
     }
     
     .hero-content h1 {
@@ -580,7 +592,7 @@
     <div class="hero-content">
         <h1>The National Scaffolding</h1>
         <h3>Since 2015</h3>
-        <p class="hero-tagline">''The Wide Range Of Manufacturers In Aluminium , H-Frame And CupLock Scaffolding''</p>
+        <p class="hero-tagline">"The Wide Range Of Manufacturers In Aluminium, H-Frame And CupLock Scaffolding and Rental Services"</p>
         <button class="hero-btn" onclick="window.location.href='{{ url_for('fabrications') }}'">
             Go to Fabrications
         </button>
@@ -615,19 +627,24 @@
         </button>
     </div>
     
-    <div class="products-grid">
+    <!-- <div class="products-grid">
         {% for product in products %}
         <div class="product-card">
             <div class="product-image-container" onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
                 {% if product.display_image_url and product.display_image_url != 'images/no-image.png' %}
                     <!-- Single image - simple and direct -->
-                    <img src="{{ url_for('static', filename=product.display_image_url) }}" alt="{{ product.name }}" class="product-image" onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}';">
+                    <!-- <img src="{{ url_for('static', filename=product.display_image_url) }}" alt="{{ product.name }}" class="product-image" onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}';">
                 {% else %}
-                    <!-- No image available - show placeholder -->
-                    <img src="{{ url_for('static', filename='images/no-image.png') }}" alt="No Image" class="product-image">
+                    No image available - show placeholder -->
+                    <!-- <img src="{{ url_for('static', filename='images/no-image.png') }}" alt="No Image" class="product-image">
                 {% endif %}
-            </div>
-            
+            </div> -->
+            <!-- <img src="{{ url_for('static', filename=product.display_image_url) }}"
+     alt="{{ product.name }}"
+     class="product-image"
+     onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}'">
+
+             
             <div class="product-info">
                 <h3 class="product-name" onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
                     {{ product.name }}
@@ -649,26 +666,105 @@
                 {% endif %}
                 
                 <div class="product-price-row">
-                    <span class="product-price">₹{{ product.price|indian }}</span>
+                   <span class="product-price">₹{{ product.display_price|indian }}</span>
+
                 </div>
                 
-                <div class="product-actions">
-                    <button class="btn btn-secondary"
-                            onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
-                        View Details
-                    </button>
-                    {% if current_user.is_authenticated and session.get('user_type') != 'admin' %}
-                        <button class="btn btn-primary"
-                                onclick="event.stopPropagation(); addToCart({{ product.id }}, '{{ product.name|e }}', {{ product.price }})">
-                            🛒 Add to Cart
-                        </button>
-                    {% endif %}
-                </div>
+               <div class="product-actions">
+
+    <button class="btn btn-secondary"
+            onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
+        View Details
+    </button>
+
+    {% if current_user.is_authenticated and session.get('user_type') != 'admin' %}
+        <button class="btn btn-primary"
+                onclick="event.stopPropagation(); addToCart({{ product.id }})">
+            🛒 Add to Cart
+        </button>
+    {% endif %}
+
+</div>
+
             </div>
         </div>
         {% endfor %}
     </div>
+</div> -->
+
+<div class="products-grid">
+    {% for product in products %}
+    <div class="product-card">
+
+        <!-- PRODUCT IMAGE -->
+        <div class="product-image-container"
+             onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
+
+            <img src="{{ url_for('static', filename=product.display_image_url) }}"
+                 alt="{{ product.name }}"
+                 class="product-image"
+                 onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}'">
+        </div>
+
+        <!-- PRODUCT INFO -->
+        <div class="product-info">
+
+            <h3 class="product-name"
+                onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
+                {{ product.name }}
+            </h3>
+
+            {% if product.category %}
+            <div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.5rem;">
+                <span class="product-category">
+                    {{ product.category|replace('-', ' ') }}
+                </span>
+
+                {% if product.cuplock_type %}
+                <span style="background:#4CAF50;color:white;padding:0.25rem 0.75rem;
+                             border-radius:20px;font-size:0.75rem;font-weight:bold;">
+                    {{ product.cuplock_type|capitalize }}
+                </span>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% if product.description %}
+            <p class="product-description">
+                {{ product.description[:100] }}
+                {% if product.description|length > 100 %}...{% endif %}
+            </p>
+            {% endif %}
+
+            <!-- PRICE -->
+            <div class="product-price-row">
+                <span class="product-price">
+                    ₹{{ product.display_price|indian }}
+                </span>
+            </div>
+
+            <div class="product-actions">
+
+    <button class="btn btn-secondary"
+            onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
+        View Details
+    </button>
+
+    {% if current_user.is_authenticated and session.get('user_type') != 'admin' %}
+    <button class="btn btn-primary"
+            onclick="event.stopPropagation(); addToCart({{ product.id }})">
+        🛒 Add to Cart
+    </button>
+    {% endif %}
+
 </div>
+
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+
 
 {% if current_user.is_authenticated and session.get('user_type') != 'admin' %}
 <button class="view-cart-btn" onclick="window.location.href='{{ url_for('cart') }}'">

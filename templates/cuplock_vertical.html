@@ -46,14 +46,14 @@
     font-size: 16px;
 }
 
-.cup-images-grid {
+.cup-options-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     gap: 15px;
     margin: 20px 0;
 }
 
-.cup-image-card {
+.cup-option-card {
     border: 3px solid #ddd;
     border-radius: 10px;
     padding: 15px;
@@ -61,30 +61,20 @@
     cursor: pointer;
     transition: all 0.3s ease;
     background: white;
+    font-weight: 600;
+    font-size: 16px;
 }
 
-.cup-image-card:hover {
+.cup-option-card:hover {
     border-color: #007bff;
     transform: translateY(-3px);
     box-shadow: 0 4px 12px rgba(0,123,255,0.2);
 }
 
-.cup-image-card.selected {
+.cup-option-card.selected {
     border-color: #28a745;
     background: #e8f5e9;
-}
-
-.cup-image-card img {
-    width: 100%;
-    height: 120px;
-    object-fit: contain;
-    margin-bottom: 10px;
-}
-
-.cup-price {
-    font-weight: bold;
     color: #28a745;
-    font-size: 18px;
 }
 
 .price-display {
@@ -131,6 +121,12 @@
     box-shadow: 0 5px 15px rgba(245,87,108,0.4);
 }
 
+.btn-warning:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
 .info-box {
     background: #fff3cd;
     border-left: 4px solid #ffc107;
@@ -146,10 +142,30 @@
 
     <!-- PRODUCT IMAGE -->
     <div style="text-align:center;margin-bottom:20px;">
+    {% if product.display_image_url %}
         <img src="{{ url_for('static', filename=product.display_image_url) }}"
              style="max-width:300px;border-radius:8px;"
-             onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}'">
-    </div>
+             onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}'"
+             alt="{{ product.name }}">
+    {% elif product.image_url %}
+        {% set first_image = product.image_url.split(',')[0].strip() %}
+        {% if first_image.startswith('uploads/') or first_image.startswith('images/') %}
+            <img src="{{ url_for('static', filename=first_image) }}"
+                 style="max-width:300px;border-radius:8px;"
+                 onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}'"
+                 alt="{{ product.name }}">
+        {% else %}
+            <img src="{{ url_for('static', filename='uploads/' + first_image) }}"
+                 style="max-width:300px;border-radius:8px;"
+                 onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}'"
+                 alt="{{ product.name }}">
+        {% endif %}
+    {% else %}
+        <img src="{{ url_for('static', filename='images/no-image.png') }}"
+             style="max-width:300px;border-radius:8px;"
+             alt="No image available">
+    {% endif %}
+</div>
 
     <!-- Available Sizes Info -->
     <div class="info-box">
@@ -187,8 +203,9 @@
             <option
                 value="{{ size.id }}"
                 data-label="{{ size.size_label }}"
-                data-rent="{{ size.rent_price }}"
-                data-deposit="{{ size.deposit }}">
+                data-buy="{{ size.buy_price|default(0) }}"
+                data-rent="{{ size.rent_price|default(0) }}"
+                data-deposit="{{ size.deposit|default(0) }}">
                 {{ size.size_label }}
             </option>
             {% endfor %}
@@ -198,7 +215,7 @@
     <!-- CUP SECTION -->
     <div id="cupSection" style="display:block;">
         <h3>Select Cup Configuration *</h3>
-        <div id="cupImagesContainer" class="cup-images-grid">
+        <div id="cupOptionsContainer" class="cup-options-grid">
             <p style="color:#666;">Please select a size first</p>
         </div>
     </div>
@@ -237,13 +254,11 @@
 
 {% block scripts %}
 <script>
-// ============================================
-// VERTICAL CUPLOCK PRODUCT PAGE LOGIC
-// ============================================
-
 console.log('🔵 Vertical Cuplock page loaded');
 
-/* ================== GLOBALS ================== */
+// ============================================
+// GLOBALS
+// ============================================
 const PRODUCT_ID = {{ product.id }};
 const PRODUCT_BASE_PRICE = {{ product.price|default(0) }};
 
@@ -252,15 +267,20 @@ let rentPrice = 0;
 let depositPrice = 0;
 let selectedSizeLabel = null;
 let selectedCupId = null;
+let currentSizeBuyPrice = 0;
 
-/* ================== PURCHASE TYPE ================== */
+// ============================================
+// PURCHASE TYPE
+// ============================================
 function updatePurchaseType() {
     try {
+        console.log('🔄 Purchase type changed');
+        
         const purchaseTypeRadios = document.querySelectorAll('input[name="purchaseType"]');
         const cupSection = document.getElementById('cupSection');
         
         if (!purchaseTypeRadios || !cupSection) {
-            console.error('Required elements not found');
+            console.error('❌ Required elements not found');
             return;
         }
         
@@ -271,46 +291,51 @@ function updatePurchaseType() {
             }
         });
         
-        // Show/hide cup section based on purchase type
+        console.log('📊 Buy selected:', isBuySelected);
+        
+        // Show/hide cup section
         cupSection.style.display = isBuySelected ? 'block' : 'none';
         
         // Reset cup selection when switching to rent
         if (!isBuySelected) {
             selectedCupPrice = 0;
             selectedCupId = null;
-            document.querySelectorAll('.cup-image-card').forEach(function(card) {
+            document.querySelectorAll('.cup-option-card').forEach(function(card) {
                 card.classList.remove('selected');
             });
         }
         
         updatePrice();
     } catch (error) {
-        console.error('Error in updatePurchaseType:', error);
+        console.error('❌ Error in updatePurchaseType:', error);
     }
 }
 
-/* ================== LOAD CUP OPTIONS ================== */
+// ============================================
+// LOAD CUP OPTIONS
+// ============================================
 function loadCups() {
     try {
         console.log('🔄 loadCups() called');
         
         const sizeSelect = document.getElementById('sizeSelect');
-        const container = document.getElementById('cupImagesContainer');
+        const container = document.getElementById('cupOptionsContainer');
         
         if (!sizeSelect || !container) {
-            console.error('Required elements not found');
+            console.error('❌ Required elements not found');
             return;
         }
         
         const selectedOption = sizeSelect.options[sizeSelect.selectedIndex];
 
-        // Clear selections if no option selected
+        // Clear if no selection
         if (!selectedOption || !selectedOption.value) {
             selectedCupPrice = 0;
             selectedCupId = null;
             selectedSizeLabel = null;
             rentPrice = 0;
             depositPrice = 0;
+            currentSizeBuyPrice = 0;
             container.innerHTML = '<p style="color:#666;">Please select a size first</p>';
             updatePrice();
             return;
@@ -319,24 +344,29 @@ function loadCups() {
         const sizeId = selectedOption.value;
         selectedSizeLabel = selectedOption.getAttribute('data-label') || '';
 
-        // Get rent and deposit prices
+        // Get prices from data attributes
         const rentValue = selectedOption.getAttribute('data-rent');
         const depositValue = selectedOption.getAttribute('data-deposit');
+        const buyValue = selectedOption.getAttribute('data-buy');
         
         rentPrice = rentValue ? parseFloat(rentValue) : 0;
         depositPrice = depositValue ? parseFloat(depositValue) : 0;
+        currentSizeBuyPrice = buyValue ? parseFloat(buyValue) : 0;
 
-        console.log('📊 Selected size:', selectedSizeLabel, 'Rent:', rentPrice, 'Deposit:', depositPrice);
+        console.log('📊 Size selected:', {
+            label: selectedSizeLabel,
+            buy: currentSizeBuyPrice,
+            rent: rentPrice,
+            deposit: depositPrice
+        });
 
         // Show loading
         container.innerHTML = '<p>Loading cup options...</p>';
 
-        // Fetch cups for this size
+        // Fetch cups
         fetch('/cuplock/api/vertical/size/' + encodeURIComponent(sizeId) + '/cups')
             .then(function(response) {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
+                if (!response.ok) throw new Error('Network response was not ok');
                 return response.json();
             })
             .then(function(data) {
@@ -347,48 +377,29 @@ function loadCups() {
                 selectedCupId = null;
 
                 if (!data.success || !data.cups || data.cups.length === 0) {
-                    container.innerHTML = '<p style="color:#ff6b6b;">No cup options available for this size</p>';
+                    container.innerHTML = '<p style="color:#ff6b6b;">No cup options available</p>';
                     updatePrice();
                     return;
                 }
 
-                const cups = data.cups;
-                cups.forEach(function(c) {
+                data.cups.forEach(function(c) {
                     const card = document.createElement('div');
-                    card.className = 'cup-image-card';
+                    card.className = 'cup-option-card';
 
-                    // ✅ FIXED: Handle image URL properly
-                    let imageUrl = c.image_url || 'images/no-image.png';
-                    
-                    // Build the correct URL for static files
-                    // Backend returns: "uploads/filename.png"
-                    // We need: "/static/uploads/filename.png"
-                    if (imageUrl && !imageUrl.startsWith('/static/') && !imageUrl.startsWith('http')) {
-                        // If it starts with 'uploads/', use it as-is
-                        // Otherwise, add 'uploads/' prefix
-                        if (!imageUrl.startsWith('uploads/')) {
-                            imageUrl = 'uploads/' + imageUrl;
-                        }
-                        // Now prepend /static/
-                        imageUrl = '/static/' + imageUrl;
-                    }
-                    
-                    console.log('🖼️ Cup image URL:', imageUrl);
+                    const cupPrice = c.price || 0;
+                    const cupCount = c.cup_count || 0;
 
-                    card.innerHTML = 
-                        '<img src="' + imageUrl + '" onerror="this.src=\'/static/images/no-image.png\'" alt="' + c.cup_count + ' cups">' +
-                        '<p><strong>' + c.cup_count + ' Cups</strong></p>' +
-                        '<p class="cup-price">₹' + (c.buy_price || 0).toFixed(2) + '</p>';
+                    card.textContent = cupCount + (cupCount === 1 ? ' Cup' : ' Cups');
+                    card.dataset.price = cupPrice;
+                    card.dataset.cupId = c.id;
 
-                    // Add click handler
                     card.addEventListener('click', function() {
-                        selectedCupPrice = parseFloat(c.buy_price || 0);
-                        selectedCupId = c.id;
+                        selectedCupPrice = parseFloat(this.dataset.price);
+                        selectedCupId = this.dataset.cupId;
 
-                        console.log('🎯 Selected cup:', c.cup_count, 'cups, Price:', selectedCupPrice);
+                        console.log('🎯 Cup selected:', cupCount, 'Price:', selectedCupPrice);
 
-                        // Remove selected class from all cards
-                        document.querySelectorAll('.cup-image-card').forEach(function(el) {
+                        document.querySelectorAll('.cup-option-card').forEach(function(el) {
                             el.classList.remove('selected');
                         });
                         card.classList.add('selected');
@@ -403,23 +414,24 @@ function loadCups() {
             })
             .catch(function(error) {
                 console.error('❌ Error loading cups:', error);
-                container.innerHTML = '<p style="color: red;">Error loading cup options. Please try again.</p>';
+                container.innerHTML = '<p style="color: red;">Error loading cups. Please try again.</p>';
                 updatePrice();
             });
     } catch (error) {
         console.error('❌ Error in loadCups:', error);
     }
 }
-/* ================== PRICE PREVIEW ================== */
+
+// ============================================
+// UPDATE PRICE
+// ============================================
 function updatePrice() {
     try {
         const qtyInput = document.getElementById('quantity');
         const purchaseTypeRadios = document.querySelectorAll('input[name="purchaseType"]');
         
-        // Get quantity
         const qty = qtyInput ? (parseInt(qtyInput.value) || 1) : 1;
         
-        // Get purchase type
         let type = 'buy';
         if (purchaseTypeRadios) {
             purchaseTypeRadios.forEach(function(radio) {
@@ -433,17 +445,21 @@ function updatePrice() {
         let deposit = 0;
 
         if (type === 'buy') {
-            // Buy = base price + selected cup price
-            unit = PRODUCT_BASE_PRICE + selectedCupPrice;
+            unit = currentSizeBuyPrice + selectedCupPrice;
         } else {
-            // Rent = rent price + deposit
             unit = rentPrice;
             deposit = depositPrice;
         }
 
         const total = (unit * qty) + (deposit * qty);
 
-        console.log('💰 Price updated - Type:', type, 'Unit:', unit, 'Deposit:', deposit, 'Total:', total);
+        console.log('💰 Price calculated:', {
+            type: type,
+            unit: unit,
+            deposit: deposit,
+            qty: qty,
+            total: total
+        });
 
         // Update display
         const unitPriceEl = document.getElementById('unitPrice');
@@ -462,7 +478,9 @@ function updatePrice() {
     }
 }
 
-/* ================== ADD TO CART ================== */
+// ============================================
+// ADD TO CART
+// ============================================
 function addToCart() {
     try {
         const qtyInput = document.getElementById('quantity');
@@ -470,7 +488,6 @@ function addToCart() {
         
         const qty = qtyInput ? (parseInt(qtyInput.value) || 1) : 1;
         
-        // Get purchase type
         let type = 'buy';
         if (purchaseTypeRadios) {
             purchaseTypeRadios.forEach(function(radio) {
@@ -491,18 +508,16 @@ function addToCart() {
             return;
         }
 
-        // ✅ CRITICAL: Include the selected cup price in customization
         const customization = {
             component: "vertical",
             purchase_type: type,
             size: selectedSizeLabel,
             cup_id: selectedCupId,
-            cup_price: selectedCupPrice  // ← ADD THIS!
+            cup_price: selectedCupPrice
         };
 
         console.log('🛒 Adding to cart:', customization);
 
-        // Disable button
         const btn = event.target;
         btn.disabled = true;
         btn.textContent = 'Adding...';
@@ -517,9 +532,7 @@ function addToCart() {
             })
         })
         .then(function(response) {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
+            if (!response.ok) throw new Error('Network response was not ok');
             return response.json();
         })
         .then(function(data) {
@@ -543,13 +556,27 @@ function addToCart() {
     }
 }
 
-// Initialize on page load
-try {
-    updatePurchaseType();
-    updatePrice();
-    console.log('✅ Page initialized successfully');
-} catch (error) {
-    console.error('❌ Error during initialization:', error);
-}
+// ============================================
+// INITIALIZE
+// ============================================
+(function() {
+    console.log('🚀 Initializing vertical cuplock page...');
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializePage);
+    } else {
+        initializePage();
+    }
+    
+    function initializePage() {
+        console.log('✅ DOM ready');
+        
+        setTimeout(function() {
+            updatePurchaseType();
+            updatePrice();
+            console.log('✅ Initialization complete');
+        }, 50);
+    }
+})();
 </script>
 {% endblock %}

@@ -6,6 +6,11 @@ import logging
 import os
 import uuid
 from werkzeug.utils import secure_filename
+from flask import render_template, abort, current_app
+from models import Product, CuplockVerticalSize
+from utils import get_image_url
+
+from models import Product, CuplockLedgerSize
 
 cuplock_bp = Blueprint('cuplock', __name__)
 logger = logging.getLogger(__name__)
@@ -21,41 +26,27 @@ def allowed_file(filename):
 
 # FIXED: Helper function to get the image path for rendering
 def get_image_url(image_path):
-    """Get the PRIMARY image path for rendering (to be used with url_for in templates)
-    
-    Handles comma-separated image lists by extracting the FIRST image only.
-    Returns the first image path if valid, otherwise returns no-image.png
-    
-    Args:
-        image_path: Single image path, or comma-separated list of paths
-        
-    Returns:
-        A single image path suitable for <img src="{{ url_for('static', filename=path) }}">
-    """
     if not image_path:
         return 'images/no-image.png'
-    
-    # If there are multiple images (comma-separated), take only the FIRST one
+
+    # If multiple images exist, take only the first one
     if ',' in image_path:
         image_path = image_path.split(',')[0].strip()
-    
-    # Handle empty string after splitting
+
     if not image_path:
         return 'images/no-image.png'
-    
-    # Normalize path - check which prefix it should have
-    if image_path.startswith('uploads/'):
-        # Already has uploads/ prefix
+
+    # Remove static/ if present
+    if image_path.startswith('static/'):
+        image_path = image_path.replace('static/', '', 1)
+
+    # Valid prefixes
+    if image_path.startswith(('uploads/', 'images/')):
         return image_path
-    elif image_path.startswith('images/'):
-        # Already has images/ prefix (for hardcoded/default images)
-        return image_path
-    elif image_path.startswith('static/'):
-        # Has static/ prefix - remove it and return just the rest
-        return image_path.replace('static/', '', 1)
-    else:
-        # No prefix - it's just a filename, add uploads/ prefix
-        return f'uploads/{image_path}'
+
+    # Plain filename → assume uploads/
+    return f'uploads/{image_path}'
+
 
 # ===========================
 # PREDEFINED CONFIGURATIONS
@@ -115,13 +106,13 @@ def vertical_list():
         flash(f'Error loading Cuplock products. Details: {str(e)}', 'error')
         return redirect(url_for('admin_scaffoldings'))
 
-
 @cuplock_bp.route('/admin/vertical/create', methods=['GET', 'POST'])
 @login_required
 def vertical_create():
     """Create new Vertical Cuplock product"""
     try:
         if session.get('user_type') != 'admin':
+            flash('Admin access required', 'error')
             return redirect(url_for('dashboard'))
 
         if request.method == 'POST':
@@ -149,46 +140,60 @@ def vertical_create():
                 is_active=True
             )
 
-            # FIXED: Handle image upload - store only filename
-            if 'image' in request.files and request.files['image']:
-                file = request.files['image']
-                if file and file.filename and allowed_file(file.filename):
-                    try:
-                        upload_folder = current_app.config.get('UPLOAD_FOLDER', 'static/uploads')
-                        os.makedirs(upload_folder, exist_ok=True)
-                        
-                        unique_name = f"{uuid.uuid4().hex}_{secure_filename(file.filename)}"
-                        filepath = os.path.join(upload_folder, unique_name)
-                        
-                        file.save(filepath)
-                        # FIXED: Store with uploads/ prefix so get_image_url() doesn't double it
-                        product.image_url = f'uploads/{unique_name}'
-                        logger.info(f"Created product with image: uploads/{unique_name}")
-                    except Exception as e:
-                        logger.error(f"Error saving product image during creation: {e}")
-                        flash(f'Warning: Image upload failed, but product created. Error: {str(e)}', 'warning')
+            # ✅ Handle multiple images upload
+            uploaded_images = []
+            
+            if 'images' in request.files:
+                files = request.files.getlist('images')
+                
+                for file in files:
+                    if file and file.filename and allowed_file(file.filename):
+                        try:
+                            upload_folder = current_app.config.get('UPLOAD_FOLDER', 'static/uploads')
+                            os.makedirs(upload_folder, exist_ok=True)
+                            
+                            unique_name = f"{uuid.uuid4().hex}_{secure_filename(file.filename)}"
+                            filepath = os.path.join(upload_folder, unique_name)
+                            
+                            file.save(filepath)
+                            uploaded_images.append(f'uploads/{unique_name}')
+                            logger.info(f"Uploaded image: uploads/{unique_name}")
+                            
+                        except Exception as e:
+                            logger.error(f"Error saving image: {e}")
+                            flash(f'Warning: Failed to upload image {file.filename}', 'warning')
+            
+            # Join multiple images with comma
+            if uploaded_images:
+                product.image_url = ','.join(uploaded_images)
+                logger.info(f"Product images: {product.image_url}")
+            else:
+                logger.warning("No images uploaded for new product")
 
             db.session.add(product)
             db.session.commit()
 
-            flash('Vertical Cuplock product created! Now add sizes.', 'success')
+            flash('✅ Vertical Cuplock product created! Now add sizes and cup configurations.', 'success')
+            
+            # ✅ FIX: Redirect to ADMIN edit page, not user product page
             return redirect(url_for('cuplock.vertical_edit', product_id=product.id))
 
         return render_template('cuplock_vertical_create.html')
 
     except Exception as e:
         db.session.rollback()
-        logger.error(f"Error creating vertical product: {e}")
+        logger.error(f"Error creating vertical product: {e}", exc_info=True)
         flash('Error creating product', 'error')
         return redirect(url_for('cuplock.vertical_list'))
-
 
 @cuplock_bp.route('/admin/vertical/<int:product_id>/edit', methods=['GET', 'POST'])
 @login_required
 def vertical_edit(product_id):
-    """Edit Vertical Cuplock product"""
+    """Edit Vertical Cuplock product - ADMIN ONLY"""
     try:
+        # ✅ CRITICAL: Check admin access FIRST
         if session.get('user_type') != 'admin':
+            flash('Admin access required', 'error')
             return redirect(url_for('dashboard'))
 
         product = Product.query.get_or_404(product_id)
@@ -198,27 +203,33 @@ def vertical_edit(product_id):
             product.name = request.form.get('name', product.name)
             product.description = request.form.get('description', '')
             
-            # FIXED: Handle product image upload
-            if 'image' in request.files and request.files['image']:
-                file = request.files['image']
-                if file and file.filename and allowed_file(file.filename):
-                    try:
-                        upload_folder = current_app.config.get('UPLOAD_FOLDER', 'static/uploads')
-                        os.makedirs(upload_folder, exist_ok=True)
-                        
-                        unique_name = f"{uuid.uuid4().hex}_{secure_filename(file.filename)}"
-                        filepath = os.path.join(upload_folder, unique_name)
-                        
-                        file.save(filepath)
-                        # FIXED: Store with uploads/ prefix so templates display correctly
-                        product.image_url = f'uploads/{unique_name}'
-                        logger.info(f"Updated product image: uploads/{unique_name}")
-                    except Exception as e:
-                        logger.error(f"Error saving product image: {e}")
-                        flash(f'Error saving image: {str(e)}', 'error')
+            # ✅ Handle multiple image uploads
+            if 'images' in request.files:
+                files = request.files.getlist('images')
+                uploaded_images = []
+                
+                for file in files:
+                    if file and file.filename and allowed_file(file.filename):
+                        try:
+                            upload_folder = current_app.config.get('UPLOAD_FOLDER', 'static/uploads')
+                            os.makedirs(upload_folder, exist_ok=True)
+                            
+                            unique_name = f"{uuid.uuid4().hex}_{secure_filename(file.filename)}"
+                            filepath = os.path.join(upload_folder, unique_name)
+                            
+                            file.save(filepath)
+                            uploaded_images.append(f'uploads/{unique_name}')
+                            logger.info(f"Updated product image: uploads/{unique_name}")
+                        except Exception as e:
+                            logger.error(f"Error saving product image: {e}")
+                            flash(f'Error saving image: {str(e)}', 'error')
+                
+                # Only update if new images were uploaded
+                if uploaded_images:
+                    product.image_url = ','.join(uploaded_images)
             
             db.session.commit()
-            flash('Product information updated successfully!', 'success')
+            flash('✅ Product information updated successfully!', 'success')
             return redirect(url_for('cuplock.vertical_edit', product_id=product_id))
 
         sizes = CuplockVerticalSize.query.filter_by(
@@ -226,8 +237,8 @@ def vertical_edit(product_id):
             is_active=True
         ).all()
 
-        # FIXED: Get display URL for template
-        image_url = get_image_url(product.image_url)
+        # ✅ Get display URL for template
+        image_url = get_image_url(product.image_url) if product.image_url else 'images/no-image.png'
 
         return render_template('cuplock_vertical_edit.html',
                                product=product,
@@ -237,10 +248,9 @@ def vertical_edit(product_id):
                                image_url=image_url)
 
     except Exception as e:
-        logger.error(f"Error editing vertical product: {e}")
+        logger.error(f"Error editing vertical product: {e}", exc_info=True)
         flash('Error loading product', 'error')
         return redirect(url_for('cuplock.vertical_list'))
-
 
 @cuplock_bp.route('/admin/vertical/product/<int:product_id>/delete', methods=['POST'])
 @login_required
@@ -270,9 +280,6 @@ def vertical_add_size(product_id):
         if session.get('user_type') != 'admin':
             return jsonify({'success': False, 'message': 'Unauthorized'}), 403
 
-        if not request.form:
-            return jsonify({'success': False, 'message': 'Invalid form data'}), 400
-
         size_label = request.form.get('size_label')
         if not size_label or size_label not in VERTICAL_SIZES:
             return jsonify({
@@ -295,12 +302,22 @@ def vertical_add_size(product_id):
             except (TypeError, ValueError):
                 return 0.0
 
+        buy_price = safe_decimal(request.form.get('buy_price'))
+        rent_price = safe_decimal(request.form.get('rent_price'))
+        
+        # ✅ VALIDATION: Ensure at least one price is set
+        if buy_price == 0 and rent_price == 0:
+            return jsonify({
+                'success': False,
+                'message': 'At least one price (buy or rent) must be greater than 0'
+            }), 400
+
         size = CuplockVerticalSize(
             product_id=product_id,
             size_label=size_label,
             weight=safe_decimal(request.form.get('weight')),
-            buy_price=safe_decimal(request.form.get('buy_price')),
-            rent_price=safe_decimal(request.form.get('rent_price')),
+            buy_price=buy_price,
+            rent_price=rent_price,
             deposit=safe_decimal(request.form.get('deposit')),
             is_active=True
         )
@@ -315,7 +332,6 @@ def vertical_add_size(product_id):
         logger.exception("Error adding vertical size")
         return jsonify({'success': False, 'message': 'Server error occurred'}), 500
 
-
 @cuplock_bp.route('/admin/vertical/size/<int:size_id>/cup/add', methods=['POST'])
 @login_required
 def vertical_add_cup(size_id):
@@ -328,7 +344,7 @@ def vertical_add_cup(size_id):
         
         # Get cup configuration data
         cup_count = request.form.get('cup_count')
-        weight_kg = request.form.get('weight_kg', 0)
+        weight_kg = request.form.get('weight_kg', 0)  # Default to 0 if not provided
         buy_price = request.form.get('buy_price', 0)
         rent_price = request.form.get('rent_price', 0)
         deposit = request.form.get('deposit', 0)
@@ -347,7 +363,7 @@ def vertical_add_cup(size_id):
         
         cup_image_url = ''
         
-        # FIXED: Handle file upload consistently
+        # Handle file upload
         if 'cup_image' in request.files and request.files['cup_image']:
             file = request.files['cup_image']
             if file and file.filename and allowed_file(file.filename):
@@ -360,24 +376,24 @@ def vertical_add_cup(size_id):
                 
                 try:
                     file.save(filepath)
-                    # Store only the filename
                     cup_image_url = unique_name
                     logger.info(f"Saved cup image: {cup_image_url}")
                 except Exception as e:
                     logger.error(f"Error saving cup image: {e}")
                     return jsonify({'success': False, 'message': f'Error saving image: {str(e)}'}), 500
-            else:
-                return jsonify({'success': False, 'message': 'Invalid image file'}), 400
+        
+        # FIXED: Ensure weight_kg has a value (default to 0.0 if not provided)
+        weight_value = float(weight_kg) if weight_kg and str(weight_kg).strip() else 0.0
         
         # Create new cup configuration
         cup = CuplockVerticalCup(
             vertical_size_id=size_id,
             cup_count=int(cup_count),
             cup_image_url=cup_image_url,
-            weight_kg=float(weight_kg) if weight_kg else None,
-            buy_price=float(buy_price) if buy_price else 0,
-            rent_price=float(rent_price) if rent_price else 0,
-            deposit_amount=float(deposit) if deposit else 0
+            weight_kg=weight_value,  # Always provide a value
+            buy_price=float(buy_price) if buy_price and str(buy_price).strip() else 0,
+            rent_price=float(rent_price) if rent_price and str(rent_price).strip() else 0,
+            deposit_amount=float(deposit) if deposit and str(deposit).strip() else 0
         )
         
         db.session.add(cup)
@@ -390,8 +406,8 @@ def vertical_add_cup(size_id):
         db.session.rollback()
         logger.error(f"Error adding cup configuration: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
-
-
+    
+    
 @cuplock_bp.route('/admin/vertical/size/<int:size_id>/delete', methods=['POST'])
 @login_required
 def vertical_delete_size(size_id):
@@ -677,124 +693,168 @@ def ledger_delete_size(size_id):
 
 @cuplock_bp.route('/product/vertical/<int:product_id>')
 def vertical_product_page(product_id):
-    product = Product.query.get_or_404(product_id)
-
-    product.display_image_url = get_image_url(product.image_url)
-
-    sizes = CuplockVerticalSize.query.filter_by(
-        product_id=product_id,
-        is_active=True
-    ).all()
-
-    return render_template(
-        'cuplock_vertical.html',
-        product=product,
-        sizes=sizes,
-        cup_options=VERTICAL_CUP_OPTIONS,
-        base_price=float(product.price or 0)
-    )
-
-# ===========================
-# PRICE CALCULATION HELPERS
-# ===========================
-
-def calculate_vertical_price(product, size_id, cup_id, mode='buy'):
-    base_price = float(product.price or 0)
-
-    unit_price = 0
-    deposit = 0
-
-    if mode == 'buy':
-        # BUY = base + cup
-        cup = CuplockVerticalCup.query.get(cup_id)
-        if not cup:
-            return None
-
-        unit_price = base_price + float(cup.buy_price or 0)
-
-    else:
-        # RENT = rent + deposit
-        size = CuplockVerticalSize.query.get(size_id)
-        if not size:
-            return None
-
-        unit_price = float(size.rent_price or 0)
-        deposit = float(size.deposit or 0)
-
-    return {
-        'price': round(unit_price, 2),
-        'deposit': round(deposit, 2)
-    }
-@cuplock_bp.route('/product/ledger/<int:product_id>')
-def ledger_product_page(product_id):
-    """
-    User page for Ledger Cuplock product
-    Uses ONLY admin-defined prices from product table:
-    - product.price (buy price)
-    - product.rent_price (rent price)
-    - product.deposit_amount (deposit for rent)
-    
-    Formula: (price × quantity) + (deposit × quantity if renting)
-    """
+    """User-facing vertical product page - PUBLIC"""
     try:
-        logger.info(f"Loading ledger product page for product_id: {product_id}")
+        # ✅ NO admin check here - this is for customers
         
-        # Fetch product
-        product = Product.query.get_or_404(product_id)
+        product = Product.query.filter_by(
+            id=product_id,
+            category='cuplock',
+            cuplock_type='vertical',
+            is_active=True
+        ).first_or_404()
+
+        sizes = CuplockVerticalSize.query.filter_by(
+            product_id=product.id,
+            is_active=True
+        ).order_by(CuplockVerticalSize.size_label).all()
+
+        if not sizes:
+            current_app.logger.warning(f"No sizes found for vertical product {product_id}")
+            flash('This product has no sizes configured. Please contact support.', 'warning')
+            return redirect(url_for('products'))
+
+        # Validate and clean sizes data
+        valid_sizes = []
+        has_valid_prices = False
         
-        # Verify this is actually a ledger product
-        if product.category != 'cuplock' or product.cuplock_type != 'ledger':
-            logger.warning(f"Product {product_id} is not a ledger - redirecting")
-            flash('Invalid product type', 'error')
-            return redirect(url_for('national_scaffoldings'))
+        for size in sizes:
+            buy_price = float(size.buy_price) if size.buy_price and size.buy_price > 0 else 0
+            rent_price = float(size.rent_price) if size.rent_price and size.rent_price > 0 else 0
+            deposit = float(size.deposit) if size.deposit and size.deposit >= 0 else 0
+            
+            if buy_price > 0 or rent_price > 0:
+                has_valid_prices = True
+            
+            size.buy_price = buy_price
+            size.rent_price = rent_price
+            size.deposit = deposit
+            
+            valid_sizes.append(size)
+            
+            if buy_price == 0 and rent_price == 0:
+                current_app.logger.warning(
+                    f"Product {product_id}, Size {size.size_label}: Both prices are 0"
+                )
 
-        # Set display image
-        product.display_image_url = get_image_url(product.image_url)
-        logger.info(f"Ledger product: {product.name}")
-        logger.info(f"Buy Price: ₹{product.price}, Rent: ₹{product.rent_price}, Deposit: ₹{product.deposit_amount}")
+        if not valid_sizes:
+            current_app.logger.error(f"No valid sizes for product {product_id}")
+            flash('This product is not properly configured.', 'error')
+            return redirect(url_for('products'))
+        
+        if not has_valid_prices:
+            flash('⚠️ This product has no prices configured. Please contact admin.', 'warning')
 
-        # Render dedicated ledger template
+        base_price = float(valid_sizes[0].buy_price or 0)
+
+        # Fix image path
+        if product.image_url:
+            image_urls = [url.strip() for url in product.image_url.split(',') if url.strip()]
+            if image_urls:
+                first_image = image_urls[0]
+                if not first_image.startswith(('uploads/', 'images/', 'static/')):
+                    first_image = f'uploads/{first_image}'
+                if first_image.startswith('static/'):
+                    first_image = first_image.replace('static/', '', 1)
+                product.display_image_url = first_image
+            else:
+                product.display_image_url = 'images/no-image.png'
+        else:
+            product.display_image_url = 'images/no-image.png'
+
         return render_template(
-            'cuplock_ledger.html',
-            product=product
+            'cuplock_vertical.html',
+            product=product,
+            sizes=valid_sizes,
+            cup_options=VERTICAL_CUP_OPTIONS,
+            base_price=base_price
         )
 
     except Exception as e:
-        logger.error(f"Error loading ledger product page: {e}", exc_info=True)
-        flash('Error loading product', 'error')
-        return redirect(url_for('national_scaffoldings'))
+        current_app.logger.error(f"Vertical product error: {e}", exc_info=True)
+        flash('Error loading product. Please try again.', 'error')
+        return redirect(url_for('products'))
+
+
+@cuplock_bp.route('/product/ledger/<int:product_id>')
+def ledger_product_page(product_id):
+    product = Product.query.filter_by(
+        id=product_id,
+        category='cuplock',
+        cuplock_type='ledger',
+        is_active=True
+    ).first_or_404()
+
+    sizes = CuplockLedgerSize.query.filter_by(
+        product_id=product.id,
+        is_active=True
+    ).all()
+
+    product.display_image_url = get_image_url(product.image_url)
+
+    return render_template(
+        'cuplock_ledger.html',
+        product=product,
+        sizes=sizes
+    )
+
 
 # ===========================
 # API ENDPOINTS
 # ===========================
+@cuplock_bp.route('/cuplock/api/vertical/size/<int:size_id>/cups', methods=['GET'])
+def get_cups_by_size(size_id):
+    """API endpoint to fetch cup options for a specific vertical size"""
+    try:
+        cups = CuplockVerticalCup.query.filter_by(vertical_size_id=size_id).all()
+        
+        cup_list = []
+        for cup in cups:
+            # ✅ Use the helper function that already handles all edge cases!
+            image_url = get_image_url(cup.cup_image_url) if cup.cup_image_url else 'images/no-image.png'
+            
+            cup_list.append({
+                'id': cup.id,
+                'size_id': cup.vertical_size_id,
+                'cup_count': cup.cup_count,
+                'price': float(cup.buy_price) if cup.buy_price else 0,  # Return as 'price'
+                'image_url': image_url
+            })
+        
+        logger.info(f"✅ Loaded {len(cup_list)} cups for size {size_id}")
+        
+        return jsonify({
+            'success': True,
+            'cups': cup_list
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ Error fetching cups: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'message': str(e),
+            'cups': []
+        }), 500
+
 
 @cuplock_bp.route('/admin/api/ledger/<int:product_id>/sizes')
-def api_ledger_sizes(product_id):
-    """Return all sizes for this ledger product (for frontend JS)."""
-    try:
-        product = Product.query.get_or_404(product_id)
+def admin_api_ledger_sizes(product_id):
+    sizes = CuplockLedgerSize.query.filter_by(
+        product_id=product_id,
+        is_active=True
+    ).order_by(CuplockLedgerSize.size_label).all()
 
-        sizes = CuplockLedgerSize.query.filter_by(
-            product_id=product_id,
-            is_active=True
-        ).all()
-
-        output = []
-        for s in sizes:
-            output.append({
-                "id": s.id,
-                "label": s.size_label,
-                "weight": float(s.weight_kg or 0),
-                "buy_price": float(s.buy_price or 0),
-                "rent_price": float(s.rent_price or 0),
-                "deposit": float(s.deposit_amount or 0)
-            })
-
-        return jsonify(output)
-
-    except Exception as e:
-        logger.error(f"Error loading ledger sizes API: {e}")
-        return jsonify({"error": True, "message": str(e)}), 500
+    return jsonify([
+        {
+            "id": s.id,
+            "label": s.size_label,
+            "weight": float(s.weight_kg or 0),
+            "buy_price": float(s.buy_price or 0),
+            "rent_price": float(s.rent_price or 0),
+            "deposit": float(s.deposit_amount or 0)
+        }
+        for s in sizes
+    ])
 
 
 @cuplock_bp.route('/admin/api/vertical/<int:product_id>/sizes')
@@ -825,38 +885,3 @@ def api_vertical_sizes(product_id):
     except Exception as e:
         logger.error(f"Error loading vertical sizes API: {e}")
         return jsonify({"error": True, "message": str(e)}), 500
-
-
-@cuplock_bp.route('/cuplock/api/vertical/size/<int:size_id>/cups', methods=['GET'])
-def get_cups_by_size(size_id):
-    """API endpoint to fetch cup options for a specific vertical size"""
-    try:
-        cups = CuplockVerticalCup.query.filter_by(vertical_size_id=size_id).all()
-        
-        cup_list = []
-        for cup in cups:
-            # ✅ Use the helper function that already handles all edge cases!
-            image_url = get_image_url(cup.cup_image_url) if cup.cup_image_url else 'images/no-image.png'
-            
-            cup_list.append({
-                'id': cup.id,
-                'size_id': cup.vertical_size_id,
-                'cup_count': cup.cup_count,
-                'buy_price': float(cup.buy_price) if cup.buy_price else 0,
-                'image_url': image_url
-            })
-        
-        logger.info(f"✅ Loaded {len(cup_list)} cups for size {size_id}")
-        
-        return jsonify({
-            'success': True,
-            'cups': cup_list
-        })
-        
-    except Exception as e:
-        logger.error(f"❌ Error fetching cups: {str(e)}", exc_info=True)
-        return jsonify({
-            'success': False,
-            'message': str(e),
-            'cups': []
-        }), 500

@@ -31,7 +31,6 @@
     .detail-grid { grid-template-columns: 1fr; }
 }
 
-/* Gallery */
 .product-detail-gallery {
     position: relative;
     width: 100%;
@@ -58,7 +57,6 @@
     border-radius: 10px;
 }
 
-/* Product Info */
 .page-title { 
     font-size: 1.6rem; 
     margin: 0; 
@@ -83,7 +81,6 @@
     margin-bottom: 1rem; 
 }
 
-/* Ledger Pricing Box */
 .ledger-pricing-box {
     background: linear-gradient(135deg, var(--ledger-primary), var(--ledger-secondary));
     padding: 24px;
@@ -198,26 +195,6 @@
     cursor: pointer;
 }
 
-.toast-notification {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%) translateY(100px);
-    background-color: rgba(0,0,0,0.9);
-    color: white;
-    padding: 14px 24px;
-    border-radius: 8px;
-    z-index: 2000;
-    opacity: 0;
-    transition: all .3s ease;
-    font-weight: 600;
-}
-
-.toast-notification.show {
-    transform: translateX(-50%) translateY(0);
-    opacity: 1;
-}
-
 .admin-warning {
     background: rgba(255, 165, 0, 0.15);
     border-left: 4px solid #ffa500;
@@ -247,7 +224,8 @@
                         <div class="gallery-main-image">
                             <img src="{{ url_for('static', filename=valid_images[0]) }}"
                                  alt="{{ product.name }}"
-                                 loading="lazy">
+                                 loading="lazy"
+                                 onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}'">
                         </div>
                     </div>
                 {% else %}
@@ -277,34 +255,46 @@
             <div class="ledger-pricing-box">
                 <h3>📊 Pricing Details</h3>
 
-                <!-- Display Admin Prices -->
+                <!-- Size Selector -->
+                <div class="form-group">
+                    <label for="ledger_size">Select Size</label>
+                    <select id="ledger_size" onchange="onLedgerSizeChange()">
+                        {% for s in sizes %}
+                            <option
+                                value="{{ s.id }}"
+                                data-buy="{{ s.buy_price|default(0) }}"
+                                data-rent="{{ s.rent_price|default(0) }}"
+                                data-deposit="{{ s.deposit_amount|default(0) }}"
+                                data-label="{{ s.size_label }}"
+                            >
+                                {{ s.size_label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Display Prices -->
                 <div class="price-info-row">
                     <strong>Buy Price (per unit):</strong>
-                    <span>₹{{ "%.2f"|format(product.price|float) }}</span>
+                    <span id="buy_price_display">₹0.00</span>
                 </div>
 
-                {% if product.rent_price and product.rent_price > 0 %}
                 <div class="price-info-row">
                     <strong>Rent Price (per unit):</strong>
-                    <span>₹{{ "%.2f"|format(product.rent_price|float) }}</span>
+                    <span id="rent_price_display">₹0.00</span>
                 </div>
-                {% endif %}
 
-                {% if product.deposit_amount and product.deposit_amount > 0 %}
                 <div class="price-info-row">
                     <strong>Deposit (per unit):</strong>
-                    <span>₹{{ "%.2f"|format(product.deposit_amount|float) }}</span>
+                    <span id="deposit_price_display">₹0.00</span>
                 </div>
-                {% endif %}
 
                 <!-- Purchase Type Selector -->
                 <div class="form-group">
                     <label for="purchase_type">Purchase Type</label>
                     <select id="purchase_type" onchange="updateLedgerPrice()">
                         <option value="buy">Buy</option>
-                        {% if product.rent_price and product.rent_price > 0 %}
                         <option value="rent">Rent</option>
-                        {% endif %}
                     </select>
                 </div>
 
@@ -320,10 +310,10 @@
 
                 <!-- Total Price Display -->
                 <div class="final-price-display" id="final_price_display">
-                    ₹{{ "%.2f"|format(product.price|float) }}
+                    ₹0.00
                 </div>
 
-                <!-- Deposit Display (shown only for rent) -->
+                <!-- Deposit Display -->
                 <div class="deposit-display" id="deposit_display">
                     <strong>Deposit Required:</strong> 
                     <span id="deposit_amount">₹0.00</span>
@@ -354,133 +344,195 @@
     </div>
 </div>
 
-<!-- Toast Notification -->
-<div id="toast" class="toast-notification"></div>
-
 {% endblock %}
 
 {% block scripts %}
 <script>
+console.log('🔵 Ledger product page loaded');
+
 // ============================================
-// LEDGER-SPECIFIC PRICING LOGIC
-// Uses ONLY admin-defined prices from product table
+// GLOBAL VARIABLES
 // ============================================
+let currentBuyPrice = 0;
+let currentRentPrice = 0;
+let currentDeposit = 0;
 
-const PRODUCT_ID = {{ product.id }};
-const BUY_PRICE = {{ product.price | default(0) | float }};
-const RENT_PRICE = {{ product.rent_price | default(0) | float }};
-const DEPOSIT_AMOUNT = {{ product.deposit_amount | default(0) | float }};
+// ============================================
+// SIZE CHANGE HANDLER
+// ============================================
+function onLedgerSizeChange() {
+    console.log('📊 onLedgerSizeChange called');
+    
+    const sizeSelect = document.getElementById('ledger_size');
+    if (!sizeSelect) {
+        console.error('❌ Size select not found');
+        return;
+    }
+    
+    const selectedOption = sizeSelect.options[sizeSelect.selectedIndex];
+    if (!selectedOption) {
+        console.error('❌ No option selected');
+        return;
+    }
 
-console.log('🔵 Ledger Product Initialized');
-console.log('Buy Price:', BUY_PRICE, 'Rent Price:', RENT_PRICE, 'Deposit:', DEPOSIT_AMOUNT);
+    // Read prices from data attributes
+    currentBuyPrice = parseFloat(selectedOption.dataset.buy || 0);
+    currentRentPrice = parseFloat(selectedOption.dataset.rent || 0);
+    currentDeposit = parseFloat(selectedOption.dataset.deposit || 0);
 
-/**
- * Update price display based on purchase type and quantity
- */
+    console.log('💰 Prices loaded:', {
+        buy: currentBuyPrice,
+        rent: currentRentPrice,
+        deposit: currentDeposit
+    });
+
+    // Update price display labels
+    const buyDisplay = document.getElementById('buy_price_display');
+    const rentDisplay = document.getElementById('rent_price_display');
+    const depositDisplay = document.getElementById('deposit_price_display');
+    
+    if (buyDisplay) buyDisplay.textContent = '₹' + currentBuyPrice.toFixed(2);
+    if (rentDisplay) rentDisplay.textContent = '₹' + currentRentPrice.toFixed(2);
+    if (depositDisplay) depositDisplay.textContent = '₹' + currentDeposit.toFixed(2);
+
+    // Update total price
+    updateLedgerPrice();
+}
+
+// ============================================
+// PRICE UPDATE HANDLER
+// ============================================
 function updateLedgerPrice() {
-    const quantity = parseInt(document.getElementById('quantity').value) || 1;
-    const purchaseType = document.getElementById('purchase_type').value;
+    console.log('💵 updateLedgerPrice called');
     
-    // Calculate unit price based on purchase type
-    const unitPrice = purchaseType === 'rent' ? RENT_PRICE : BUY_PRICE;
-    const totalPrice = unitPrice * quantity;
+    const typeSelect = document.getElementById('purchase_type');
+    const qtySelect = document.getElementById('quantity');
+    const finalPriceDisplay = document.getElementById('final_price_display');
+    const depositBox = document.getElementById('deposit_display');
+    const depositAmount = document.getElementById('deposit_amount');
     
-    // Update total price display
-    document.getElementById('final_price_display').textContent = '₹' + totalPrice.toFixed(2);
-    
-    // Handle deposit display
-    const depositDisplay = document.getElementById('deposit_display');
-    const depositAmountEl = document.getElementById('deposit_amount');
-    
-    if (purchaseType === 'rent' && DEPOSIT_AMOUNT > 0) {
-        const totalDeposit = DEPOSIT_AMOUNT * quantity;
-        depositAmountEl.textContent = '₹' + totalDeposit.toFixed(2);
-        depositDisplay.classList.add('show');
-    } else {
-        depositDisplay.classList.remove('show');
+    if (!typeSelect || !qtySelect || !finalPriceDisplay) {
+        console.error('❌ Required elements not found');
+        return;
+    }
+
+    const type = typeSelect.value;
+    const qty = parseInt(qtySelect.value || 1);
+
+    // Calculate based on purchase type
+    const unitPrice = type === 'rent' ? currentRentPrice : currentBuyPrice;
+    const total = unitPrice * qty;
+
+    console.log('🧮 Calculation:', {
+        type: type,
+        qty: qty,
+        unitPrice: unitPrice,
+        total: total
+    });
+
+    // Update total display
+    finalPriceDisplay.textContent = '₹' + total.toFixed(2);
+
+    // Show/hide deposit
+    if (depositBox && depositAmount) {
+        if (type === 'rent' && currentDeposit > 0) {
+            depositBox.style.display = 'block';
+            depositAmount.textContent = '₹' + (currentDeposit * qty).toFixed(2);
+        } else {
+            depositBox.style.display = 'none';
+        }
     }
 }
 
-/**
- * Add ledger product to cart
- */
+// ============================================
+// ADD TO CART
+// ============================================
 function addLedgerToCart() {
-    const btn = document.getElementById('addToCartBtn');
-    if (!btn) return;
+    console.log('🛒 Adding to cart');
     
-    // Disable button during request
-    btn.disabled = true;
-    btn.innerHTML = 'Adding...';
+    const sizeSelect = document.getElementById('ledger_size');
+    const typeSelect = document.getElementById('purchase_type');
+    const qtySelect = document.getElementById('quantity');
     
-    const quantity = parseInt(document.getElementById('quantity').value) || 1;
-    const purchaseType = document.getElementById('purchase_type').value;
+    if (!sizeSelect || !typeSelect || !qtySelect) {
+        alert('❌ Error: Form elements not found');
+        return;
+    }
+    
+    const selectedOption = sizeSelect.options[sizeSelect.selectedIndex];
     
     const payload = {
-        product_id: PRODUCT_ID,
-        quantity: quantity,
+        product_id: {{ product.id }},
+        quantity: parseInt(qtySelect.value),
         customization: {
             product_type: 'cuplock_ledger',
-            purchase_type: purchaseType,
-            quantity: quantity
+            size_id: parseInt(sizeSelect.value),
+            size_label: selectedOption.dataset.label,
+            purchase_type: typeSelect.value,
+            buy_price: currentBuyPrice,
+            rent_price: currentRentPrice,
+            deposit: currentDeposit
         }
     };
-    
-    console.log('🛒 Adding to cart:', payload);
-    
+
+    console.log('📦 Payload:', payload);
+
+    const addBtn = document.getElementById('addToCartBtn');
+    if (addBtn) {
+        addBtn.disabled = true;
+        addBtn.textContent = 'Adding...';
+    }
+
     fetch("{{ url_for('add_to_cart') }}", {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
     })
-    .then(async res => {
-        const json = await res.json().catch(() => ({ 
-            success: false, 
-            message: 'Invalid response from server' 
-        }));
-        
-        if (!res.ok) {
-            showToast('❌ ' + (json.message || `Server error ${res.status}`));
-            btn.disabled = false;
-            btn.innerHTML = '🛒 Add to Cart';
-            return;
-        }
-        
-        if (json.success) {
-            showToast('✓ Added to cart!');
-            setTimeout(() => { window.location.href = '/cart'; }, 700);
+    .then(res => res.json())
+    .then(data => {
+        console.log('✅ Response:', data);
+        if (data.success) {
+            window.location.href = "/cart";
         } else {
-            showToast('❌ ' + (json.message || 'Failed to add to cart'));
-            btn.disabled = false;
-            btn.innerHTML = '🛒 Add to Cart';
+            alert(data.message || "Failed to add to cart");
+            if (addBtn) {
+                addBtn.disabled = false;
+                addBtn.textContent = '🛒 Add to Cart';
+            }
         }
     })
-    .catch(err => {
-        console.error('Cart error:', err);
-        showToast('❌ Network error');
-        btn.disabled = false;
-        btn.innerHTML = '🛒 Add to Cart';
+    .catch(error => {
+        console.error('❌ Error:', error);
+        alert('Error adding to cart. Please try again.');
+        if (addBtn) {
+            addBtn.disabled = false;
+            addBtn.textContent = '🛒 Add to Cart';
+        }
     });
 }
 
-/**
- * Show toast notification
- */
-function showToast(message) {
-    const toast = document.getElementById('toast');
-    if (!toast) return;
+// ============================================
+// INITIALIZE ON PAGE LOAD
+// ============================================
+(function() {
+    console.log('🚀 Initializing ledger page...');
     
-    toast.textContent = message;
-    toast.classList.add('show');
+    // Wait for DOM to be fully ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializePage);
+    } else {
+        initializePage();
+    }
     
-    setTimeout(() => {
-        toast.classList.remove('show');
-    }, 3000);
-}
-
-// Initialize price display on page load
-updateLedgerPrice();
-
-console.log('✅ Ledger pricing initialized');
+    function initializePage() {
+        console.log('✅ DOM ready, calling onLedgerSizeChange');
+        
+        // Small delay to ensure all elements are rendered
+        setTimeout(function() {
+            onLedgerSizeChange();
+            console.log('✅ Initialization complete');
+        }, 50);
+    }
+})();
 </script>
 {% endblock %}

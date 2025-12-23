@@ -81,7 +81,7 @@ class Product(db.Model):
         cascade='all, delete-orphan'
     )
 
-    order_items = db.relationship('OrderItem', backref='product', lazy=True)
+    order_items = db.relationship('OrderItem', backref='product', lazy=True, cascade='all, delete-orphan')
 
 
 # ===========================
@@ -92,7 +92,7 @@ class CuplockVerticalSize(db.Model):
     __tablename__ = 'cuplock_vertical_sizes'
 
     id = db.Column(db.Integer, primary_key=True)
-    product_id = db.Column(db.Integer, db.ForeignKey('products.id', ondelete='CASCADE'), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
     size_label = db.Column(db.String(50), nullable=False)
     weight = db.Column(db.Numeric(10, 2), nullable=True)
     buy_price = db.Column(db.Numeric(10, 2), nullable=True)
@@ -129,12 +129,12 @@ class CuplockLedgerSize(db.Model):
         nullable=False
     )
     size_label = db.Column(db.String(50), nullable=False)
-    weight_kg = db.Column(db.Numeric(10, 2), nullable=False)
-    buy_price = db.Column(db.Numeric(10, 2), nullable=False)
-    rent_price = db.Column(db.Numeric(10, 2), nullable=False)
-    deposit_amount = db.Column(db.Numeric(10, 2), nullable=False)
-    display_order = db.Column(db.Integer, default=0)
+    weight_kg = db.Column(db.Numeric(10, 2), nullable=True)
+    buy_price = db.Column(db.Numeric(10, 2), nullable=True)
+    rent_price = db.Column(db.Numeric(10, 2), nullable=True)
+    deposit_amount = db.Column(db.Numeric(10, 2), nullable=True)
     is_active = db.Column(db.Boolean, default=True)
+    display_order = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     __table_args__ = (
@@ -158,9 +158,9 @@ class CuplockVerticalCup(db.Model):
     cup_count = db.Column(db.Integer, nullable=False)
     cup_image_url = db.Column(db.String(255), nullable=True)
     weight_kg = db.Column(db.Numeric(10, 2), nullable=True)
-    buy_price = db.Column(db.Numeric(10, 2), nullable=False, default=0)
-    rent_price = db.Column(db.Numeric(10, 2), nullable=False, default=0)
-    deposit_amount = db.Column(db.Numeric(10, 2), nullable=True, default=0)
+    buy_price = db.Column(db.Numeric(10, 2), nullable=True)
+    rent_price = db.Column(db.Numeric(10, 2), nullable=True)
+    deposit_amount = db.Column(db.Numeric(10, 2), nullable=True)
     display_order = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -180,12 +180,11 @@ class Order(db.Model):
     __tablename__ = 'orders'
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     total_price = db.Column(db.Numeric(10, 2), nullable=False)
     order_date = db.Column(db.DateTime, default=datetime.utcnow)
     status = db.Column(db.String(50), default='pending_verification')
     transaction_id = db.Column(db.String(100), unique=True, nullable=False)
-
     amount_paid = db.Column(db.Numeric(10, 2))
     payment_time = db.Column(db.DateTime)
 
@@ -200,8 +199,8 @@ class OrderItem(db.Model):
     __tablename__ = 'order_items'
 
     id = db.Column(db.Integer, primary_key=True)
-    order_id = db.Column(db.Integer, db.ForeignKey('orders.id', ondelete='CASCADE'), nullable=False)
-    product_id = db.Column(db.Integer, db.ForeignKey('products.id', ondelete='CASCADE'), nullable=False)
+    order_id = db.Column(db.Integer, db.ForeignKey('orders.id'), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
     product_name = db.Column(db.String(200), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     price = db.Column(db.Numeric(10, 2), nullable=False)

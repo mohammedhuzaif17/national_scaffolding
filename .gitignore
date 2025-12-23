@@ -1,23 +1,7 @@
-# ===== Python =====
+venv/
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
-
-# ===== Virtual Env =====
-.venv/
-venv/
-
-# ===== Environment =====
 .env
-
-# ===== Flask =====
 instance/
-*.db
-
-# ===== Uploads (user content) =====
+uploads/
 static/uploads/
-
-# ===== OS =====
-.DS_Store
-Thumbs.db

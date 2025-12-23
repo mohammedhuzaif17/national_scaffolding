@@ -1,190 +1,91 @@
 {% extends "base.html" %}
-
-{% block title %}{{ product.name }} - Ledger Cuplock{% endblock %}
+{% block title %}{{ product.name }}{% endblock %}
 
 {% block content %}
-<div class="product-container">
-    <div class="product-header">
-        <h1>{{ product.name }}</h1>
-        <p class="product-description">{{ product.description or 'High-quality Ledger Cuplock scaffolding system' }}</p>
-    </div>
+<div class="container">
+    <a href="{{ url_for('national_scaffoldings') }}" class="btn btn-warning mb-3">← Back to Products</a>
 
-    <div class="product-body">
-        <!-- Buy/Rent Selection -->
-        <div class="purchase-type-section">
-            <h3>Select Purchase Type</h3>
-            <div class="radio-group">
-                <label class="radio-option">
-                    <input type="radio" name="purchaseType" value="buy" checked onchange="updatePrice()">
-                    <span>Buy</span>
-                </label>
-                <label class="radio-option">
-                    <input type="radio" name="purchaseType" value="rent" onchange="updatePrice()">
-                    <span>Rent (per day)</span>
-                </label>
-            </div>
+    <div class="row">
+        <div class="col-md-6">
+            <img src="{{ url_for('static', filename=product.display_image_url) }}"
+                 class="img-fluid"
+                 onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}'">
         </div>
 
-        <!-- Size Selection with Weight Display -->
-        <div class="form-group">
-            <label>Select Size & Weight *</label>
-            <select id="sizeSelect" class="form-control" onchange="updatePrice()">
-                <option value="">-- Choose Size --</option>
-                {% for size in sizes %}
-                <option value="{{ size.id }}" 
-                        data-label="{{ size.size_label }}"
-                        data-weight="{{ size.weight_kg }}"
-                        data-buy="{{ size.buy_price }}"
-                        data-rent="{{ size.rent_price }}"
-                        data-deposit="{{ size.deposit_amount }}">
-                    {{ size.size_label }} ({{ size.weight_kg }}kg)
-                </option>
-                {% endfor %}
-            </select>
-        </div>
+        <div class="col-md-6">
+            <h2>{{ product.name }}</h2>
+            <span class="badge bg-primary">CUPLOCK LEDGER</span>
 
-        <!-- Quantity Selection -->
-        <div class="form-group">
-            <label>Quantity *</label>
-            <input type="number" id="quantity" class="form-control" min="1" value="1" onchange="updatePrice()">
-        </div>
+            <div class="card mt-4 p-3 bg-primary text-white">
+                <h5>📊 Pricing Details</h5>
 
-        <!-- Weight Summary -->
-        <div id="weightSummary" class="info-box" style="display: none;">
-            <div class="info-row">
-                <span>Unit Weight:</span>
-                <span id="unitWeight" class="info-value">0 kg</span>
-            </div>
-            <div class="info-row">
-                <span>Total Weight:</span>
-                <span id="totalWeight" class="info-value">0 kg</span>
+                <label>Select Size</label>
+                <select id="sizeSelect" class="form-select mb-2"></select>
+
+                <label>Purchase Type</label>
+                <select id="purchaseType" class="form-select mb-2">
+                    <option value="buy">Buy</option>
+                    <option value="rent">Rent</option>
+                </select>
+
+                <label>Quantity</label>
+                <select id="quantity" class="form-select mb-3">
+                    {% for i in range(1,11) %}
+                    <option value="{{ i }}">{{ i }}</option>
+                    {% endfor %}
+                </select>
+
+                <p>Unit Price: <strong id="unitPrice">₹0.00</strong></p>
+                <h4 id="totalPrice">₹0.00</h4>
+
+                <button class="btn btn-warning w-100 mt-2">🛒 Add to Cart</button>
             </div>
         </div>
-
-        <!-- Price Display -->
-        <div class="price-display">
-            <div class="price-row">
-                <span>Unit Price:</span>
-                <span id="unitPrice" class="price-value">₹0.00</span>
-            </div>
-            <div class="price-row" id="depositRow" style="display: none;">
-                <span>Deposit (per unit):</span>
-                <span id="depositAmount" class="price-value">₹0.00</span>
-            </div>
-            <div class="price-row total-row">
-                <span>Total:</span>
-                <span id="totalPrice" class="price-value">₹0.00</span>
-            </div>
-        </div>
-
-        <!-- Add to Cart Button -->
-        <button class="btn btn-primary btn-large" onclick="addToCart()">
-            🛒 Add to Cart
-        </button>
     </div>
 </div>
-
+{% endblock %}
+{% block scripts %}
 <script>
-let currentPricing = {
-    buy: 0,
-    rent: 0,
-    deposit: 0,
-    weight: 0
-};
+let ledgerSizes = [];
 
 function updatePrice() {
-    const sizeSelect = document.getElementById('sizeSelect');
-    const quantity = parseInt(document.getElementById('quantity').value) || 0;
-    const purchaseType = document.querySelector('input[name="purchaseType"]:checked').value;
-    const selectedOption = sizeSelect.options[sizeSelect.selectedIndex];
-    
-    if (!sizeSelect.value || quantity <= 0) {
-        document.getElementById('unitPrice').textContent = '₹0.00';
-        document.getElementById('depositAmount').textContent = '₹0.00';
-        document.getElementById('totalPrice').textContent = '₹0.00';
-        document.getElementById('weightSummary').style.display = 'none';
-        return;
-    }
-    
-    // Get pricing from selected option
-    currentPricing.buy = parseFloat(selectedOption.dataset.buy || 0);
-    currentPricing.rent = parseFloat(selectedOption.dataset.rent || 0);
-    currentPricing.deposit = parseFloat(selectedOption.dataset.deposit || 0);
-    currentPricing.weight = parseFloat(selectedOption.dataset.weight || 0);
-    
-    let unitPrice = purchaseType === 'buy' ? currentPricing.buy : currentPricing.rent;
-    let deposit = purchaseType === 'rent' ? currentPricing.deposit : 0;
-    
-    // Calculate totals
-    let total = (unitPrice * quantity) + (deposit * quantity);
-    let totalWeight = currentPricing.weight * quantity;
-    
-    // Update display
-    document.getElementById('unitPrice').textContent = `₹${unitPrice.toFixed(2)}`;
-    document.getElementById('depositAmount').textContent = `₹${deposit.toFixed(2)}`;
-    document.getElementById('totalPrice').textContent = `₹${total.toFixed(2)}`;
-    
-    // Update weight display
-    document.getElementById('unitWeight').textContent = `${currentPricing.weight.toFixed(1)} kg`;
-    document.getElementById('totalWeight').textContent = `${totalWeight.toFixed(1)} kg`;
-    document.getElementById('weightSummary').style.display = 'block';
-    
-    // Show/hide deposit row
-    const depositRow = document.getElementById('depositRow');
-    if (purchaseType === 'rent' && deposit > 0) {
-        depositRow.style.display = 'flex';
-    } else {
-        depositRow.style.display = 'none';
-    }
+    const sizeId = parseInt(document.getElementById('sizeSelect').value);
+    const type = document.getElementById('purchaseType').value;
+    const qty = parseInt(document.getElementById('quantity').value);
+
+    const size = ledgerSizes.find(s => s.id === sizeId);
+    if (!size) return;
+
+    let unit = type === 'buy' ? size.buy_price : size.rent_price;
+    let total = unit * qty;
+
+    document.getElementById('unitPrice').innerText = `₹${unit.toFixed(2)}`;
+    document.getElementById('totalPrice').innerText = `₹${total.toFixed(2)}`;
 }
 
-function addToCart() {
-    const sizeSelect = document.getElementById('sizeSelect');
-    const quantity = parseInt(document.getElementById('quantity').value);
-    const purchaseType = document.querySelector('input[name="purchaseType"]:checked').value;
-    
-    if (!sizeSelect.value) {
-        alert('Please select a size');
-        return;
-    }
-    
-    if (quantity <= 0) {
-        alert('Please enter a valid quantity');
-        return;
-    }
-    
-    const selectedSize = sizeSelect.options[sizeSelect.selectedIndex];
-    const customization = {
-        purchaseType: purchaseType,
-        size: selectedSize.dataset.label,
-        size_id: sizeSelect.value,
-        weight: currentPricing.weight,
-        quantity: quantity
-    };
-    
-    fetch('/add_to_cart', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            product_id: {{ product.id }},
-            quantity: quantity,
-            customization: customization
-        })
-    })
-    .then(r => r.json())
+fetch(`/cuplock/api/ledger/{{ product.id }}/sizes`)
+    .then(res => res.json())
     .then(data => {
-        if (data.success) {
-            alert('Added to cart!');
-            window.location.href = '/cart';
-        } else {
-            alert('Error: ' + data.message);
-        }
-    })
-    .catch(err => alert('Error adding to cart'));
-}
+        ledgerSizes = data;
+        const select = document.getElementById('sizeSelect');
+
+        data.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s.id;
+            opt.text = s.label;
+            select.appendChild(opt);
+        });
+
+        updatePrice();
+    });
+
+['sizeSelect','purchaseType','quantity'].forEach(id => {
+    document.getElementById(id).addEventListener('change', updatePrice);
+});
 </script>
+{% endblock %}
+
+
 
 <style>
 .product-container {
