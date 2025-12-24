@@ -1064,7 +1064,6 @@ def fabrications():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)})
-    
 @app.route('/fabrication/<int:product_id>')
 def fabrication_detail(product_id):
     try:
@@ -1088,7 +1087,6 @@ def fabrication_detail(product_id):
         print("🔥 FABRICATION DETAIL ERROR:", repr(e))
         flash('Error loading product details. Please try again.', 'error')
         return redirect(url_for('fabrications'))
-        
 @app.route('/about')
 def about():
     return render_template('about.html')
@@ -2205,7 +2203,7 @@ def fabrications():
         
         # Base query - ONLY fabrication products (exclude scaffolding)
         query = Product.query.filter(
-            Product.category.notin_(scaffolding_categories),  # Exclude scaffolding
+            Product.category.notin_(scaffolding_categories),  # FIXED: removed 'a' -> notin_
             Product.is_active == True
         )
         

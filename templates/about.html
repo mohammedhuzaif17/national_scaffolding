@@ -13,6 +13,32 @@
     <style>
         /* --- NEW NAVBAR STYLES --- */
         /* These styles control the navigation bar with the logo */
+
+        .faq-content {
+    display: none;
+    padding: 10px 0;
+    color: #ddd;
+}
+
+.faq-item.active .faq-content {
+    display: block;
+}
+
+.faq-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+.faq-summary i {
+    transition: transform 0.3s ease;
+}
+
+.faq-item.active .faq-summary i {
+    transform: rotate(180deg);
+}
+
         .navbar {
             display: flex;
             justify-content: space-between;
@@ -976,7 +1002,7 @@
                     </tbody>
                 </table>
                 
-                <h3>8. Frequently Asked Questions (FAQs)</h3>
+                <!-- <h3>8. Frequently Asked Questions (FAQs)</h3>
                 <div class="faq-item">
                     <div class="faq-summary">
                         <strong>Can I use the scaffolding outdoors?</strong>
@@ -1005,9 +1031,9 @@
                     <div class="faq-content">
                         <p>Stop using the scaffolding immediately, contact emergency services if required, and report the incident to your supervisor.</p>
                     </div>
-                </div>
+                </div> -->
                 
-                <h3>9. Conclusion</h3>
+                <h3>8. Conclusion</h3>
                 <p>Thank you for choosing The National Scaffoldings. By adhering to this manual, you ensure safe, reliable, and efficient use of your aluminium scaffolding system. Always prioritize safety, conduct regular inspections, and comply with established safety standards for optimal performance.</p>
                 
                 <!-- Download Button -->
@@ -1208,6 +1234,16 @@
                     navMenu.classList.remove('active');
                 });
             });
+
+            
+document.querySelectorAll('.faq-summary').forEach(item => {
+    item.addEventListener('click', () => {
+        const parent = item.closest('.faq-item');
+        parent.classList.toggle('active');
+    });
+});
+
+
             
             // FAQ toggle functionality
             const faqItems = document.querySelectorAll('.faq-item');
