@@ -1283,14 +1283,15 @@ def fix_old_fabrication_products():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)})
-    
 @app.route('/fabrication/<int:product_id>')
 def fabrication_detail(product_id):
     try:
         product = Product.query.get_or_404(product_id)
 
-        # Check if this is a fabrication product and is active
-        if product.category != 'fabrication' or not product.is_active:
+        # ✅ FIX: Allow valid fabrication sub-categories (steel, custom, parts, etc.)
+        valid_categories = ['steel', 'custom', 'parts', 'fabrication', 'fabrications']
+        
+        if product.category not in valid_categories or not product.is_active:
             flash('This product is not available.', 'warning')
             return redirect(url_for('fabrications'))
 
@@ -1305,7 +1306,6 @@ def fabrication_detail(product_id):
         print("🔥 FABRICATION DETAIL ERROR:", repr(e))
         flash('Error loading product details. Please try again.', 'error')
         return redirect(url_for('fabrications'))
-        
 @app.route('/about')
 def about():
     return render_template('about.html')
@@ -2589,7 +2589,7 @@ def fabrications():
         
         # Base query - ONLY fabrication products (exclude scaffolding)
         query = Product.query.filter(
-            Product.category.notin_(scaffolding_categories),  # Exclude scaffolding
+            Product.category.notin_(scaffolding_categories),  # FIXED: removed 'a' -> notin_
             Product.is_active == True
         )
         
