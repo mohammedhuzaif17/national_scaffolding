@@ -45,6 +45,23 @@ class Admin(UserMixin, db.Model):
 
 
 # ===========================
+# ADMIN OTP
+# ===========================
+
+class AdminOTP(db.Model):
+    __tablename__ = 'admin_otps'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    admin_id = db.Column(db.Integer, db.ForeignKey('admins.id'), nullable=False)
+    otp_hash = db.Column(db.String(255), nullable=False)
+    expires_at = db.Column(db.DateTime, nullable=False)
+    attempts = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    admin = db.relationship('Admin', backref='otps', lazy=True)
+
+
+# ===========================
 # PRODUCTS
 # ===========================
 

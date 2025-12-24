@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Admin OTP Verification{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-shield-alt"></i> Admin OTP Verification
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> 
+                        An OTP has been sent to the admin email address.
+                    </div>
+
+                    {% if time_remaining %}
+                    <div class="alert alert-warning" id="timer-alert">
+                        <i class="fas fa-clock"></i> 
+                        Time remaining: <strong id="countdown">{{ time_remaining }}</strong> seconds
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" action="{{ url_for('admin_otp') }}">
+                        <div class="mb-3">
+                            <label for="otp" class="form-label">Enter OTP</label>
+                            <input 
+                                type="text" 
+                                class="form-control form-control-lg text-center" 
+                                id="otp" 
+                                name="otp" 
+                                placeholder="000000"
+                                maxlength="6"
+                                pattern="[0-9]{6}"
+                                required
+                                autofocus
+                                style="letter-spacing: 10px; font-size: 24px;"
+                            >
+                            <small class="text-muted">Enter the 6-digit OTP sent to your email</small>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-check-circle"></i> Verify OTP
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <button 
+                            class="btn btn-link" 
+                            id="resend-btn"
+                            onclick="resendOTP()"
+                        >
+                            <i class="fas fa-redo"></i> Resend OTP
+                        </button>
+                    </div>
+
+                    <div class="text-center mt-2">
+                        <a href="{{ url_for('admin_login') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Login
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 15px;
+        overflow: hidden;
+    }
+    .card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    #otp::-webkit-outer-spin-button,
+    #otp::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    #otp[type=number] {
+        -moz-appearance: textfield;
+    }
+</style>
+
+<script>
+// Countdown timer
+{% if time_remaining %}
+let timeRemaining = {{ time_remaining }};
+const countdownElement = document.getElementById('countdown');
+const timerAlert = document.getElementById('timer-alert');
+
+const countdownInterval = setInterval(() => {
+    timeRemaining--;
+    if (timeRemaining <= 0) {
+        clearInterval(countdownInterval);
+        timerAlert.className = 'alert alert-danger';
+        timerAlert.innerHTML = '<i class="fas fa-times-circle"></i> OTP expired. Please <a href="{{ url_for('admin_login') }}">login again</a>.';
+        document.querySelector('button[type="submit"]').disabled = true;
+    } else {
+        countdownElement.textContent = timeRemaining;
+        if (timeRemaining <= 30) {
+            timerAlert.className = 'alert alert-danger';
+        } else if (timeRemaining <= 60) {
+            timerAlert.className = 'alert alert-warning';
+        }
+    }
+}, 1000);
+{% endif %}
+
+// Resend OTP
+function resendOTP() {
+    const btn = document.getElementById('resend-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+    fetch('{{ url_for("admin_resend_otp") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('OTP resent successfully! Check your email.');
+            location.reload();
+        } else {
+            alert('Failed to resend OTP: ' + data.message);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-redo"></i> Resend OTP';
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-redo"></i> Resend OTP';
+    });
+}
+
+// Auto-focus and format OTP input
+const otpInput = document.getElementById('otp');
+otpInput.addEventListener('input', function(e) {
+    this.value = this.value.replace(/[^0-9]/g, '');
+});
+
+// Auto-submit when 6 digits entered
+otpInput.addEventListener('input', function(e) {
+    if (this.value.length === 6) {
+        // Optional: auto-submit after brief delay
+        setTimeout(() => {
+            this.form.submit();
+        }, 500);
+    }
+});
+</script>
+{% endblock %}

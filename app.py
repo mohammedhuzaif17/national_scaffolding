@@ -8,6 +8,9 @@ import qrcode
 import io
 import base64
 from utils import get_image_url
+import random
+from flask import abort
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # from cuplock_routes import get_image_url
 from flask import render_template, request
@@ -259,6 +262,200 @@ def validate_image_file(filepath):
         diagnostic['dimensions'] = 'Unable to read'
     
     return diagnostic
+
+
+# ============================================================================
+# ADMIN OTP FUNCTIONS
+# ============================================================================
+
+def send_admin_otp(admin_id):
+    """Send OTP to admin email"""
+    from models import AdminOTP
+    
+    otp = random.randint(100000, 999999)
+    
+    # Delete old OTPs for this admin
+    AdminOTP.query.filter_by(admin_id=admin_id).delete()
+    
+    # Create new OTP entry
+    otp_entry = AdminOTP(
+        admin_id=admin_id,
+        otp_hash=generate_password_hash(str(otp)),
+        expires_at=datetime.utcnow() + timedelta(minutes=5),
+        attempts=0
+    )
+    db.session.add(otp_entry)
+    db.session.commit()
+    
+    # Send email
+    try:
+        admin_email = os.getenv("ADMIN_OTP_EMAIL")
+        if not admin_email:
+            app.logger.error("ADMIN_OTP_EMAIL not configured in .env")
+            raise ValueError("Admin email not configured")
+        
+        msg = Message(
+            subject="Admin Login OTP - National Scaffolding",
+            recipients=[admin_email],
+            body=f"Your OTP for admin login is: {otp}\n\nThis OTP is valid for 5 minutes.\n\nIf you did not request this, please ignore this email."
+        )
+        mail.send(msg)
+        app.logger.info(f"OTP sent successfully to {admin_email}")
+    except Exception as e:
+        app.logger.error(f"Failed to send OTP email: {e}")
+        raise
+
+
+# ============================================================================
+# ADMIN LOGIN WITH OTP
+# ============================================================================
+@app.route('/admin_login', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        try:
+            identifier = request.form.get('identifier')
+            password = request.form.get('password')
+            panel_type = request.form.get('panel_type')
+            
+            app.logger.info(f"Admin login attempt: {identifier}, panel: {panel_type}")
+            
+            if not panel_type:
+                flash('Please select an admin panel', 'error')
+                return render_template('admin_login.html')
+            
+            # Find admin
+            admin = Admin.query.filter_by(
+                username=identifier,
+                panel_type=panel_type
+            ).first()
+            
+            if not admin:
+                app.logger.warning(f"Admin not found: {identifier}")
+                flash('Invalid admin credentials or wrong panel selected', 'error')
+                return render_template('admin_login.html')
+            
+            # Verify password
+            if not admin.check_password(password):
+                app.logger.warning(f"Wrong password for admin: {identifier}")
+                flash('Invalid admin credentials or wrong panel selected', 'error')
+                return render_template('admin_login.html')
+            
+            app.logger.info(f"Password verified for {identifier}, sending OTP...")
+            
+            # Password correct → Generate and send OTP
+            try:
+                send_admin_otp(admin.id)
+                app.logger.info(f"OTP sent successfully to {os.getenv('ADMIN_OTP_EMAIL')}")
+            except Exception as e:
+                flash('Failed to send OTP. Please contact support.', 'error')
+                app.logger.error(f"OTP send failed: {e}", exc_info=True)
+                return render_template('admin_login.html')
+            
+            # Clear session and set OTP pending state
+            session.clear()
+            session['otp_admin_id'] = admin.id
+            session['otp_verified'] = False
+            session['panel_type'] = admin.panel_type
+            session.permanent = True
+            
+            flash(f'OTP has been sent to {os.getenv("ADMIN_OTP_EMAIL")}', 'success')
+            app.logger.info(f"Redirecting to OTP page for admin {identifier}")
+            return redirect(url_for('admin_otp'))
+            
+        except Exception as e:
+            app.logger.error(f"Admin login error: {e}", exc_info=True)
+            flash('Login failed. Please try again.', 'error')
+            return render_template('admin_login.html')
+    
+    return render_template('admin_login.html')
+
+
+@app.route('/admin_otp', methods=['GET', 'POST'])
+def admin_otp():
+    """Handle OTP verification"""
+    from models import AdminOTP
+    
+    admin_id = session.get('otp_admin_id')
+    if not admin_id:
+        flash('Session expired. Please login again.', 'error')
+        return redirect(url_for('admin_login'))
+    
+    admin = Admin.query.get(admin_id)
+    if not admin:
+        flash('Invalid session', 'error')
+        return redirect(url_for('admin_login'))
+    
+    otp_entry = AdminOTP.query.filter_by(admin_id=admin_id).first()
+    
+    if request.method == 'POST':
+        otp = request.form.get('otp', '').strip()
+        
+        # Check if OTP entry exists and is not expired
+        if not otp_entry or otp_entry.expires_at < datetime.utcnow():
+            if otp_entry:
+                db.session.delete(otp_entry)
+                db.session.commit()
+            flash('OTP expired. Please login again.', 'error')
+            return redirect(url_for('admin_login'))
+        
+        # Check attempts
+        if otp_entry.attempts >= 3:
+            db.session.delete(otp_entry)
+            db.session.commit()
+            flash('Too many failed attempts. Please login again.', 'error')
+            return redirect(url_for('admin_login'))
+        
+        # Verify OTP
+        if not check_password_hash(otp_entry.otp_hash, otp):
+            otp_entry.attempts += 1
+            db.session.commit()
+            remaining = 3 - otp_entry.attempts
+            flash(f'Invalid OTP. {remaining} attempts remaining.', 'error')
+            return render_template('admin_otp.html', admin=admin)
+        
+        # OTP SUCCESS
+        login_user(admin)
+        session['user_type'] = 'admin'
+        session['otp_verified'] = True
+        session['panel_type'] = admin.panel_type
+        session.permanent = True
+        
+        # Delete used OTP
+        db.session.delete(otp_entry)
+        db.session.commit()
+        
+        app.logger.info(f"Admin {admin.username} logged in successfully with OTP")
+        
+        # Redirect to appropriate panel
+        if admin.panel_type == 'scaffolding':
+            return redirect(url_for('admin_scaffoldings'))
+        else:
+            return redirect(url_for('admin_fabrication'))
+    
+    # Calculate time remaining
+    time_remaining = None
+    if otp_entry:
+        time_remaining = int((otp_entry.expires_at - datetime.utcnow()).total_seconds())
+        if time_remaining < 0:
+            time_remaining = 0
+    
+    return render_template('admin_otp.html', admin=admin, time_remaining=time_remaining)
+
+
+@app.route('/admin_resend_otp', methods=['POST'])
+def admin_resend_otp():
+    """Resend OTP to admin"""
+    admin_id = session.get('otp_admin_id')
+    if not admin_id:
+        return jsonify({'success': False, 'message': 'Session expired'}), 401
+    
+    try:
+        send_admin_otp(admin_id)
+        return jsonify({'success': True, 'message': 'OTP resent successfully'})
+    except Exception as e:
+        app.logger.error(f"OTP resend failed: {e}")
+        return jsonify({'success': False, 'message': 'Failed to resend OTP'}), 500
+
 
 def safe_float(value):
     if value is None:
@@ -799,37 +996,6 @@ def login():
 
     return render_template('login.html')
 
-
-@app.route('/admin_login', methods=['GET', 'POST'])
-def admin_login():
-    if request.method == 'POST':
-        try:
-            identifier = request.form.get('identifier')
-            password = request.form.get('password')
-            panel_type = request.form.get('panel_type')
-            
-            if not panel_type:
-                flash('Please select an admin panel', 'error')
-                return render_template('admin_login.html')
-            
-            user = Admin.query.filter_by(username=identifier, panel_type=panel_type).first()
-            if user and user.check_password(password):
-                login_user(user)
-                session['user_type'] = 'admin'
-                session['panel_type'] = user.panel_type
-                session.permanent = True  # Make session permanent
-                
-                if user.panel_type == 'scaffolding':
-                    return redirect(url_for('admin_scaffoldings'))
-                else:
-                    return redirect(url_for('admin_fabrication'))
-            
-            flash('Invalid admin credentials or wrong panel selected', 'error')
-        except Exception as e:
-            app.logger.error(f"Admin login error: {e}")
-            flash('Login failed. Please try again.', 'error')
-    
-    return render_template('admin_login.html')
   
 # =================================================================
 # PASTE THE FABRICATION_DETAIL FUNCTION HERE (at the top level)
@@ -1660,8 +1826,20 @@ def admin_complete_order(order_id):
 @login_required
 def admin_scaffoldings():
     try:
-        if session.get('user_type') != 'admin' or session.get('panel_type') != 'scaffolding':
-            return redirect(url_for('dashboard'))
+        # ✅ CHECK USER TYPE AND PANEL TYPE ONLY (NOT OTP YET)
+        # OTP check is done during login flow, not here
+        if session.get('user_type') != 'admin':
+            flash('Admin access required', 'error')
+            return redirect(url_for('admin_login'))
+        
+        if session.get('panel_type') != 'scaffolding':
+            flash('Access denied. Wrong admin panel.', 'error')
+            return redirect(url_for('admin_login'))
+        
+        # ✅ NOW CHECK OTP VERIFICATION
+        if session.get('otp_verified') != True:
+            flash('OTP verification required', 'error')
+            return redirect(url_for('admin_login'))
 
         # ✅ SHOW ONLY ACTIVE NON-FABRICATION PRODUCTS
         products = Product.query.filter(
@@ -1676,10 +1854,8 @@ def admin_scaffoldings():
 
     except Exception as e:
         app.logger.error(f"Admin scaffoldings error: {e}", exc_info=True)
-        return render_template('admin_scaffoldings.html', products=[])
-
-
-
+        flash('An error occurred. Please try again.', 'error')
+        return redirect(url_for('admin_login'))
 
 @app.route('/admin/product/<int:product_id>/edit', methods=['GET', 'POST'])
 @login_required
@@ -1786,10 +1962,21 @@ def cuplock_products():
 @login_required
 def admin_fabrication():
     try:
-        if session.get('user_type') != 'admin' or session.get('panel_type') != 'fabrication':
-            return redirect(url_for('dashboard'))
+        # ✅ CHECK USER TYPE AND PANEL TYPE ONLY (NOT OTP YET)
+        if session.get('user_type') != 'admin':
+            flash('Admin access required', 'error')
+            return redirect(url_for('admin_login'))
+        
+        if session.get('panel_type') != 'fabrication':
+            flash('Access denied. Wrong admin panel.', 'error')
+            return redirect(url_for('admin_login'))
+        
+        # ✅ NOW CHECK OTP VERIFICATION
+        if session.get('otp_verified') != True:
+            flash('OTP verification required', 'error')
+            return redirect(url_for('admin_login'))
 
-        # ✅ ONLY TRUE FABRICATION CATEGORIES (exclude aluminium scaffolding)
+        # ✅ ONLY TRUE FABRICATION CATEGORIES
         fabrication_only_categories = ['steel', 'custom', 'parts', 'fabrication', 'fabrications']
         
         products = Product.query.filter(
@@ -1805,8 +1992,6 @@ def admin_fabrication():
                 products_by_category[cat] = []
             products_by_category[cat].append(product)
 
-        app.logger.info(f"Admin fabrication - Found {len(products)} products in categories: {list(products_by_category.keys())}")
-
         return render_template(
             'admin_fabrication.html',
             products=products,
@@ -1815,8 +2000,9 @@ def admin_fabrication():
 
     except Exception as e:
         app.logger.error(f"Admin fabrication error: {e}", exc_info=True)
-        return render_template('admin_fabrication.html', products=[], products_by_category={})
-    
+        flash('An error occurred. Please try again.', 'error')
+        return redirect(url_for('admin_login'))
+
 @app.route('/admin_orders')
 @login_required
 def admin_orders():
@@ -1885,19 +2071,19 @@ def admin_analytics():
     except Exception as e:
         app.logger.error(f"Admin analytics error: {e}")
         return render_template('admin_analytics.html', monthly_data={}, yearly_data={}, category_data={}, sorted_months=[], total_revenue=0, total_orders=0, avg_order_value=0)
-
 @app.route('/admin_logout')
 @login_required
 def admin_logout():
     try:
         if session.get('user_type') == 'admin':
+            # Clear all session data including OTP verification
             session.clear()
             logout_user()
             flash('Admin logged out successfully', 'success')
-            return redirect(url_for('national_scaffoldings'))
+            return redirect(url_for('index'))
         return redirect(url_for('dashboard'))
     except Exception as e:
-        app.logger.error(f"Admin logout error: {e}")
+        app.logger.error(f"Logout error: {e}")
         return redirect(url_for('dashboard'))
     
 
