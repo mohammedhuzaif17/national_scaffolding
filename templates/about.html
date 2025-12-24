@@ -11,30 +11,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     
     <style>
-        /* ===== MOBILE OPTIMIZATION & LAYOUT FIXES ===== */
-        
-        /* 1. Global Reset for Mobile */
-        html {
-            scroll-behavior: smooth;
-        }
-        
-        body {
-            overflow-x: hidden; /* Prevents horizontal scrolling on mobile */
-            font-family: 'Poppins', sans-serif;
-            color: #333;
-            line-height: 1.6;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        img {
-            max-width: 100%; /* Ensures images never overflow screen width */
-            height: auto;
-        }
-
-        /* 2. Navbar Styles (Improved Mobile Support) */
+        /* --- NEW NAVBAR STYLES --- */
+        /* These styles control the navigation bar with the logo */
         .navbar {
             display: flex;
             justify-content: space-between;
@@ -971,37 +949,65 @@
                 </ul>
                 
                 <h3>7. Troubleshooting</h3>
-                <!-- Added Table Wrapper for Mobile Scroll -->
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Issue</th>
-                                <th>Possible Cause</th>
-                                <th>Solution</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Scaffolding feels unstable</td>
-                                <td>Uneven surface or loose base plates</td>
-                                <td>Recheck level and secure all plates</td>
-                            </tr>
-                            <tr>
-                                <td>Difficulty assembling parts</td>
-                                <td>Incorrect component placement</td>
-                                <td>Refer to diagram and verify compatibility</td>
-                            </tr>
-                            <tr>
-                                <td>Wobbling during use</td>
-                                <td>Loose braces or guardrails</td>
-                                <td>Stop use immediately and tighten all fittings</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Issue</th>
+                            <th>Possible Cause</th>
+                            <th>Solution</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Scaffolding feels unstable</td>
+                            <td>Uneven surface or loose base plates</td>
+                            <td>Recheck level and secure all plates</td>
+                        </tr>
+                        <tr>
+                            <td>Difficulty assembling parts</td>
+                            <td>Incorrect component placement</td>
+                            <td>Refer to diagram and verify compatibility</td>
+                        </tr>
+                        <tr>
+                            <td>Wobbling during use</td>
+                            <td>Loose braces or guardrails</td>
+                            <td>Stop use immediately and tighten all fittings</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h3>8. Frequently Asked Questions (FAQs)</h3>
+                <div class="faq-item">
+                    <div class="faq-summary">
+                        <strong>Can I use the scaffolding outdoors?</strong>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-content">
+                        <p>Yes. Ensure the scaffolding is rated for outdoor use and set up on firm, level ground to maintain stability.</p>
+                    </div>
                 </div>
                 
-                <h3>8. Conclusion</h3>
+                <div class="faq-item">
+                    <div class="faq-summary">
+                        <strong>Can I modify the scaffolding?</strong>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-content">
+                        <p>No. Any modification may affect load capacity and structural safety. Always use the scaffolding as originally designed.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-summary">
+                        <strong>What should I do if an accident occurs?</strong>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-content">
+                        <p>Stop using the scaffolding immediately, contact emergency services if required, and report the incident to your supervisor.</p>
+                    </div>
+                </div>
+                
+                <h3>9. Conclusion</h3>
                 <p>Thank you for choosing The National Scaffoldings. By adhering to this manual, you ensure safe, reliable, and efficient use of your aluminium scaffolding system. Always prioritize safety, conduct regular inspections, and comply with established safety standards for optimal performance.</p>
                 
                 <!-- Download Button -->
@@ -1202,16 +1208,8 @@
                     navMenu.classList.remove('active');
                 });
             });
-
-            // FAQ toggle functionality (Kept original logic)
-            document.querySelectorAll('.faq-summary').forEach(item => {
-                item.addEventListener('click', () => {
-                    const parent = item.closest('.faq-item');
-                    parent.classList.toggle('active');
-                });
-            });
-
             
+            // FAQ toggle functionality
             const faqItems = document.querySelectorAll('.faq-item');
             faqItems.forEach(item => {
                 const summary = item.querySelector('.faq-summary');
