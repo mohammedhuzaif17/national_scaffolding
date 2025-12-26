@@ -167,11 +167,11 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_PERMANENT'] = True
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7) # FIX APPLIED
 
-db_user = os.environ.get('DB_USER', 'postgres')
-db_password = os.environ.get('DB_PASSWORD', 'postgres')
+db_user = os.environ.get('DB_USER', 'cresttechnocrat')
+db_password = os.environ.get('DB_PASSWORD', 'syedzubairarbaazkhan123Ert678')
 db_host = os.environ.get('DB_HOST', 'thenationalscaffolding.cofeca2iwshi.us-east-1.rds.amazonaws.com')
 db_port = os.environ.get('DB_PORT', '5432')
-db_name = os.environ.get('DB_NAME', 'national_scaffolding')
+db_name = os.environ.get('DB_NAME', 'postgres')
 
 app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
