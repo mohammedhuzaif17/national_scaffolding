@@ -3,23 +3,27 @@
 {% block title %}H-Frames Pricing Management{% endblock %}
 
 {% block content %}
-<div class="glass-container">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-        <button class="btn-secondary" onclick="window.location.href='{{ url_for('admin_scaffoldings') }}'" style="width: auto;">← Back to Admin Panel</button>
+
+<!-- Wrapper for clean CSS control -->
+<div class="pricing-wrapper">
+    <!-- Header Section -->
+    <div class="top-header">
+        <button class="btn btn-secondary" onclick="window.location.href='{{ url_for('admin_scaffoldings') }}'">
+            ← Back to Admin Panel
+        </button>
     </div>
     
     <h1 class="page-title">H-Frames Pricing Management</h1>
-    <p style="color: #d4af37; margin-bottom: 2rem;">Set buy and rent prices for all H-Frame products organized by quantity sets</p>
+    <p class="subtitle">Set buy and rent prices for all H-Frame products organized by quantity sets</p>
     
-    <div id="hframesPricingForm">
+    <!-- Products Grid Section -->
+    <div class="products-grid-wrapper">
         {% if hframe_products %}
-        <div style="background: rgba(30, 58, 138, 0.2); padding: 2rem; border-radius: 10px; margin-bottom: 2rem;">
-            <h2 style="color: #ffa500; margin-bottom: 1.5rem;">All H-Frame Products</h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+            <div class="products-grid">
                 {% for product in hframe_products %}
-                <div style="background: rgba(212, 175, 55, 0.05); padding: 1.5rem; border-radius: 8px; border: 2px solid rgba(212, 175, 55, 0.2);">
-                    <h3 style="color: #d4af37; margin-bottom: 1rem;">{{ product.name }}</h3>
-                    <p style="color: #a0a0a0; font-size: 0.9rem; margin-bottom: 1rem;">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
+                <div class="pricing-card">
+                    <h3 class="product-name">{{ product.name }}</h3>
+                    <p class="product-desc">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
                     
                     <div class="form-group">
                         <label for="buy_{{ product.id }}_{{ sets }}">Buy Price (₹/set)</label>
@@ -34,21 +38,25 @@
                         <input type="number" id="deposit_{{ product.id }}_{{ sets }}" step="0.01" placeholder="₹500" class="pricing-input" data-product-id="{{ product.id }}" data-sets="{{ sets }}">
                     </div>
                 </div>
+                {% endfor %}
             </div>
-        </div>
         {% else %}
-        <div style="background: rgba(212, 175, 55, 0.1); padding: 2rem; border-radius: 10px; text-align: center;">
-            <p style="color: #d4af37; font-size: 1.1rem;">No H-Frame products found. Add products first from the Admin Panel.</p>
+        <div class="empty-state">
+            <p>No H-Frame products found. Add products first from Admin Panel.</p>
         </div>
         {% endif %}
-        
-        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
-            <button class="btn-primary" onclick="saveAllPricing()" style="padding: 1rem 3rem;">💾 Save All H-Frames Pricing</button>
-            <button class="btn-secondary" onclick="window.location.href='{{ url_for('admin_scaffoldings') }}'" style="padding: 1rem 3rem;">Cancel</button>
-        </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <button class="btn btn-primary" onclick="saveAllPricing()">💾 Save All H-Frames Pricing</button>
+        <button class="btn btn-secondary" onclick="window.location.href='{{ url_for('admin_scaffoldings') }}'">Cancel</button>
     </div>
 </div>
 
+{% endblock %}
+
+{% block scripts %}
 <script>
 const pricingData = {{ pricing_data|tojson|safe }};
 
@@ -67,10 +75,10 @@ window.addEventListener('DOMContentLoaded', () => {
                     if (typeof priceData === 'object') {
                         const buyInputId = `buy_${productId}_${sets}`;
                         const rentInputId = `rent_${productId}_${sets}`;
+                        const depositInputId = `deposit_${productId}_${sets}`;
                         
                         const buyInput = document.getElementById(buyInputId);
                         const rentInput = document.getElementById(rentInputId);
-                        const depositInputId = `deposit_${productId}_${sets}`;
                         const depositInput = document.getElementById(depositInputId);
                         
                         if (buyInput && priceData.buy) {
@@ -92,27 +100,29 @@ window.addEventListener('DOMContentLoaded', () => {
 function saveAllPricing() {
     const allPricing = {};
     const buyInputs = document.querySelectorAll('.pricing-input');
-    const rentInputs = document.querySelectorAll('.rent-pricing-input');
-    const depositInputs = document.querySelectorAll('.deposit-pricing-input');
     
-    // Collect buy prices
     buyInputs.forEach(input => {
         const productId = input.dataset.productId;
         const sets = input.dataset.sets;
-        const buyValue = parseFloat(input.value);
+        const value = parseFloat(input.value);
         
-        if (buyValue && buyValue > 0) {
+        if (!productId || !sets) {
+            return;
+        }
+
+        if (!isNaN(value) && value > 0) {
             if (!allPricing[productId]) {
                 allPricing[productId] = {};
             }
             if (!allPricing[productId][sets]) {
                 allPricing[productId][sets] = {};
             }
-            allPricing[productId][sets].buy = buyValue;
+            allPricing[productId][sets].buy = value;
         }
     });
     
     // Collect rent prices
+    const rentInputs = document.querySelectorAll('.rent-pricing-input');
     rentInputs.forEach(input => {
         const productId = input.dataset.productId;
         const sets = input.dataset.sets;
@@ -133,6 +143,7 @@ function saveAllPricing() {
     });
     
     // Collect deposit amounts
+    const depositInputs = document.querySelectorAll('.deposit-pricing-input');
     depositInputs.forEach(input => {
         const productId = input.dataset.productId;
         const sets = input.dataset.sets;
@@ -182,4 +193,212 @@ function saveAllPricing() {
         alert('❌ Error updating H-Frames pricing');
     });
 }
-{% endblock %}
+</script>
+
+<style>
+    /* ===== GLOBAL RESETS ===== */
+    * {
+        box-sizing: border-box;
+    }
+
+    /* Main Wrapper */
+    .pricing-wrapper {
+        width: 100%;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 1.5rem;
+    }
+
+    /* Header Section */
+    .top-header {
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-size: 1.8rem;
+        color: #ffd966; /* Gold */
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+        color: #d4af37;
+        margin-bottom: 2rem;
+        font-weight: 500;
+    }
+
+    /* Grid Layouts */
+    .products-grid-wrapper {
+        background: rgba(30, 58, 138, 0.1);
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+
+    .products-grid {
+        display: grid;
+        /* Desktop: Grid with columns based on screen width */
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    /* Product Cards */
+    .pricing-card {
+        background: rgba(212, 175, 55, 0.05); /* Orange tint */
+        padding: 1.5rem;
+        border-radius: 8px;
+        border: 2px solid rgba(212, 175, 55, 0.2);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-name {
+        color: #d4af37;
+        margin-bottom: 1rem;
+        font-size: 1.25rem;
+    }
+
+    .product-desc {
+        color: #a0a0a0;
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+        min-height: 3em; /* Uniform height */
+    }
+
+    /* Form Inputs */
+    .form-group {
+        margin-bottom: 1.2rem;
+        width: 100%;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #555;
+        font-size: 0.95rem;
+    }
+
+    /* Input Styling - Critical for Mobile */
+    .pricing-input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #ccc;
+        border-radius: 6px;
+        font-size: 16px; /* 16px prevents iOS auto-zoom */
+        background: #fff;
+        transition: border-color 0.3s;
+    }
+
+    .pricing-input:focus {
+        border-color: #d4af37;
+        outline: none;
+        background-color: #fff;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .btn {
+        padding: 1rem 3rem;
+        border: none;
+        border-radius: 5px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #002855, #004080);
+        color: white;
+        box-shadow: 0 4px 10px rgba(0, 40, 80, 0.2);
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary:hover, .btn-secondary:hover {
+        transform: translateY(-2px);
+        opacity: 0.9;
+    }
+
+    /* Empty State */
+    .empty-state {
+        background: rgba(212, 175, 55, 0.1);
+        padding: 2rem;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    /* ===== MOBILE RESPONSIVE FIXES ===== */
+    @media (max-width: 768px) {
+        .pricing-wrapper {
+            padding: 1rem; /* Less padding on mobile */
+        }
+
+        /* Typography Adjustments */
+        .page-title {
+            font-size: 1.5rem;
+            text-align: center;
+        }
+        
+        .subtitle {
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        /* FIX: Force Single Column Grid on Mobile */
+        /* This overrides the desktop grid-template-columns */
+        .products-grid {
+            display: grid !important;
+            grid-template-columns: 1fr !important; /* Force single column stack */
+            gap: 1rem !important;
+        }
+
+        /* Adjust Card Padding */
+        .pricing-card {
+            padding: 1rem !important; /* Tighter fit for mobile */
+            border-width: 1px;
+        }
+
+        /* Adjust Labels */
+        .product-name {
+            font-size: 1.1rem;
+        }
+
+        /* Fix Inputs for Touch */
+        .pricing-input {
+            padding: 14px !important; /* Larger touch area */
+            font-size: 16px !important; /* Maintain 16px to prevent zoom */
+        }
+
+        /* Stack Action Buttons */
+        .action-buttons {
+            flex-direction: column !important; /* Stack vertically */
+            width: 100%;
+            gap: 1rem;
+        }
+
+        .btn {
+            width: 100% !important; /* Full width buttons for tapping */
+            padding: 14px 20px; /* Taller buttons */
+        }
+
+        .empty-state {
+            padding: 1.5rem;
+        }
+    }
+</style>

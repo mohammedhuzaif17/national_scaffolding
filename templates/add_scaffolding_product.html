@@ -74,7 +74,7 @@
                         <!-- Sizes will be dynamically added here -->
                     </div>
                     
-                    <button type="button" id="addSizeBtn" class="btn btn-secondary">+ Add Another Size</button>
+                    <button type="button" id="addSizeBtn" class="btn btn-secondary btn-add-size">+ Add Another Size</button>
                 </div>
 
                 <!-- Standard Pricing Section (for non-ledger products) -->
@@ -176,8 +176,6 @@ function handleCategoryChange() {
     setStandardPricingRequired(true);
 }
 
-}
-
 // This function runs when the cuplock type dropdown changes.
 function handleCuplockTypeChange() {
     const cuplockType = document.getElementById('cuplock_type').value;
@@ -261,7 +259,7 @@ function removeSizeOption(id) {
     }
 }
 
-// This is the key validation function that runs on form submission.
+// This is a key validation function that runs on form submission.
 document.getElementById('productForm').addEventListener('submit', function(e) {
     const category = document.getElementById('category').value;
     const cuplockType = document.getElementById('cuplock_type').value;
@@ -297,194 +295,265 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<!-- The CSS is the same as before, just included for completeness -->
 <style>
-.admin-container {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 20px;
-}
+    /* ===== GLOBAL RESETS ===== */
+    * {
+        box-sizing: border-box;
+    }
 
-.page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-}
+    .admin-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+    }
 
-.form-container {
-    background: white;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        flex-wrap: wrap; /* Allow wrapping if needed */
+        gap: 15px;
+    }
 
-.form-section h3 {
-    color: #333;
-    border-bottom: 2px solid #e0e0e0;
-    padding-bottom: 10px;
-    margin-top: 30px;
-    margin-bottom: 20px;
-}
+    .form-container {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
 
-.form-section h3:first-child {
-    margin-top: 0;
-}
+    .form-section h3 {
+        color: #333;
+        border-bottom: 2px solid #e0e0e0;
+        padding-bottom: 10px;
+        margin-top: 30px;
+        margin-bottom: 20px;
+        font-size: 1.4rem;
+    }
 
-.form-group {
-    margin-bottom: 20px;
-}
+    .form-section h3:first-child {
+        margin-top: 0;
+    }
 
-.form-group label {
-    display: block;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: #555;
-}
+    .form-group {
+        margin-bottom: 20px;
+    }
 
-.form-group input[type="text"],
-.form-group input[type="number"],
-.form-group textarea,
-.form-group select {
-    width: 100%;
-    padding: 10px;
-    border: 2px solid #ddd;
-    border-radius: 5px;
-    font-size: 14px;
-}
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #555;
+    }
 
-.form-group input[type="file"] {
-    width: 100%;
-    padding: 8px;
-    border: 2px dashed #ddd;
-    border-radius: 5px;
-}
+    /* Input Styling - Optimized for Touch */
+    .form-group input[type="text"],
+    .form-group input[type="number"],
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 12px; /* Larger padding for touch targets */
+        border: 2px solid #ddd;
+        border-radius: 5px;
+        font-size: 16px; /* 16px prevents iOS zoom on focus */
+        background-color: #fff;
+        transition: border-color 0.3s;
+    }
 
-.form-group small {
-    display: block;
-    margin-top: 5px;
-    color: #666;
-    font-size: 13px;
-}
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+        border-color: #667eea;
+        outline: none;
+    }
 
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-}
+    .form-group input[type="file"] {
+        width: 100%;
+        padding: 10px;
+        border: 2px dashed #ddd;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
 
-.button-group {
-    display: flex;
-    gap: 15px;
-    margin-top: 30px;
-}
+    .form-group small {
+        display: block;
+        margin-top: 5px;
+        color: #666;
+        font-size: 13px;
+    }
 
-.btn {
-    padding: 12px 30px;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-}
-
-.btn-secondary {
-    background: #6c757d;
-    color: white;
-}
-
-.btn-remove {
-    background: #dc3545;
-    color: white;
-    padding: 8px 15px;
-    font-size: 14px;
-}
-
-.btn:hover {
-    opacity: 0.9;
-    transform: translateY(-2px);
-    transition: all 0.3s ease;
-}
-
-.size-option {
-    background: #f9f9f9;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    border: 1px solid #e0e0e0;
-}
-
-.size-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-}
-
-.size-header h4 {
-    margin: 0;
-    color: #555;
-}
-
-.info-box {
-    background: #f0f7ff;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    border-left: 4px solid #2196F3;
-}
-
-.info-box p {
-    margin: 0;
-    color: #555;
-}
-
-.alert {
-    padding: 15px;
-    margin-bottom: 20px;
-    border: 1px solid transparent;
-    border-radius: 4px;
-}
-
-.alert-success {
-    color: #155724;
-    background-color: #d4edda;
-    border-color: #c3e6cb;
-}
-
-.alert-error {
-    color: #721c24;
-    background-color: #f8d7da;
-    border-color: #f5c6cb;
-}
-
-.alert-warning {
-    color: #856404;
-    background-color: #fff3cd;
-    border-color: #ffeaa7;
-}
-
-@media (max-width: 768px) {
+    /* Form Grid Layouts */
     .form-row {
-        grid-template-columns: 1fr;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
     }
-    
-    .size-header {
-        flex-direction: column;
-        align-items: flex-start;
+
+    .button-group {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
     }
-    
+
+    /* Button Styling */
+    .btn {
+        padding: 12px 30px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px; /* Larger font for mobile */
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+
     .btn-remove {
-        margin-top: 10px;
+        background: #dc3545;
+        color: white;
+        padding: 8px 15px;
+        font-size: 14px;
     }
-}
+
+    .btn:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+        transition: all 0.3s ease;
+    }
+
+    /* Dynamic Size Options */
+    .size-option {
+        background: #f9f9f9;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border: 1px solid #e0e0e0;
+    }
+
+    .size-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        gap: 10px;
+    }
+
+    .size-header h4 {
+        margin: 0;
+        color: #555;
+        font-size: 1.1rem;
+    }
+
+    .info-box {
+        background: #f0f7ff;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border-left: 4px solid #2196F3;
+    }
+
+    .info-box p {
+        margin: 0;
+        color: #555;
+    }
+
+    /* Alerts */
+    .alert {
+        padding: 15px;
+        margin-bottom: 20px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+    }
+
+    .alert-success { color: #155724; background-color: #d4edda; border-color: #c3e6cb; }
+    .alert-error { color: #721c24; background-color: #f8d7da; border-color: #f5c6cb; }
+    .alert-warning { color: #856404; background-color: #fff3cd; border-color: #ffeaa7; }
+
+    /* ===== MOBILE RESPONSIVE CSS ===== */
+    @media (max-width: 768px) {
+        /* Adjust Container */
+        .admin-container {
+            padding: 15px;
+        }
+
+        /* Header: Stack vertically on mobile */
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .page-header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        /* Make buttons full width for easy tapping */
+        .btn {
+            width: 100%;
+            padding: 14px 20px; /* Taller buttons */
+        }
+
+        /* Stack main buttons */
+        .button-group {
+            flex-direction: column;
+            width: 100%;
+        }
+
+        /* Stack form rows into single column */
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        /* Adjust labels */
+        .form-group label {
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        /* Reduce padding slightly on mobile */
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group textarea,
+        .form-group select {
+            padding: 10px;
+        }
+
+        /* Adjust Size Options Header */
+        .size-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .btn-remove {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-add-size {
+            width: 100%;
+        }
+
+        .info-box {
+            padding: 12px;
+        }
+
+        .form-container {
+            padding: 15px;
+        }
+    }
 </style>
 
 {% endblock %}

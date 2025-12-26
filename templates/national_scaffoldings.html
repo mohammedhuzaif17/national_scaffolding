@@ -3,10 +3,14 @@
 {% block title %}National Scaffolding - Products{% endblock %}
 
 {% block content %}
-<!-- Welcome Popup -->
-
 
 <style>
+/* =========================================
+   BASE STYLES (Desktop Default)
+   ========================================= */
+* { box-sizing: border-box; }
+
+/* Product Gallery (Carousel Styles) */
 .product-gallery {
     position: relative;
     width: 100%;
@@ -18,55 +22,38 @@
     cursor: pointer;
 }
 
-.gallery-images-container {
-    position: relative;
-    width: 100%;
-    height: 100%;
-}
+.gallery-images-container { position: relative; width: 100%; height: 100%; }
 
 .gallery-item {
     position: absolute;
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100%;
     opacity: 0;
     transition: opacity 0.5s ease-in-out;
-    top: 0;
-    left: 0;
+    top: 0; left: 0;
     pointer-events: none;
 }
 
-.gallery-item.active {
-    opacity: 1;
-    z-index: 1;
-    pointer-events: auto;
-}
+.gallery-item.active { opacity: 1; z-index: 1; pointer-events: auto; }
 
 .gallery-item img {
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100%;
     object-fit: contain;
     display: block;
 }
 
 .gallery-nav {
     position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 50%; transform: translateY(-50%);
     background-color: rgba(0,0,0,0.7);
     color: white;
     border: 2px solid rgba(255,255,255,0.8);
-    width: 35px;
-    height: 35px;
+    width: 35px; height: 35px;
     border-radius: 50%;
     cursor: pointer;
-    font-size: 18px;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    font-size: 18px; font-weight: bold;
+    display: flex; align-items: center; justify-content: center;
     z-index: 100;
-    transition: all 0.2s ease;
-    user-select: none;
+    transition: all 0.2s ease; user-select: none;
 }
 
 .gallery-nav:hover {
@@ -75,28 +62,18 @@
     border-color: white;
 }
 
-.gallery-prev {
-    left: 10px;
-}
-
-.gallery-next {
-    right: 10px;
-}
+.gallery-prev { left: 10px; }
+.gallery-next { right: 10px; }
 
 .gallery-dots {
     position: absolute;
-    bottom: 10px;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: center;
-    gap: 8px;
+    bottom: 10px; left: 0; right: 0;
+    display: flex; justify-content: center; gap: 8px;
     z-index: 10;
 }
 
 .gallery-dot {
-    width: 10px;
-    height: 10px;
+    width: 10px; height: 10px;
     border-radius: 50%;
     background-color: rgba(255,255,255,0.5);
     cursor: pointer;
@@ -104,77 +81,28 @@
     border: 2px solid rgba(0,0,0,0.3);
 }
 
-.gallery-dot.active {
-    background-color: white;
-    transform: scale(1.2);
-    border-color: rgba(0,0,0,0.5);
-}
-
-.gallery-dot:hover {
-    background-color: rgba(255,255,255,0.8);
-}
+.gallery-dot.active { background-color: white; transform: scale(1.2); border-color: rgba(0,0,0,0.5); }
+.gallery-dot:hover { background-color: rgba(255,255,255,0.8); }
 
 .gallery-counter {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 10px; right: 10px;
     background: rgba(0,0,0,0.7);
     color: white;
     padding: 4px 10px;
     border-radius: 12px;
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 12px; font-weight: 600;
     z-index: 10;
 }
 
-/* FIXED: Two images side by side with + sign */
-.product-image-grid {
-    position: relative;
-    width: 100%;
-    height: 250px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4px;
-    border-radius: 8px 8px 0 0;
-    overflow: hidden;
-    background: #f0f0f0;
-    cursor: pointer;
-}
-
-.product-image-grid img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    background-color: #ffffff;
-}
-
-.product-image-more {
-    position: absolute;
-    top: 50%;
-    right: 10px;
-    transform: translateY(-50%);
-    background: rgba(0,0,0,0.8);
-    color: white;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    font-weight: bold;
-    z-index: 10;
-    pointer-events: none;
-}
-
+/* Product Card Styles */
 .product-card {
     background: white;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
+    display: flex; flex-direction: column;
 }
 
 .product-card:hover {
@@ -184,44 +112,33 @@
 
 .product-image-container {
     width: 100%;
-    height: 260px; /* uniform height for all product images */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 5px; /* reduced padding */
+    height: 260px;
+    display: flex; align-items: center; justify-content: center;
+    padding: 5px;
     background: #ffffff;
     overflow: hidden;
 }
 
 .product-image {
-    width: 100%;
-    height: 100%;
-    object-fit: contain; /* changed from cover to contain */
+    width: 100%; height: 100%;
+    object-fit: contain;
     transition: transform 0.3s ease;
     cursor: pointer;
     background-color: #ffffff;
 }
 
-.product-image:hover {
-    transform: scale(1.05);
-}
+.product-image:hover { transform: scale(1.05); }
 
 .product-image-placeholder {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f0f0f0;
-    font-size: 3rem;
-    cursor: pointer;
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    background: #f0f0f0; font-size: 3rem; cursor: pointer;
 }
 
 .product-info {
     padding: 1.5rem;
     flex: 1;
-    display: flex;
-    flex-direction: column;
+    display: flex; flex-direction: column;
 }
 
 .product-name {
@@ -233,9 +150,7 @@
     transition: color 0.3s ease;
 }
 
-.product-name:hover {
-    color: #004080;
-}
+.product-name:hover { color: #004080; }
 
 .product-category {
     display: inline-block;
@@ -264,9 +179,9 @@
 }
 
 .product-price {
-    font-size: 1.8rem; /* Increased from 1.5rem to 1.8rem */
-    font-weight: 800; /* Increased from 700 to 800 for bolder text */
-    color: #001d3d; /* Matching the heading color */
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #001d3d;
 }
 
 .product-actions {
@@ -289,34 +204,25 @@
     white-space: nowrap;
 }
 
-.btn-primary {
-    background: linear-gradient(135deg, #002855, #004080);
-    color: white;
-}
-
-.btn-secondary {
-    background: #6c757d;
-    color: white;
-}
+.btn-primary { background: linear-gradient(135deg, #002855, #004080); color: white; }
+.btn-secondary { background: #6c757d; color: white; }
 
 .btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
+/* Page Layout */
 .page-container {
     display: block;
     margin: 0 auto;
     max-width: 100%;
     height: auto;
-    padding: 10px;
+    padding: 20px; /* Desktop Padding */
     object-fit: contain;
 }
 
-.page-header {
-    text-align: center;
-    margin-bottom: 2rem;
-}
+.page-header { text-align: center; margin-bottom: 2rem; }
 
 .page-title {
     font-size: 2.5rem;
@@ -325,11 +231,7 @@
     margin-bottom: 0.5rem;
 }
 
-.page-subtitle {
-    color: #555;
-    margin-bottom: 2rem;
-    font-size: 1.1rem;
-}
+.page-subtitle { color: #555; margin-bottom: 2rem; font-size: 1.1rem; }
 
 .category-buttons {
     display: flex;
@@ -349,20 +251,8 @@
     transition: all 0.3s ease;
 }
 
-.category-btn.active {
-    background: #001d3d;
-    color: white;
-    border-color: #001d3d;
-}
-
-.category-btn:hover {
-    background: #e9ecef;
-    border-color: #adb5bd;
-}
-
-.category-btn.active:hover {
-    background: #002855;
-}
+.category-btn.active { background: #001d3d; color: white; border-color: #001d3d; }
+.category-btn:hover { background: #e9ecef; border-color: #adb5bd; }
 
 .products-grid {
     display: grid;
@@ -392,52 +282,17 @@
     box-shadow: 0 6px 20px rgba(212,175,55,0.6);
 }
 
-@media (max-width: 768px) {
-    .products-grid {
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 1rem;
-    }
-    
-    .product-image-container {
-        height: 220px; /* slightly smaller on mobile */
-        padding: 3px; /* reduced padding for mobile */
-    }
-    
-    .product-image-grid {
-        height: 220px; /* matching the container height */
-    }
-    
-    .product-image-container img,
-    .product-image-grid img {
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: contain; /* keeps image fully visible */
-        display: block;
-        margin: 0 auto;
-    }
-    
-    .page-container {
-        padding: 1rem 0.5rem;
-    }
-    
-    .page-title {
-        font-size: 2rem;
-    }
-}
-
-/* ===== HERO SECTION WITH BACKGROUND IMAGE - MODIFIED ===== */
+/* HERO SECTION */
 .hero-section {
     position: relative;
     width: 100%;
     min-height: 500px;
     background:url('{{ url_for('static', filename='images/background.png') }}');
     background-size: cover;
-    background-position: right center; /* Changed to show more of the right side */
+    background-position: right center;
     background-attachment: fixed;
     background-repeat: no-repeat;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     color: white;
     text-align: center;
     padding: 80px 20px;
@@ -445,15 +300,11 @@
     overflow: hidden;
 }
 
-/* REMOVED: The blue overlay that was applied with ::before pseudo-element */
 .hero-section::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.5) 100%); /* Reduced opacity for better visibility */
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.5) 100%);
     z-index: 1;
 }
 
@@ -464,7 +315,7 @@
     animation: fadeInDown 0.8s ease-out;
     padding: 20px;
     border-radius: 10px;
-    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background for better text contrast */
+    background-color: rgba(0, 0, 0, 0.5);
 }
 
 .hero-content h1 {
@@ -472,7 +323,7 @@
     font-weight: 900;
     color: rgb(193, 158, 45);
     margin-bottom: 1rem;
-    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9); /* Increased shadow for better contrast */
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9);
     letter-spacing: 2px;
 }
 
@@ -480,7 +331,7 @@
     font-size: 1.3rem;
     color: #ffd966;
     margin-bottom: 0.8rem;
-    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.9); /* Increased shadow for better contrast */
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.9);
     font-weight: 600;
 }
 
@@ -489,7 +340,7 @@
     color: #ffffff;
     margin: 1.5rem 0;
     line-height: 1.6;
-    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.9); /* Increased shadow for better contrast */
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.9);
 }
 
 .hero-btn {
@@ -515,63 +366,90 @@
 }
 
 @keyframes fadeInDown {
-    from {
-        opacity: 0;
-        transform: translateY(-30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
+/* =========================================
+   RESPONSIVE MOBILE CSS
+   ========================================= */
 @media (max-width: 768px) {
+    /* Hero Section Adjustments */
     .hero-section {
-        min-height: 400px;
+        /* Fixed bg often janky on mobile */
         background-attachment: scroll;
         padding: 60px 15px;
-        margin-bottom: 30px;
+        margin-bottom: 20px;
+        min-height: 350px;
+    }
+
+    .hero-content h1 { font-size: 2.2rem; letter-spacing: 1px; }
+    .hero-content h3 { font-size: 1.1rem; }
+    .hero-tagline { font-size: 0.95rem; }
+    
+    /* Container & Grid */
+    .page-container {
+        padding: 15px; /* Less padding to give more width */
+    }
+
+    .products-grid {
+        grid-template-columns: 1fr; /* Single Column Layout for Mobile */
+        gap: 1.5rem;
+    }
+
+    /* Product Card Adjustments */
+    .product-image-container {
+        height: 220px;
+        padding: 10px;
+    }
+
+    .product-info {
+        padding: 1rem;
+    }
+
+    .product-name {
+        font-size: 1.15rem;
     }
     
-    .hero-content {
-        padding: 15px;
+    .product-price {
+        font-size: 1.5rem;
     }
-    
-    .hero-content h1 {
-        font-size: 2.2rem;
-        letter-spacing: 1px;
+
+    /* BUTTONS: Critical Mobile Fix */
+    /* Force buttons to stack vertically so they are full width and touch-friendly */
+    .product-actions {
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
     }
-    
-    .hero-content h3 {
-        font-size: 1.1rem;
+
+    .product-actions .btn {
+        width: 100%;
+        padding: 14px; /* Larger touch target */
+        font-size: 1rem;
+        justify-content: center;
     }
-    
-    .hero-tagline {
-        font-size: 0.95rem;
+
+    /* Floating Cart Button */
+    .view-cart-btn {
+        bottom: 15px;
+        right: 15px;
+        padding: 12px 20px;
+        font-size: 0.9rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
 }
 
 @media (max-width: 480px) {
-    .hero-section {
-        min-height: 350px;
-        padding: 40px 10px;
-    }
+    .hero-content { padding: 10px; }
+    .hero-content h1 { font-size: 1.8rem; }
+    .hero-content h3 { font-size: 1rem; }
     
-    .hero-content {
-        padding: 10px;
-    }
+    .page-title { font-size: 1.8rem; }
     
-    .hero-content h1 {
-        font-size: 1.8rem;
-        letter-spacing: 0.5px;
-    }
-    
-    .hero-content h3 {
-        font-size: 0.95rem;
-    }
-    
-    .hero-tagline {
+    .category-btn {
         font-size: 0.85rem;
+        padding: 0.5rem 1rem;
     }
 }
 </style>
@@ -619,144 +497,75 @@
         </button>
     </div>
     
-    <!-- <div class="products-grid">
+    <div class="products-grid">
         {% for product in products %}
         <div class="product-card">
-            <div class="product-image-container" onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
-                {% if product.display_image_url and product.display_image_url != 'images/no-image.png' %}
-                    <!-- Single image - simple and direct -->
-                    <!-- <img src="{{ url_for('static', filename=product.display_image_url) }}" alt="{{ product.name }}" class="product-image" onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}';">
-                {% else %}
-                    No image available - show placeholder -->
-                    <!-- <img src="{{ url_for('static', filename='images/no-image.png') }}" alt="No Image" class="product-image">
-                {% endif %}
-            </div> -->
-            <!-- <img src="{{ url_for('static', filename=product.display_image_url) }}"
-     alt="{{ product.name }}"
-     class="product-image"
-     onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}'">
 
-             
+            <!-- PRODUCT IMAGE -->
+            <div class="product-image-container"
+                 onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
+
+                <img src="{{ url_for('static', filename=product.display_image_url) }}"
+                     alt="{{ product.name }}"
+                     class="product-image"
+                     onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}'">
+            </div>
+
+            <!-- PRODUCT INFO -->
             <div class="product-info">
-                <h3 class="product-name" onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
+
+                <h3 class="product-name"
+                    onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
                     {{ product.name }}
                 </h3>
-                
+
                 {% if product.category %}
-                <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;">
-                    <span class="product-category">{{ product.category|replace('-', ' ') }}</span>
+                <div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.5rem; flex-wrap: wrap;">
+                    <span class="product-category">
+                        {{ product.category|replace('-', ' ') }}
+                    </span>
+
                     {% if product.cuplock_type %}
-                    <span style="background: #4CAF50; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: bold;">{{ product.cuplock_type|capitalize }}</span>
+                    <span style="background:#4CAF50;color:white;padding:0.25rem 0.75rem;
+                                 border-radius:20px;font-size:0.75rem;font-weight:bold;">
+                        {{ product.cuplock_type|capitalize }}
+                    </span>
                     {% endif %}
                 </div>
                 {% endif %}
-                
+
                 {% if product.description %}
                 <p class="product-description">
-                    {{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}
+                    {{ product.description[:100] }}
+                    {% if product.description|length > 100 %}...{% endif %}
                 </p>
                 {% endif %}
-                
+
+                <!-- PRICE -->
                 <div class="product-price-row">
-                   <span class="product-price">₹{{ product.display_price|indian }}</span>
-
+                    <span class="product-price">
+                        ₹{{ product.display_price|indian }}
+                    </span>
                 </div>
-                
-               <div class="product-actions">
 
-    <button class="btn btn-secondary"
-            onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
-        View Details
-    </button>
+                <div class="product-actions">
+                    <button class="btn btn-secondary"
+                            onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
+                        View Details
+                    </button>
 
-    {% if current_user.is_authenticated and session.get('user_type') != 'admin' %}
-        <button class="btn btn-primary"
-                onclick="event.stopPropagation(); addToCart({{ product.id }})">
-            🛒 Add to Cart
-        </button>
-    {% endif %}
-
-</div>
-
+                    {% if current_user.is_authenticated and session.get('user_type') != 'admin' %}
+                    <button class="btn btn-primary"
+                            onclick="event.stopPropagation(); addToCart({{ product.id }})">
+                        🛒 Add to Cart
+                    </button>
+                    {% endif %}
+                </div>
             </div>
         </div>
         {% endfor %}
     </div>
-</div> -->
-
-<div class="products-grid">
-    {% for product in products %}
-    <div class="product-card">
-
-        <!-- PRODUCT IMAGE -->
-        <div class="product-image-container"
-             onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
-
-            <img src="{{ url_for('static', filename=product.display_image_url) }}"
-                 alt="{{ product.name }}"
-                 class="product-image"
-                 onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}'">
-        </div>
-
-        <!-- PRODUCT INFO -->
-        <div class="product-info">
-
-            <h3 class="product-name"
-                onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
-                {{ product.name }}
-            </h3>
-
-            {% if product.category %}
-            <div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.5rem;">
-                <span class="product-category">
-                    {{ product.category|replace('-', ' ') }}
-                </span>
-
-                {% if product.cuplock_type %}
-                <span style="background:#4CAF50;color:white;padding:0.25rem 0.75rem;
-                             border-radius:20px;font-size:0.75rem;font-weight:bold;">
-                    {{ product.cuplock_type|capitalize }}
-                </span>
-                {% endif %}
-            </div>
-            {% endif %}
-
-            {% if product.description %}
-            <p class="product-description">
-                {{ product.description[:100] }}
-                {% if product.description|length > 100 %}...{% endif %}
-            </p>
-            {% endif %}
-
-            <!-- PRICE -->
-            <div class="product-price-row">
-                <span class="product-price">
-                    ₹{{ product.display_price|indian }}
-                </span>
-            </div>
-
-            <div class="product-actions">
-
-    <button class="btn btn-secondary"
-            onclick="window.location.href='{{ url_for('product_detail', product_id=product.id) }}'">
-        View Details
-    </button>
-
-    {% if current_user.is_authenticated and session.get('user_type') != 'admin' %}
-    <button class="btn btn-primary"
-            onclick="event.stopPropagation(); addToCart({{ product.id }})">
-        🛒 Add to Cart
-    </button>
-    {% endif %}
-
 </div>
-
-        </div>
-    </div>
-    {% endfor %}
-</div>
-
-
 
 {% if current_user.is_authenticated and session.get('user_type') != 'admin' %}
 <button class="view-cart-btn" onclick="window.location.href='{{ url_for('cart') }}'">
@@ -768,9 +577,6 @@
 
 {% block scripts %}
 <script>
-// Show welcome popup only for non-logged-in users
-
-
 function addToCart(productId) {
     fetch('/add_to_cart', {
         method: 'POST',
@@ -795,6 +601,5 @@ function addToCart(productId) {
         alert('❌ Error adding to cart');
     });
 }
-
 </script>
 {% endblock %}

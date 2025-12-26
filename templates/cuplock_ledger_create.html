@@ -1,202 +1,480 @@
 {% extends "base.html" %}
 
-{% block title %}Create Ledger Cuplock Product - Admin{% endblock %}
+{% block title %}Cart - National Scaffolding{% endblock %}
 
 {% block content %}
-<div class="admin-container">
-    <div class="page-header">
-        <h1>Create Ledger Cuplock Product</h1>
-        <a href="{{ url_for('cuplock.ledger_list') }}" class="btn btn-secondary">← Back</a>
-    </div>
-
-    <div class="form-container">
-        <form method="POST" enctype="multipart/form-data" class="admin-form">
-
-            <div class="form-section">
-                <h3>Product Information</h3>
-
-                <div class="form-group">
-                    <label for="name">Product Name *</label>
-                    <input type="text" id="name" name="name" required placeholder="e.g., Cuplock Ledger System">
-                </div>
-
-                <div class="form-group">
-                    <label for="description">Description</label>
-                    <textarea id="description" name="description" rows="4" placeholder="Product description..."></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="price">Starting Price (₹) *</label>
-                    <input type="number" id="price" name="price" required placeholder="e.g., 5000" step="0.01" min="0">
-                    <small>This is base price displayed on shop page</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="image">Product Image</label>
-                    <input type="file" id="image" name="image" accept="image/*" placeholder="Upload product image">
-                    <small>Optional: You can also upload an image after creating the product</small>
-                </div>
-            </div>
-
-            <div class="form-section">
-                <h3>Size Information</h3>
-
-                <div class="size-entry">
-                    <div class="form-group">
-                        <label for="size_label">Size Label *</label>
-                        <input type="text" id="size_label" name="size_label" required placeholder="e.g., 6ft">
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="weight">Weight (kg) *</label>
-                            <input type="number" step="0.01" id="weight" name="weight" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="buy_price">Buy Price (₹) *</label>
-                            <input type="number" step="0.01" id="buy_price" name="buy_price" required>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="rent_price">Rent Price (₹/day) *</label>
-                            <input type="number" step="0.01" id="rent_price" name="rent_price" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="deposit">Deposit (₹) *</label>
-                            <input type="number" step="0.01" id="deposit" name="deposit" required>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="image">Product Image</label>
-                        <input type="file" id="image" name="image" accept="image/*">
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary btn-lg">Create Product</button>
-                <a href="{{ url_for('cuplock.ledger_list') }}" class="btn btn-secondary btn-lg">Cancel</a>
-            </div>
-        </form>
-    </div>
-</div>
-
 <style>
-.admin-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
-}
+    /* ===== GLOBAL RESETS ===== */
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
 
-.form-row {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f8f9fa;
+        color: #333;
+        padding-bottom: 80px; /* Space for scrolling past navbar/footer */
+    }
 
-.form-row .form-group {
-    flex: 1;
-}
+    /* ===== MAIN CONTAINER ===== */
+    .cart-container {
+        width: 100%;
+        max-width: 1200px; /* Desktop limit */
+        margin: 2rem auto;
+        padding: 0 1.5rem;
+    }
 
-.size-entry {
-    background: #f8f9fa;
-    padding: 1.5rem;
-    border-radius: 8px;
-    margin-top: 1rem;
-    border: 1px solid #e9ecef;
-}
+    /* ===== HEADER ===== */
+    .page-header h1 {
+        font-size: 2rem;
+        color: #001d3d; /* Royal Blue */
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
 
-.page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-}
+    /* ===== CART ITEM COMPONENT ===== */
+    .cart-item {
+        display: flex;
+        flex-wrap: wrap; /* Allow wrapping on very small screens */
+        gap: 1.5rem;
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        margin-bottom: 1.5rem;
+        align-items: flex-start; /* Align items to left */
+    }
 
-.form-container {
-    background: white;
-    border-radius: 8px;
-    padding: 2rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
+    .cart-item-image-container {
+        width: 120px;
+        height: 120px;
+        flex-shrink: 0; /* Prevent image from shrinking */
+    }
 
-.form-section {
-    margin-bottom: 2rem;
-    padding-bottom: 2rem;
-    border-bottom: 1px solid #e0e0e0;
-}
+    .cart-item-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #eee;
+    }
 
-.form-section h3 {
-    color: #001d3d;
-    margin-bottom: 1rem;
-}
+    .cart-item-placeholder {
+        width: 100%;
+        height: 100%;
+        background-color: #f0f0f0;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        color: #999;
+    }
 
-.form-group {
-    margin-bottom: 1.5rem;
-}
+    .cart-item-details {
+        flex: 1; /* Take up remaining space */
+        min-width: 250px; /* Ensure details have width on desktop */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
 
-.form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-    color: #333;
-}
+    .cart-item-name {
+        font-size: 1.25rem;
+        color: #001d3d;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        line-height: 1.3;
+    }
 
-input,
-textarea {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 1rem;
-    font-family: inherit;
-}
+    .cart-item-specs {
+        color: #555;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
 
-input:focus,
-textarea:focus {
-    outline: none;
-    border-color: #002855;
-    box-shadow: 0 0 5px rgba(0,40,85,0.3);
-}
+    .cart-item-price {
+        color: #001d3d;
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-top: 0.5rem;
+    }
 
-.btn {
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    text-decoration: none;
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
-}
+    /* Remove Button */
+    .cart-item-actions {
+        align-self: center; /* Vertically center with image */
+        margin-left: auto; /* Push to right */
+    }
 
-.btn-primary {
-    background: #002855;
-    color: white;
-}
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 0.5rem 1.2rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
 
-.btn-secondary {
-    background: #6c757d;
-    color: white;
-}
+    .btn-danger:hover {
+        background: #c82333;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
 
-.btn-lg {
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-}
+    /* ===== CART SUMMARY ===== */
+    .cart-summary {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        margin-top: 2rem;
+    }
 
-.form-actions {
-    display: flex;
-    gap: 1rem;
-    margin-top: 2rem;
-}
+    .cart-summary h2 {
+        color: #001d3d;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid #e0e0e0;
+        padding-bottom: 1rem;
+        font-size: 1.3rem;
+    }
 
-.form-actions .btn {
-    flex: 1;
-}
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 1.1rem;
+    }
+
+    .summary-row span:first-child {
+        color: #555;
+        font-weight: 500;
+    }
+
+    .summary-row.total {
+        background-color: #f8f9fa; /* Highlight grand total */
+        border-bottom: 2px solid #001d3d;
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+        margin-top: 0;
+    }
+
+    .summary-row.total span:first-child {
+        color: #001d3d;
+        font-weight: 700;
+        font-size: 1.3rem;
+    }
+
+    .summary-row.total span:last-child {
+        color: #001d3d;
+        font-weight: 700;
+        font-size: 1.3rem;
+    }
+
+    .deposit-note {
+        color: #666;
+        font-style: italic;
+        font-size: 0.85rem;
+        text-align: center;
+        margin-top: 0.5rem;
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+        padding: 0.8rem 2rem;
+        margin-right: 0.5rem;
+    }
+
+    .btn-secondary:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+    }
+
+    .checkout-btn {
+        width: 100%; /* Full width by default */
+        background: linear-gradient(135deg, #002855, #004080);
+        color: white;
+        padding: 1.2rem 3rem;
+        font-size: 1.1rem;
+        box-shadow: 0 4px 15px rgba(0,40,80,0.2);
+    }
+
+    .checkout-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,40,80,0.3);
+    }
+
+    .mb-2 { margin-bottom: 2rem; }
+    .mt-3 { margin-top: 3rem; }
+    .mt-5 { margin-top: 5rem; }
+
+    /* Empty State */
+    .empty-cart-message {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: 12px;
+    }
+
+    .empty-cart-message p {
+        font-size: 1.2rem;
+        color: #666;
+        margin-bottom: 2rem;
+    }
+
+    /* ===== MOBILE RESPONSIVE DESIGN ===== */
+    @media (max-width: 768px) {
+        .cart-container {
+            padding: 0 1rem; /* Less side padding */
+            margin: 1rem auto;
+        }
+
+        .page-header h1 {
+            font-size: 1.6rem;
+        }
+
+        /* Stack Cart Items Vertically */
+        .cart-item {
+            flex-direction: column; /* Force stack */
+            align-items: stretch; /* Full width items */
+            padding: 1rem;
+            gap: 1rem;
+        }
+
+        /* Image Container adjusts to full width */
+        .cart-item-image-container {
+            width: 100%; /* Full width image */
+            height: 200px; /* Taller image for mobile */
+            margin: 0 auto; /* Center it */
+            flex-shrink: 0;
+        }
+
+        /* Details take full width below image */
+        .cart-item-details {
+            width: 100%;
+            min-width: auto; /* Remove min-width constraint */
+            text-align: left;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 1rem;
+        }
+
+        .cart-item-name {
+            text-align: left;
+            margin-bottom: 0.5rem;
+        }
+
+        .cart-item-price {
+            text-align: left;
+            margin-top: 0;
+        }
+
+        /* Remove Button becomes full width */
+        .cart-item-actions {
+            width: 100%;
+            margin-top: 1rem;
+            margin-left: 0; /* Reset left margin */
+        }
+
+        .btn-danger {
+            width: 100%; /* Full width button */
+            padding: 14px; /* Taller button for touch */
+            font-size: 1rem;
+            justify-content: center;
+        }
+
+        /* Summary Section Stacks */
+        .cart-summary {
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .cart-summary h2 {
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        /* Stack Summary Rows Vertically */
+        .summary-row {
+            flex-direction: column; /* Stack rows */
+            align-items: space-between;
+            border-bottom: 1px solid #f0f0f0;
+            padding: 0.75rem 0;
+            text-align: left;
+        }
+
+        .summary-row.total {
+            padding: 1rem 0;
+            margin-top: 0;
+            background-color: #fff;
+        }
+
+        .summary-row span:first-child {
+            margin-bottom: 0.25rem; /* Space between label and value */
+        }
+
+        .summary-row.total span:last-child {
+            font-size: 1.5rem; /* Larger total on mobile */
+            margin-bottom: 0.25rem;
+        }
+
+        .deposit-note {
+            text-align: left;
+            font-size: 0.8rem;
+        }
+
+        /* Stack Buttons vertically */
+        .btn, .btn-secondary {
+            width: 100%; /* Full width for all buttons */
+            padding: 14px 20px;
+            font-size: 1rem;
+        }
+
+        .btn-secondary {
+            margin-bottom: 1rem; /* Space between buttons */
+        }
+
+        .checkout-btn {
+            padding: 16px 20px;
+            font-size: 1.1rem;
+            width: 100%;
+        }
+
+        .empty-cart-message {
+            padding: 2rem 1rem;
+        }
+
+        .empty-cart-message p {
+            font-size: 1rem;
+        }
+    }
 </style>
 
+<div class="cart-container">
+    <button class="btn-secondary" onclick="history.back()">← Back</button>
+
+    <div class="page-header">
+        <h1>Shopping Cart</h1>
+    </div>
+
+    {% if cart_items %}
+        <!-- Display cart items -->
+        {% for item in cart_items %}
+        <div class="cart-item">
+            <div class="cart-item-image-container">
+                {% if item.image_url %}
+                    {% set first_image = item.image_url.split(',')[0].strip() %}
+                    <img src="{{ url_for('static', filename=first_image) }}"
+                         class="cart-item-image"
+                         alt="{{ item.product_name }}">
+                {% else %}
+                    <div class="cart-item-placeholder">📦</div>
+                {% endif %}
+            </div>
+
+            <div class="cart-item-details">
+                <h3 class="cart-item-name">{{ item.product_name }}</h3>
+                <p class="cart-item-specs"><strong>Quantity:</strong> {{ item.quantity }}</p>
+
+                {% if item.customization and item.customization.purchaseType %}
+                    <p class="cart-item-specs">
+                        <strong>Type:</strong> {{ item.customization.purchaseType|title }}
+                    </p>
+                {% endif %}
+
+                <p class="cart-item-price">
+                    ₹{{ "%.2f"|format(item.unit_price) }}
+                    × {{ item.quantity }}
+                    = ₹{{ "%.2f"|format(item.item_total) }}
+                </p>
+
+                {% if item.item_deposit > 0 %}
+                    <p class="cart-item-price" style="color: #666; font-size: 0.9rem;">
+                        + Deposit: ₹{{ "%.2f"|format(item.item_deposit) }}
+                    </p>
+                {% endif %}
+            </div>
+
+            <div class="cart-item-actions">
+                <button class="btn-danger"
+                        onclick="removeItem({{ loop.index0 }})">
+                    Remove
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Cart Summary (using backend-calculated values) -->
+        <div class="cart-summary">
+            <h2>Order Summary</h2>
+
+            <div class="summary-row">
+                <span>Subtotal (Products):</span>
+                <span>₹{{ "%.2f"|format(total_before_gst) }}</span>
+            </div>
+
+            {% if total_deposit > 0 %}
+            <div class="summary-row">
+                <span>Deposit (Refundable):</span>
+                <span>₹{{ "%.2f"|format(total_deposit) }}</span>
+            </div>
+            <p class="deposit-note">* Deposit will be refunded upon product return</p>
+            {% endif %}
+
+            <div class="summary-row">
+                <span>GST (18%):</span>
+                <span>₹{{ "%.2f"|format(gst) }}</span>
+            </div>
+
+            <div class="summary-row total">
+                <span>Grand Total:</span>
+                <span>₹{{ "%.2f"|format(total_with_gst) }}</span>
+            </div>
+
+            <button class="checkout-btn"
+                    onclick="window.location.href='{{ url_for('qr_scanner') }}'">
+                Proceed to Checkout
+            </button>
+        </div>
+    {% else %}
+        <div class="empty-cart-message">
+            <p>Your cart is empty</p>
+            <button class="btn-secondary mt-3"
+        onclick="window.location.href='{{ url_for('national_scaffoldings') }}'">
+        Continue Shopping
+        </button>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function removeItem(index) {
+    if (confirm('Remove this item from cart?')) {
+        window.location.href = '/remove_from_cart/' + index;
+    }
+}
+</script>
 {% endblock %}

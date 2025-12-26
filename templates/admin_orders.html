@@ -3,482 +3,187 @@
 {% block title %}Admin - Orders{% endblock %}
 
 {% block content %}
-<style>
-/* =========================
-   Admin Orders Styles
-   AGGRESSIVE FULL WIDTH OVERRIDE
-   ========================= */
-
-/* Force full page width with highest specificity */
-html body .glass-container,
-html body main .glass-container,
-html body section .glass-container,
-html body .container .glass-container,
-html body .container-fluid .glass-container,
-html body .content-wrapper .glass-container {
-    max-width: 100vw !important;
-    width: 100vw !important;
-    margin: 0 !important;
-    padding: 1.5rem !important;
-    box-sizing: border-box !important;
-    position: relative !important;
-    left: 0 !important;
-    transform: none !important;
-}
-
-/* Override all parent containers */
-html body,
-html body main,
-html body section,
-html body .container,
-html body .container-fluid,
-html body .content-wrapper {
-    max-width: none !important;
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-}
-
-/* Completely hide background slider and related elements */
-.hero-section,
-.slider,
-.background-slider,
-.carousel,
-.owl-carousel,
-.swiper-container,
-.slick-slider,
-.flexslider {
-    display: none !important;
-    visibility: hidden !important;
-    height: 0 !important;
-    width: 0 !important;
-    overflow: hidden !important;
-    position: absolute !important;
-    top: -9999px !important;
-    left: -9999px !important;
-}
-
-/* Page title */
-.page-title { 
-    font-size: 1.6rem; 
-    margin: 0 0 1.5rem 0; 
-    color: #ffd966; 
-    font-weight: 800; 
-    text-align: left; 
-}
-
-/* Orders container */
-.orders-container {
-    max-width: 100%;
-    margin: 0;
-    padding: 0;
-}
-
-.order-card {
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    margin-bottom: 1.5rem;
-    overflow: hidden;
-    transition: transform 0.3s ease;
-}
-
-.order-card:hover {
-    transform: translateY(-5px);
-}
-
-.order-header {
-    background: linear-gradient(135deg, #264a71, #002855);
-    color: white;
-    padding: 1rem 1.5rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.order-id {
-    font-size: 1.2rem;
-    font-weight: bold;
-}
-
-.order-date {
-    font-size: 0.9rem;
-    opacity: 0.8;
-}
-
-.order-status {
-    padding: 0.3rem 0.8rem;
-    border-radius: 20px;
-    font-weight: bold;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-}
-
-.status-pending {
-    background-color: #ffc107;
-    color: #333;
-}
-
-.status-pending_verification {
-    background-color: #ffc107;
-    color: #333;
-}
-
-.status-approved {
-    background-color: #28a745;
-    color: white;
-}
-
-.status-rejected {
-    background-color: #dc3545;
-    color: white;
-}
-
-.status-completed {
-    background-color: #007bff;
-    color: white;
-}
-
-.order-body {
-    padding: 1.5rem;
-}
-
-.customer-info {
-    margin-bottom: 1rem;
-    padding: 1rem;
-    background-color: #f8f9fa;
-    border-radius: 8px;
-}
-
-.info-row {
-    display: flex;
-    margin-bottom: 0.5rem;
-}
-
-.info-label {
-    font-weight: bold;
-    width: 120px;
-    color: #555;
-}
-
-.info-value {
-    flex: 1;
-    color: #333;
-}
-
-.order-items {
-    margin-bottom: 1rem;
-}
-
-.item-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 1rem;
-}
-
-.item-table th {
-    background-color: #29a47b;
-    color: white;
-    text-align: left;
-    padding: 0.75rem;
-}
-
-.item-table td {
-    padding: 0.75rem;
-    border-bottom: 1px solid #dee2e6;
-}
-
-.order-footer {
-    padding: 1rem 1.5rem;
-    background-color: #f8f9fa;
-    border-top: 1px solid #dee2e6;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.payment-info {
-    text-align: right;
-}
-
-.payment-time {
-    font-size: 0.9rem;
-    color: #000;
-    margin-top: 0.5rem;
-}
-
-.transaction-id {
-    font-family: monospace;
-    background-color: #e9ecef;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.9rem;
-}
-
-/* Buttons */
-.btn {
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.2s;
-    margin-right: 0.5rem;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, #002855, #004080);
-    color: white;
-}
-
-.btn-primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 18px rgba(2,24,63,0.25);
-}
-
-.btn-success {
-    background: #28a745 !important;
-    color: white !important;
-    border: none !important;
-}
-
-.btn-success:hover {
-    background: #218838 !important;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(40,167,69,0.3);
-}
-
-.btn-danger {
-    background: #dc3545 !important;
-    color: white !important;
-    border: none !important;
-}
-
-.btn-danger:hover {
-    background: #c82333 !important;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(220,53,69,0.3);
-}
-
-.btn-secondary {
-    background: #6c757d !important;
-    color: white !important;
-    border: none !important;
-}
-
-.btn-secondary:hover {
-    background: #5a6268 !important;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(108,117,125,0.3);
-}
-
-.btn-warning {
-    background: #ffc107 !important;
-    color: #212529 !important;
-    border: none !important;
-}
-
-.btn-warning:hover {
-    background: #e0a800 !important;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(255,193,7,0.3);
-}
-
-.filter-section {
-    margin-bottom: 2rem;
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.filter-select {
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: white;
-}
-
-.search-box {
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    width: 250px;
-}
-
-@media (max-width: 768px) {
-    .orders-container {
-        padding: 1rem;
-    }
-    
-    .order-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-    }
-    
-    .info-row {
-        flex-direction: column;
-    }
-    
-    .info-label {
-        width: 100%;
-        margin-bottom: 0.25rem;
-    }
-    
-    .filter-section {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .search-box {
-        width: 100%;
-    }
-}
-</style>
-
-<!-- Inline styles as fallback for full width -->
-<div class="glass-container" style="max-width: 100vw !important; width: 100vw !important; margin: 0 !important; padding: 1.5rem !important; box-sizing: border-box !important; position: relative !important; left: 0 !important; transform: none !important;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+<!-- Clean Wrapper (Removed aggressive inline styles) -->
+<div class="orders-wrapper">
+    <!-- Header Section -->
+    <div class="top-nav">
+        <button class="btn btn-secondary" onclick="window.location.href='{{ url_for('admin_scaffoldings') }}'">
+            ← Back to Admin Panel
+        </button>
         <h1 class="page-title">📋 All Transactions & Orders</h1>
-        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-            <button class="btn-primary" onclick="window.location.href='{{ url_for('admin_scaffoldings') }}'" style="background: linear-gradient(135deg, #28a745, #20c997);">📦 Scaffolding Products</button>
-            <button class="btn-primary" onclick="window.location.href='{{ url_for('admin_analytics') }}'" style="background: linear-gradient(135deg, #7d96af, #4f7db1);">📊 Business Analytics</button>
-            <button class="btn-danger" onclick="window.location.href='{{ url_for('admin_logout') }}'">🚪 Logout</button>
+        <div class="header-actions">
+            <button class="btn btn-primary" onclick="window.location.href='{{ url_for('admin_scaffoldings') }}'">
+                <span class="btn-icon">📦</span> <span class="btn-text">Scaffolding Products</span>
+            </button>
+            <button class="btn btn-primary" onclick="window.location.href='{{ url_for('admin_analytics') }}'">
+                <span class="btn-icon">📊</span> <span class="btn-text">Business Analytics</span>
+            </button>
+            <button class="btn btn-danger" onclick="window.location.href='{{ url_for('admin_logout') }}'">
+                <span class="btn-icon">🚪</span> <span class="btn-text">Logout</span>
+            </button>
         </div>
     </div>
     
-    <!-- Transaction Summary Section -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-        <div style="background: linear-gradient(135deg, #1976d2, #1565c0); color: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-            <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 0.5rem;">Total Transactions</div>
-            <div style="font-size: 2rem; font-weight: bold;">{{ orders|length }}</div>
+    <!-- Transaction Summary Stats -->
+    <div class="summary-grid">
+        <div class="stat-card stat-total">
+            <div class="stat-label">Total Transactions</div>
+            <div class="stat-value">{{ orders|length }}</div>
         </div>
-        <div style="background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-            <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 0.5rem;">Completed Orders</div>
-            <div style="font-size: 2rem; font-weight: bold;">{{ orders|selectattr('status', 'equalto', 'completed')|list|length }}</div>
+        <div class="stat-card stat-completed">
+            <div class="stat-label">Completed Orders</div>
+            <div class="stat-value">{{ orders|selectattr('status', 'equalto', 'completed')|list|length }}</div>
         </div>
-        <div style="background: linear-gradient(135deg, #ffc107, #e0a800); color: #333; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-            <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 0.5rem;">Pending/Verification</div>
-            <div style="font-size: 2rem; font-weight: bold;">{{ orders|selectattr('status', 'equalto', 'pending_verification')|list|length }}</div>
+        <div class="stat-card stat-pending">
+            <div class="stat-label">Pending/Verification</div>
+            <div class="stat-value">{{ orders|selectattr('status', 'equalto', 'pending_verification')|list|length }}</div>
         </div>
-        <div style="background: linear-gradient(135deg, #dc3545, #c82333); color: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-            <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 0.5rem;">Rejected Orders</div>
-            <div style="font-size: 2rem; font-weight: bold;">{{ orders|selectattr('status', 'equalto', 'rejected')|list|length }}</div>
+        <div class="stat-card stat-rejected">
+            <div class="stat-label">Rejected Orders</div>
+            <div class="stat-value">{{ orders|selectattr('status', 'equalto', 'rejected')|list|length }}</div>
         </div>
     </div>
     
-    <div class="filter-section">
-        <select id="statusFilter" class="filter-select" onchange="filterOrders()">
-            <option value="all">All Orders</option>
-            <option value="pending_verification">Pending Verification</option>
-            <!-- <option value="approved">Approved</option> -->
-            <option value="rejected">Rejected</option>
-            <option value="completed">Completed</option>
-        </select>
-        
-        <input type="text" id="searchBox" class="search-box" placeholder="Search by Order ID, Customer Name, or Transaction ID" onkeyup="filterOrders()">
+    <!-- Filter & Search Section -->
+    <div class="filter-bar">
+        <div class="filter-group">
+            <label for="statusFilter">Filter Status:</label>
+            <select id="statusFilter" class="filter-select" onchange="filterOrders()">
+                <option value="all">All Orders</option>
+                <option value="pending_verification">Pending Verification</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+                <option value="completed">Completed</option>
+            </select>
+        </div>
+        <div class="search-group">
+            <input type="text" id="searchBox" class="search-input" placeholder="Search by Order ID, Customer Name..." onkeyup="filterOrders()">
+        </div>
     </div>
     
+    <!-- Orders List -->
     <div class="orders-container">
         {% for order in orders %}
         <div class="order-card" data-status="{{ order.status }}" data-transaction-id="{{ order.transaction_id }}">
+            <!-- Order Header -->
             <div class="order-header">
-                <div>
+                <div class="header-left">
                     <div class="order-id">#{{ order.id }}</div>
-                    <div class="order-date">{{ order.order_date.strftime('%Y-%m-%d %H:%M') }}</div>
+                    <div class="order-date">{{ order.order_date.strftime('%d %b %Y') }}</div>
                 </div>
-                <div class="order-status status-{{ order.status }}">{{ order.status.replace('_', ' ').title() }}</div>
+                <div class="order-status status-{{ order.status }}">
+                    {{ order.status.replace('_', ' ').title() }}
+                </div>
             </div>
             
             <div class="order-body">
-                <div class="customer-info">
-                    <div class="info-row">
-                        <div class="info-label">Customer:</div>
-                        <div class="info-value">{{ order.user.full_name or order.user.username }}</div>
+                <!-- Customer Information -->
+                <div class="customer-section">
+                    <h4>Customer Details</h4>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="label">Name:</span>
+                            <span class="value">{{ order.user.full_name or order.user.username }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Email:</span>
+                            <span class="value">{{ order.user.email }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Phone:</span>
+                            <span class="value">{{ order.user.phone or 'N/A' }}</span>
+                        </div>
+                        {% if order.user.address %}
+                        <div class="info-item">
+                            <span class="label">Address:</span>
+                            <span class="value">{{ order.user.address }}</span>
+                        </div>
+                        {% endif %}
                     </div>
-                    <div class="info-row">
-                        <div class="info-label">Email:</div>
-                        <div class="info-value">{{ order.user.email }}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Phone:</div>
-                        <div class="info-value">{{ order.user.phone or 'N/A' }}</div>
-                    </div>
-                    {% if order.user.address %}
-                    <div class="info-row">
-                        <div class="info-label">Address:</div>
-                        <div class="info-value">{{ order.user.address }}</div>
-                    </div>
-                    {% endif %}
                 </div>
                 
-                <div class="order-items">
-                    <h3>Order Items</h3>
-                    <table class="item-table">
-                        <thead>
-                            <tr>
-                                <th>Product</th>
-                                <th>Quantity</th>
-                                <th>Unit Price</th>
-                                <th>Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for item in order.items %}
-                            <tr>
-                                <td>{{ item.product_name }}</td>
-                                <td>{{ item.quantity }}</td>
-                                <td>₹{{ "%.2f"|format(item.price) }}</td>
-                                <td>₹{{ "%.2f"|format(item.price * item.quantity) }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                <!-- Order Items Table -->
+                <div class="items-section">
+                    <h4>Order Items</h4>
+                    <!-- WRAPPED IN RESPONSIVE DIV -->
+                    <div class="table-responsive-wrapper">
+                        <table class="item-table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Quantity</th>
+                                    <th>Unit Price</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order.items %}
+                                <tr>
+                                    <td>{{ item.product_name }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>₹{{ "%.2f"|format(item.price) }}</td>
+                                    <td>₹{{ "%.2f"|format(item.price * item.quantity) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
             
+            <!-- Order Footer (Totals & Actions) -->
             <div class="order-footer">
-                <div>
-                    <div class="info-row">
-                        <div class="info-label">Total Amount:</div>
-                        <div class="info-value">₹{{ "%.2f"|format(order.total_price) }}</div>
+                <div class="totals-section">
+                    <div class="total-row">
+                        <span class="label">Total Amount:</span>
+                        <span class="amount">₹{{ "%.2f"|format(order.total_price) }}</span>
                     </div>
                     {% if order.amount_paid %}
-                    <div class="info-row">
-                        <div class="info-label">Amount Paid:</div>
-                        <div class="info-value">₹{{ "%.2f"|format(order.amount_paid) }}</div>
+                    <div class="total-row">
+                        <span class="label">Amount Paid:</span>
+                        <span class="amount paid">₹{{ "%.2f"|format(order.amount_paid) }}</span>
                     </div>
                     {% endif %}
                 </div>
                 
-                <div class="payment-info">
-                    <div class="info-row">
-                        <div class="info-label">Transaction ID:</div>
-                        <div class="info-value transaction-id">{{ order.transaction_id }}</div>
-                    </div>
+                <div class="meta-section">
                     {% if order.payment_time %}
-                    <div class="payment-time">
-                        Payment Time: {{ order.payment_time.strftime('%Y-%m-%d %H:%M:%S') }}
+                    <div class="meta-info">
+                        <span class="meta-label">Payment Time:</span>
+                        <span class="meta-value">{{ order.payment_time.strftime('%I:%M %p') }}</span>
                     </div>
                     {% endif %}
+                    <div class="meta-info">
+                        <span class="meta-label">Transaction ID:</span>
+                        <span class="transaction-id">{{ order.transaction_id }}</span>
+                    </div>
                 </div>
                 
-                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <div class="actions-section">
                     {% if order.status == 'pending_verification' %}
-                    <button class="btn-success" onclick="verifyPayment({{ order.id }}, '{{ order.transaction_id }}')">Verify Payment</button>
-                    <button class="btn-danger" onclick="rejectPayment({{ order.id }}, '{{ order.transaction_id }}')">Reject Payment</button>
+                    <button class="btn btn-success" onclick="verifyPayment({{ order.id }}, '{{ order.transaction_id }}')">
+                        Verify Payment
+                    </button>
+                    <button class="btn btn-danger" onclick="rejectPayment({{ order.id }}, '{{ order.transaction_id }}')">
+                        Reject
+                    </button>
                     {% endif %}
                     
                     {% if order.status == 'approved' and not order.amount_paid %}
-                    <button class="btn-primary" onclick="confirmPayment({{ order.id }}, '{{ order.transaction_id }}')">Confirm Payment</button>
+                    <button class="btn btn-primary" onclick="confirmPayment({{ order.id }}, '{{ order.transaction_id }}')">
+                        Confirm Payment
+                    </button>
                     {% endif %}
                     
                     {% if order.status == 'approved' and order.amount_paid %}
-                    <button class="btn-warning" onclick="completeOrder({{ order.id }}, '{{ order.transaction_id }}')">Complete Order</button>
+                    <button class="btn btn-warning" onclick="completeOrder({{ order.id }}, '{{ order.transaction_id }}')">
+                        Complete Order
+                    </button>
                     {% endif %}
                     
-                    <button class="btn-secondary" onclick="viewOrderDetails({{ order.id }})">View Details</button>
+                    <button class="btn btn-secondary" onclick="viewOrderDetails({{ order.id }})">
+                        View Details
+                    </button>
                 </div>
             </div>
         </div>
@@ -487,17 +192,17 @@ html body .content-wrapper {
 </div>
 
 <script>
-// AGGRESSIVE FULL WIDTH ENFORCEMENT
+// AGGRESSIVE FULL WIDTH ENFORCEMENT (Kept from your code)
 function enforceFullWidth() {
     const elementsToOverride = [
         document.querySelector('.glass-container'),
         document.querySelector('.container'),
         document.querySelector('.container-fluid'),
-        document.querySelector('main'),
+        document.querySelector('.main'),
         document.querySelector('section'),
         document.querySelector('.content-wrapper'),
-        document.querySelector('body'),
-        document.querySelector('html')
+        document.querySelector('.body'),
+        document.querySelector('.html')
     ];
     
     elementsToOverride.forEach(element => {
@@ -513,18 +218,6 @@ function enforceFullWidth() {
             element.style.setProperty('transform', 'none', 'important');
         }
     });
-    
-    const glassContainer = document.querySelector('.glass-container');
-    if (glassContainer) {
-        glassContainer.style.setProperty('max-width', '100vw', 'important');
-        glassContainer.style.setProperty('width', '100vw', 'important');
-        glassContainer.style.setProperty('margin', '0', 'important');
-        glassContainer.style.setProperty('padding', '1.5rem', 'important');
-        glassContainer.style.setProperty('box-sizing', 'border-box', 'important');
-        glassContainer.style.setProperty('position', 'relative', 'important');
-        glassContainer.style.setProperty('left', '0', 'important');
-        glassContainer.style.setProperty('transform', 'none', 'important');
-    }
 }
 
 // AGGRESSIVE BACKGROUND SLIDER REMOVAL
@@ -566,7 +259,7 @@ function filterOrders() {
     orderCards.forEach(card => {
         const status = card.getAttribute('data-status');
         const transactionId = card.getAttribute('data-transaction-id').toLowerCase();
-        const customerName = card.querySelector('.customer-info .info-value').textContent.toLowerCase();
+        const customerName = card.querySelector('.value').textContent.toLowerCase();
         
         const statusMatch = statusFilter === 'all' || status === statusFilter;
         const searchMatch = searchBox === '' || 
@@ -574,7 +267,7 @@ function filterOrders() {
                           customerName.includes(searchBox);
         
         if (statusMatch && searchMatch) {
-            card.style.display = 'block';
+            card.style.display = 'flex';
         } else {
             card.style.display = 'none';
         }
@@ -584,7 +277,7 @@ function filterOrders() {
 function verifyPayment(orderId, transactionId) {
     const amountPaid = prompt(`Enter the amount paid for Order #${orderId}:`, '');
     if (amountPaid === null) {
-        return; // User cancelled
+        return; 
     }
     
     if (!amountPaid || isNaN(parseFloat(amountPaid))) {
@@ -705,7 +398,7 @@ function completeOrder(orderId, transactionId) {
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('❌ An error occurred while completing the order');
+            alert('❌ An error occurred while completing order');
         });
     }
 }
@@ -733,4 +426,479 @@ setTimeout(function() {
     removeBackgroundSlider();
 }, 500);
 </script>
+
+<style>
+    /* ===== GLOBAL RESETS & LAYOUT ===== */
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        overflow-x: hidden; /* Prevents horizontal scrolling */
+        background-color: #f4f6f8;
+        color: #333;
+        font-family: sans-serif;
+    }
+
+    /* Main Container */
+    .orders-wrapper {
+        width: 100%;
+        max-width: 1400px; /* Reasonable max width for desktop */
+        margin: 0 auto;
+        padding: 1.5rem;
+    }
+
+    /* Header & Navigation */
+    .top-nav {
+        display: flex;
+        flex-wrap: wrap; /* Wraps on mobile */
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+        color: #ffd966; /* Gold */
+        font-weight: 700;
+        margin: 0;
+        flex: 1;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        flex-wrap: wrap; /* Stack buttons on mobile if needed */
+    }
+
+    /* Summary Statistics Grid */
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, #1e3a8a, #002855);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        text-align: center;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+    }
+
+    /* Filter Bar */
+    .filter-bar {
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        margin-bottom: 2rem;
+        align-items: center;
+    }
+
+    .filter-group, .search-group {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .filter-select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background-color: #fff;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+
+    /* Order Cards */
+    .orders-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .order-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        overflow: hidden; /* Important for rounded corners */
+        display: flex;
+        flex-direction: column;
+        border-left: 5px solid transparent;
+    }
+
+    /* Color code left border based on status */
+    .order-card[data-status="pending_verification"] { border-left-color: #ffc107; }
+    .order-card[data-status="approved"] { border-left-color: #28a745; }
+    .order-card[data-status="rejected"] { border-left-color: #dc3545; }
+    .order-card[data-status="completed"] { border-left-color: #007bff; }
+
+    .order-header {
+        background-color: #f8f9fa;
+        padding: 1rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #eee;
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .order-id {
+        font-size: 0.9rem;
+        color: #666;
+        background: #eee;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-weight: 600;
+    }
+
+    .order-date {
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    .order-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        font-weight: 700;
+        white-space: nowrap;
+        color: white;
+    }
+
+    .status-pending { background-color: #ffc107; }
+    .status-approved { background-color: #28a745; }
+    .status-rejected { background-color: #dc3545; }
+    .status-completed { background-color: #007bff; }
+
+    .order-body {
+        padding: 1.5rem;
+    }
+
+    /* Customer Section */
+    .customer-section h4, .items-section h4 {
+        font-size: 1.1rem;
+        color: #333;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 0.5rem;
+    }
+
+    .customer-section {
+        margin-bottom: 1.5rem;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .info-item .label {
+        font-size: 0.85rem;
+        color: #888;
+        margin-bottom: 0.25rem;
+    }
+
+    .info-item .value {
+        font-weight: 500;
+        color: #333;
+    }
+
+    /* Table Responsive Wrapper - THE MOBILE FIX */
+    .table-responsive-wrapper {
+        width: 100%;
+        overflow-x: auto; /* Allows table to scroll on mobile */
+        -webkit-overflow-scrolling: touch;
+        border-radius: 8px;
+        border: 1px solid #eee;
+    }
+
+    .item-table {
+        width: 100%;
+        min-width: 600px; /* Ensures columns don't squish too much */
+        border-collapse: collapse;
+    }
+
+    .item-table th {
+        background-color: #29a47b;
+        color: white;
+        padding: 0.75rem;
+        text-align: left;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .item-table td {
+        padding: 0.75rem;
+        border-bottom: 1px solid #eee;
+        color: #333;
+    }
+
+    /* Order Footer */
+    .order-footer {
+        background-color: #fcfcfc;
+        padding: 1.5rem;
+        border-top: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 2rem;
+    }
+
+    .totals-section {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .total-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+
+    .total-row .label {
+        font-weight: 600;
+        color: #555;
+    }
+
+    .total-row .amount {
+        font-weight: 700;
+        color: #333;
+    }
+
+    .meta-section {
+        flex: 1;
+        text-align: right;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .meta-info {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+    }
+
+    .meta-label {
+        font-size: 0.85rem;
+        color: #888;
+    }
+
+    .meta-value {
+        font-weight: 500;
+        font-family: monospace;
+        background: #e9ecef;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+    }
+
+    .actions-section {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        align-items: center;
+    }
+
+    /* Buttons */
+    .btn {
+        border: none;
+        border-radius: 6px;
+        padding: 0.6rem 1.2rem;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: transform 0.2s, box-shadow 0.2s;
+        text-decoration: none;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #002855, #004080);
+        color: white;
+    }
+
+    .btn-success {
+        background: #28a745;
+        color: white;
+    }
+
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+    }
+
+    .btn-warning {
+        background: #ffc107;
+        color: #212529;
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+
+    /* Mobile Adjustments for Buttons */
+    .btn-icon {
+        display: none; /* Hide icon on mobile to save space */
+    }
+
+    .btn-text {
+        display: block; /* Ensure text is visible */
+    }
+
+    /* ===== MOBILE RESPONSIVE FIXES ===== */
+    @media (max-width: 768px) {
+        .orders-wrapper {
+            padding: 1rem;
+        }
+
+        /* Stack Header */
+        .top-nav {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 1rem;
+        }
+
+        .header-actions {
+            width: 100%;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .page-title {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        /* Stack Stats Grid */
+        .summary-grid {
+            grid-template-columns: 1fr; /* Single column */
+            gap: 1rem;
+        }
+
+        /* Adjust Order Card */
+        .order-card {
+            border-radius: 0; /* Remove radius on mobile for cleaner look */
+        }
+
+        .order-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+            text-align: center;
+        }
+
+        .order-status {
+            width: fit-content;
+            margin: 0 auto;
+        }
+
+        /* Stack Info Grid */
+        .info-grid {
+            grid-template-columns: 1fr; /* Stack vertically */
+            gap: 0.5rem;
+        }
+
+        .info-item .label {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Stack Footer */
+        .order-footer {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 1.5rem;
+        }
+
+        .totals-section {
+            width: 100%;
+            margin-bottom: 0;
+        }
+
+        .meta-section {
+            width: 100%;
+            text-align: left;
+            align-items: flex-start;
+        }
+
+        .meta-info {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+            width: 100%;
+        }
+
+        /* Stack Actions */
+        .actions-section {
+            flex-direction: column; /* Stack buttons vertically */
+            width: 100%;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            width: 100%; /* Full width buttons for touch */
+            padding: 0.8rem 1rem; /* Taller buttons */
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        /* Adjust table header */
+        .item-table th {
+            font-size: 0.8rem;
+            padding: 0.6rem;
+            white-space: normal; /* Allow wrapping for smaller screens */
+        }
+
+        .item-table td {
+            padding: 0.6rem;
+            font-size: 0.9rem;
+        }
+    }
+</style>
 {% endblock %}

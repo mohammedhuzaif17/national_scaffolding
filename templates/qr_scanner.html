@@ -3,10 +3,220 @@
 {% block title %}Checkout{% endblock %}
 
 {% block content %}
+<style>
+/* =========================================
+   RESPONSIVE CHECKOUT STYLES
+   ========================================= */
+* {
+    box-sizing: border-box; /* Ensures padding doesn't increase width */
+}
+
+.glass-container {
+    max-width: 600px; /* Limits width on desktop */
+    margin: 2rem auto;
+    padding: 2rem;
+    border-radius: 12px;
+    /* Assuming a glass effect background, adding a fallback */
+    background: rgba(255, 255, 255, 0.95); 
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+/* Back Button */
+.btn-secondary {
+    padding: 10px 20px;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s;
+    margin-bottom: 1.5rem;
+    display: inline-block;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+
+.page-title {
+    font-size: 1.8rem;
+    color: #001d3d;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.qr-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Summary Box */
+.qr-container h2 {
+    font-size: 1.4rem;
+    color: #ffa500;
+    margin-bottom: 1rem;
+}
+
+.summary-box {
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    padding: 1.5rem;
+    border-radius: 8px;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.row-between {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    color: #333;
+}
+
+.row-between.total {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #001d3d;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 2px solid #ddd;
+}
+
+/* Timer & QR Section */
+.payment-timer-text {
+    margin-top: 1rem;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+#payment-timer {
+    color: #d4af37;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.qr-wrapper {
+    margin: 2rem 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+/* RESPONSIVE QR IMAGE */
+.qr-wrapper img {
+    max-width: 100%;   /* Critical: Shrinks on mobile */
+    height: auto;      /* Maintains aspect ratio */
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.qr-wrapper h2 {
+    font-size: 2rem;
+    color: #4CAF50;
+    margin: 0;
+}
+
+/* Form Inputs */
+.form-group {
+    width: 100%;
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #555;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 14px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px; /* Critical: Prevents iOS zoom */
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+    border-color: #d4af37;
+    outline: none;
+}
+
+/* Action Buttons */
+.actions {
+    display: flex;
+    gap: 1rem;
+    width: 100%;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #002855, #004080);
+    color: white;
+    padding: 14px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,40,85,0.3);
+}
+
+.btn-primary:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* =========================================
+   MOBILE OPTIMIZATION
+   ========================================= */
+@media (max-width: 600px) {
+    .glass-container {
+        margin: 1rem auto;
+        padding: 1.5rem;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+    }
+
+    /* Stack the Action Buttons vertically */
+    .actions {
+        flex-direction: column;
+    }
+
+    .actions button {
+        width: 100%; /* Full width buttons for tapping */
+        padding: 16px; /* Larger touch targets */
+    }
+}
+
+@media (max-width: 400px) {
+    .qr-wrapper h2 {
+        font-size: 1.5rem;
+    }
+    
+    .row-between.total {
+        font-size: 1.1rem;
+    }
+}
+</style>
+
 <div class="glass-container">
     <button class="btn-secondary"
-            onclick="window.location.href='{{ url_for('cart') }}'"
-            style="margin-bottom: 1rem;">
+            onclick="window.location.href='{{ url_for('cart') }}'">
         ← Back to Cart
     </button>
 
@@ -15,9 +225,9 @@
     <div class="qr-container">
 
         <!-- PAYMENT SUMMARY -->
-        <h2 style="color:#ffa500;margin-bottom:1rem;">Payment Summary</h2>
+        <h2>Payment Summary</h2>
 
-        <div style="background:rgba(255,255,255,0.05);padding:1.5rem;border-radius:10px;">
+        <div class="summary-box">
             <div class="row-between">
                 <span>Subtotal:</span>
                 <span>₹{{ "%.2f"|format(total) }}</span>
@@ -35,37 +245,38 @@
             </div>
             {% endif %}
 
-            <hr>
+            <hr style="border: 0; border-top: 1px solid #ddd; margin: 0.5rem 0;">
             <div class="row-between total">
                 <span>Total Amount:</span>
                 <span>₹{{ "%.2f"|format(total_with_gst) }}</span>
             </div>
         </div>
 
-        <p style="margin-top:1rem;">
+        <p class="payment-timer-text">
             Payment Time Limit:
             <strong id="payment-timer">15:00</strong>
         </p>
 
-        <p>Scan the QR code below and pay the exact amount.</p>
+        <p style="color:#666; margin-bottom:0.5rem;">Scan the QR code below and pay the exact amount.</p>
 
         <!-- QR -->
-        <div style="text-align:center;margin:2rem 0;">
+        <div class="qr-wrapper">
+            <!-- Added responsive styling via class -->
             <img src="{{ url_for('static', filename='phonepe_qr.png') }}"
-                 width="300" height="300">
+                 alt="Payment QR Code">
         </div>
 
-        <h2 style="color:#4CAF50;">Pay ₹{{ "%.2f"|format(total_with_gst) }}</h2>
+        <h2>Pay ₹{{ "%.2f"|format(total_with_gst) }}</h2>
 
         <!-- TRANSACTION INPUT -->
-        <h3 style="color:#ffa500;margin-top:2rem;">Confirm Payment</h3>
-        <p>Enter your UPI Transaction ID after payment:</p>
+        <h3 style="color:#ffa500; margin-top:2rem; font-size:1.2rem;">Confirm Payment</h3>
+        <p style="color:#666; font-size:0.95rem;">Enter your UPI Transaction ID after payment:</p>
 
         <div class="form-group">
-            <label>UPI Transaction ID</label>
+            <label for="transaction_id">UPI Transaction ID</label>
             <input type="text"
                    id="transaction_id"
-                   placeholder="Enter transaction ID"
+                   placeholder="Enter 12-digit transaction ID"
                    oninput="validateUPIID()">
         </div>
 
@@ -166,5 +377,4 @@ function completeOrder() {
     });
 }
 </script>
-
 {% endblock %}

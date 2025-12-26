@@ -1,49 +1,87 @@
 {% extends "base.html" %}
+
 {% block title %}{{ product.name }}{% endblock %}
 
 {% block content %}
-<div class="container">
-    <a href="{{ url_for('national_scaffoldings') }}" class="btn btn-warning mb-3">← Back to Products</a>
+<!-- Main Wrapper -->
+<div class="product-wrapper">
+    <!-- Header Section -->
+    <div class="header-section">
+        <a href="{{ url_for('national_scaffoldings') }}" class="btn btn-back">← Back to Products</a>
+        <div class="header-title">
+            <h2>{{ product.name }}</h2>
+            <span class="badge badge-primary">CUPLOCK LEDGER</span>
+        </div>
+    </div>
 
-    <div class="row">
-        <div class="col-md-6">
+    <!-- Content Area -->
+    <div class="content-row">
+        <!-- Left Column: Product Image -->
+        <div class="product-image-col">
             <img src="{{ url_for('static', filename=product.display_image_url) }}"
-                 class="img-fluid"
+                 class="product-image"
+                 alt="{{ product.name }}"
                  onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}'">
         </div>
 
-        <div class="col-md-6">
-            <h2>{{ product.name }}</h2>
-            <span class="badge bg-primary">CUPLOCK LEDGER</span>
+        <!-- Right Column: Details & Form -->
+        <div class="product-details-col">
+            <div class="card">
+                <div class="card-header">
+                    <h5>📊 Pricing Details</h5>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Pricing Inputs -->
+                    <div class="form-group">
+                        <label for="sizeSelect">Select Size</label>
+                        <select id="sizeSelect" class="form-select" required>
+                            <!-- Options populated via JS -->
+                        </select>
+                    </div>
 
-            <div class="card mt-4 p-3 bg-primary text-white">
-                <h5>📊 Pricing Details</h5>
+                    <div class="form-group">
+                        <label for="purchaseType">Purchase Type</label>
+                        <select id="purchaseType" class="form-select">
+                            <option value="buy">Buy</option>
+                            <option value="rent">Rent</option>
+                        </select>
+                    </div>
 
-                <label>Select Size</label>
-                <select id="sizeSelect" class="form-select mb-2"></select>
+                    <div class="form-group">
+                        <label for="quantity">Quantity</label>
+                        <select id="quantity" class="form-select">
+                            {% for i in range(1,11) %}
+                            <option value="{{ i }}">{{ i }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
 
-                <label>Purchase Type</label>
-                <select id="purchaseType" class="form-select mb-2">
-                    <option value="buy">Buy</option>
-                    <option value="rent">Rent</option>
-                </select>
+                    <!-- Price Summary Box -->
+                    <div class="info-box">
+                        <div class="info-row">
+                            <span class="info-label">Unit Price:</span>
+                            <span class="info-value" id="unitPrice">₹0.00</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Total:</span>
+                            <span class="info-value price-highlight" id="totalPrice">₹0.00</span>
+                        </div>
+                    </div>
+                </div>
 
-                <label>Quantity</label>
-                <select id="quantity" class="form-select mb-3">
-                    {% for i in range(1,11) %}
-                    <option value="{{ i }}">{{ i }}</option>
-                    {% endfor %}
-                </select>
-
-                <p>Unit Price: <strong id="unitPrice">₹0.00</strong></p>
-                <h4 id="totalPrice">₹0.00</h4>
-
-                <button class="btn btn-warning w-100 mt-2">🛒 Add to Cart</button>
+                <!-- Action Button -->
+                <div class="action-area">
+                    <button class="btn btn-warning btn-lg" id="addToCartBtn">
+                        🛒 Add to Cart
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
+
 {% block scripts %}
 <script>
 let ledgerSizes = [];
@@ -63,6 +101,7 @@ function updatePrice() {
     document.getElementById('totalPrice').innerText = `₹${total.toFixed(2)}`;
 }
 
+// Fetch sizes and populate dropdown
 fetch(`/cuplock/api/ledger/{{ product.id }}/sizes`)
     .then(res => res.json())
     .then(data => {
@@ -85,165 +124,322 @@ fetch(`/cuplock/api/ledger/{{ product.id }}/sizes`)
 </script>
 {% endblock %}
 
-
-
 <style>
-.product-container {
-    max-width: 800px;
-    margin: 2rem auto;
-    padding: 2rem;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-}
+    /* ===== GLOBAL RESETS ===== */
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
 
-.product-header {
-    text-align: center;
-    margin-bottom: 2rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 2px solid #e0e0e0;
-}
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f8f9fa;
+        color: #333;
+        padding-bottom: 80px; /* Space for scrolling */
+    }
 
-.product-header h1 {
-    color: #001d3d;
-    margin-bottom: 0.5rem;
-}
+    /* ===== MAIN WRAPPER ===== */
+    .product-wrapper {
+        width: 100%;
+        max-width: 900px; /* Reasonable max width for desktop */
+        margin: 0 auto;
+        padding: 1.5rem;
+    }
 
-.product-description {
-    color: #666;
-    font-size: 1rem;
-}
+    /* ===== HEADER ===== */
+    .header-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap; /* Allow wrapping on small screens */
+        gap: 1rem;
+    }
 
-.purchase-type-section {
-    margin-bottom: 2rem;
-}
+    .header-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1;
+    }
 
-.purchase-type-section h3 {
-    color: #001d3d;
-    margin-bottom: 1rem;
-    font-size: 1.1rem;
-}
+    .header-title h2 {
+        font-size: 1.5rem;
+        color: #1e3a8a; /* Royal Blue */
+        margin: 0;
+        font-weight: 700;
+    }
 
-.radio-group {
-    display: flex;
-    gap: 1.5rem;
-}
+    .badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
 
-.radio-option {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    padding: 0.75rem 1.5rem;
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    transition: all 0.3s;
-}
+    .bg-primary {
+        background: #002855;
+        color: white;
+    }
 
-.radio-option:has(input:checked) {
-    border-color: #002855;
-    background: #f0f7ff;
-}
+    /* ===== LAYOUT ROW ===== */
+    .content-row {
+        display: flex;
+        gap: 2rem;
+        align-items: stretch; /* Both columns stretch to full height */
+    }
 
-.radio-option input {
-    cursor: pointer;
-}
+    /* ===== PRODUCT IMAGE COLUMN ===== */
+    .product-image-col {
+        flex: 0 0 auto; /* Fixed width */
+        width: 300px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
 
-.form-group {
-    margin-bottom: 1.5rem;
-}
+    .product-image {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
 
-.form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-    color: #333;
-}
+    /* ===== PRODUCT DETAILS COLUMN ===== */
+    .product-details-col {
+        flex: 1; /* Takes remaining space */
+        min-width: 300px; /* Prevents crushing on small screens */
+    }
 
-.form-control {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 1rem;
-}
+    .card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
 
-.form-control:focus {
-    outline: none;
-    border-color: #002855;
-    box-shadow: 0 0 5px rgba(0,40,85,0.2);
-}
+    .card-header {
+        background: #1e3a8a;
+        padding: 1rem 1.5rem;
+        color: white;
+    }
 
-.info-box {
-    background: #e3f2fd;
-    border-left: 4px solid #1976d2;
-    border-radius: 6px;
-    padding: 1rem;
-    margin: 1.5rem 0;
-}
+    .card-header h5 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
 
-.info-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.5rem 0;
-}
+    .card-body {
+        padding: 2rem;
+    }
 
-.info-value {
-    font-weight: 600;
-    color: #1976d2;
-}
+    /* ===== FORM INPUTS & SELECTS ===== */
+    .form-group {
+        margin-bottom: 1.5rem;
+        width: 100%;
+    }
 
-.price-display {
-    background: #f8f9fa;
-    border-radius: 8px;
-    padding: 1.5rem;
-    margin: 2rem 0;
-}
+    .form-group label {
+        display: block;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        color: #444;
+        font-size: 1rem;
+    }
 
-.price-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid #e0e0e0;
-}
+    /* Mobile Critical Styles */
+    .form-control, .form-select {
+        width: 100%;
+        padding: 14px; /* Comfortable touch target */
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 16px !important; /* 16px prevents iOS auto-zoom */
+        background-color: #fff;
+        font-family: inherit;
+        transition: border-color 0.3s ease;
+        -webkit-appearance: none;
+    }
 
-.price-row:last-child {
-    border-bottom: none;
-}
+    .form-control:focus, .form-select:focus {
+        border-color: #d4af37; /* Gold focus */
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.2);
+    }
 
-.total-row {
-    font-weight: bold;
-    font-size: 1.2rem;
-    color: #001d3d;
-    margin-top: 0.5rem;
-    padding-top: 1rem;
-    border-top: 2px solid #001d3d;
-}
+    /* ===== INFO BOX & PRICING ===== */
+    .info-box {
+        background: #f0f7ff; /* Light Blue */
+        border-left: 5px solid #1976d2;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-top: 2rem;
+    }
 
-.price-value {
-    color: #d4af37;
-    font-weight: 600;
-}
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
 
-.btn-large {
-    width: 100%;
-    padding: 1rem;
-    font-size: 1.1rem;
-    font-weight: 600;
-}
+    .info-row:last-child {
+        margin-bottom: 0;
+    }
 
-.btn-primary {
-    background: linear-gradient(135deg, #002855, #004a99);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s;
-}
+    .info-label {
+        font-size: 1rem;
+        color: #555;
+    }
 
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0,40,85,0.3);
-}
+    .info-value {
+        font-size: 1.1rem;
+        color: #333;
+        font-weight: 600;
+    }
+
+    .price-highlight {
+        color: #d4af37; /* Gold for price */
+        font-size: 1.25rem;
+    }
+
+    /* ===== BUTTONS ===== */
+    .action-area {
+        margin-top: 2rem;
+    }
+
+    .btn {
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .btn-back {
+        background: white;
+        color: #1e3a8a;
+        border: 2px solid #1e3a8a;
+        padding: 0.5rem 1.5rem;
+        font-size: 1rem;
+    }
+
+    .btn-back:hover {
+        background: #f8f9fa;
+    }
+
+    .btn-warning {
+        background: #d4af37; /* Gold */
+        color: white;
+        width: 100%; /* Full width by default */
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        box-shadow: 0 4px 10px rgba(212, 175, 55, 0.2);
+    }
+
+    .btn-warning:hover {
+        background: #b5952f;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(212, 175, 55, 0.3);
+    }
+
+    .btn-lg {
+        padding: 1rem 3rem;
+    }
+
+    /* ===== MOBILE RESPONSIVE DESIGN ===== */
+    @media (max-width: 768px) {
+        .product-wrapper {
+            padding: 1rem;
+        }
+
+        .header-section {
+            flex-direction: column; /* Stack header elements */
+            align-items: stretch;
+            gap: 1rem;
+        }
+
+        .header-title {
+            width: 100%;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .header-title h2 {
+            font-size: 1.25rem; /* Slightly smaller on mobile */
+        }
+
+        /* Stack Content Vertically */
+        .content-row {
+            flex-direction: column; /* Force stack */
+            gap: 2rem;
+        }
+
+        /* Image Column */
+        .product-image-col {
+            width: 100%; /* Take full width */
+            max-height: 300px; /* Limit height */
+            padding: 2rem; /* Padding for image */
+        }
+
+        .product-image {
+            max-width: 200px; /* Constrain image size */
+        }
+
+        /* Details Column */
+        .product-details-col {
+            width: 100%; /* Take full width */
+            min-width: auto; /* Remove constraint */
+        }
+
+        .card {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* Reduce shadow on mobile */
+        }
+
+        .card-header {
+            padding: 0.8rem 1rem;
+        }
+
+        .card-header h5 {
+            font-size: 1rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Adjust Info Box */
+        .info-box {
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            padding: 1rem;
+        }
+
+        /* Stacking Inputs for Mobile */
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        /* Button Adjustments */
+        .btn-warning {
+            width: 100% !important; /* Force full width */
+            padding: 14px 20px; /* Taller button */
+            font-size: 1.1rem;
+        }
+
+        .btn-back {
+            width: 100%; /* Full width back button */
+            order: 2; /* Place back button at bottom? */
+            margin-bottom: 1rem;
+        }
+    }
 </style>
-{% endblock %}

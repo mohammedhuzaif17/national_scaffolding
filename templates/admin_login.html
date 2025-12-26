@@ -3,31 +3,246 @@
 {% block title %}Admin Login - National Scaffolding{% endblock %}
 
 {% block content %}
-<div class="glass-container form-container">
-    <button class="btn-secondary" onclick="window.location.href='{{ url_for('national_scaffoldings') }}'" style="margin-bottom: 1rem; width: auto;">← Back to Home</button>
-    <h1 class="page-title">Admin Login</h1>
-    <p style="text-align: center; color: #ffa500; margin-bottom: 2rem;">For Authorized Personnel Only</p>
-    <form method="POST">
-        <div class="form-group">
-            <label for="identifier">Username</label>
-            <input type="text" id="identifier" name="identifier" required placeholder="Enter your admin username">
-        </div>
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" required placeholder="Enter your password">
-        </div>
-        <div class="form-group">
-            <label for="panel_type">Admin Panel</label>
-            <select id="panel_type" name="panel_type" required>
-                <option value="">-- Select Panel --</option>
-                <option value="scaffolding">National Scaffolding Admin</option>
-                <option value="fabrication">Fabrication Admin</option>
-            </select>
-        </div>
-        <button type="submit" class="btn-primary">Admin Login</button>
-    </form>
-    <p style="text-align: center; margin-top: 1rem;">
-        <a href="{{ url_for('login') }}" style="color: #ffa500;">← Back to User Login</a>
-    </p>
+<!-- Main Wrapper -->
+<div class="login-wrapper">
+    <div class="form-header">
+        <button class="btn btn-secondary" onclick="window.location.href='{{ url_for('national_scaffoldings') }}'">
+            ← Back to Home
+        </button>
+    </div>
+    
+    <div class="login-card">
+        <h1 class="page-title">Admin Login</h1>
+        <p class="alert-text">For Authorized Personnel Only</p>
+        
+        <form method="POST" class="login-form">
+            <div class="form-group">
+                <label for="identifier">Username</label>
+                <input type="text" id="identifier" name="identifier" required placeholder="Enter your admin username">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required placeholder="Enter your password">
+            </div>
+            <div class="form-group">
+                <label for="panel_type">Admin Panel</label>
+                <select id="panel_type" name="panel_type" required>
+                    <option value="">-- Select Panel --</option>
+                    <option value="scaffolding">National Scaffolding Admin</option>
+                    <option value="fabrication">Fabrication Admin</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Admin Login</button>
+        </form>
+        
+        <p class="footer-link">
+            <a href="{{ url_for('login') }}">← Back to User Login</a>
+        </p>
+    </div>
 </div>
+
 {% endblock %}
+
+<style>
+    /* ===== GLOBAL RESETS ===== */
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: sans-serif;
+        background-color: #f4f6f8;
+        color: #333;
+        line-height: 1.6;
+    }
+
+    /* ===== LAYOUT WRAPPER ===== */
+    .login-wrapper {
+        width: 100%;
+        max-width: 100%; /* Override any base.html constraints */
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+    }
+
+    .form-header {
+        width: 100%;
+        max-width: 450px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        justify-content: flex-start;
+    }
+
+    .login-card {
+        background: white;
+        width: 100%;
+        max-width: 450px;
+        padding: 2.5rem;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    /* ===== TYPOGRAPHY ===== */
+    .page-title {
+        font-size: 1.8rem;
+        color: #1e3a8a; /* Royal Blue */
+        font-weight: 700;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .alert-text {
+        color: #ffa500; /* Gold/Orange for warning */
+        font-weight: 500;
+        margin-bottom: 2rem;
+        text-align: center;
+        font-size: 0.95rem;
+    }
+
+    .footer-link {
+        text-align: center;
+        margin-top: 2rem;
+        font-size: 0.9rem;
+    }
+
+    .footer-link a {
+        color: #ffa500;
+        text-decoration: none;
+        font-weight: 600;
+        transition: opacity 0.2s;
+    }
+
+    .footer-link a:hover {
+        text-decoration: underline;
+        opacity: 0.8;
+    }
+
+    /* ===== FORM STYLES ===== */
+    .login-form {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .form-group {
+        text-align: left;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #555;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    /* Input Styling - Critical for Mobile */
+    input[type="text"],
+    input[type="password"],
+    select {
+        width: 100%; /* Force full width of container */
+        padding: 12px 15px; /* Comfortable padding */
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 16px; /* 16px prevents iOS auto-zoom */
+        background-color: #fff;
+        transition: border-color 0.3s;
+        -webkit-appearance: none; /* Reset iOS styles */
+    }
+
+    input:focus,
+    select:focus {
+        border-color: #1e3a8a;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+    }
+
+    /* ===== BUTTON STYLES ===== */
+    .btn {
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+        padding: 0.6rem 1.2rem;
+    }
+
+    .btn-secondary:hover {
+        background: #5a6268;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #002855, #004080);
+        color: white;
+        padding: 1rem 1.5rem;
+        width: 100%; /* Full width by default */
+        font-size: 1rem;
+        box-shadow: 0 4px 15px rgba(0, 40, 80, 0.2);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 40, 80, 0.3);
+    }
+
+    /* ===== MOBILE RESPONSIVE FIXES ===== */
+    @media (max-width: 768px) {
+        .login-wrapper {
+            padding: 1rem; /* Less padding on mobile */
+        }
+
+        .login-card {
+            padding: 1.5rem; /* Less padding to fit screen */
+            box-shadow: none; /* Remove heavy shadow on small screens for cleaner look */
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+        }
+
+        .alert-text {
+            font-size: 0.9rem;
+        }
+
+        /* Ensure inputs use full width properly */
+        input[type="text"],
+        input[type="password"],
+        select {
+            padding: 14px !important; /* Larger touch area */
+            font-size: 16px !important; /* Maintain 16px */
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem; /* Compact spacing */
+        }
+
+        /* Button Adjustments */
+        .btn {
+            width: 100% !important; /* Force full width */
+            padding: 14px 20px !important; /* Taller buttons for touch */
+        }
+
+        .form-header .btn {
+            width: auto !important; /* Back button stays auto */
+            padding: 0.6rem 1.2rem !important;
+        }
+    }
+</style>

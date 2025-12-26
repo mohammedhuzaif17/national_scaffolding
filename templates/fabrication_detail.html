@@ -3,318 +3,70 @@
 {% block title %}{{ product.name }} – Fabrication{% endblock %}
 
 {% block content %}
-<style>
-:root{
-    --brand-900: #001d3d;
-    --brand-700: #002855;
-    --accent: #ffd966;
-    --muted: #666;
-}
-
-.glass-container {
-    max-width: 1100px;
-    margin: 20px auto;
-    padding: 18px;
-    font-family: Inter, sans-serif;
-    color: #111827;
-}
-
-.detail-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-    align-items: start;
-}
-
-@media (max-width: 880px) {
-    .detail-grid { grid-template-columns: 1fr; }
-}
-
-/* Gallery */
-.product-detail-gallery {
-    position: relative;
-    width: 100%;
-    height: 500px;
-    overflow: hidden;
-    border-radius: 10px;
-    background: #f0f0f0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.gallery-main-container {
-    width: 100%;
-    height: 100%;
-    position: relative;
-}
-
-.gallery-main-image {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    transition: opacity 0.45s ease-in-out;
-    pointer-events: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #fafafa;
-}
-
-.gallery-main-image.active {
-    opacity: 1;
-    z-index: 1;
-    pointer-events: auto;
-}
-
-.gallery-main-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    border-radius: 10px;
-    cursor: zoom-in;
-}
-
-.gallery-thumbnails {
-    display: flex;
-    gap: 10px;
-    margin-top: 14px;
-    overflow-x: auto;
-    padding-bottom: 6px;
-}
-
-.gallery-thumbnail {
-    width: 80px;
-    height: 80px;
-    object-fit: cover;
-    border-radius: 8px;
-    cursor: pointer;
-    border: 3px solid transparent;
-    transition: all 0.18s ease;
-    flex-shrink: 0;
-}
-.gallery-thumbnail:hover { transform: scale(1.03); border-color: rgba(0,0,0,0.06); }
-.gallery-thumbnail.active { border-color: #d4af37; transform: scale(1.05); }
-
-.gallery-navigation {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(0, 0, 0, 0.65);
-    color: white;
-    border: 2px solid rgba(255,255,255,0.8);
-    width: 48px;
-    height: 48px;
-    cursor: pointer;
-    font-size: 26px;
-    border-radius: 50%;
-    z-index: 20;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.gallery-prev { left: 14px; }
-.gallery-next { right: 14px; }
-.gallery-navigation.single-image { display: none !important; }
-
-.gallery-counter {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background: rgba(0,0,0,0.66);
-    color: #fff;
-    padding: 8px 12px;
-    border-radius: 999px;
-    font-weight: 700;
-    z-index: 30;
-}
-
-.no-image-box {
-    background: rgba(255,255,255,0.06);
-    padding: 3.5rem;
-    text-align: center;
-    border-radius: 10px;
-}
-
-/* Product info */
-.page-title { font-size: 1.6rem; margin: 0; color: var(--brand-900); }
-.product-meta { color: var(--accent); text-transform: uppercase; margin: 8px 0 16px; font-weight:700; }
-.product-description { color: #000; line-height:1.6; margin-bottom: 1rem; }
-
-.customization-section { margin-top: 10px; }
-.product-price { font-size: 1.3rem; font-weight: 900; color: var(--brand-900); margin-top: 8px; }
-.form-group { margin-bottom: 10px; }
-.form-group label { display:block; margin-bottom:6px; font-weight:700; color:var(--brand-700); }
-.form-group select { width:100%; padding:8px 10px; border-radius:6px; border:1px solid #e6e9ee; }
-
-.btn-primary {
-    background: linear-gradient(135deg,var(--brand-700),var(--brand-900));
-    color: white;
-    border: none;
-    padding: 12px;
-    border-radius: 10px;
-    font-weight: 800;
-    width: 100%;
-    cursor: pointer;
-}
-
-.btn-secondary {
-    background: #6c757d;
-    color: white;
-    border: none;
-    padding: 10px 16px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.toast-notification {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%) translateY(100px);
-    background-color: rgba(0,0,0,0.82);
-    color: white;
-    padding: 12px 20px;
-    border-radius: 6px;
-    z-index: 2000;
-    opacity: 0;
-    transition: all .28s ease;
-}
-.toast-notification.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-
-/* Modal */
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 3000;
-    padding: 18px;
-}
-.modal-overlay.show { display: flex; }
-
-.modal-content {
-    position: relative;
-    width: 100%;
-    max-width: 1200px;
-    max-height: 95vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-image-wrap {
-    width: 100%;
-    height: 0;
-    padding-bottom: 56%;
-    position: relative;
-}
-.modal-image-wrap img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    border-radius: 8px;
-}
-
-.modal-close, .modal-nav {
-    position: absolute;
-    background: rgba(255,255,255,0.1);
-    color: #fff;
-    border: none;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 3050;
-}
-.modal-close { right: 18px; top: 18px; }
-.modal-nav { top: 50%; transform: translateY(-50%); width: 56px; height: 56px; font-size: 28px; }
-.modal-prev { left: 12px; }
-.modal-next { right: 12px; }
-
-@media (max-width: 480px) {
-    .gallery-thumbnail { width: 56px; height:56px; }
-    .product-detail-gallery { height: 260px; }
-}
-</style>
-
+<!-- Main Container -->
 <div class="glass-container">
-    <button class="btn-secondary" onclick="history.back()" style="margin-bottom: 1rem;">← Back to Products</button>
+    <!-- Back Button -->
+    <button class="btn btn-secondary" onclick="history.back()" style="margin-bottom: 1rem;">← Back to Products</button>
 
     <div class="detail-grid">
-        <div>
-            {% if product.image_url %}
-                {% set valid_images = product.image_url
-                    .split(',')
-                    | map('trim')
-                    | reject('equalto', '')
-                    | list %}
-
-                {% if valid_images|length > 0 %}
-                    <div class="product-detail-gallery">
-                        <div class="gallery-main-container">
-                            {% for img_url in valid_images %}
-                                <div class="gallery-main-image {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}">
-                                    <img src="{{ url_for('static', filename=img_url) }}"
-                                         alt="{{ product.name }} - Image {{ loop.index }}"
-                                         loading="lazy"
-                                         onclick="openModal({{ loop.index0 }})">
-                                </div>
-                            {% endfor %}
+        <!-- Left Column: Product Gallery -->
+        <div class="gallery-section">
+            <div class="product-detail-gallery">
+                <div class="gallery-main-container">
+                    {% set valid_images = product.image_url.split(',').map(s=>s.strip()).filter(s=>s) %}
+                    {% for img_url in valid_images %}
+                        <div class="gallery-main-image {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}">
+                            <img src="{{ url_for('static', filename=img_url) }}"
+                                 alt="{{ product.name }}"
+                                 loading="lazy">
                         </div>
-
-                        {% if valid_images|length > 1 %}
-                            <div class="gallery-counter">
-                                <span id="currentImageNum">1</span> / {{ valid_images|length }}
-                            </div>
-                            <button class="gallery-navigation gallery-prev" id="galleryPrev">‹</button>
-                            <button class="gallery-navigation gallery-next" id="galleryNext">›</button>
-                        {% endif %}
+                    {% endfor %}
+                </div>
+                
+                {% if valid_images|length > 1 %}
+                    <div class="gallery-counter">
+                        <span id="currentImageNum">1</span> / {{ valid_images|length }}
                     </div>
-
-                    {% if valid_images|length > 1 %}
-                        <div class="gallery-thumbnails">
-                            {% for img_url in valid_images %}
-                                <img src="{{ url_for('static', filename=img_url) }}"
-                                     class="gallery-thumbnail {% if loop.first %}active{% endif %}"
-                                     onclick="setMainImage({{ loop.index0 }})">
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                {% else %}
-                    <div class="no-image-box">
-                        <p style="font-size:2rem;color:#ffa500">📷</p>
-                        <p>No Image Available</p>
-                    </div>
+                    <button class="gallery-navigation gallery-prev" id="galleryPrev">‹</button>
+                    <button class="gallery-navigation gallery-next" id="galleryNext">›</button>
                 {% endif %}
-            {% else %}
+            </div>
+
+            <!-- Thumbnails List -->
+            {% if valid_images|length > 1 %}
+                <div class="gallery-thumbnails">
+                    {% for img_url in valid_images %}
+                        <img src="{{ url_for('static', filename=img_url) }}"
+                             class="gallery-thumbnail {% if loop.first %}active{% endif %}"
+                             onclick="setMainImage({{ loop.index0 }})"
+                             alt="Thumbnail {{ loop.index0 }}">
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% if not product.image_url or valid_images|length == 0 %}
                 <div class="no-image-box">
-                    <p style="font-size:2rem;color:#ffa500">📷</p>
-                    <p>Product Image Not Set</p>
+                    <p style="font-size: 2rem; color: #ffa500;">📷</p>
+                    <p>No Image Available</p>
                 </div>
             {% endif %}
         </div>
 
-        <!-- Info -->
+        <!-- Right Column: Product Info & Customization -->
         <div>
-            <h1 class="page-title">{{ product.name }}</h1>
-            <p class="product-meta">{{ product.category|title if product.category else 'N/A' }}</p>
+            <!-- Product Header -->
+            <div class="product-header">
+                <h1 class="page-title">{{ product.name }}</h1>
+                <p class="product-meta">{{ product.category|title if product.category else 'N/A' }}</p>
+            </div>
+
+            <!-- Description -->
             <p class="product-description">{{ product.description }}</p>
 
-            <!-- Fabrication specific section -->
+            <!-- Customization Section -->
             <div class="customization-section">
-                <h3 style="color: var(--accent); margin-bottom: 8px;">Product Details</h3>
-                <p style="color: #000; margin-bottom: 1rem;">High-quality fabrication product for your construction needs.</p>
-
+                <h3 class="section-title">Product Details</h3>
+                
                 <div class="form-group">
                     <label for="quantity">Quantity</label>
                     <select id="quantity" onchange="updateFabricationPrice()">
@@ -324,27 +76,41 @@
                     </select>
                 </div>
 
-                <div class="product-price" id="final_price_display">₹{{ "%.2f"|format(product.price|float) }}</div>
-            </div>
+                <!-- Price Display -->
+                <div class="price-display">
+                    <div class="price-row">
+                        <span>Unit Price:</span>
+                        <span id="final_price_display">₹{{ "%.2f"|format(product.price|float) }}</span>
+                    </div>
+                    <div class="price-row total-row">
+                        <span>Total:</span>
+                        <span id="final_total_display">₹{{ "%.2f"|format(product.price|float) }}</span>
+                    </div>
+                </div>
 
-            <div class="product-note" style="background: rgba(255,217,102,0.25); padding: 14px 16px; border-left: 6px solid var(--accent); border-radius: 8px; font-weight: 600; margin: 18px 0;">
-                <strong>Fabrication Product</strong><br>
-                Custom sizes and specifications are available on request.
-            </div>
+                <!-- Product Note -->
+                <div class="product-note">
+                    <strong>Fabrication Product</strong><br>
+                    Custom sizes and specifications are available on request.
+                </div>
 
-            {% if current_user.is_authenticated and session.get('user_type') == 'admin' %}
-                <div style="background: rgba(255, 165, 0, 0.12); padding: 12px; border-radius: 8px; margin-top: 12px;">
-                    <p style="margin:0; font-weight:700; color:#ffa500;">⚠️ Admin accounts cannot make purchases.</p>
+                <!-- Buttons -->
+                <div class="button-section">
+                    {% if current_user.is_authenticated and session.get('user_type') == 'admin' %}
+                        <div class="admin-alert">
+                            <p style="margin: 0; font-weight: 700; color: #ffa500;">⚠️ Admin accounts cannot make purchases.</p>
+                        </div>
+                    {% elif current_user.is_authenticated %}
+                        <div class="button-wrapper">
+                            <button class="btn btn-primary btn-lg" id="addToCartBtn" onclick="addToCartCustom()">🛒 Add to Cart</button>
+                        </div>
+                    {% else %}
+                        <div class="button-wrapper">
+                            <button class="btn btn-primary btn-lg" onclick="window.location.href='{{ url_for('login') }}'">🔐 Login to Purchase</button>
+                        </div>
+                    {% endif %}
                 </div>
-            {% elif current_user.is_authenticated %}
-                <div style="margin-top: 16px;">
-                    <button class="btn-primary" id="addToCartBtn" onclick="addToCartCustom()">🛒 Add to Cart</button>
-                </div>
-            {% else %}
-                <div style="margin-top: 16px;">
-                    <button class="btn-primary" onclick="window.location.href='{{ url_for('login') }}'">🔐 Login to Purchase</button>
-                </div>
-            {% endif %}
+            </div>
         </div>
     </div>
 </div>
@@ -417,6 +183,7 @@ function nextImage() {
 if (prevBtn) prevBtn.addEventListener('click', prevImage);
 if (nextBtn) nextBtn.addEventListener('click', nextImage);
 
+// Keyboard support
 document.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowLeft') prevImage();
     if (e.key === 'ArrowRight') nextImage();
@@ -464,6 +231,7 @@ window.updateFabricationPrice = function() {
     const quantity = parseInt(document.getElementById('quantity').value);
     const total = basePrice * quantity;
     document.getElementById('final_price_display').textContent = '₹' + total.toFixed(2);
+    document.getElementById('final_total_display').textContent = '₹' + total.toFixed(2);
 };
 
 // Add to cart functionality
@@ -488,7 +256,6 @@ window.addToCartCustom = function() {
 
     fetch("{{ url_for('add_to_cart') }}", {
         method: 'POST',
-        credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
     })
@@ -504,7 +271,7 @@ window.addToCartCustom = function() {
             showToast('✓ Added to cart!');
             setTimeout(() => { window.location.href = '/cart'; }, 700);
         } else {
-            showToast('❌ ' + (json.message || 'Failed'));
+            showToast('❌ ' + (json.message || 'Failed to add to cart'));
             btn.disabled = false;
             btn.innerHTML = '🛒 Add to Cart';
         }
@@ -529,3 +296,558 @@ window.showToast = function(message) {
 updateFabricationPrice();
 </script>
 {% endblock %}
+
+<style>
+    /* ===== CSS VARIABLES ===== */
+    :root {
+        --brand-900: #001d3d;
+        --brand-700: #002855;
+        --accent: #ffd966; /* Gold */
+        --muted: #666;
+        --bg-light: #f8f9fa;
+        --bg-white: #ffffff;
+        --border-color: #e0e0e0;
+    }
+
+    /* ===== GLOBAL RESETS ===== */
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        margin: 0;
+        padding-bottom: 60px; /* Space for scrolling past navbar */
+        background-color: var(--bg-light);
+        color: #333;
+        overflow-x: hidden; /* Prevents horizontal scrolling */
+    }
+
+    /* ===== MAIN CONTAINER ===== */
+    .glass-container {
+        width: 100%;
+        max-width: 1100px; /* Reasonable width for desktop */
+        margin: 0 auto;
+        padding: 1.5rem;
+        overflow-x: hidden; /* Ensure no scroll */
+    }
+
+    /* ===== DETAIL GRID (Core Layout) ===== */
+    .detail-grid {
+        display: grid;
+        /* Desktop: 2 Columns */
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        align-items: start;
+    }
+
+    /* ===== GALLERY SECTION (Left Column) ===== */
+    .gallery-section {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .product-detail-gallery {
+        position: relative;
+        width: 100%;
+        /* Desktop: Fixed height */
+        /* Mobile: Reduced height */
+        height: 400px;
+        overflow: hidden;
+        border-radius: 10px;
+        background: var(--bg-white);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .gallery-main-container {
+        width: 100%;
+        height: 100%;
+        position: relative;
+    }
+
+    /* Main Image */
+    .gallery-main-image {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        transition: opacity 0.45s ease-in-out;
+        pointer-events: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-light);
+        z-index: 1;
+    }
+
+    .gallery-main-image.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .gallery-main-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+    }
+
+    /* Gallery Navigation */
+    .gallery-counter {
+        position: absolute;
+        bottom: 1rem;
+        right: 1rem;
+        background: rgba(0,0,0,0.75);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        z-index: 10;
+    }
+
+    .gallery-navigation {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(0,0,0,0.75);
+        color: white;
+        border: 2px solid rgba(255,255,255,0.9);
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 24px; /* Large touch target */
+    }
+    .gallery-prev { left: 12px; }
+    .gallery-next { right: 12px; }
+    .gallery-navigation.single-image { display: none !important; }
+
+    /* Thumbnails */
+    .gallery-thumbnails {
+        display: grid;
+        /* Desktop: Multi-column grid */
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        gap: 10px;
+        margin-top: 1rem;
+    }
+
+    .gallery-thumbnail {
+        width: 100%;
+        padding-top: 100%; /* Aspect ratio 1:1 container */
+        border: 3px solid transparent;
+        border-radius: 6px;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        background: var(--bg-white);
+        transition: all 0.2s ease;
+    }
+
+    .gallery-thumbnail:hover {
+        transform: scale(1.03);
+        border-color: rgba(212, 175, 55, 0.4);
+    }
+
+    .gallery-thumbnail.active {
+        border-color: var(--brand-900); /* Dark Blue Active State */
+        box-shadow: 0 0 0 0 4px var(--brand-900);
+    }
+
+    /* No Image Box */
+    .no-image-box {
+        background: rgba(255,255,255,0.1);
+        padding: 3rem 1rem;
+        border-radius: 8px;
+        text-align: center;
+        border: 2px dashed #ccc;
+    }
+
+    /* ===== INFO & FORM SECTION (Right Column) ===== */
+    .product-header {
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .page-title {
+        font-size: 2rem;
+        color: var(--brand-900);
+        margin-bottom: 0.5rem;
+        font-weight: 800;
+        line-height: 1.2;
+    }
+
+    .product-meta {
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .product-description {
+        color: #444;
+        font-size: 1rem;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+    }
+
+    /* Customization Section */
+    .customization-section {
+        background: var(--bg-white);
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        border: 1px solid var(--border-color);
+    }
+
+    .section-title {
+        color: var(--brand-700);
+        margin-bottom: 1.5rem;
+        font-size: 1.2rem;
+        font-weight: 700;
+    }
+
+    /* Form Groups */
+    .form-group {
+        margin-bottom: 1.5rem;
+        width: 100%;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        color: #333;
+        font-size: 1rem;
+    }
+
+    /* Responsive Inputs */
+    select {
+        width: 100%;
+        padding: 14px 16px; /* Large touch target */
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        background-color: var(--bg-white);
+        font-size: 16px !important; /* 16px prevents iOS auto-zoom */
+        font-family: inherit;
+        color: #333;
+        -webkit-appearance: none;
+        appearance: none;
+        transition: border-color 0.3s ease;
+    }
+
+    select:focus {
+        border-color: var(--brand-700);
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(0, 40, 85, 0.15);
+    }
+
+    /* Price Display */
+    .price-display {
+        background: var(--bg-light);
+        padding: 2rem;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        margin-top: 2rem;
+    }
+
+    .price-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        font-size: 1.2rem;
+    }
+
+    .total-row {
+        font-weight: 800;
+        color: var(--brand-900);
+        font-size: 1.4rem;
+    }
+
+    .product-note {
+        background: rgba(255, 217, 102, 0.1); /* Light Orange */
+        border-left: 4px solid var(--accent);
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        margin-top: 2rem;
+        font-weight: 600;
+    }
+
+    /* Buttons */
+    .button-section {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid var(--border-color);
+    }
+
+    .btn-wrapper {
+        display: flex;
+        justify-content: center;
+    }
+
+    .btn {
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+        padding: 0.6rem 1.2rem;
+    }
+
+    .btn-secondary:hover {
+        background: #5a6268;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--brand-700), var(--brand-900));
+        color: white;
+        width: 100%;
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #003366, var(--brand-700));
+        box-shadow: 0 6px 20px rgba(0, 40, 85, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .btn-lg {
+        font-size: 1.1rem;
+        padding: 1rem 2.5rem;
+    }
+
+    /* Admin Alert */
+    .admin-alert {
+        background: #f8d7da;
+        border-left: 4px solid #dc3545;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    /* ===== MODAL ===== */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.85);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 3000;
+    }
+
+    .modal-overlay.show {
+        display: flex;
+    }
+
+    .modal-content {
+        position: relative;
+        width: 95%;
+        max-width: 1200px; /* Modal width */
+        max-height: 95vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .modal-image-wrap {
+        width: 100%;
+        height: 0;
+        padding-bottom: 56%;
+        position: relative;
+    }
+
+    .modal-image-wrap img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: 8px;
+    }
+
+    .modal-close, .modal-nav {
+        position: absolute;
+        background: rgba(255,255,255,0.3);
+        color: #fff;
+        border: none;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 3050;
+        font-size: 18px;
+        transition: all 0.2s ease;
+    }
+
+    .modal-close { right: 18px; top: 18px; }
+    .modal-nav { top: 50%; transform: translateY(-50%); width: 56px; height: 56px; font-size: 28px; }
+    .modal-prev { left: 12px; }
+    .modal-next { right: 12px; }
+
+    /* ===== TOAST ===== */
+    .toast-notification {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%) translateY(100px);
+        background-color: #333;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        z-index: 4000;
+        opacity: 0;
+        transition: all 0.3s ease;
+        width: 90%;
+        text-align: center;
+    }
+
+    .toast-notification.show {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+
+    /* ===== MOBILE RESPONSIVE DESIGN ===== */
+    @media (max-width: 768px) {
+        .glass-container {
+            width: 100%;
+            max-width: 100%;
+            padding: 1rem;
+            margin: 0 auto;
+        }
+
+        /* 1. Stack Layout on Mobile */
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr !important; /* Force single column stack */
+            gap: 1.5rem;
+            align-items: stretch;
+        }
+
+        /* 2. Adjust Gallery Height on Mobile */
+        .product-detail-gallery {
+            height: 300px !important; /* Reduced height for mobile screens */
+        }
+
+        .gallery-thumbnails {
+            display: grid !important;
+            grid-template-columns: 1fr !important; /* Stack thumbnails vertically */
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .gallery-thumbnail {
+            width: 100% !important;
+            padding-top: 100%;
+            height: auto;
+            aspect-ratio: 1/1; /* Maintain square shape */
+        }
+
+        /* 3. Form Adjustments */
+        .page-title {
+            font-size: 1.5rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .customization-section {
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        /* 4. Full Width Buttons */
+        .btn, .btn-primary, .btn-secondary {
+            width: 100% !important; /* Force full width for tapping */
+            padding: 0.9rem 2rem; /* Adjust height */
+            font-size: 1rem;
+            justify-content: center;
+        }
+
+        /* 5. Modal Adjustments */
+        .modal-content {
+            width: 95% !important; /* Nearly full screen width */
+            padding: 0;
+        }
+
+        .modal-image-wrap {
+            height: 0; /* Remove height constraint for wrap */
+            padding-bottom: 0;
+        }
+
+        .modal-close, .modal-nav {
+            width: 50px; /* Larger touch target */
+            height: 50px;
+            font-size: 20px;
+        }
+
+        /* 6. Gallery Nav Positioning */
+        .gallery-counter {
+            bottom: 0.5rem;
+            right: 0.5rem;
+        }
+
+        .gallery-navigation {
+            width: 50px;
+            height: 50px;
+            font-size: 22px;
+        }
+
+        /* 7. Gallery Buttons Positioning */
+        .gallery-prev { left: 8px; }
+        .gallery-next { right: 8px; }
+
+        /* 8. Typography Scaling */
+        .total-row {
+            font-size: 1.2rem;
+        }
+
+        .price-row {
+            font-size: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+        }
+
+        .product-description {
+            font-size: 0.95rem;
+        }
+
+        .admin-alert {
+            font-size: 0.9rem;
+            padding: 0.75rem;
+        }
+
+        /* 9. Button Section Wrapper */
+        .button-section {
+            padding-top: 1.5rem;
+        }
+
+        .btn-lg {
+            padding: 0.8rem 2rem;
+            font-size: 1rem;
+        }
+    }
+</style>

@@ -3,21 +3,166 @@
 {% block title %}User Login - National Scaffolding{% endblock %}
 
 {% block content %}
-<div class="glass-container form-container">
-    <h1 class="page-title">User Login</h1>
-    <form method="POST">
-        <div class="form-group">
-            <label for="identifier">Username / Email </label>
-            <input type="text" id="identifier" name="identifier" required placeholder="Enter your username, email">
-        </div>
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" required placeholder="Enter your password">
-        </div>
-        <button type="submit" class="btn-primary">Login</button>
-    </form>
-    <p style="text-align: center; margin-top: 1rem;">
-        Don't have an account? <a href="{{ url_for('register') }}" style="color: #d4af37;">Register here</a>
-    </p>
+<style>
+/* =========================================
+   RESPONSIVE LOGIN STYLES
+   ========================================= */
+* { box-sizing: border-box; }
+
+/* Safe wrapper to center content without breaking global body layout */
+.login-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 85vh; /* 85vh prevents overlap with address bars/headers */
+    padding: 20px;
+    background-color: #f4f6f9; /* Light background */
+}
+
+.glass-container {
+    width: 100%;
+    max-width: 420px; /* Optimal width for forms */
+    background: white;
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.page-title {
+    text-align: center;
+    color: #001d3d;
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    margin-top: 0;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.6rem;
+    color: #444;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+/* Mobile Input Optimization */
+.form-group input {
+    width: 100%;
+    padding: 14px 16px; /* Larger touch target */
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px; /* CRITICAL: Prevents iOS auto-zoom */
+    outline: none;
+    background-color: #f9f9f9;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-group input:focus {
+    border-color: #d4af37; /* Gold focus border */
+    background-color: #fff;
+    box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.15);
+}
+
+/* Submit Button */
+.btn-primary {
+    width: 100%;
+    padding: 16px; /* Tall, easy-to-tap button */
+    background: #001d3d; /* Brand Dark Blue */
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: transform 0.2s, background-color 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-primary:hover {
+    background-color: #002855;
+    transform: translateY(-2px);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+/* Bottom Text & Link */
+p {
+    text-align: center;
+    margin-top: 1.8rem;
+    color: #666;
+    font-size: 0.95rem;
+}
+
+a {
+    color: #d4af37; /* Brand Gold */
+    font-weight: 700;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: #b38600;
+    text-decoration: underline;
+}
+
+/* =========================================
+   MOBILE SPECIFIC ADJUSTMENTS
+   ========================================= */
+@media (max-width: 480px) {
+    .login-wrapper {
+        padding: 10px; /* Less padding on small screens */
+        min-height: 80vh;
+    }
+
+    .glass-container {
+        padding: 2rem 1.5rem; /* Narrower side padding */
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+    }
+
+    .btn-primary {
+        font-size: 1rem;
+        padding: 14px;
+    }
+}
+</style>
+
+<!-- Wrapper for centering (safer than styling body directly) -->
+<div class="login-wrapper">
+    <div class="glass-container">
+        <h1 class="page-title">User Login</h1>
+        <form method="POST">
+            <div class="form-group">
+                <label for="identifier">Username / Email</label>
+                <input type="text" id="identifier" name="identifier" required placeholder="Enter your username or email" autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required placeholder="Enter your password" autocomplete="current-password">
+            </div>
+            <button type="submit" class="btn-primary">Login</button>
+        </form>
+        <p>
+            Don't have an account? <a href="{{ url_for('register') }}">Register here</a>
+        </p>
+    </div>
 </div>
+
 {% endblock %}

@@ -6,25 +6,34 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-* { font-family:'Inter', sans-serif }
+/* =========================================
+   BASE STYLES (Desktop Default)
+   ========================================= */
+* { 
+    font-family:'Inter', sans-serif;
+    box-sizing: border-box; /* Ensures padding doesn't add to width */
+}
 
-/* Bigger centered cards */
+/* Grid Layout */
 .products-grid {
     display: flex;
     justify-content: center;
     gap: 3rem;
     flex-wrap: wrap;
+    margin-top: 1rem;
 }
 
-/* Card box */
+/* Card Box - Responsive Width */
 .product-card {
     background: white;
-    border-radius: 12px;
-    width: 430px;
+    border-radius: 16px;
+    width: 100%; /* Allows shrinking */
+    max-width: 420px; /* Limits size on desktop */
     min-height: 380px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.12);
     transition: 0.25s;
     cursor: pointer;
+    border: 1px solid rgba(0,0,0,0.05);
 }
 
 .product-card:hover {
@@ -32,61 +41,74 @@
     box-shadow: 0 12px 28px rgba(0,0,0,0.18);
 }
 
-/* Card inner content */
+/* Card Inner Content */
 .product-info {
-    padding: 1.8rem;
+    padding: 2.5rem 2rem;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
 }
 
 .product-info div:first-child {
     font-size: 3.8rem;
+    margin-bottom: 0.5rem;
 }
 
-/* MAIN TITLES FIXED */
+/* Main Titles */
 .product-name {
     font-size: 1.7rem !important;
     font-weight: 700;
     color: #001d3d;
     margin-bottom: 0.7rem;
+    line-height: 1.2;
 }
 
-/* CATEGORY BADGE FIXED (VISIBLE NOW) */
+/* Category Badge */
 .product-category {
     background: #e6b325; /* Darker gold */
     color: #001d3d;
-    padding: 0.35rem 1.2rem;
-    border-radius: 6px;
+    padding: 0.4rem 1.2rem;
+    border-radius: 50px;
     font-weight: 700;
-    font-size: 0.9rem;
-    margin: 0 auto 1rem;
+    font-size: 0.85rem;
+    margin: 0 auto 1.5rem;
     display: inline-block;
     letter-spacing: 0.5px;
+    box-shadow: 0 2px 5px rgba(230, 179, 37, 0.3);
 }
 
 /* Description Text */
 .product-description {
-    color: #444;
+    color: #555;
     font-size: 1rem;
     line-height: 1.6;
-    padding: 0 1rem;
+    padding: 0;
+    margin-bottom: auto; /* Pushes button to bottom */
 }
 
-/* CTA Button Look */
+/* CTA Button */
 .view-btn {
-    padding: 0.6rem 1.3rem;
+    padding: 0.8rem 2rem;
     background: #f0f2f5;
     display: inline-block;
-    margin-top: 1rem;
+    margin-top: 2rem;
     border-radius: 8px;
     font-weight: 600;
     color: #001d3d;
+    transition: all 0.2s;
+}
+
+.view-btn:hover {
+    background: #e2e6ea;
 }
 
 /* Page Layout */
 .page-container {
     max-width: 1250px;
     margin: auto;
-    padding: 2rem 1rem;
+    padding: 3rem 1.5rem;
 }
 
 .page-header {
@@ -98,20 +120,22 @@
     font-size: 2.8rem;
     color: #001d3d;
     font-weight: 800;
+    margin-bottom: 0.5rem;
 }
 
 .page-subtitle {
-    color: #555;
-    font-size: 1.1rem;
+    color: #666;
+    font-size: 1.2rem;
+    font-weight: 400;
 }
 
 /* Help Box */
 .help-box {
-    margin-top: 3.5rem;
+    margin-top: 4rem;
     background: rgba(212, 175, 55, 0.12);
-    padding: 2rem;
-    border-radius: 14px;
-    border: 1px solid rgba(212,175,55,0.35);
+    padding: 2.5rem;
+    border-radius: 16px;
+    border: 1px solid rgba(212,175,55,0.3);
     text-align: center;
 }
 
@@ -119,9 +143,85 @@
     font-size: 1.5rem;
     font-weight: 700;
     color: #d4af37;
+    margin-bottom: 1rem;
+}
+
+/* =========================================
+   RESPONSIVE / MOBILE STYLES
+   ========================================= */
+@media (max-width: 768px) {
+    .page-container {
+        padding: 1.5rem 1rem;
+    }
+
+    .page-header {
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-size: 2rem;
+    }
+
+    .page-subtitle {
+        font-size: 1rem;
+    }
+
+    .products-grid {
+        gap: 1.5rem; /* Reduce gap between cards on mobile */
+        flex-direction: column; /* Stack vertically */
+        align-items: center;
+    }
+
+    .product-card {
+        min-height: auto; /* Let content decide height */
+        width: 100%; /* Full width of container */
+        max-width: 400px;
+    }
+
+    .product-info {
+        padding: 2rem 1.5rem;
+    }
+
+    .product-info div:first-child {
+        font-size: 3rem; /* Slightly smaller emoji */
+    }
+
+    .product-name {
+        font-size: 1.5rem !important;
+    }
+
+    .product-description {
+        font-size: 0.95rem;
+    }
+
+    .view-btn {
+        padding: 0.7rem 1.5rem;
+        margin-top: 1.5rem;
+        width: 100%; /* Full width button on mobile */
+        box-sizing: border-box;
+    }
+
+    .help-box {
+        margin-top: 2.5rem;
+        padding: 1.5rem;
+    }
+
+    .help-title {
+        font-size: 1.25rem;
+    }
+}
+
+/* Extra small devices (phones under 360px) */
+@media (max-width: 360px) {
+    .product-name {
+        font-size: 1.3rem !important;
+    }
+    
+    .product-info div:first-child {
+        font-size: 2.5rem;
+    }
 }
 </style>
-
 
 <div class="page-container">
 
@@ -134,12 +234,12 @@
     </header>
 
     <!-- PRODUCT CATEGORY CARDS -->
-    <section style="margin-bottom: 2.5rem;">
-        <div style="text-align:center; margin-bottom:1.5rem;">
-            <h2 style="color:#d4af37; font-size:2rem; font-weight:700;">
+    <section>
+        <div style="text-align:center; margin-bottom:2rem;">
+            <h2 style="color:#d4af37; font-size:1.8rem; font-weight:700;">
                 🏗️ Our Product Categories
             </h2>
-            <p style="color:#000;">Browse our scaffolding and fabrication products</p>
+            <p style="color:#666; font-size:1rem; margin-top:0.5rem;">Browse our scaffolding and fabrication products</p>
         </div>
 
         <div class="products-grid">
@@ -176,7 +276,7 @@
     <!-- HELP BOX -->
     <div class="help-box">
         <h3 class="help-title">Need Help?</h3>
-        <p style="color:#555;">
+        <p style="color:#555; line-height:1.6;">
             Our team is here to assist you with product selection, pricing, and orders. Feel free to reach out!
         </p>
     </div>

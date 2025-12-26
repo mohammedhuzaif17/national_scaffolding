@@ -31,11 +31,11 @@
                 </div>
 
                 <div class="form-group">
-    <label for="images">Product Images</label>
-    <input type="file" id="images" name="images" multiple accept="image/*" class="form-control">
-    <div id="image-preview" class="image-preview-container"></div>
-    <small class="form-text text-muted">You can select multiple images at once</small>
-</div>
+                    <label for="images">Product Images</label>
+                    <input type="file" id="images" name="images" multiple accept="image/*" class="form-control">
+                    <div id="image-preview" class="image-preview-container"></div>
+                    <small class="form-text text-muted">You can select multiple images at once</small>
+                </div>
             </div>
 
             <div class="form-section">
@@ -60,6 +60,7 @@
     </div>
 </div>
 
+<!-- Logic for adding size fields -->
 <script>
 function addSizeField() {
     const container = document.getElementById('sizes-container');
@@ -73,7 +74,40 @@ function addSizeField() {
 }
 </script>
 
+<!-- Logic for image preview -->
+<script>
+    document.getElementById('images').addEventListener('change', function(e) {
+    const preview = document.getElementById('image-preview');
+    preview.innerHTML = '';
+    
+    if (this.files) {
+        Array.from(this.files).forEach((file, index) => {
+            const reader = new FileReader();
+            
+            reader.onload = function(event) {
+                const div = document.createElement('div');
+                div.className = 'preview-image';
+                div.innerHTML = `
+                    <img src="${event.target.result}" alt="Preview ${index+1}">
+                    <button type="button" class="remove-btn" onclick="removePreviewImage(this)">×</button>
+                `;
+                preview.appendChild(div);
+            }
+            
+            reader.readAsDataURL(file);
+        });
+    }
+});
+
+function removePreviewImage(btn) {
+    btn.parentElement.remove();
+}
+</script>
+
 <style>
+/* =========================================
+   BASE STYLES (Desktop Default)
+   ========================================= */
 .admin-container {
     max-width: 800px;
     margin: 0 auto;
@@ -107,6 +141,7 @@ function addSizeField() {
 .form-section h3 {
     color: #001d3d;
     margin-bottom: 1rem;
+    font-size: 1.25rem;
 }
 
 .form-help {
@@ -132,58 +167,74 @@ function addSizeField() {
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 1rem;
+    transition: border-color 0.2s;
 }
 
 .form-control:focus {
     outline: none;
     border-color: #002855;
-    box-shadow: 0 0 5px rgba(0,40,85,0.3);
+    box-shadow: 0 0 0 3px rgba(0,40,85,0.1);
 }
 
+/* Dynamic Size Inputs */
 .size-input-group {
     display: flex;
     gap: 1rem;
     margin-bottom: 0.75rem;
+    align-items: center;
 }
 
 .size-input-group .form-control {
     flex: 1;
 }
 
+/* Buttons */
 .btn {
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
     text-decoration: none;
     border: none;
     cursor: pointer;
     font-weight: 600;
+    display: inline-block;
+    text-align: center;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.btn:active {
+    transform: translateY(1px);
 }
 
 .btn-sm {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
 }
 
 .btn-secondary {
     background: #6c757d;
     color: white;
 }
+.btn-secondary:hover { background: #5a6268; }
 
 .btn-danger {
     background: #dc3545;
     color: white;
+    white-space: nowrap;
 }
+.btn-danger:hover { background: #c82333; }
 
 .btn-primary {
     background: #002855;
     color: white;
 }
+.btn-primary:hover { background: #001d3d; }
 
 .btn-lg {
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
+    padding: 0.8rem 1.5rem;
+    font-size: 1.1rem;
 }
 
+/* Form Actions */
 .form-actions {
     display: flex;
     gap: 1rem;
@@ -194,11 +245,12 @@ function addSizeField() {
     flex: 1;
 }
 
+/* Image Preview */
 .image-preview-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 10px;
+    gap: 12px;
+    margin-top: 15px;
 }
 
 .preview-image {
@@ -206,8 +258,9 @@ function addSizeField() {
     height: 100px;
     overflow: hidden;
     border: 1px solid #ddd;
-    border-radius: 4px;
+    border-radius: 6px;
     position: relative;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .preview-image img {
@@ -218,47 +271,94 @@ function addSizeField() {
 
 .preview-image .remove-btn {
     position: absolute;
-    top: 5px;
-    right: 5px;
-    background: rgba(255, 0, 0,  0.7);
+    top: 4px;
+    right: 4px;
+    background: rgba(220, 53, 69, 0.9);
     color: white;
     border: none;
     border-radius: 50%;
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
+    line-height: 1;
+}
+
+/* =========================================
+   RESPONSIVE / MOBILE STYLES
+   ========================================= */
+@media (max-width: 600px) {
+    /* Adjust Container */
+    .admin-container {
+        padding: 1rem;
+    }
+
+    .form-container {
+        padding: 1.5rem 1rem;
+    }
+
+    /* Adjust Header */
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .page-header h1 {
+        font-size: 1.5rem;
+        margin: 0;
+    }
+
+    .page-header .btn {
+        width: 100%;
+    }
+
+    /* Adjust Inputs */
+    /* Setting font-size to 16px prevents iOS zoom on focus */
+    .form-control, textarea, select {
+        font-size: 16px !important;
+        padding: 12px; /* Larger touch area */
+    }
+
+    /* Fix Size Inputs (Stack vertically) */
+    .size-input-group {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+
+    .size-input-group .btn {
+        width: 100%;
+        padding: 12px; /* Larger touch target */
+    }
+
+    /* Fix Action Buttons (Stack vertically) */
+    .form-actions {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+        padding: 14px; /* Larger touch target */
+        font-size: 1rem;
+    }
+
+    /* Adjust Image Preview */
+    .preview-image {
+        width: 80px;
+        height: 80px;
+    }
+
+    /* Helper text */
+    .form-text.text-muted {
+        font-size: 0.85rem;
+        display: block;
+        margin-top: 5px;
+    }
 }
 </style>
-<script>
-    document.getElementById('images').addEventListener('change', function(e) {
-    const preview = document.getElementById('image-preview');
-    preview.innerHTML = '';
-    
-    if (this.files) {
-        Array.from(this.files).forEach((file, index) => {
-            const reader = new FileReader();
-            
-            reader.onload = function(event) {
-                const div = document.createElement('div');
-                div.className = 'preview-image';
-                div.innerHTML = `
-                    <img src="${event.target.result}" alt="Preview ${index+1}">
-                    <button type="button" class="remove-btn" onclick="removePreviewImage(this)">×</button>
-                `;
-                preview.appendChild(div);
-            }
-            
-            reader.readAsDataURL(file);
-        });
-    }
-});
-
-function removePreviewImage(btn) {
-    btn.parentElement.remove();
-}
-</script>
 {% endblock %}

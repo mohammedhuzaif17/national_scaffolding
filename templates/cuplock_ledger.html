@@ -12,10 +12,15 @@
     --ledger-secondary: #1e40af;
 }
 
+/* Ensure box-sizing is calculated correctly for mobile widths */
+* {
+    box-sizing: border-box;
+}
+
 .glass-container {
     max-width: 1100px;
     margin: 20px auto;
-    padding: 18px;
+    padding: 24px;
     font-family: Inter, sans-serif;
     color: #111827;
 }
@@ -23,12 +28,21 @@
 .detail-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
+    gap: 2rem;
     align-items: start;
 }
 
-@media (max-width: 880px) {
-    .detail-grid { grid-template-columns: 1fr; }
+/* Tablet & Mobile Layout */
+@media (max-width: 900px) {
+    .glass-container {
+        padding: 15px;
+        margin: 10px auto;
+    }
+    
+    .detail-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
 }
 
 .product-detail-gallery {
@@ -36,7 +50,7 @@
     width: 100%;
     height: 500px;
     overflow: hidden;
-    border-radius: 10px;
+    border-radius: 12px;
     background: #f0f0f0;
     display: flex;
     align-items: center;
@@ -47,7 +61,7 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
-    border-radius: 10px;
+    border-radius: 12px;
 }
 
 .no-image-box {
@@ -55,38 +69,43 @@
     padding: 3.5rem;
     text-align: center;
     border-radius: 10px;
+    border: 2px dashed #ccc;
 }
 
 .page-title { 
-    font-size: 1.6rem; 
-    margin: 0; 
+    font-size: 1.8rem; 
+    margin: 0 0 5px 0; 
     color: var(--brand-900); 
+    line-height: 1.2;
 }
 
 .product-meta { 
     background: var(--ledger-primary);
     color: white;
     display: inline-block;
-    padding: 0.5rem 1rem;
+    padding: 6px 14px;
     border-radius: 20px;
     text-transform: uppercase;
-    margin: 8px 0 16px;
+    margin: 0 0 16px 0;
     font-weight: 700;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
 }
 
 .product-description { 
-    color: #000; 
+    color: #4b5563; 
     line-height: 1.6; 
-    margin-bottom: 1rem; 
+    margin-bottom: 1.5rem; 
+    font-size: 0.95rem;
 }
 
 .ledger-pricing-box {
     background: linear-gradient(135deg, var(--ledger-primary), var(--ledger-secondary));
     padding: 24px;
-    border-radius: 12px;
+    border-radius: 16px;
     color: white;
     margin-top: 20px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 .ledger-pricing-box h3 {
@@ -100,18 +119,18 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px;
+    padding: 12px 14px;
     background: rgba(255,255,255,0.1);
     border-radius: 8px;
     margin-bottom: 10px;
 }
 
 .price-info-row strong {
-    font-size: 1rem;
+    font-size: 0.95rem;
 }
 
 .price-info-row span {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: bold;
     color: var(--accent);
 }
@@ -123,29 +142,42 @@
 .form-group label {
     display: block;
     margin-bottom: 8px;
-    font-weight: 700;
-    color: white;
+    font-weight: 600;
+    color: rgba(255,255,255,0.9);
+    font-size: 0.9rem;
 }
 
 .form-group select {
     width: 100%;
-    padding: 12px;
+    padding: 14px;
     border-radius: 8px;
     border: 2px solid rgba(255,255,255,0.2);
     background: rgba(255,255,255,0.95);
     font-size: 1rem;
     cursor: pointer;
+    outline: none;
+    appearance: none; /* Removes default arrow for custom styling */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1em;
+}
+
+.form-group select:focus {
+    border-color: var(--accent);
+    background-color: #fff;
 }
 
 .final-price-display {
-    font-size: 2rem;
+    font-size: 2.2rem;
     font-weight: 900;
     text-align: center;
     color: var(--accent);
-    margin: 20px 0;
+    margin: 24px 0;
     padding: 16px;
     background: rgba(0,0,0,0.2);
-    border-radius: 10px;
+    border-radius: 12px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .deposit-display {
@@ -166,17 +198,23 @@
     background: linear-gradient(135deg, #10b981, #059669);
     color: white;
     border: none;
-    padding: 16px;
-    border-radius: 10px;
+    padding: 18px;
+    border-radius: 12px;
     font-weight: 800;
     width: 100%;
     cursor: pointer;
     font-size: 1.1rem;
-    transition: transform 0.2s;
+    transition: transform 0.1s, box-shadow 0.2s;
+    box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(16, 185, 129, 0.4);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
 }
 
 .btn-primary:disabled {
@@ -186,13 +224,20 @@
 }
 
 .btn-secondary {
-    background: #6c757d;
-    color: white;
-    border: none;
-    padding: 10px 16px;
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+    padding: 10px 20px;
     border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
+    transition: background 0.2s;
+    display: inline-flex;
+    align-items: center;
+}
+
+.btn-secondary:hover {
+    background: #e5e7eb;
 }
 
 .admin-warning {
@@ -200,17 +245,86 @@
     border-left: 4px solid #ffa500;
     padding: 12px;
     border-radius: 8px;
-    margin-top: 12px;
+    margin-top: 16px;
 }
 
+/* ==========================================
+   MOBILE SPECIFIC FIXES
+   ========================================== */
 @media (max-width: 480px) {
-    .product-detail-gallery { height: 260px; }
-    .final-price-display { font-size: 1.5rem; }
+    .glass-container {
+        padding: 10px;
+    }
+
+    .detail-grid {
+        gap: 1rem;
+    }
+
+    /* Increase image height slightly on mobile for better visibility */
+    .product-detail-gallery {
+        height: 280px;
+    }
+
+    .page-title {
+        font-size: 1.4rem;
+    }
+
+    .product-meta {
+        font-size: 0.75rem;
+        padding: 4px 10px;
+    }
+
+    .ledger-pricing-box {
+        padding: 16px;
+        border-radius: 12px;
+    }
+
+    .ledger-pricing-box h3 {
+        font-size: 1.1rem;
+        margin-bottom: 16px;
+    }
+
+    .price-info-row {
+        padding: 10px;
+        margin-bottom: 8px;
+        flex-direction: row; /* Keep row, but adjust font sizes */
+        justify-content: space-between;
+    }
+
+    .price-info-row strong {
+        font-size: 0.85rem;
+    }
+
+    .price-info-row span {
+        font-size: 1rem;
+    }
+
+    .form-group select {
+        padding: 12px; /* Slightly smaller touch target */
+        font-size: 16px; /* Prevents iOS zoom on focus */
+    }
+
+    .final-price-display {
+        font-size: 1.8rem;
+        margin: 16px 0;
+        padding: 12px;
+    }
+
+    .btn-primary {
+        padding: 16px;
+        font-size: 1rem;
+    }
+    
+    .btn-secondary {
+        width: 100%;
+        justify-content: center;
+        margin-bottom: 10px;
+    }
 }
 </style>
 
 <div class="glass-container">
-    <button class="btn-secondary" onclick="history.back()" style="margin-bottom: 1rem;">
+    <button class="btn-secondary" onclick="history.back()" style="margin-bottom: 1rem; width: auto;">
         ← Back to Products
     </button>
 

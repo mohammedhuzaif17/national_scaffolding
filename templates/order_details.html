@@ -1,67 +1,270 @@
-
 {% extends "base.html" %}
 {% block title %}Order Details #{{ order.id }}{% endblock %}
 
 {% block content %}
-<div class="glass-container" style="max-width: 900px; margin: 2rem auto;">
-    <button class="btn-secondary" onclick="window.history.back()" style="margin-bottom: 1rem; width: auto;">← Back</button>
+<style>
+/* =========================================
+   BASE STYLES (Desktop Default)
+   ========================================= */
+.order-detail-container {
+    max-width: 900px;
+    margin: 2rem auto;
+}
+
+/* Back Button */
+.btn-back {
+    margin-bottom: 1rem;
+    width: auto;
+    padding: 8px 16px;
+    display: inline-block;
+}
+
+/* Order Header Gradient */
+.order-header-card {
+    background: linear-gradient(135deg, #1e3a8a, #d4af37);
+    padding: 2rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.order-title h1 {
+    margin: 0;
+    font-size: 2rem;
+}
+
+.order-date {
+    margin: 0.5rem 0 0;
+    opacity: 0.9;
+}
+
+.status-display {
+    text-align: right;
+}
+
+.status-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    display: block;
+}
+
+.status-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-top: 0.5rem;
+    display: block;
+}
+
+/* Info Grid (Customer & Payment) */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.info-card h2 {
+    color: #d4af37;
+    margin-top: 0;
+    font-size: 1.2rem;
+}
+
+.info-box {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1.5rem;
+    border-radius: 8px;
+}
+
+.info-row {
+    margin-bottom: 1rem;
+}
+
+.info-row:last-child {
+    margin-bottom: 0;
+}
+
+.info-label {
+    color: #aaa;
+    font-size: 0.9rem;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.info-value {
+    font-size: 1.1rem;
+    word-break: break-word;
+}
+
+/* Order Items Table */
+.order-table-container {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    overflow-x: auto; /* Allows table to scroll on mobile */
+    margin-bottom: 2rem;
+}
+
+.order-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px; /* Ensures columns don't squash too much */
+}
+
+.order-table th {
+    background-color: rgba(212, 175, 55, 0.1);
+    border-bottom: 2px solid #d4af37;
+    padding: 1rem;
+    text-align: left;
+    color: #d4af37;
+}
+
+.order-table td {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.order-table .text-right { text-align: right; }
+.order-table .text-center { text-align: center; }
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+/* =========================================
+   RESPONSIVE MOBILE STYLES
+   ========================================= */
+@media (max-width: 768px) {
+    .order-detail-container {
+        margin: 1rem auto;
+        padding: 0 10px;
+    }
+
+    /* Stack Header */
+    .order-header-card {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1.5rem;
+    }
+
+    .status-display {
+        text-align: left;
+        width: 100%;
+        border-top: 1px solid rgba(255,255,255,0.2);
+        padding-top: 1rem;
+    }
+
+    .order-title h1 {
+        font-size: 1.5rem;
+    }
+
+    .status-value {
+        font-size: 1.2rem;
+    }
+
+    /* Stack Info Grid */
+    .info-grid {
+        grid-template-columns: 1fr; /* Single column */
+        gap: 1.5rem;
+    }
+
+    .info-box {
+        padding: 1rem;
+    }
+
+    /* Adjust Text Sizes */
+    .info-value {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Stack Buttons Vertically */
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .action-buttons button {
+        width: 100%; /* Full width buttons */
+        padding: 14px; /* Larger touch target */
+        font-size: 1rem;
+    }
+
+    .order-title h1 {
+        font-size: 1.3rem;
+    }
+}
+</style>
+
+<div class="glass-container order-detail-container">
+    <button class="btn-secondary btn-back" onclick="window.history.back()">← Back</button>
     
-    <div style="background: linear-gradient(135deg, #1e3a8a, #d4af37); padding: 2rem; border-radius: 10px; margin-bottom: 2rem; color: white;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <h1 style="margin: 0; font-size: 2rem;">Order #{{ order.id }}</h1>
-                <p style="margin: 0.5rem 0 0; opacity: 0.9;">{{ order.order_date.strftime('%B %d, %Y at %I:%M %p') }}</p>
-            </div>
-            <div style="text-align: right;">
-                <div style="font-size: 0.9rem; opacity: 0.9;">Status</div>
-                <div style="font-size: 1.5rem; font-weight: bold; margin-top: 0.5rem;">
-                    {% if order.status == 'completed' %}
-                        <span style="color: #4CAF50;">✓ COMPLETED</span>
-                    {% elif order.status == 'pending_verification' %}
-                        <span style="color: #FFA500;">⏳ PENDING VERIFICATION</span>
-                    {% elif order.statuas == 'rejected' %}
-                        <span style="color: #FF4444;">✗ REJECTED</span>
-                    {% else %}
-                        <span>{{ order.status|upper }}</span>
-                    {% endif %}
-                </div>
-            </div>
+    <!-- ORDER HEADER -->
+    <div class="order-header-card">
+        <div class="order-title">
+            <h1>Order #{{ order.id }}</h1>
+            <p class="order-date">{{ order.order_date.strftime('%B %d, %Y at %I:%M %p') }}</p>
+        </div>
+        <div class="status-display">
+            <span class="status-label">Status</span>
+            <span class="status-value">
+                {% if order.status == 'completed' %}
+                    <span style="color: #4CAF50;">✓ COMPLETED</span>
+                {% elif order.status == 'pending_verification' %}
+                    <span style="color: #FFA500;">⏳ PENDING VERIFICATION</span>
+                {% elif order.statuas == 'rejected' %}
+                    <span style="color: #FF4444;">✗ REJECTED</span>
+                {% else %}
+                    <span>{{ order.status|upper }}</span>
+                {% endif %}
+            </span>
         </div>
     </div>
     
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
-        <div>
-            <h2 style="color: #d4af37; margin-top: 0; font-size: 1.2rem;">Customer Information</h2>
-            <div style="background: rgba(255, 255, 255, 0.05); padding: 1.5rem; border-radius: 8px;">
-                <div style="margin-bottom: 1rem;">
-                    <label style="color: #aaa; font-size: 0.9rem;">Name</label>
-                    <div style="font-size: 1.1rem;">{{ order.user.full_name }}</div>
+    <!-- INFO GRID (Customer & Payment) -->
+    <div class="info-grid">
+        <!-- Customer Info -->
+        <div class="info-card">
+            <h2>Customer Information</h2>
+            <div class="info-box">
+                <div class="info-row">
+                    <label class="info-label">Name</label>
+                    <div class="info-value">{{ order.user.full_name }}</div>
                 </div>
-                <div style="margin-bottom: 1rem;">
-                    <label style="color: #aaa; font-size: 0.9rem;">Email</label>
-                    <div style="font-size: 1rem; word-break: break-all;">{{ order.user.email }}</div>
+                <div class="info-row">
+                    <label class="info-label">Email</label>
+                    <div class="info-value" style="word-break: break-all;">{{ order.user.email }}</div>
                 </div>
-                <div>
-                    <label style="color: #aaa; font-size: 0.9rem;">Phone</label>
-                    <div style="font-size: 1.1rem;">{{ order.user.phone }}</div>
+                <div class="info-row">
+                    <label class="info-label">Phone</label>
+                    <div class="info-value">{{ order.user.phone }}</div>
                 </div>
             </div>
         </div>
         
-        <div>
-            <h2 style="color: #d4af37; margin-top: 0; font-size: 1.2rem;">Payment Information</h2>
-            <div style="background: rgba(255, 255, 255, 0.05); padding: 1.5rem; border-radius: 8px;">
-                <div style="margin-bottom: 1rem;">
-                    <label style="color: #aaa; font-size: 0.9rem;">Transaction ID</label>
-                    <div style="font-size: 1.1rem; font-family: monospace;">{{ order.transaction_id }}</div>
+        <!-- Payment Info -->
+        <div class="info-card">
+            <h2>Payment Information</h2>
+            <div class="info-box">
+                <div class="info-row">
+                    <label class="info-label">Transaction ID</label>
+                    <div class="info-value" style="font-family: monospace;">{{ order.transaction_id }}</div>
                 </div>
-                <div style="margin-bottom: 1rem;">
-                    <label style="color: #aaa; font-size: 0.9rem;">Total Amount</label>
-                    <div style="font-size: 1.3rem; color: #4CAF50; font-weight: bold;">₹{{ "%.2f"|format(order.total_price) }}</div>
+                <div class="info-row">
+                    <label class="info-label">Total Amount</label>
+                    <div class="info-value" style="color: #4CAF50; font-weight: bold; font-size: 1.3rem;">₹{{ "%.2f"|format(order.total_price) }}</div>
                 </div>
-                <div>
-                    <label style="color: #aaa; font-size: 0.9rem;">Amount Paid</label>
-                    <div style="font-size: 1.1rem;">
+                <div class="info-row">
+                    <label class="info-label">Amount Paid</label>
+                    <div class="info-value">
                         {% if order.amount_paid %}
                             ₹{{ "%.2f"|format(order.amount_paid) }}
                         {% else %}
@@ -73,25 +276,26 @@
         </div>
     </div>
     
+    <!-- ORDER ITEMS TABLE -->
     <div>
         <h2 style="color: #d4af37; margin-top: 0; margin-bottom: 1rem; font-size: 1.2rem;">Order Items</h2>
-        <div style="background: rgba(255, 255, 255, 0.05); border-radius: 8px; overflow: hidden;">
-            <table style="width: 100%; border-collapse: collapse;">
+        <div class="order-table-container">
+            <table class="order-table">
                 <thead>
-                    <tr style="background-color: rgba(212, 175, 55, 0.1); border-bottom: 2px solid #d4af37;">
-                        <th style="padding: 1rem; text-align: left; color: #d4af37;">Product</th>
-                        <th style="padding: 1rem; text-align: center; color: #d4af37;">Quantity</th>
-                        <th style="padding: 1rem; text-align: right; color: #d4af37;">Unit Price</th>
-                        <th style="padding: 1rem; text-align: right; color: #d4af37;">Total</th>
+                    <tr>
+                        <th>Product</th>
+                        <th class="text-center">Quantity</th>
+                        <th class="text-right">Unit Price</th>
+                        <th class="text-right">Total</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for item in order.items %}
-                    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
-                        <td style="padding: 1rem;">{{ item.product_name }}</td>
-                        <td style="padding: 1rem; text-align: center;">{{ item.quantity }}</td>
-                        <td style="padding: 1rem; text-align: right;">₹{{ "%.2f"|format(item.price) }}</td>
-                        <td style="padding: 1rem; text-align: right; font-weight: bold;">₹{{ "%.2f"|format(item.price * item.quantity) }}</td>
+                    <tr>
+                        <td>{{ item.product_name }}</td>
+                        <td class="text-center">{{ item.quantity }}</td>
+                        <td class="text-right">₹{{ "%.2f"|format(item.price) }}</td>
+                        <td class="text-right" style="font-weight: bold;">₹{{ "%.2f"|format(item.price * item.quantity) }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -99,7 +303,8 @@
         </div>
     </div>
     
-    <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center;">
+    <!-- ACTION BUTTONS -->
+    <div class="action-buttons">
         <button class="btn-secondary" onclick="window.history.back()">Back to Orders</button>
         {% if session.get('user_type') == 'admin' and order.status == 'pending_verification' %}
             <button class="btn-success" onclick="verifyPaymentFromDetails({{ order.id }})">Verify Payment</button>

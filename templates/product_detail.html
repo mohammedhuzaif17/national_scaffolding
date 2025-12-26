@@ -11,6 +11,9 @@
     --muted: #666;
 }
 
+/* Ensure box-sizing includes padding/border in width calculations */
+* { box-sizing: border-box; }
+
 .glass-container {
     max-width: 1100px;
     margin: 20px auto;
@@ -26,8 +29,10 @@
     align-items: start;
 }
 
-@media (max-width: 880px) {
-    .detail-grid { grid-template-columns: 1fr; }
+/* Tablet & Mobile Layout */
+@media (max-width: 900px) {
+    .glass-container { padding: 15px; }
+    .detail-grid { grid-template-columns: 1fr; gap: 2rem; }
 }
 
 /* Gallery */
@@ -62,7 +67,7 @@
 }
 
 .gallery-main-image.active {
-    opacity: 1;
+    opacity:1;
     z-index: 1;
     pointer-events: auto;
 }
@@ -81,7 +86,11 @@
     margin-top: 14px;
     overflow-x: auto;
     padding-bottom: 6px;
+    /* Hide scrollbar for cleaner look */
+    -ms-overflow-style: none; 
+    scrollbar-width: none; 
 }
+.gallery-thumbnails::-webkit-scrollbar { display: none; }
 
 .gallery-thumbnail {
     width: 80px;
@@ -127,6 +136,7 @@
     border-radius: 999px;
     font-weight: 700;
     z-index: 30;
+    font-size: 0.9rem;
 }
 
 .no-image-box {
@@ -137,26 +147,71 @@
 }
 
 /* Product info */
-.page-title { font-size: 1.6rem; margin: 0; color: var(--brand-900); }
-.product-meta { color: var(--accent); text-transform: uppercase; margin: 8px 0 16px; font-weight:700; }
-.product-description { color: #000; line-height:1.6; margin-bottom: 1rem; }
+.page-title { 
+    font-size: 1.6rem; 
+    margin: 0; 
+    color: var(--brand-900); 
+    line-height: 1.3;
+}
+.product-meta { 
+    color: var(--accent); 
+    text-transform: uppercase; 
+    margin: 8px 0 16px; 
+    font-weight:700; 
+    font-size: 0.9rem;
+}
+.product-description { 
+    color: #000; 
+    line-height:1.6; 
+    margin-bottom: 1rem; 
+    font-size: 0.95rem;
+}
 
-.customization-section { margin-top: 10px; }
-.product-price { font-size: 1.3rem; font-weight: 900; color: var(--brand-900); margin-top: 8px; }
-.form-group { margin-bottom: 10px; }
-.form-group label { display:block; margin-bottom:6px; font-weight:700; color:var(--brand-700); }
-.form-group select { width:100%; padding:8px 10px; border-radius:6px; border:1px solid #e6e9ee; }
+.customization-section { margin-top: 10px; background: #fff; padding: 10px; border-radius: 8px; }
+.product-price { 
+    font-size: 1.5rem; 
+    font-weight: 900; 
+    color: var(--brand-900); 
+    margin-top: 12px; 
+    margin-bottom: 12px;
+}
+
+.form-group { margin-bottom: 16px; }
+.form-group label { 
+    display:block; 
+    margin-bottom:8px; 
+    font-weight:700; 
+    color:var(--brand-700); 
+    font-size: 0.9rem;
+}
+
+.form-group select { 
+    width:100%; 
+    padding: 12px 14px; /* Increased touch target */
+    border-radius:8px; 
+    border:1px solid #e6e9ee;
+    background-color: #fff;
+    font-size: 16px; /* CRITICAL: Prevents iOS zoom */
+    appearance: none; /* Removes default arrow for custom styling */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1em;
+}
 
 .btn-primary {
     background: linear-gradient(135deg,var(--brand-700),var(--brand-900));
     color: white;
     border: none;
-    padding: 12px;
+    padding: 14px; /* Increased touch target */
     border-radius: 10px;
     font-weight: 800;
     width: 100%;
     cursor: pointer;
+    font-size: 1.1rem;
+    transition: transform 0.2s;
 }
+.btn-primary:hover { transform: translateY(-2px); }
 
 .btn-secondary {
     background: #6c757d;
@@ -166,20 +221,25 @@
     border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
+    display: inline-block;
+    text-align: center;
 }
 
 .toast-notification {
     position: fixed;
-    bottom: 20px;
+    bottom: 30px; /* Moved up slightly */
     left: 50%;
     transform: translateX(-50%) translateY(100px);
-    background-color: rgba(0,0,0,0.82);
+    background-color: rgba(0,0,0,0.9);
     color: white;
-    padding: 12px 20px;
-    border-radius: 6px;
+    padding: 14px 24px;
+    border-radius: 50px; /* Pill shape */
     z-index: 2000;
     opacity: 0;
     transition: all .28s ease;
+    width: max-content;
+    max-width: 90%;
+    text-align: center;
 }
 .toast-notification.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
@@ -192,7 +252,7 @@
     align-items: center;
     justify-content: center;
     z-index: 3000;
-    padding: 18px;
+    padding: 10px;
 }
 .modal-overlay.show { display: flex; }
 
@@ -224,7 +284,7 @@
 
 .modal-close, .modal-nav {
     position: absolute;
-    background: rgba(255,255,255,0.1);
+    background: rgba(0,0,0,0.4);
     color: #fff;
     border: none;
     width: 44px;
@@ -236,14 +296,39 @@
     cursor: pointer;
     z-index: 3050;
 }
-.modal-close { right: 18px; top: 18px; }
+.modal-close { right: 18px; top: 18px; background: rgba(0,0,0,0.8); }
 .modal-nav { top: 50%; transform: translateY(-50%); width: 56px; height: 56px; font-size: 28px; }
 .modal-prev { left: 12px; }
 .modal-next { right: 12px; }
 
+/* =========================================
+   RESPONSIVE MOBILE STYLES
+   ========================================= */
+@media (max-width: 768px) {
+    .product-detail-gallery { height: 350px; }
+    .gallery-navigation { width: 40px; height: 40px; font-size: 20px; }
+    .gallery-prev { left: 10px; }
+    .gallery-next { right: 10px; }
+}
+
 @media (max-width: 480px) {
-    .gallery-thumbnail { width: 56px; height:56px; }
+    .glass-container { padding: 10px; }
+    
+    .page-title { font-size: 1.4rem; }
+    
+    /* Significantly reduce gallery height on phones */
     .product-detail-gallery { height: 260px; }
+    
+    /* Smaller thumbnails */
+    .gallery-thumbnail { width: 60px; height: 60px; }
+    .gallery-thumbnails { gap: 8px; }
+    
+    /* Adjust buttons */
+    .btn-primary { font-size: 1rem; padding: 12px; }
+    
+    /* Ensure modal nav is touchable */
+    .modal-nav { width: 48px; height: 48px; }
+    .modal-close { width: 40px; height: 40px; top: 10px; right: 10px; }
 }
 </style>
 
@@ -273,7 +358,7 @@
                             {% endfor %}
                         </div>
 
-                        {% if valid_images|length > 1 %}
+                        {% if valid_images|length >1 %}
                             <div class="gallery-counter">
                                 <span id="currentImageNum">1</span> / {{ valid_images|length }}
                             </div>
@@ -315,7 +400,7 @@
             {% if product.category == 'aluminium' %}
                 <div class="customization-section">
                     <h3 style="color: var(--accent); margin-bottom: 8px;">Product Details</h3>
-                    <p style="color: #000; margin-bottom: 1rem;">Height and width specifications are included in product description.</p>
+                    <p style="color: #000; margin-bottom:1rem;">Height and width specifications are included in product description.</p>
 
                     <div class="form-group">
                         <label for="purchase_type">Purchase Type</label>
@@ -540,8 +625,8 @@ if (_category === 'cuplock' && _cuplockType === 'ledger') {
             setActiveImage(parseInt(i));
         };
 
-        function prevImage() { if (totalImages > 1) setActiveImage((currentIndex - 1 + totalImages) % totalImages); }
-        function nextImage() { if (totalImages > 1) setActiveImage((currentIndex + 1) % totalImages); }
+        function prevImage() { if (totalImages >1) setActiveImage((currentIndex - 1 + totalImages) % totalImages); }
+        function nextImage() { if (totalImages >1) setActiveImage((currentIndex + 1) % totalImages); }
 
         if (prevBtn) prevBtn.addEventListener('click', prevImage);
         if (nextBtn) nextBtn.addEventListener('click', nextImage);
@@ -573,13 +658,13 @@ if (_category === 'cuplock' && _cuplockType === 'ledger') {
 
         let modalCurrentIndex = 0;
         window.modalPrev = function() {
-            if (!galleryImages || galleryImages.length <= 1) return;
+            if (!galleryImages || galleryImages.length <=1) return;
             modalCurrentIndex = (modalCurrentIndex - 1 + galleryImages.length) % galleryImages.length;
             modalImg.src = galleryImages[modalCurrentIndex];
         };
 
         window.modalNext = function() {
-            if (!galleryImages || galleryImages.length <= 1) return;
+            if (!galleryImages || galleryImages.length <=1) return;
             modalCurrentIndex = (modalCurrentIndex + 1) % galleryImages.length;
             modalImg.src = galleryImages[modalCurrentIndex];
         };
@@ -628,7 +713,7 @@ if (_category === 'cuplock' && _cuplockType === 'ledger') {
 
             if (!quantityEl || !purchaseTypeEl) return;
 
-            const quantity = parseInt(quantityEl.value) || 1;
+            const quantity = parseInt(quantityEl.value) ||1;
             const purchaseType = purchaseTypeEl.value;
 
             // Single source of truth (admin-defined)

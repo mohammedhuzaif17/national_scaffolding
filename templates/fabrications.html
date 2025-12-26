@@ -1,9 +1,16 @@
 {% extends "base.html" %}
 
 {% block title %}National Scaffolding - Fabrications{% endblock %}
-
 {% block content %}
+
 <style>
+/* =========================================
+   RESET & BASE STYLES
+   ========================================= */
+* {
+    box-sizing: border-box; /* Critical for mobile width calculations */
+}
+
 .product-gallery {
     position: relative;
     width: 100%;
@@ -72,19 +79,13 @@
     border-color: white;
 }
 
-.gallery-prev {
-    left: 10px;
-}
-
-.gallery-next {
-    right: 10px;
-}
+.gallery-prev { left: 10px; }
+.gallery-next { right: 10px; }
 
 .gallery-dots {
     position: absolute;
     bottom: 10px;
-    left: 0;
-    right: 0;
+    left: 0; right: 0;
     display: flex;
     justify-content: center;
     gap: 8px;
@@ -92,8 +93,7 @@
 }
 
 .gallery-dot {
-    width: 10px;
-    height: 10px;
+    width: 10px; height: 10px;
     border-radius: 50%;
     background-color: rgba(255,255,255,0.5);
     cursor: pointer;
@@ -101,20 +101,12 @@
     border: 2px solid rgba(0,0,0,0.3);
 }
 
-.gallery-dot.active {
-    background-color: white;
-    transform: scale(1.2);
-    border-color: rgba(0,0,0,0.5);
-}
-
-.gallery-dot:hover {
-    background-color: rgba(255,255,255,0.8);
-}
+.gallery-dot.active { background-color: white; transform: scale(1.2); border-color: rgba(0,0,0,0.5); }
+.gallery-dot:hover { background-color: rgba(255,255,255,0.8); }
 
 .gallery-counter {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 10px; right: 10px;
     background: rgba(0,0,0,0.7);
     color: white;
     padding: 4px 10px;
@@ -124,46 +116,7 @@
     z-index: 10;
 }
 
-/* FIXED: Two images side by side with + sign */
-.product-image-grid {
-    position: relative;
-    width: 100%;
-    height: 250px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4px;
-    border-radius: 8px 8px 0 0;
-    overflow: hidden;
-    background: #f0f0f0;
-    cursor: pointer;
-}
-
-.product-image-grid img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    background-color: #ffffff;
-}
-
-.product-image-more {
-    position: absolute;
-    top: 50%;
-    right: 10px;
-    transform: translateY(-50%);
-    background: rgba(0,0,0,0.8);
-    color: white;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    font-weight: bold;
-    z-index: 10;
-    pointer-events: none;
-}
-
+/* PRODUCT CARD STYLES */
 .product-card {
     background: white;
     border-radius: 8px;
@@ -172,6 +125,7 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    height: 100%;
 }
 
 .product-card:hover {
@@ -181,11 +135,11 @@
 
 .product-image-container {
     width: 100%;
-    height: 260px; /* uniform height for all product images */
+    height: 260px; /* Desktop height */
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 5px; /* reduced padding */
+    padding: 5px;
     background: #ffffff;
     overflow: hidden;
 }
@@ -193,25 +147,18 @@
 .product-image {
     width: 100%;
     height: 100%;
-    object-fit: contain; /* changed from cover to contain */
+    object-fit: contain;
     transition: transform 0.3s ease;
     cursor: pointer;
     background-color: #ffffff;
 }
 
-.product-image:hover {
-    transform: scale(1.05);
-}
+.product-image:hover { transform: scale(1.05); }
 
 .product-image-placeholder {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f0f0f0;
-    font-size: 3rem;
-    cursor: pointer;
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    background: #f0f0f0; font-size: 3rem; cursor: pointer;
 }
 
 .product-info {
@@ -228,11 +175,10 @@
     color: #001d3d;
     cursor: pointer;
     transition: color 0.3s ease;
+    line-height: 1.3;
 }
 
-.product-name:hover {
-    color: #004080;
-}
+.product-name:hover { color: #004080; }
 
 .product-category {
     display: inline-block;
@@ -251,19 +197,20 @@
     margin-bottom: 1rem;
     line-height: 1.5;
     flex: 1;
+    font-size: 0.95rem;
 }
 
 .product-price-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
 }
 
 .product-price {
-    font-size: 1.8rem; /* Increased from 1.5rem to 1.8rem */
-    font-weight: 800; /* Increased from 700 to 800 for bolder text */
-    color: #001d3d; /* Matching heading color */
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #001d3d;
 }
 
 .product-actions {
@@ -284,30 +231,23 @@
     align-items: center;
     justify-content: center;
     white-space: nowrap;
+    font-size: 0.95rem;
 }
 
-.btn-primary {
-    background: linear-gradient(135deg, #002855, #004080);
-    color: white;
-}
-
-.btn-secondary {
-    background: #6c757d;
-    color: white;
-}
+.btn-primary { background: linear-gradient(135deg, #002855, #004080); color: white; }
+.btn-secondary { background: #6c757d; color: white; }
 
 .btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
+/* PAGE LAYOUT */
 .page-container {
     display: block;
     margin: 0 auto;
     max-width: 100%;
-    height: auto;
-    padding: 10px;
-    object-fit: contain;
+    padding: 20px; /* Desktop padding */
 }
 
 .page-header {
@@ -346,20 +286,7 @@
     transition: all 0.3s ease;
 }
 
-.category-btn.active {
-    background: #001d3d;
-    color: white;
-    border-color: #001d3d;
-}
-
-.category-btn:hover {
-    background: #e9ecef;
-    border-color: #adb5bd;
-}
-
-.category-btn.active:hover {
-    background: #002855;
-}
+.category-btn.active { background: #001d3d; color: white; border-color: #001d3d; }
 
 .products-grid {
     display: grid;
@@ -382,54 +309,18 @@
     box-shadow: 0 4px 16px rgba(212,175,55,0.4);
     transition: all 0.3s ease;
     z-index: 999;
+    text-decoration: none;
+    white-space: nowrap;
 }
 
-.view-cart-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(212,175,55,0.6);
-}
-
-@media (max-width: 768px) {
-    .products-grid {
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 1rem;
-    }
-    
-    .product-image-container {
-        height: 220px; /* slightly smaller on mobile */
-        padding: 3px; /* reduced padding for mobile */
-    }
-    
-    .product-image-grid {
-        height: 220px; /* matching container height */
-    }
-    
-    .product-image-container img,
-    .product-image-grid img {
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: contain; /* keeps image fully visible */
-        display: block;
-        margin: 0 auto;
-    }
-    
-    .page-container {
-        padding: 1rem 0.5rem;
-    }
-    
-    .page-title {
-        font-size: 2rem;
-    }
-}
-
-/* ===== HERO SECTION WITH BACKGROUND IMAGE - MODIFIED ===== */
+/* HERO SECTION */
 .hero-section {
     position: relative;
     width: 100%;
     min-height: 500px;
     background:url('{{ url_for('static', filename='images/background.png') }}');
     background-size: cover;
-    background-position: right center; /* Changed to show more of the right side */
+    background-position: right center;
     background-attachment: fixed;
     background-repeat: no-repeat;
     display: flex;
@@ -442,15 +333,11 @@
     overflow: hidden;
 }
 
-/* REMOVED: The blue overlay that was applied with ::before pseudo-element */
 .hero-section::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.5) 100%); /* Reduced opacity for better visibility */
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.5) 100%);
     z-index: 1;
 }
 
@@ -459,17 +346,16 @@
     z-index: 2;
     max-width: 800px;
     animation: fadeInDown 0.8s ease-out;
-    padding: 20px;
+    padding: 30px;
     border-radius: 10px;
-    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background for better text contrast */
+    background-color: rgba(0, 0, 0, 0.5);
 }
 
 .hero-content h1 {
     font-size: 3.5rem;
     font-weight: 900;
-    color: rgb(255, 255, 255);
     margin-bottom: 1rem;
-    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9); /* Increased shadow for better contrast */
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9);
     letter-spacing: 2px;
 }
 
@@ -477,7 +363,7 @@
     font-size: 1.3rem;
     color: #ffd966;
     margin-bottom: 0.8rem;
-    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.9); /* Increased shadow for better contrast */
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.9);
     font-weight: 600;
 }
 
@@ -486,7 +372,7 @@
     color: #ffffff;
     margin: 1.5rem 0;
     line-height: 1.6;
-    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.9); /* Increased shadow for better contrast */
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.9);
 }
 
 .hero-btn {
@@ -508,67 +394,114 @@
 .hero-btn:hover {
     transform: translateY(-3px);
     box-shadow: 0 8px 28px rgba(212, 175, 55, 0.6);
-    background: linear-gradient(135deg, #ffe082, #ffd966);
 }
 
 @keyframes fadeInDown {
-    from {
-        opacity: 0;
-        transform: translateY(-30px);
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================================
+   RESPONSIVE MOBILE CSS
+   ========================================= */
+
+/* Tablets and Small Desktops */
+@media (max-width: 768px) {
+    .page-container {
+        padding: 15px;
     }
-    to {
-        opacity: 1;
-        transform: translateY(0);
+
+    .hero-section {
+        min-height: 400px;
+        background-attachment: scroll; /* Fixed bg often janky on mobile */
+        padding: 40px 15px;
+        margin-bottom: 20px;
+    }
+
+    .hero-content h1 { font-size: 2.2rem; letter-spacing: 1px; }
+    .hero-content h3 { font-size: 1.1rem; }
+    .hero-tagline { font-size: 0.95rem; }
+    
+    .products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
     }
 }
 
-@media (max-width: 768px) {
-    .hero-section {
-        min-height: 400px;
-        background-attachment: scroll;
-        padding: 60px 15px;
-        margin-bottom: 30px;
+/* Mobile Phones */
+@media (max-width: 480px) {
+    .page-container {
+        padding: 10px; /* Reduce padding for more width */
     }
-    
+
+    .page-title {
+        font-size: 1.8rem;
+    }
+
+    /* Force single column for cleaner look */
+    .products-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    /* Reduce image height on mobile to save vertical space */
+    .product-image-container {
+        height: 200px; 
+        padding: 10px;
+    }
+
+    .product-info {
+        padding: 1rem;
+    }
+
+    .product-name {
+        font-size: 1.1rem;
+    }
+
+    .product-description {
+        font-size: 0.9rem;
+    }
+
+    .product-price {
+        font-size: 1.5rem;
+    }
+
+    /* STACK BUTTONS ON MOBILE */
+    /* This prevents squishing and makes buttons easier to tap */
+    .product-actions {
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .product-actions .btn {
+        width: 100%;
+        padding: 14px; /* Larger touch target */
+        font-size: 1rem;
+    }
+
+    /* Floating Cart Button adjustments */
+    .view-cart-btn {
+        bottom: 15px;
+        right: 15px;
+        padding: 12px 20px;
+        font-size: 1rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+}
+
+/* Very Small Screens (iPhone SE, etc) */
+@media (max-width: 360px) {
     .hero-content {
         padding: 15px;
     }
     
     .hero-content h1 {
-        font-size: 2.2rem;
-        letter-spacing: 1px;
+        font-size: 1.6rem;
     }
-    
-    .hero-content h3 {
-        font-size: 1.1rem;
-    }
-    
-    .hero-tagline {
-        font-size: 0.95rem;
-    }
-}
 
-@media (max-width: 480px) {
-    .hero-section {
-        min-height: 350px;
-        padding: 40px 10px;
-    }
-    
-    .hero-content {
-        padding: 10px;
-    }
-    
-    .hero-content h1 {
-        font-size: 1.8rem;
-        letter-spacing: 0.5px;
-    }
-    
-    .hero-content h3 {
-        font-size: 0.95rem;
-    }
-    
-    .hero-tagline {
-        font-size: 0.85rem;
+    .product-image-container {
+        height: 180px;
     }
 }
 </style>
@@ -593,25 +526,8 @@
         </button>
     </div>
     
-    <!-- FABRICATION CATEGORY FILTERS -->
-    <!-- <div class="category-buttons">
-        <button class="category-btn {% if request.args.get('category') == 'all' or request.args.get('category') == None %}active{% endif %}" 
-                onclick="window.location.href='{{ url_for('fabrications', category='all') }}'">
-            ALL FABRICATIONS
-        </button>
-        <button class="category-btn {% if request.args.get('category') == 'steel' %}active{% endif %}" 
-                onclick="window.location.href='{{ url_for('fabrications', category='steel') }}'">
-            STEEL FABRICATIONS
-        </button>
-        <button class="category-btn {% if request.args.get('category') == 'aluminium' %}active{% endif %}" 
-                onclick="window.location.href='{{ url_for('fabrications', category='aluminium') }}'">
-            ALUMINIUM FABRICATIONS
-        </button>
-        <button class="category-btn {% if request.args.get('category') == 'custom' %}active{% endif %}" 
-                onclick="window.location.href='{{ url_for('fabrications', category='custom') }}'">
-            CUSTOM FABRICATIONS
-        </button>
-    </div> -->
+    <!-- FABRICATION CATEGORY FILTERS (Commented out in original, kept here) -->
+    <!-- <div class="category-buttons">...</div> -->
     
     <div class="products-grid">
         {% for product in products %}
@@ -710,8 +626,6 @@ function addToCart(productId, productName) {
     .then(d => {
         if (d.success) {
             alert('✅ ' + productName + ' added to cart');
-            // Optionally redirect to cart
-            // window.location.href = '/cart';
         } else {
             alert('❌ ' + d.message);
         }

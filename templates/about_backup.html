@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>About Us - THE NATIONAL SCAFFOLDING</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600;700&family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
@@ -12,11 +12,11 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-           body {
-  font-family: 'Inter', sans-serif;
-}
+        }
 
-
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden; /* Prevents horizontal scroll on mobile */
         }
 
         :root {
@@ -105,11 +105,11 @@
         .nav-logo a {
             font-size: 2rem; /* Increased font size */
             font-weight: 700;
-            font-family: 'Playfair Display', serif; /* Changed to a more attractive font */
-            color: var(--royal-blue); /* Changed to a royal blue color */
+            font-family: 'Playfair Display', serif;
+            color: var(--royal-blue);
             text-decoration: none;
-            letter-spacing: 1px; /* Added letter spacing for elegance */
-            text-transform: uppercase; /* Uppercase for more impact */
+            letter-spacing: 1px;
+            text-transform: uppercase;
             position: relative;
             transition: var(--transition);
         }
@@ -121,7 +121,7 @@
             left: 0;
             width: 0;
             height: 3px;
-            background-color: var(--royal-gold); /* Royal gold underline */
+            background-color: var(--royal-gold);
             transition: var(--transition);
         }
 
@@ -140,9 +140,9 @@
 
         .nav-menu a {
             text-decoration: none;
-            color: #000000; /* Changed to pure black for more contrast */
-            font-weight: 700; /* Increased font weight to bold */
-            font-size: 1.1rem; /* Slightly increased font size */
+            color: #000000;
+            font-weight: 700;
+            font-size: 1.1rem;
             transition: var(--transition);
             position: relative;
         }
@@ -154,12 +154,12 @@
             left: 0;
             width: 0;
             height: 3px;
-            background-color: var(--royal-gold); /* Changed to royal gold */
+            background-color: var(--royal-gold);
             transition: var(--transition);
         }
 
         .nav-menu a:hover {
-            color: var(--royal-blue); /* Changed to royal blue on hover */
+            color: var(--royal-blue);
         }
 
         .nav-menu a:hover::after {
@@ -167,7 +167,7 @@
         }
 
         .nav-menu a.active {
-            color: var(--royal-blue); /* Changed to royal blue for active */
+            color: var(--royal-blue);
         }
 
         .nav-menu a.active::after {
@@ -178,7 +178,7 @@
         .nav-menu .cart-icon {
             font-size: 1.2rem;
             color: var(--white);
-            background-color: var(--royal-blue); /* Changed to royal blue */
+            background-color: var(--royal-blue);
             width: 35px;
             height: 35px;
             border-radius: 50%;
@@ -189,7 +189,7 @@
         }
 
         .nav-menu .cart-icon:hover {
-            background-color: var(--royal-gold); /* Changed to royal gold on hover */
+            background-color: var(--royal-gold);
             color: var(--white);
             transform: scale(1.1);
         }
@@ -198,6 +198,7 @@
             display: none;
             flex-direction: column;
             cursor: pointer;
+            z-index: 1001;
         }
 
         .hamburger span {
@@ -218,14 +219,12 @@
             overflow: hidden;
         }
 
-        /* Animated gradient background */
         @keyframes gradientShift {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
 
-        /* Add overlay to make text more readable */
         .hero::before {
             content: '';
             position: absolute;
@@ -295,7 +294,7 @@
             font-size: 2.5rem;
             margin-bottom: 10px;
             font-weight: 700;
-            color: var(--royal-blue); /* Changed to royal blue */
+            color: var(--royal-blue);
         }
 
         .stat-item p {
@@ -327,16 +326,17 @@
         .expertise-container {
             display: flex;
             flex-wrap: nowrap;
-            gap: 30px; /* Increased gap for better spacing */
+            gap: 30px;
             justify-content: space-between;
             overflow-x: auto;
-            padding-bottom: 20px; /* Increased padding */
+            padding: 0 5px 25px 5px; /* Adjusted padding */
             max-width: 1200px;
             margin: 0 auto;
+            -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
         }
 
         .expertise-container::-webkit-scrollbar {
-            height: 8px;
+            height: 6px; /* Thinner scrollbar for mobile */
         }
 
         .expertise-container::-webkit-scrollbar-track {
@@ -345,20 +345,20 @@
         }
 
         .expertise-container::-webkit-scrollbar-thumb {
-            background: var(--royal-blue); /* Changed to royal blue */
+            background: var(--royal-blue);
             border-radius: 10px;
         }
 
         .expertise-item {
-            flex: 1;
-            min-width: 250px; /* Increased min-width */
+            flex: 0 0 auto; /* Prevent shrinking */
+            min-width: 280px; /* Slightly wider for better readability */
             background-color: var(--light-color);
-            padding: 35px; /* Increased padding */
-            border-radius: 15px; /* Increased border radius */
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08); /* Enhanced shadow */
+            padding: 35px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
             text-align: center;
             transition: var(--transition);
-            border: 1px solid rgba(30, 58, 138, 0.1); /* Subtle border */
+            border: 1px solid rgba(30, 58, 138, 0.1);
             position: relative;
             overflow: hidden;
         }
@@ -375,18 +375,18 @@
 
         .expertise-item:hover {
             transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12); /* Enhanced shadow on hover */
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
         }
 
         .expertise-icon {
-            margin-bottom: 25px; /* Increased margin */
+            margin-bottom: 25px;
             position: relative;
             z-index: 1;
         }
 
         .expertise-icon i {
-            font-size: 3rem; /* Increased icon size */
-            color: var(--royal-blue); /* Changed to royal blue */
+            font-size: 3rem;
+            color: var(--royal-blue);
             background: rgba(30, 58, 138, 0.1);
             width: 80px;
             height: 80px;
@@ -404,19 +404,19 @@
         }
 
         .expertise-item h3 {
-            font-size: 1.4rem; /* Increased font size */
+            font-size: 1.4rem;
             margin-bottom: 20px;
-            color: var(--royal-blue); /* Changed to royal blue */
+            color: var(--royal-blue);
             font-weight: 600;
             position: relative;
             z-index: 1;
-            line-height: 1.3; /* Added line height for better spacing */
+            line-height: 1.3;
         }
 
         .expertise-bar {
-            height: 12px; /* Increased height */
-            background-color: rgba(30, 58, 138, 0.1); /* Lighter royal blue */
-            border-radius: 10px; /* Increased border radius */
+            height: 12px;
+            background-color: rgba(30, 58, 138, 0.1);
+            border-radius: 10px;
             margin-bottom: 15px;
             overflow: hidden;
             position: relative;
@@ -424,7 +424,7 @@
 
         .expertise-percentage {
             height: 100%;
-            background: linear-gradient(to right, var(--royal-blue), var(--royal-purple)); /* Changed to royal gradient */
+            background: linear-gradient(to right, var(--royal-blue), var(--royal-purple));
             border-radius: 10px;
             position: relative;
             overflow: hidden;
@@ -442,9 +442,9 @@
         }
 
         .expertise-item p {
-            font-weight: 700; /* Increased font weight */
-            color: var(--royal-blue); /* Changed to royal blue */
-            font-size: 1.1rem; /* Increased font size */
+            font-weight: 700;
+            color: var(--royal-blue);
+            font-size: 1.1rem;
             margin-top: 10px;
             position: relative;
             z-index: 1;
@@ -472,7 +472,7 @@
 
         .clients-section h3, .projects-section h3 {
             font-size: 1.8rem;
-            color: var(--royal-blue); /* Changed to royal blue */
+            color: var(--royal-blue);
             margin-bottom: 25px;
             text-align: center;
             position: relative;
@@ -487,19 +487,19 @@
             transform: translateX(-50%);
             width: 60px;
             height: 3px;
-            background-color: var(--royal-gold); /* Changed to royal gold */
+            background-color: var(--royal-gold);
         }
 
         .clients-grid, .projects-grid {
             display: flex;
-            flex-wrap: nowrap;
-            justify-content: space-between;
-            gap: 10px;
+            flex-wrap: wrap; /* Allow wrapping */
+            justify-content: center; /* Center items */
+            gap: 15px;
         }
 
         .client-item, .project-item {
             background-color: var(--white);
-            padding: 10px 12px;
+            padding: 12px 15px;
             border-radius: 8px;
             text-align: center;
             font-weight: 600;
@@ -509,112 +509,109 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 45px;
+            min-height: 50px;
             cursor: default;
-            font-size: 0.85rem;
-            flex: 1;
+            font-size: 0.9rem;
+            white-space: nowrap; /* Prevent text breaking */
         }
 
         /* ===== Administrators Section ===== */
-.administrators {
-    padding: 80px 0;
-    background-color: var(--white);
-}
+        .administrators {
+            padding: 80px 0;
+            background-color: var(--white);
+        }
 
-.administrators-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 30px;
-    justify-content: center;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 15px;
-}
+        .administrators-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
 
-.administrator {
-    flex: 1;
-    min-width: 250px;
-    max-width: 350px;
-    background-color: var(--light-color);
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-    transition: var(--transition);
-}
+        .administrator {
+            flex: 1;
+            min-width: 250px;
+            max-width: 350px;
+            background-color: var(--light-color);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
 
-.administrator:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-}
+        .administrator:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
 
-/* --- MODIFIED IMAGE CONTAINER --- */
-.administrator-image {
-    position: relative;
-    width: 100%;
-    padding-top: 100%; /* This forces the container to be a perfect square */
-    overflow: hidden;
-    background-color: #f5f5f5; /* Adds a light background to fill any empty space */
-}
+        .administrator-image {
+            position: relative;
+            width: 100%;
+            padding-top: 100%;
+            overflow: hidden;
+            background-color: #f5f5f5;
+        }
 
-/* --- MODIFIED IMAGE ITSELF --- */
-.administrator-image img {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: contain; /* Shows the full image without cropping or stretching */
-    object-position: center; /* Centers the image inside the square container */
-    transition: var(--transition);
-}
+        .administrator-image img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            object-position: center;
+            transition: var(--transition);
+        }
 
-.administrator:hover .administrator-image img {
-    transform: scale(1.05); /* A subtle zoom effect on hover */
-}
+        .administrator:hover .administrator-image img {
+            transform: scale(1.05);
+        }
 
-.administrator h3 {
-    font-size: 1.5rem;
-    color: var(--royal-blue);
-    margin: 20px 0 10px;
-    text-align: center;
-}
+        .administrator h3 {
+            font-size: 1.5rem;
+            color: var(--royal-blue);
+            margin: 20px 0 10px;
+            text-align: center;
+        }
 
-.administrator p {
-    color: var(--text-color);
-    margin-bottom: 20px;
-    text-align: center;
-}
+        .administrator p {
+            color: var(--text-color);
+            margin-bottom: 20px;
+            text-align: center;
+        }
 
-.administrator .social-links {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 30px;
-    padding-bottom: 25px;
-}
+        .administrator .social-links {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            padding-bottom: 25px;
+        }
 
-/* Center single icon */
-.administrator .social-links.single-icon {
-    justify-content: center;
-}
+        .administrator .social-links.single-icon {
+            justify-content: center;
+        }
 
-.administrator .social-links a {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    background-color: var(--royal-blue);
-    color: var(--white);
-    transition: var(--transition);
-    font-size: 1.2rem;
-}
+        .administrator .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background-color: var(--royal-blue);
+            color: var(--white);
+            transition: var(--transition);
+            font-size: 1.2rem;
+        }
 
-.administrator .social-links a:hover {
-    background-color: var(--royal-gold);
-    transform: translateY(-3px);
-}
+        .administrator .social-links a:hover {
+            background-color: var(--royal-gold);
+            transform: translateY(-3px);
+        }
 
         /* ===== User Manual Section ===== */
         .user-manual {
@@ -636,18 +633,18 @@
         }
 
         .user-manual-content h2 {
-            color: var(--royal-blue); /* Changed to royal blue */
+            color: var(--royal-blue);
             margin-bottom: 30px;
             text-align: center;
             font-size: 2.2rem;
         }
 
         .user-manual-content h3 {
-            color: var(--royal-blue); /* Changed to royal blue */
+            color: var(--royal-blue);
             margin-top: 30px;
             margin-bottom: 15px;
             font-size: 1.6rem;
-            border-bottom: 2px solid var(--royal-gold); /* Changed to royal gold */
+            border-bottom: 2px solid var(--royal-gold);
             padding-bottom: 10px;
         }
 
@@ -687,7 +684,7 @@
             transform: translateX(-50%);
             width: 80%;
             height: 1px;
-            background: linear-gradient(to right, transparent, var(--royal-gold), transparent); /* Changed to royal gold */
+            background: linear-gradient(to right, transparent, var(--royal-gold), transparent);
         }
 
         .scaffolding-diagram::after {
@@ -698,20 +695,16 @@
             transform: translateX(-50%);
             width: 80%;
             height: 1px;
-            background: linear-gradient(to right, transparent, var(--royal-gold), transparent); /* Changed to royal gold */
+            background: linear-gradient(to right, transparent, var(--royal-gold), transparent);
         }
 
         .scaffolding-diagram img {
             max-width: 100%;
+            height: auto;
             border-radius: 10px;
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
             border: 4px solid var(--white);
             transition: var(--transition);
-        }
-
-        .scaffolding-diagram:hover img {
-            transform: scale(1.02);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
         }
 
         .scaffolding-diagram-caption {
@@ -719,6 +712,32 @@
             font-style: italic;
             color: var(--text-color);
             font-size: 0.95rem;
+        }
+
+        /* Table Wrapper for Mobile Responsiveness */
+        .table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: 20px 0;
+        }
+
+        .user-manual-content table {
+            width: 100%;
+            min-width: 600px; /* Ensure table keeps layout on small screens by forcing scroll */
+            border-collapse: collapse;
+            margin: 0;
+        }
+
+        .user-manual-content th, .user-manual-content td {
+            border: 1px solid var(--gray);
+            padding: 12px;
+            text-align: left;
+        }
+
+        .user-manual-content th {
+            background-color: var(--light-color);
+            font-weight: 600;
+            white-space: nowrap;
         }
 
         .user-manual-content .faq-item {
@@ -751,27 +770,10 @@
             display: block;
         }
 
-        .user-manual-content table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-
-        .user-manual-content th, .user-manual-content td {
-            border: 1px solid var(--gray);
-            padding: 10px;
-            text-align: left;
-        }
-
-        .user-manual-content th {
-            background-color: var(--light-color);
-            font-weight: 600;
-        }
-
         /* ===== Footer ===== */
         footer {
-            background: var(--footer-bg); /* Changed to premium gradient */
-            color: var(--premium-text); /* Changed to premium text color */
+            background: var(--footer-bg);
+            color: var(--premium-text);
             padding: 70px 0 0;
             position: relative;
             overflow: hidden;
@@ -811,15 +813,15 @@
             font-size: 1.8rem;
             margin-bottom: 15px;
             color: var(--white);
-            font-family: 'Playfair Display', serif; /* Changed to premium font */
+            font-family: 'Playfair Display', serif;
             letter-spacing: 1px;
             text-transform: uppercase;
         }
 
         .footer-logo p {
             margin-bottom: 20px;
-            color: var(--premium-text); /* Changed to premium text color */
-            font-family: 'Source Sans Pro', sans-serif; /* Changed to premium font */
+            color: var(--premium-text);
+            font-family: 'Source Sans Pro', sans-serif;
             font-weight: 400;
             line-height: 1.6;
         }
@@ -846,7 +848,7 @@
         }
 
         .footer-column .social-links a:hover {
-            background-color: var(--premium-gold); /* Changed to premium gold */
+            background-color: var(--premium-gold);
             transform: translateY(-3px);
         }
 
@@ -856,7 +858,7 @@
             position: relative;
             padding-bottom: 10px;
             color: var(--white);
-            font-family: 'Source Sans Pro', sans-serif; /* Changed to premium font */
+            font-family: 'Source Sans Pro', sans-serif;
             font-weight: 600;
             letter-spacing: 0.5px;
         }
@@ -868,7 +870,7 @@
             left: 0;
             width: 50px;
             height: 2px;
-            background-color: var(--premium-gold); /* Changed to premium gold */
+            background-color: var(--premium-gold);
         }
 
         .footer-column ul {
@@ -880,15 +882,15 @@
         }
 
         .footer-column ul li a {
-            color: var(--premium-text); /* Changed to premium text color */
+            color: var(--premium-text);
             text-decoration: none;
             transition: var(--transition);
-            font-family: 'Source Sans Pro', sans-serif; /* Changed to premium font */
+            font-family: 'Source Sans Pro', sans-serif;
             font-weight: 400;
         }
 
         .footer-column ul li a:hover {
-            color: var(--premium-gold); /* Changed to premium gold on hover */
+            color: var(--premium-gold);
             padding-left: 5px;
         }
 
@@ -896,7 +898,8 @@
             display: flex;
             flex: 2;
             gap: 30px;
-            min-width: 500px;
+            min-width: 300px; /* Adjusted for mobile */
+            flex-wrap: wrap; /* Allow wrapping */
         }
 
         .services-column, .contact-column {
@@ -916,41 +919,47 @@
 
         .contact-info li i {
             margin-right: 10px;
-            color: var(--premium-gold); /* Changed to premium gold */
+            color: var(--premium-gold);
             font-size: 1rem;
             margin-top: 4px;
             min-width: 16px;
         }
 
         .contact-info li span {
-            color: var(--premium-text); /* Changed to premium text color */
+            color: var(--premium-text);
             font-size: 0.9rem;
-            font-family: 'Source Sans Pro', sans-serif; /* Changed to premium font */
+            font-family: 'Source Sans Pro', sans-serif;
         }
 
         /* Inline Map Styles */
         .contact-map-item {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             margin-bottom: 15px;
+            flex-direction: column; /* Stack map and link on small screens */
+            gap: 10px;
         }
 
         .inline-map-container {
             display: flex;
             flex-direction: column;
             gap: 5px;
+            width: 100%;
         }
 
+        /* Responsive Iframe */
         .inline-map-container iframe {
             border-radius: 4px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            height: 150px;
         }
 
         .view-map-link {
             display: inline-flex;
             align-items: center;
             gap: 5px;
-            color: var(--premium-gold); /* Changed to premium gold */
+            color: var(--premium-gold);
             font-size: 0.8rem;
             text-decoration: none;
             transition: var(--transition);
@@ -959,10 +968,6 @@
         .view-map-link:hover {
             color: var(--white);
             text-decoration: underline;
-        }
-
-        .view-map-link i {
-            font-size: 0.7rem;
         }
 
         .footer-bottom {
@@ -974,20 +979,20 @@
         }
 
         .footer-bottom-links a {
-            color: var(--premium-text); /* Changed to premium text color */
+            color: var(--premium-text);
             text-decoration: none;
             margin-left: 20px;
             transition: var(--transition);
-            font-family: 'Source Sans Pro', sans-serif; /* Changed to premium font */
+            font-family: 'Source Sans Pro', sans-serif;
         }
 
         .footer-bottom-links a:hover {
-            color: var(--premium-gold); /* Changed to premium gold on hover */
+            color: var(--premium-gold);
         }
 
         /* Policy Sections Styles */
         .policy-section {
-            padding: 80px 0;
+            padding: 80px 0 40px;
             background-color: var(--light-color);
             display: none;
             position: relative;
@@ -1068,42 +1073,28 @@
         }
 
         /* ===== Responsive Styles ===== */
+        
+        /* Tablet and below */
         @media (max-width: 992px) {
             .hero-container {
                 flex-direction: column;
             }
             
             .expertise-container {
-                flex-wrap: wrap;
-                justify-content: center;
+                justify-content: flex-start;
             }
             
             .journey-container {
                 max-width: 100%;
             }
             
-            .clients-grid, .projects-grid {
-                flex-wrap: wrap;
-            }
-            
-            .client-item, .project-item {
-                font-size: 0.8rem;
-                padding: 8px 10px;
-                min-height: 40px;
-                min-width: 100px;
-            }
-            
             .services-contact-container {
                 flex-direction: column;
                 gap: 20px;
             }
-            
-            .inline-map-container iframe {
-                width: 150px;
-                height: 80px;
-            }
         }
 
+        /* Mobile Landscape and Portrait */
         @media (max-width: 768px) {
             .hamburger {
                 display: flex;
@@ -1111,41 +1102,48 @@
             
             .nav-menu {
                 position: fixed;
-                top: 70px;
-                left: -100%;
-                width: 100%;
-                height: calc(100vh - 70px);
+                top: 0; /* Full screen menu */
+                right: -100%; /* Slide from right */
+                width: 80%;
+                max-width: 300px;
+                height: 100vh;
                 background-color: var(--white);
                 flex-direction: column;
-                align-items: center;
+                align-items: flex-start; /* Align left */
                 justify-content: flex-start;
-                padding-top: 50px;
+                padding-top: 80px; /* Space for close button */
+                padding-left: 30px;
+                box-shadow: -2px 0 10px rgba(0,0,0,0.1);
                 transition: var(--transition);
+                z-index: 999;
             }
             
             .nav-menu.active {
-                left: 0;
+                right: 0;
             }
             
             .nav-menu li {
-                margin: 15px 0;
+                margin: 20px 0;
+                width: 100%;
+            }
+            
+            .nav-menu a {
+                font-size: 1.2rem;
+                display: block;
+                padding: 10px 0;
             }
             
             .hero-stats {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr 1fr; /* Keep 2 columns but tighter */
                 gap: 15px;
             }
             
             .stat-item {
-                padding: 15px;
+                padding: 20px 10px;
             }
             
             .stat-item h3 {
                 font-size: 2rem;
-            }
-            
-            .stat-item p {
-                font-size: 0.8rem;
             }
             
             .footer-bottom {
@@ -1154,151 +1152,100 @@
                 gap: 15px;
             }
             
-            .administrator .social-links {
-                gap: 20px;
-            }
-            
-            .footer-column .social-links {
-                justify-content: center;
-                margin-top: 15px;
-            }
-            
-            .client-item, .project-item {
-                font-size: 0.75rem;
-                padding: 6px 8px;
-                min-height: 35px;
-                min-width: 90px;
-            }
-            
-            .contact-info li {
-                margin-bottom: 12px;
-            }
-            
-            .contact-info li i {
-                margin-right: 8px;
-                font-size: 0.9rem;
-            }
-            
-            .inline-map-container {
-                flex-direction: row;
-                align-items: center;
-                gap: 10px;
-            }
-            
-            .inline-map-container iframe {
-                width: 120px;
-                height: 70px;
+            .footer-bottom-links a {
+                margin: 0 10px;
             }
             
             .user-manual-content {
                 padding: 25px;
             }
             
-            /* Adjust expertise items for mobile */
             .expertise-item {
-                min-width: 100%;
-            }
-            
-            /* Adjust logo for mobile */
-            .nav-logo a {
-                font-size: 1.6rem;
+                min-width: 85%; /* Show most of card */
             }
         }
 
-        @media (max-width: 576px) {
+        /* Small Mobile Phones (iPhone SE, etc.) */
+        @media (max-width: 480px) {
             .section-title h2 {
-                font-size: 2rem;
+                font-size: 1.8rem;
             }
             
-            .contact-info li {
-                flex-direction: column;
-                align-items: flex-start;
+            .nav-logo a {
+                font-size: 1.2rem;
             }
             
-            .contact-info li i {
-                margin-bottom: 8px;
-                margin-right: 0;
-            }
-            
-            .expertise-item {
-                min-width: 100%;
+            .hero {
+                padding-top: 100px;
             }
             
             .hero-stats {
-                padding: 0;
+                gap: 10px;
+            }
+            
+            .stat-item {
+                padding: 15px 5px;
             }
             
             .stat-item h3 {
-                font-size: 1.8rem;
+                font-size: 1.5rem;
             }
             
             .stat-item p {
-                font-size: 0.8rem;
+                font-size: 0.7rem;
             }
             
-            .administrator .social-links {
-                gap: 15px;
+            .expertise-item {
+                min-width: 95%; /* Full width card on very small phones */
+                padding: 20px 15px;
             }
             
-            .administrator .social-links a {
-                width: 40px;
-                height: 40px;
-                font-size: 1rem;
+            .expertise-icon i {
+                width: 60px;
+                height: 60px;
+                font-size: 2rem;
             }
             
-            .footer-column .social-links a {
-                width: 40px;
-                height: 40px;
-                font-size: 1rem;
+            .expertise-item h3 {
+                font-size: 1.2rem;
             }
             
             .client-item, .project-item {
-                font-size: 0.7rem;
-                padding: 6px 8px;
-                min-height: 35px;
-                min-width: 80px;
+                font-size: 0.8rem;
+                padding: 8px 10px;
+                width: 45%; /* 2 per row */
             }
             
-            .services-contact-container {
-                min-width: 100%;
+            .contact-info li span {
+                font-size: 0.85rem;
             }
-            
-            .inline-map-container iframe {
-                width: 100px;
-                height: 60px;
-            }
-            
-            .view-map-link {
-                font-size: 0.7rem;
-            }
-            
-            .user-manual-content {
-                padding: 20px;
-            }
-            
+
             .user-manual-content h2 {
-                font-size: 1.8rem;
+                font-size: 1.5rem;
             }
             
             .user-manual-content h3 {
-                font-size: 1.4rem;
+                font-size: 1.3rem;
             }
             
-            .scaffolding-diagram::before,
-            .scaffolding-diagram::after {
-                width: 60%;
+            .user-manual-content {
+                padding: 20px 15px;
             }
             
-            /* Further adjust logo for small mobile */
-            .nav-logo a {
-                font-size: 1.4rem;
+            .scaffolding-diagram img {
+                height: auto;
             }
             
-            /* Adjust expertise icon for small mobile */
-            .expertise-icon i {
-                font-size: 2.5rem;
-                width: 70px;
-                height: 70px;
+            .faq-summary {
+                font-size: 0.9rem;
+            }
+            
+            .policy-content {
+                padding: 25px 15px;
+            }
+            
+            .policy-content h2 {
+                font-size: 1.5rem;
             }
         }
     </style>
@@ -1306,7 +1253,7 @@
 <body>
     <!-- Navigation -->
     <nav class="navbar">
-        <div class="nav-container">
+        <div class="container nav-container">
             <div class="nav-logo">
                 <a href="#">THE NATIONAL SCAFFOLDING</a>
             </div>
@@ -1327,7 +1274,7 @@
 
     <!-- Hero Section with Image and Stats -->
     <section id="hero" class="hero">
-        <div class="hero-container">
+        <div class="container hero-container">
             <div class="hero-image">
                 <img src="https://z-cdn-media.chatglm.cn/files/0face00d-359f-4d9e-b2f6-339b6e6e55ba_pasted_image_1760871849173.jpg?auth_key=1792407998-c12ab30faf1d4b8b9fd655a35c42d96e-0-640668e647f81948a21e7a6507f8eac1" alt="Scaffolding Work">
             </div>
@@ -1342,7 +1289,7 @@
                 </div>
                 <div class="stat-item">
                     <h3>300+</h3>
-                    <p>EQUIPMENT UNITS AVAILABLE</p>
+                    <p>EQUIPMENT UNITS</p>
                 </div>
                 <div class="stat-item">
                     <h3>10+</h3>
@@ -1354,59 +1301,58 @@
 
     <!-- Attractive Expertise Section -->
     <section id="expertise" class="expertise-new">
-        <div class="section-title">
-            <h2>Our Expertise</h2>
-        </div>
-        <div class="expertise-container">
-            <div class="expertise-item">
-                <div class="expertise-icon">
-                    <i class="fas fa-drafting-compass"></i>
-                </div>
-                <h3>Scaffolding<br>Design</h3>
-                <div class="expertise-bar">
-                    <div class="expertise-percentage" style="width: 95%;"></div>
-                </div>
-                <p>95%</p>
+        <div class="container">
+            <div class="section-title">
+                <h2>Our Expertise</h2>
             </div>
-            <div class="expertise-item">
-                <div class="expertise-icon">
-                    <i class="fas fa-shield-alt"></i>
+            <div class="expertise-container">
+                <div class="expertise-item">
+                    <div class="expertise-icon">
+                        <i class="fas fa-drafting-compass"></i>
+                    </div>
+                    <h3>Scaffolding<br>Design</h3>
+                    <div class="expertise-bar">
+                        <div class="expertise-percentage" style="width: 95%;"></div>
+                    </div>
+                    <p>95%</p>
                 </div>
-                <h3>Safety<br>Compliance</h3>
-                <div class="expertise-bar">
-                    <div class="expertise-percentage" style="width: 100%;"></div>
+                <div class="expertise-item">
+                    <div class="expertise-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Safety<br>Compliance</h3>
+                    <div class="expertise-bar">
+                        <div class="expertise-percentage" style="width: 100%;"></div>
+                    </div>
+                    <p>100%</p>
                 </div>
-                <p>100%</p>
-            </div>
-            <div class="expertise-item">
-                <div class="expertise-icon">
-                    <i class="fas fa-project-diagram"></i>
+                <div class="expertise-item">
+                    <div class="expertise-icon">
+                        <i class="fas fa-project-diagram"></i>
+                    </div>
+                    <h3>Project<br>Management</h3>
+                    <div class="expertise-bar">
+                        <div class="expertise-percentage" style="width: 90%;"></div>
+                    </div>
+                    <p>90%</p>
                 </div>
-                <h3>Project<br>Management</h3>
-                <div class="expertise-bar">
-                    <div class="expertise-percentage" style="width: 90%;"></div>
+                <div class="expertise-item">
+                    <div class="expertise-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h3>Client<br>Support</h3>
+                    <div class="expertise-bar">
+                        <div class="expertise-percentage" style="width: 85%;"></div>
+                    </div>
+                    <p>85%</p>
                 </div>
-                <p>90%</p>
-            </div>
-            <div class="expertise-item">
-                <div class="expertise-icon">
-                    <i class="fas fa-headset"></i>
-                </div>
-                <h3>Client<br>Support</h3>
-                <div class="expertise-bar">
-                    <div class="expertise-percentage" style="width: 85%;"></div>
-                </div>
-                <p>85%</p>
             </div>
         </div>
     </section>
 
     <!-- Our Journey Section -->
     <section id="journey" class="journey">
-        <div class="section-title">
-            <h2>Our Journey Since 2015</h2>
-        </div>
-        <div class="journey-container">
+        <div class="container journey-container">
             <div class="clients-section">
                 <h3>Our Prestigious Clients</h3>
                 <div class="clients-grid">
@@ -1439,40 +1385,42 @@
 
     <!-- Board of Administrators Section -->
     <section id="administrators" class="administrators">
-        <div class="section-title">
-            <h2>Board Of Administrators</h2>
-        </div>
-        <div class="administrators-container">
-            <div class="administrator">
-                <div class="administrator-image">
-                    <img src="arbaaz.jpeg" alt="Chief Administrator">
-                </div>
-                <h3>Syed Arbaaz</h3>
-                <p>Chief Administrator</p>
-                <div class="social-links">
-                    <a href="https://www.instagram.com/syed.arbaaz.313?igsh=MTBwYTEwazVpaGE1aQ==" target="_blank"><i class="fab fa-instagram"></i></a>
-                    <a href="https://www.facebook.com/share/1A8c5B3BLV/?mibextid=LQQJ4d" target="_blank"><i class="fab fa-facebook-f"></i></a>
-                </div>
+        <div class="container">
+            <div class="section-title">
+                <h2>Board Of Administrators</h2>
             </div>
-            <div class="administrator">
-                <div class="administrator-image">
-                    <img src="zubair.jpeg" alt="Senior Administrator">
+            <div class="administrators-container">
+                <div class="administrator">
+                    <div class="administrator-image">
+                        <img src="arbaaz.jpeg" alt="Chief Administrator">
+                    </div>
+                    <h3>Syed Arbaaz</h3>
+                    <p>Chief Administrator</p>
+                    <div class="social-links">
+                        <a href="https://www.instagram.com/syed.arbaaz.313?igsh=MTBwYTEwazVpaGE1aQ==" target="_blank"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.facebook.com/share/1A8c5B3BLV/?mibextid=LQQJ4d" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                    </div>
                 </div>
-                <h3>Zubair Khan M Y</h3>
-                <p>Senior Administrator</p>
-                <div class="social-links single-icon">
-                    <a href="https://www.instagram.com/zubyrbinnoor?igsh=MWM3N2UyOWZ4YWRicA==" target="_blank"><i class="fab fa-instagram"></i></a>
+                <div class="administrator">
+                    <div class="administrator-image">
+                        <img src="zubair.jpeg" alt="Senior Administrator">
+                    </div>
+                    <h3>Zubair Khan M Y</h3>
+                    <p>Senior Administrator</p>
+                    <div class="social-links single-icon">
+                        <a href="https://www.instagram.com/zubyrbinnoor?igsh=MWM3N2UyOWZ4YWRicA==" target="_blank"><i class="fab fa-instagram"></i></a>
+                    </div>
                 </div>
-            </div>
-            <div class="administrator">
-                <div class="administrator-image">
-                    <img src="nayeem.jpeg" alt="Associate Administrator">
-                </div>
-                <h3>M D Nayeem</h3>
-                <p>Associate Administrator</p>
-                <div class="social-links">
-                    <a href="https://www.instagram.com/nayeem_khan_zaraar?igsh=c3N0dmlqdGFhNm10" target="_blank"><i class="fab fa-instagram"></i></a>
-                    <a href="https://www.facebook.com/share/17aDT4e5Zz/" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                <div class="administrator">
+                    <div class="administrator-image">
+                        <img src="nayeem.jpeg" alt="Associate Administrator">
+                    </div>
+                    <h3>M D Nayeem</h3>
+                    <p>Associate Administrator</p>
+                    <div class="social-links">
+                        <a href="https://www.instagram.com/nayeem_khan_zaraar?igsh=c3N0dmlqdGFhNm10" target="_blank"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.facebook.com/share/17aDT4e5Zz/" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1480,10 +1428,7 @@
 
     <!-- User Manual Section -->
     <section id="user-manual" class="user-manual">
-        <div class="section-title">
-            <h2>User Manual</h2>
-        </div>
-        <div class="user-manual-container">
+        <div class="container user-manual-container">
             <div class="user-manual-content">
                 <h2>THE NATIONAL SCAFFOLDING (Aluminium)</h2>
                 
@@ -1565,32 +1510,35 @@
                 </ul>
                 
                 <h3>7. Troubleshooting</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Issue</th>
-                            <th>Possible Cause</th>
-                            <th>Solution</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Scaffolding feels unstable</td>
-                            <td>Uneven surface or loose base plates</td>
-                            <td>Recheck level and secure all plates</td>
-                        </tr>
-                        <tr>
-                            <td>Difficulty assembling parts</td>
-                            <td>Incorrect component placement</td>
-                            <td>Refer to diagram and verify compatibility</td>
-                        </tr>
-                        <tr>
-                            <td>Wobbling during use</td>
-                            <td>Loose braces or guardrails</td>
-                            <td>Stop use immediately and tighten all fittings</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <!-- Added table-wrapper here for mobile scroll -->
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Issue</th>
+                                <th>Possible Cause</th>
+                                <th>Solution</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Scaffolding feels unstable</td>
+                                <td>Uneven surface or loose base plates</td>
+                                <td>Recheck level and secure all plates</td>
+                            </tr>
+                            <tr>
+                                <td>Difficulty assembling parts</td>
+                                <td>Incorrect component placement</td>
+                                <td>Refer to diagram and verify compatibility</td>
+                            </tr>
+                            <tr>
+                                <td>Wobbling during use</td>
+                                <td>Loose braces or guardrails</td>
+                                <td>Stop use immediately and tighten all fittings</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
                 
                 <h3>8. Frequently Asked Questions (FAQs)</h3>
                 <div class="faq-item">
@@ -1631,7 +1579,7 @@
 
     <!-- Footer -->
     <footer id="contact-section">
-        <div class="footer-container">
+        <div class="container footer-container">
             <div class="footer-main">
                 <div class="footer-column">
                     <div class="footer-logo">
@@ -1670,13 +1618,11 @@
                         <div class="contact-details">
                             <ul class="contact-info">
                                 <li class="contact-map-item">
-                                    <i class="fas fa-map-marker-alt"></i>
                                     <div class="inline-map-container">
+                                        <!-- Removed fixed width/height attributes for responsiveness -->
                                         <iframe 
                                             src="https://www.google.com/maps/embed?pb=!1m26!1m12!1m3!1d48650.51245197565!2d77.57826172834972!3d13.054063076572426!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m11!3e9!4m3!3m2!1d13.0356729!2d77.62225889999999!4m5!1s0x3bae1791e1e304a3%3A0x8ef57a85ae449b9c!2sRoyal%20heritage%20furniture%20factory!3m2!1d13.0489068!2d77.6268223!5e0!3m2!1sen!2sin!4v1760948910624!5m2!1sen!2sin" 
-                                            width="180" 
-                                            height="100" 
-                                            style="border:0; border-radius: 4px;" 
+                                            style="border:0;" 
                                             allowfullscreen="" 
                                             loading="lazy" 
                                             referrerpolicy="no-referrer-when-downgrade">

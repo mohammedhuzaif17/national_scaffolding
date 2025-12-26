@@ -4,7 +4,8 @@
 
 {% block content %}
 <div class="glass-container">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <!-- Top Header -->
+    <div class="top-header-wrapper">
         <button class="btn-secondary" onclick="window.location.href='{{ url_for('admin_scaffoldings') }}'" style="width: auto;">← Back to Admin Panel</button>
     </div>
     
@@ -13,13 +14,14 @@
     
     <div id="accessoriesPricingForm">
         {% if accessory_products %}
-        <div style="background: rgba(30, 58, 138, 0.2); padding: 2rem; border-radius: 10px; margin-bottom: 2rem;">
-            <h2 style="color: #ffa500; margin-bottom: 1.5rem;">All Accessories</h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+        <!-- Grid Container for Products -->
+        <div class="products-grid-wrapper">
+            <h2 class="section-header">All Accessories</h2>
+            <div class="products-grid">
                 {% for product in accessory_products %}
-                <div style="background: rgba(212, 175, 55, 0.05); padding: 1.5rem; border-radius: 8px; border: 2px solid rgba(212, 175, 55, 0.2);">
-                    <h3 style="color: #d4af37; margin-bottom: 1rem;">{{ product.name }}</h3>
-                    <p style="color: #a0a0a0; font-size: 0.9rem; margin-bottom: 1rem;">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
+                <div class="product-card">
+                    <h3 class="product-name">{{ product.name }}</h3>
+                    <p class="product-desc">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
                     
                     <div class="form-group">
                         <label for="buy_{{ product.id }}">Buy Price (₹)</label>
@@ -34,17 +36,19 @@
                         <input type="number" id="deposit_{{ product.id }}" step="0.01" placeholder="₹20" class="pricing-input" data-product-id="{{ product.id }}" data-type="deposit">
                     </div>
                 </div>
+                {% endfor %}
             </div>
         </div>
         {% else %}
-        <div style="background: rgba(212, 175, 55, 0.1); padding: 2rem; border-radius: 10px; text-align: center;">
-            <p style="color: #d4af37; font-size: 1.1rem;">No accessory products found. Add products first from the Admin Panel.</p>
+        <div class="empty-state">
+            <p class="empty-text">No accessory products found. Add products first from Admin Panel.</p>
         </div>
         {% endif %}
         
-        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
-            <button class="btn-primary" onclick="saveAllPricing()" style="padding: 1rem 3rem;">💾 Save All Accessories Pricing</button>
-            <button class="btn-secondary" onclick="window.location.href='{{ url_for('admin_scaffoldings') }}'" style="padding: 1rem 3rem;">Cancel</button>
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="btn-primary save-btn" onclick="saveAllPricing()">💾 Save All Accessories Pricing</button>
+            <button class="btn-secondary cancel-btn" onclick="window.location.href='{{ url_for('admin_scaffoldings') }}'">Cancel</button>
         </div>
     </div>
 </div>
@@ -123,15 +127,212 @@ function saveAllPricing() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert(' Accessories pricing updated successfully!');
+            alert('Accessories pricing updated successfully!');
             window.location.href = '{{ url_for("admin_scaffoldings") }}';
         } else {
-            alert(' Error: ' + (data.message || 'Failed to update pricing'));
+            alert('Error: ' + (data.message || 'Failed to update pricing'));
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert(' Error updating Accessories pricing');
+        alert('Error updating Accessories pricing');
     });
 }
+</script>
+
+<style>
+    /* ===== GLOBAL LAYOUT FIXES ===== */
+    * {
+        box-sizing: border-box;
+    }
+
+    .glass-container {
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    /* Top Header Area */
+    .top-header-wrapper {
+        margin-bottom: 1.5rem;
+    }
+
+    /* Typography */
+    .page-title {
+        font-size: 2rem;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+
+    .section-header {
+        color: #ffa500;
+        margin-bottom: 1.5rem;
+        font-size: 1.5rem;
+    }
+
+    /* Product Grid Wrapper */
+    .products-grid-wrapper {
+        background: rgba(30, 58, 138, 0.2);
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Desktop: Grid */
+        gap: 1.5rem;
+    }
+
+    /* Product Cards */
+    .product-card {
+        background: rgba(212, 175, 55, 0.05);
+        padding: 1.5rem;
+        border-radius: 8px;
+        border: 2px solid rgba(212, 175, 55, 0.2);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-name {
+        color: #d4af37;
+        margin-bottom: 1rem;
+        font-size: 1.25rem;
+    }
+
+    .product-desc {
+        color: #a0a0a0;
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+        min-height: 3em; /* Ensure uniform height */
+    }
+
+    /* Form Inputs */
+    .form-group {
+        margin-bottom: 1.2rem;
+        width: 100%;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #555;
+        font-size: 0.95rem;
+    }
+
+    .pricing-input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #ccc;
+        border-radius: 6px;
+        font-size: 16px; /* Prevents iOS auto-zoom */
+        transition: border-color 0.3s;
+        font-family: inherit;
+    }
+
+    .pricing-input:focus {
+        border-color: #ffa500;
+        outline: none;
+        background-color: #fff;
+    }
+
+    /* Empty State */
+    .empty-state {
+        background: rgba(212, 175, 55, 0.1);
+        padding: 2rem;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    .empty-text {
+        color: #d4af37;
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    /* Action Buttons Area */
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .btn-primary, .btn-secondary {
+        padding: 1rem 3rem;
+        border: none;
+        border-radius: 5px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s, opacity 0.2s;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-primary:hover, .btn-secondary:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+    }
+
+    /* ===== MOBILE RESPONSIVE FIXES ===== */
+    @media (max-width: 768px) {
+        /* Adjust Container Padding */
+        .glass-container {
+            padding: 1rem;
+        }
+
+        /* Typography Adjustments */
+        .page-title {
+            font-size: 1.5rem;
+            text-align: center;
+        }
+        
+        .section-header {
+            font-size: 1.3rem;
+            text-align: center;
+        }
+
+        /* Fix Grid: Force Single Column on Mobile */
+        .products-grid {
+            grid-template-columns: 1fr !important; /* Override inline style */
+            gap: 1rem !important;
+        }
+
+        /* Reduce Card Padding */
+        .product-card {
+            padding: 1.2rem !important; /* Override inline style */
+        }
+
+        /* Fix Inputs for Touch */
+        .pricing-input {
+            padding: 14px !important; /* Larger touch target */
+            font-size: 16px !important; /* Prevent zoom */
+        }
+
+        /* Stack Action Buttons */
+        .action-buttons {
+            flex-direction: column !important; /* Stack vertically */
+            width: 100%;
+        }
+
+        .btn-primary, .btn-secondary {
+            width: 100% !important; /* Full width buttons */
+            padding: 14px 20px; /* Taller buttons */
+        }
+    }
+</style>
 {% endblock %}

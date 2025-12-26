@@ -3,192 +3,27 @@
 {% block title %}Admin - Business Analytics{% endblock %}
 
 {% block content %}
-<style>
-/* =========================
-   Admin Analytics Styles
-   ========================= */
 
-/* Force full page width with highest specificity */
-html body .glass-container,
-html body main .glass-container,
-html body section .glass-container,
-html body .container .glass-container,
-html body .container-fluid .glass-container,
-html body .content-wrapper .glass-container {
-    max-width: 100vw !important;
-    width: 100vw !important;
-    margin: 0 !important;
-    padding: 1.5rem !important;
-    box-sizing: border-box !important;
-    position: relative !important;
-    left: 0 !important;
-    transform: none !important;
-}
-
-/* Override all parent containers */
-html body,
-html body main,
-html body section,
-html body .container,
-html body .container-fluid,
-html body .content-wrapper {
-    max-width: none !important;
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-}
-
-/* Completely hide background slider and related elements */
-.hero-section,
-.slider,
-.background-slider,
-.carousel,
-.owl-carousel,
-.swiper-container,
-.slick-slider,
-.flexslider {
-    display: none !important;
-    visibility: hidden !important;
-    height: 0 !important;
-    width: 0 !important;
-    overflow: hidden !important;
-    position: absolute !important;
-    top: -9999px !important;
-    left: -9999px !important;
-}
-
-/* Page title */
-.page-title { 
-    font-size: 1.6rem; 
-    margin: 0 0 1.5rem 0; 
-    color: #ffd966; 
-    font-weight: 800; 
-    text-align: left; 
-}
-
-/* Buttons */
-.btn-primary {
-    background: linear-gradient(135deg, #002855, #004080);
-    color: #fff;
-    border: none;
-    padding: 0.6rem 1.5rem;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(2,24,63,0.25); }
-
-.btn-danger { 
-    background: #dc3545 !important; 
-    color: white !important; 
-    border: none !important; 
-    padding: 0.6rem 1.5rem !important; 
-    border-radius: 8px !important; 
-    cursor: pointer !important; 
-    font-weight: 600 !important;
-}
-.btn-danger:hover { 
-    background: #c82333 !important; 
-    transform: translateY(-1px) !important; 
-    box-shadow: 0 4px 12px rgba(220,53,69,0.3) !important; 
-}
-
-/* Metric Cards */
-.metric-card {
-    background: linear-gradient(135deg, #001d3d, #002855);
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 8px 24px rgba(0,29,61,0.2);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border: 1px solid rgba(212,175,55,0.2);
-}
-
-.metric-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 30px rgba(0,29,61,0.3);
-}
-
-.metric-icon {
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
-    color: #d4af37;
-}
-
-.metric-label {
-    color: #ffd966;
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-
-.metric-value {
-    color: #fff;
-    font-size: 1.8rem;
-    font-weight: 700;
-}
-
-/* Chart Containers */
-.chart-container {
-    background: linear-gradient(135deg, #001d3d, #002855);
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 8px 24px rgba(0,29,61,0.2);
-    border: 1px solid rgba(212,175,55,0.2);
-}
-
-.chart-title {
-    color: #ffd966;
-    font-size: 1.2rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-    text-align: center;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .metric-card {
-        padding: 1rem;
-    }
-    
-    .metric-icon {
-        font-size: 2rem;
-    }
-    
-    .metric-value {
-        font-size: 1.5rem;
-    }
-    
-    .chart-container {
-        padding: 1rem;
-    }
-    
-    .chart-title {
-        font-size: 1rem;
-    }
-}
-</style>
-
-<div class="glass-container" style="max-width: 100vw !important; width: 100vw !important; margin: 0 !important; padding: 1.5rem !important; box-sizing: border-box !important; position: relative !important; left: 0 !important; transform: none !important;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-        <h1 class="page-title" style="margin: 0;">📊 Business Analytics Dashboard</h1>
-        <div style="display: flex; gap: 1rem;">
-            <button class="btn-primary" onclick="window.location.href='{{ url_for('admin_scaffoldings') }}'" style="width: auto; background: linear-gradient(135deg, #9333ea, #7928ca);">📦 Products</button>
-            <button class="btn-primary" onclick="window.location.href='{{ url_for('admin_orders') }}'" style="width: auto; background: linear-gradient(135deg, #4CAF50, #45a049);">📋 Orders</button>
-            <button class="btn-danger" onclick="window.location.href='{{ url_for('admin_logout') }}'" style="width: auto;">Logout</button>
+<!-- Wrapper for clean CSS control -->
+<div class="analytics-wrapper">
+    <!-- Header Section -->
+    <div class="page-header">
+        <h1 class="page-title">📊 Business Analytics Dashboard</h1>
+        <div class="header-actions">
+            <button class="btn btn-primary" onclick="window.location.href='{{ url_for('admin_scaffoldings') }}'">
+                <span class="btn-icon">📦</span> <span class="btn-text">Products</span>
+            </button>
+            <button class="btn btn-success" onclick="window.location.href='{{ url_for('admin_orders') }}'">
+                <span class="btn-icon">📋</span> <span class="btn-text">Orders</span>
+            </button>
+            <button class="btn btn-danger" onclick="window.location.href='{{ url_for('admin_logout') }}'">
+                <span class="btn-icon">🚪</span> <span class="btn-text">Logout</span>
+            </button>
         </div>
     </div>
     
-    <!-- Key Metrics Cards -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin: 2rem 0;">
+    <!-- Key Metrics Section -->
+    <div class="metrics-grid">
         <div class="metric-card">
             <div class="metric-icon">₹</div>
             <div class="metric-label">Total Revenue</div>
@@ -202,34 +37,41 @@ html body .content-wrapper {
     </div>
     
     <!-- Charts Section -->
-    <div style="display: grid; grid-template-columns: 1fr; gap: 2rem; margin-top: 3rem;">
-        <!-- Monthly Revenue Chart -->
-        <div class="chart-container">
+    <div class="charts-section">
+        <!-- Top Row: Monthly Revenue -->
+        <div class="chart-card full-width">
             <h2 class="chart-title">📈 Monthly Revenue Trend</h2>
-            <canvas id="monthlyRevenueChart"></canvas>
+            <div class="canvas-container">
+                <canvas id="monthlyRevenueChart"></canvas>
+            </div>
         </div>
-        
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem;">
-            <!-- Yearly Revenue Chart -->
-            <div class="chart-container">
+
+        <!-- Middle Row: Yearly & Categories -->
+        <div class="chart-row">
+            <div class="chart-card">
                 <h2 class="chart-title">📊 Yearly Revenue</h2>
-                <canvas id="yearlyRevenueChart"></canvas>
+                <div class="canvas-container">
+                    <canvas id="yearlyRevenueChart"></canvas>
+                </div>
             </div>
-            
-            <!-- Category Breakdown -->
-            <div class="chart-container">
+            <div class="chart-card">
                 <h2 class="chart-title">🎯 Revenue by Category</h2>
-                <canvas id="categoryChart"></canvas>
+                <div class="canvas-container">
+                    <canvas id="categoryChart"></canvas>
+                </div>
             </div>
         </div>
-        
-        <!-- Monthly Orders Chart -->
-        <div class="chart-container">
+
+        <!-- Bottom Row: Monthly Orders -->
+        <div class="chart-card full-width">
             <h2 class="chart-title">📦 Monthly Orders Count</h2>
-            <canvas id="monthlyOrdersChart"></canvas>
+            <div class="canvas-container">
+                <canvas id="monthlyOrdersChart"></canvas>
+            </div>
         </div>
     </div>
 </div>
+
 {% endblock %}
 
 {% block scripts %}
@@ -246,7 +88,7 @@ if (typeof Chart === 'undefined') {
 
     // Theme colors
     const goldColor = '#d4af37';
-    const royalBlueColor = '#001d3d';
+    const royalBlueColor = '#1e3a8a';
     const accentColors = [
         '#d4af37', // Gold
         '#4CAF50', // Green
@@ -257,9 +99,9 @@ if (typeof Chart === 'undefined') {
     ];
 
     // Chart.js default configuration
-    Chart.defaults.color = goldColor;
+    Chart.defaults.color = '#fff'; // Default text color for dark theme
     Chart.defaults.font.family = "'Poppins', sans-serif";
-    Chart.defaults.font.size = 13;
+    Chart.defaults.font.size = 12;
 
     // Monthly Revenue Chart
     if (document.getElementById('monthlyRevenueChart') && sortedMonths.length > 0) {
@@ -276,35 +118,27 @@ if (typeof Chart === 'undefined') {
                     data: sortedMonths.map(m => monthlyData[m] ? monthlyData[m].revenue : 0),
                     borderColor: goldColor,
                     backgroundColor: 'rgba(212, 175, 55, 0.1)',
-                    borderWidth: 3,
+                    borderWidth: 2,
                     fill: true,
                     tension: 0.4,
                     pointBackgroundColor: goldColor,
                     pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 5,
-                    pointHoverRadius: 7
+                    pointBorderWidth: 1,
+                    pointRadius: 4
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
                 plugins: {
-                    legend: {
-                        display: true,
-                        labels: {
-                            color: goldColor,
-                            font: { size: 14, weight: 'bold' }
-                        }
-                    },
+                    legend: { display: false },
                     tooltip: {
                         backgroundColor: royalBlueColor,
                         titleColor: goldColor,
                         bodyColor: '#fff',
                         borderColor: goldColor,
-                        borderWidth: 2,
-                        padding: 12,
-                        displayColors: false,
+                        borderWidth: 1,
+                        padding: 10,
                         callbacks: {
                             label: function(context) {
                                 return '₹' + context.parsed.y.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
@@ -315,21 +149,12 @@ if (typeof Chart === 'undefined') {
                 scales: {
                     y: {
                         beginAtZero: true,
-                        ticks: {
-                            color: goldColor,
-                            callback: function(value) {
-                                return '₹' + value.toLocaleString('en-IN');
-                            }
-                        },
-                        grid: {
-                            color: 'rgba(212, 175, 55, 0.1)'
-                        }
+                        ticks: { color: '#ddd', font: { size: 10 } },
+                        grid: { color: 'rgba(255,255,255,0.1)' }
                     },
                     x: {
-                        ticks: { color: goldColor },
-                        grid: {
-                            color: 'rgba(212, 175, 55, 0.1)'
-                        }
+                        ticks: { color: '#ddd', font: { size: 10 } },
+                        grid: { color: 'rgba(255,255,255,0.1)' }
                     }
                 }
             }
@@ -347,25 +172,23 @@ if (typeof Chart === 'undefined') {
                     label: 'Revenue (₹)',
                     data: Object.values(yearlyData).map(d => d ? d.revenue : 0),
                     backgroundColor: accentColors.slice(0, Object.keys(yearlyData).length),
-                    borderColor: goldColor,
-                    borderWidth: 2,
-                    borderRadius: 8
+                    borderColor: 'rgba(255,255,255,0.1)',
+                    borderWidth: 1,
+                    borderRadius: 4
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
                 plugins: {
-                    legend: {
-                        display: false
-                    },
+                    legend: { display: false },
                     tooltip: {
                         backgroundColor: royalBlueColor,
                         titleColor: goldColor,
                         bodyColor: '#fff',
                         borderColor: goldColor,
-                        borderWidth: 2,
-                        padding: 12,
+                        borderWidth: 1,
+                        padding: 10,
                         callbacks: {
                             label: function(context) {
                                 return '₹' + context.parsed.y.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
@@ -376,21 +199,12 @@ if (typeof Chart === 'undefined') {
                 scales: {
                     y: {
                         beginAtZero: true,
-                        ticks: {
-                            color: goldColor,
-                            callback: function(value) {
-                                return '₹' + value.toLocaleString('en-IN');
-                            }
-                        },
-                        grid: {
-                            color: 'rgba(212, 175, 55, 0.1)'
-                        }
+                        ticks: { color: '#ddd', font: { size: 10 } },
+                        grid: { color: 'rgba(255,255,255,0.1)' }
                     },
                     x: {
-                        ticks: { color: goldColor },
-                        grid: {
-                            display: false
-                        }
+                        ticks: { color: '#ddd', font: { size: 10 } },
+                        grid: { display: false }
                     }
                 }
             }
@@ -407,8 +221,8 @@ if (typeof Chart === 'undefined') {
                 datasets: [{
                     data: Object.values(categoryData).map(d => d ? d.revenue : 0),
                     backgroundColor: accentColors,
-                    borderColor: '#fff',
-                    borderWidth: 3
+                    borderColor: '#1e3a8a', // Dark blue border for separation
+                    borderWidth: 2
                 }]
             },
             options: {
@@ -418,9 +232,10 @@ if (typeof Chart === 'undefined') {
                     legend: {
                         position: 'bottom',
                         labels: {
-                            color: goldColor,
-                            font: { size: 12 },
-                            padding: 15
+                            color: '#ddd',
+                            font: { size: 10 },
+                            padding: 10,
+                            boxWidth: 10
                         }
                     },
                     tooltip: {
@@ -428,8 +243,8 @@ if (typeof Chart === 'undefined') {
                         titleColor: goldColor,
                         bodyColor: '#fff',
                         borderColor: goldColor,
-                        borderWidth: 2,
-                        padding: 12,
+                        borderWidth: 1,
+                        padding: 10,
                         callbacks: {
                             label: function(context) {
                                 return context.label + ': ₹' + context.parsed.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
@@ -456,125 +271,287 @@ if (typeof Chart === 'undefined') {
                     data: sortedMonths.map(m => monthlyData[m] ? monthlyData[m].orders : 0),
                     backgroundColor: 'rgba(76, 175, 80, 0.8)',
                     borderColor: '#4CAF50',
-                    borderWidth: 2,
-                    borderRadius: 8
+                    borderWidth: 1,
+                    borderRadius: 4
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
                 plugins: {
-                    legend: {
-                        display: false
-                    },
+                    legend: { display: false },
                     tooltip: {
                         backgroundColor: royalBlueColor,
                         titleColor: goldColor,
                         bodyColor: '#fff',
                         borderColor: goldColor,
-                        borderWidth: 2,
-                        padding: 12
+                        borderWidth: 1,
+                        padding: 10
                     }
                 },
                 scales: {
                     y: {
                         beginAtZero: true,
                         ticks: {
-                            color: goldColor,
-                            stepSize: 1
+                            color: '#ddd',
+                            stepSize: 1,
+                            callback: function(value) {
+                                if (Math.floor(value) === value) return value; // Only integers
+                            }
                         },
-                        grid: {
-                            color: 'rgba(212, 175, 55, 0.1)'
-                        }
+                        grid: { color: 'rgba(255,255,255,0.1)' }
                     },
                     x: {
-                        ticks: { color: goldColor },
-                        grid: {
-                            display: false
-                        }
+                        ticks: { color: '#ddd', font: { size: 10 } },
+                        grid: { display: false }
                     }
                 }
             }
         });
     }
 }
-
-// AGGRESSIVE FULL WIDTH ENFORCEMENT
-function enforceFullWidth() {
-    const elementsToOverride = [
-        document.querySelector('.glass-container'),
-        document.querySelector('.container'),
-        document.querySelector('.container-fluid'),
-        document.querySelector('main'),
-        document.querySelector('section'),
-        document.querySelector('.content-wrapper'),
-        document.querySelector('body'),
-        document.querySelector('html')
-    ];
-    
-    elementsToOverride.forEach(element => {
-        if (element) {
-            element.style.setProperty('max-width', '100vw', 'important');
-            element.style.setProperty('width', '100vw', 'important');
-            element.style.setProperty('margin-left', '0', 'important');
-            element.style.setProperty('margin-right', '0', 'important');
-            element.style.setProperty('padding-left', '0', 'important');
-            element.style.setProperty('padding-right', '0', 'important');
-            element.style.setProperty('position', 'relative', 'important');
-            element.style.setProperty('left', '0', 'important');
-            element.style.setProperty('transform', 'none', 'important');
-        }
-    });
-}
-
-// AGGRESSIVE BACKGROUND SLIDER REMOVAL
-function removeBackgroundSlider() {
-    const sliderSelectors = [
-        '.hero-section',
-        '.slider',
-        '.background-slider',
-        '.carousel',
-        '.owl-carousel',
-        '.swiper-container',
-        '.slick-slider',
-        '.flexslider'
-    ];
-    
-    sliderSelectors.forEach(selector => {
-        const elements = document.querySelectorAll(selector);
-        elements.forEach(element => {
-            element.style.setProperty('display', 'none', 'important');
-            element.style.setProperty('visibility', 'hidden', 'important');
-            element.style.setProperty('height', '0', 'important');
-            element.style.setProperty('width', '0', 'important');
-            element.style.setProperty('overflow', 'hidden', 'important');
-            element.style.setProperty('position', 'absolute', 'important');
-            element.style.setProperty('top', '-9999px', 'important');
-            element.style.setProperty('left', '-9999px', 'important');
-            if (element.parentNode) {
-                element.parentNode.removeChild(element);
-            }
-        });
-    });
-}
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🎯 Admin Analytics page loaded');
-    enforceFullWidth();
-    removeBackgroundSlider();
-});
-
-// Re-enforce on window resize
-window.addEventListener('resize', function() {
-    enforceFullWidth();
-    removeBackgroundSlider();
-});
-
-// Extra enforcement after a delay
-setTimeout(function() {
-    enforceFullWidth();
-    removeBackgroundSlider();
-}, 500);
 </script>
-{% endblock %}
+
+<style>
+    /* ===== GLOBAL RESETS & LAYOUT ===== */
+    * {
+        box-sizing: border-box;
+    }
+
+    /* Main Wrapper - Replaces the problematic glass-container inline styles */
+    .analytics-wrapper {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding: 1.5rem;
+        overflow-x: hidden; /* Prevents horizontal scroll */
+    }
+
+    /* Typography */
+    .page-title {
+        font-size: 1.5rem;
+        color: #ffd966; /* Gold */
+        font-weight: 700;
+        margin: 0;
+    }
+
+    /* Header Section */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    /* Button Styling */
+    .btn {
+        border: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: transform 0.2s, box-shadow 0.2s;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #9333ea, #7928ca);
+        color: white;
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #4CAF50, #45a049);
+        color: white;
+    }
+
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+    }
+
+    /* Hide text on very small screens if needed, keeping icons */
+    .btn-text {
+        display: inline-block;
+    }
+
+    /* Metrics Grid */
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .metric-card {
+        background: linear-gradient(135deg, #1e3a8a, #002855);
+        border-radius: 12px;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        border: 1px solid rgba(212,175,55,0.2);
+    }
+
+    .metric-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        color: #d4af37;
+    }
+
+    .metric-label {
+        color: #ffd966;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .metric-value {
+        color: #fff;
+        font-size: 2rem;
+        font-weight: 700;
+    }
+
+    /* Charts Layout */
+    .charts-section {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .chart-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 2rem;
+    }
+
+    .chart-card {
+        background: linear-gradient(135deg, #1e3a8a, #002855);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        border: 1px solid rgba(212,175,55,0.2);
+    }
+
+    .full-width {
+        grid-column: 1 / -1; /* Spans full width of grid */
+    }
+
+    .chart-title {
+        color: #ffd966;
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .canvas-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+    }
+
+    /* ===== MOBILE RESPONSIVE DESIGN ===== */
+    @media (max-width: 768px) {
+        .analytics-wrapper {
+            padding: 1rem;
+        }
+
+        /* Header: Stack Title and Buttons */
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1.5rem;
+        }
+
+        .header-actions {
+            width: 100%;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .btn {
+            width: 100%; /* Full width buttons for touch */
+            padding: 1rem;
+            font-size: 1rem;
+            justify-content: flex-start; /* Left align icon+text */
+        }
+
+        /* Stack Metrics */
+        .metrics-grid {
+            grid-template-columns: 1fr; /* Single column */
+            gap: 1rem;
+        }
+
+        .metric-card {
+            padding: 1.2rem;
+        }
+
+        .metric-icon {
+            font-size: 2rem;
+        }
+
+        .metric-value {
+            font-size: 1.6rem;
+        }
+
+        /* Stack Charts */
+        .chart-row {
+            grid-template-columns: 1fr; /* Single column */
+            gap: 1.5rem;
+        }
+
+        .chart-card {
+            padding: 1.2rem;
+        }
+
+        .chart-title {
+            font-size: 1rem;
+            text-align: left;
+            margin-bottom: 1rem;
+        }
+
+        /* Adjust Chart Heights for mobile */
+        .canvas-container {
+            height: 250px; /* Shorter height to fit screen better */
+        }
+    }
+
+    /* Extra small phone adjustments */
+    @media (max-width: 480px) {
+        .page-title {
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+        }
+
+        .metric-value {
+            font-size: 1.4rem;
+        }
+    }
+</style>

@@ -3,6 +3,122 @@
 {% block title %}Register - National Scaffolding{% endblock %}
 
 {% block content %}
+<style>
+    /* =========================================
+       RESPONSIVE FORM STYLES
+       ========================================= */
+    * { box-sizing: border-box; }
+
+    .glass-container.form-container {
+        max-width: 500px; /* Optimal width for forms */
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .page-title {
+        text-align: center;
+        color: #001d3d;
+        margin-bottom: 1.5rem;
+        font-size: 1.8rem;
+        font-weight: 700;
+    }
+
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #333;
+        font-size: 0.95rem;
+    }
+
+    /* Mobile Input Fix: Font-size 16px prevents iOS zoom */
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group input[type="tel"],
+    .form-group input[type="password"],
+    .form-group textarea {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 16px; 
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        background-color: #f9f9f9;
+    }
+
+    /* Focus State */
+    .form-group input:focus,
+    .form-group textarea:focus {
+        border-color: #d4af37; /* Gold accent */
+        box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        background-color: #fff;
+    }
+
+    /* Phone Number Specific Styling */
+    .form-group input[type="tel"] {
+        /* Ensure the input takes remaining flex space */
+        flex: 1; 
+    }
+
+    /* Button Styling */
+    .btn-primary {
+        width: 100%;
+        padding: 14px;
+        background: #001d3d; /* Brand Blue */
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.1s;
+        margin-top: 10px;
+    }
+
+    .btn-primary:hover {
+        background: #002855;
+        transform: translateY(-2px);
+    }
+
+    .btn-primary:active {
+        transform: translateY(0);
+    }
+
+    /* Link Styling */
+    p a {
+        color: #d4af37;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    p a:hover {
+        text-decoration: underline;
+    }
+
+    /* =========================================
+       MOBILE ADJUSTMENTS
+       ========================================= */
+    @media (max-width: 480px) {
+        .glass-container.form-container {
+            margin: 1rem;
+            padding: 1.5rem;
+            width: 95%; /* Use slightly less than full width on very small screens */
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
 <div class="glass-container form-container">
     <h1 class="page-title">Register</h1>
     <form method="POST">
@@ -16,8 +132,8 @@
         </div>
         <div class="form-group">
             <label for="phone">Phone Number</label>
-            <div style="display: flex; align-items: center; gap: 0;">
-                <span style="background: rgba(255, 255, 255, 0.1); padding: 0.75rem 1rem; border-radius: 8px 0 0 8px; color: #d4af37; font-weight: bold; border: 1px solid rgba(255, 255, 255, 0.2); border-right: none;">+91</span>
+            <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
+                <span style="background: #f0f0f0; padding: 12px 14px; border-radius: 8px 0 0 8px; color: #d4af37; font-weight: bold; border: 1px solid #ccc; border-right: none; white-space: nowrap; flex-shrink: 0;">+91</span>
                 <input type="tel" id="phone" name="phone" required placeholder="9876543210" pattern="[6-9][0-9]{9}" maxlength="10" title="Please enter 10 digit mobile number starting with 6, 7, 8, or 9" style="border-radius: 0 8px 8px 0; flex: 1;">
             </div>
         </div>
@@ -27,7 +143,7 @@
         </div>
         <div class="form-group">
             <label for="address">Complete Address</label>
-            <textarea id="address" name="address" rows="3" required placeholder="Enter your complete address (Street, City, State, PIN)"></textarea>
+            <textarea id="address" name="address" rows="3" required placeholder="Enter your complete address (Street, City, State, PIN)" style="resize: vertical;"></textarea>
         </div>
         <div class="form-group">
             <label for="organization">Organization (Optional)</label>
@@ -39,8 +155,8 @@
         </div>
         <button type="submit" class="btn-primary">Register</button>
     </form>
-    <p style="text-align: center; margin-top: 1rem;">
-        Already have an account? <a href="{{ url_for('login') }}" style="color: #ffa500;">Login here</a>
+    <p style="text-align: center; margin-top: 1.2rem; color: #555; font-size: 0.9rem;">
+        Already have an account? <a href="{{ url_for('login') }}">Login here</a>
     </p>
 </div>
 {% endblock %}

@@ -3,21 +3,24 @@
 {% block title %}Edit Vertical Cuplock - Admin{% endblock %}
 
 {% block content %}
-<div class="admin-container">
+<!-- Main Wrapper -->
+<div class="admin-wrapper">
+    <!-- Page Header -->
     <div class="page-header">
         <h1>Edit Vertical Cuplock: {{ product.name }}</h1>
-        <a href="{{ url_for('cuplock.vertical_list') }}" class="btn btn-secondary">← Back</a>
+        <a href="{{ url_for('cuplock.vertical_list') }}" class="btn btn-back">← Back</a>
     </div>
 
+    <!-- Main Content Container -->
     <div class="form-container">
-        <!-- Product Info Section -->
+        <!-- Top Form: Product Info -->
         <form method="POST" id="product-form" class="admin-form" enctype="multipart/form-data">
             <div class="form-section">
                 <h3>Product Information</h3>
                 
                 <div class="form-group">
                     <label for="name">Product Name</label>
-                    <input type="text" id="name" name="name" value="{{ product.name }}" required>
+                    <input type="text" id="name" name="name" value="{{ product.name }}" readonly>
                 </div>
 
                 <div class="form-group">
@@ -31,164 +34,164 @@
                     <div style="margin-top: 1rem; padding: 1rem; background: #f9f9f9; border-radius: 4px;">
                         <p style="margin: 0 0 0.5rem 0; color: #666; font-size: 0.9rem;">Current image:</p>
                         {% if product.image_url %}
-                            <img src="{{ url_for('static', filename=product.image_url) }}" alt="{{ product.name }}" style="max-width: 200px; max-height: 200px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                            <div style="display: none; padding: 1rem; background: #ddd; border-radius: 4px; color: #666; text-align: center;">📦 Image failed to load</div>
+                            <img src="{{ url_for('static', filename=product.image_url) }}" 
+                                 style="max-width: 200px; max-height: 200px; object-fit: contain; border-radius: 4px;">
                         {% else %}
-                            <div style="padding: 1rem; background: #e8e8e8; border-radius: 4px; color: #999; text-align: center;">📦 No image uploaded yet<br><small>Upload an image above to display it here</small></div>
+                            <span style="color: #999; font-style: italic; font-size: 0.8rem;">No image uploaded</span>
                         {% endif %}
                     </div>
                 </div>
 
                 <div class="button-group">
-                    <button type="submit" class="btn btn-primary btn-save-product">💾 Save Product Information</button>
-                    <a href="{{ url_for('cuplock.vertical_list') }}" class="btn btn-secondary" style="padding: 0.75rem 2rem; text-decoration: none; display: inline-block;">Cancel</a>
+                    <button type="submit" class="btn btn-primary btn-lg">💾 Save Product Information</button>
+                    <a href="{{ url_for('cuplock.vertical_list') }}" class="btn btn-secondary btn-lg">Cancel</a>
                 </div>
             </div>
         </form>
+    </div>
 
-        <!-- Sizes and Cups Section -->
-        <div id="sizes" class="form-section">
-            <h3>Manage Sizes & Cup Configurations</h3>
-            
-            <div class="info-alert">
-                <strong>Available Sizes:</strong> 1m, 1.5m, 2m, 2.5m, 3m<br>
-                <strong>Cup Options by Size:</strong>
-                <ul>
-                    <li>1m: 1 or 2 cups</li>
-                    <li>1.5m: 2 or 3 cups</li>
-                    <li>2m: 2, 3, or 4 cups</li>
-                    <li>2.5m: 2, 3, or 4 cups</li>
-                    <li>3m: 3, 4, or 6 cups</li>
-                </ul>
-            </div>
+    <!-- Sizes & Cups Section -->
+    <div id="sizes" class="form-section">
+        <h3>Manage Sizes & Cup Configurations</h3>
+        
+        <div class="info-alert">
+            <p><strong>💡 Tip:</strong> You can add sizes like "1.5m", "2m", etc., and configure specific cup quantities for each size.</p>
+        </div>
 
-            {% if product.vertical_sizes %}
-            <div class="sizes-list">
-                {% for size in product.vertical_sizes %}
-                <div class="size-card">
-                    <div class="size-header">
-                        <div>
-                            <h4>{{ size.size_label }}</h4>
-                            <p class="size-details">Weight: {{ size.weight }}kg | Buy: ₹{{ size.buy_price }} | Rent: ₹{{ size.rent_price }}/day</p>
+        {% if product.vertical_sizes %}
+        <div class="sizes-list">
+            {% for size in product.vertical_sizes %}
+            <div class="size-card">
+                <div class="size-header">
+                    <div>
+                        <h4 class="size-title">{{ size.size_label }}</h4>
+                        <p class="size-meta">Weight: {{ size.weight }}kg</p>
+                    </div>
+                    <button type="button" class="btn-icon btn-delete" onclick="window.deleteSize({{ size.id }})">
+                        🗑️
+                    </button>
+                </div>
+
+                <!-- Cup Configurations for this Size -->
+                {% if size.cups %}
+                <div class="cups-list">
+                    {% for cup in size.cups %}
+                    <div class="cup-item">
+                        <div class="cup-info">
+                            <span class="cup-badge">{{ cup.quantity }} Cups</span>
+                            <div class="cup-details">
+                                <p class="cup-date">Added: {{ cup.created_at.strftime('%d %b %Y') if cup.created_at else 'N/A' }}</p>
+                            </div>
                         </div>
-                        <button type="button" class="btn btn-sm btn-danger delete-size-btn" data-size-id="{{ size.id }}">
-                            🗑️ Delete Size
+                        <button type="button" class="btn-icon btn-delete" onclick="window.deleteCup({{ cup.id }})">
+                            ✖
                         </button>
                     </div>
-
-                    <!-- Cup Configurations for this size -->
-                    {% if size.cups %}
-                    <div class="cups-list">
-                        <h5>Cup Configurations:</h5>
-                        {% for cup in size.cups %}
-                        <div class="cup-item">
-                            <div class="cup-info">
-                                <span class="cup-badge">{{ cup.quantity }} Cups</span>
-                                <div class="cup-details">
-                                    <p><small>Added: {{ cup.created_at.strftime('%Y-%m-%d') if cup.created_at else 'N/A' }}</small></p>
-                                </div>
-                            </div>
-                            <button type="button" class="btn btn-sm btn-danger delete-cup-btn" data-cup-id="{{ cup.id }}">
-                                Remove
-                            </button>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    {% else %}
-                    <p class="empty-msg">No cup configurations added yet</p>
-                    {% endif %}
-
-                    <!-- Add Cup Configuration Form -->
-                    <div class="add-cup-form">
-                        <h5>Add Cup Configuration</h5>
-                        <form class="cup-form" data-size-id="{{ size.id }}" data-size-label="{{ size.size_label }}" enctype="multipart/form-data">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Number of Cups *</label>
-                                    <select name="cup_count" required class="cup-count-select">
-                                        <option value="">-- Choose --</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Weight (kg)</label>
-                                    <input type="number" name="weight_kg" step="0.01" placeholder="Optional">
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Buy Price (₹)</label>
-                                    <input type="number" name="buy_price" step="0.01" placeholder="Optional">
-                                </div>
-                                <div class="form-group">
-                                    <label>Rent Price (₹/day)</label>
-                                    <input type="number" name="rent_price" step="0.01" placeholder="Optional">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>Deposit (₹)</label>
-                                <input type="number" name="deposit" step="0.01" placeholder="Optional">
-                            </div>
-                            <div class="form-group">
-                                <label>Cup Image</label>
-                                <input type="file" name="cup_image" accept="image/*" placeholder="Upload cup image">
-                                <small>Supported formats: JPG, PNG, GIF, WebP</small>
-                            </div>
-                            <button type="submit" class="btn btn-success">➕ Add Cup Configuration</button>
-                        </form>
-                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
-            </div>
-            {% endif %}
+                {% else %}
+                <div class="empty-cups">
+                    <p>No cup configurations added yet.</p>
+                </div>
+                {% endif %}
 
-            <!-- Add New Size -->
-            <div class="add-size-form">
-                <h4>Add New Size</h4>
-                <form class="size-form" data-product-id="{{ product.id }}">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Size *</label>
-                            <select name="size_label" required>
-                                <option value="">-- Choose Size --</option>
-                                {% for size in available_sizes %}
-                                <option value="{{ size }}">{{ size }}</option>
-                                {% endfor %}
-                            </select>
+                <!-- Add Cup Configuration Form -->
+                <div class="add-cup-form">
+                    <h5 class="form-title">Add Cup Configuration</h5>
+                    <form class="cup-form" method="POST" enctype="multipart/form-data" data-size-id="{{ size.id }}" data-size-label="{{ size.size_label }}">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="cup_count">Number of Cups *</label>
+                                <select name="cup_count" class="form-control" required>
+                                    <option value="">-- Choose --</option>
+                                    {% for i in range(1, 7) %}
+                                    <option value="{{ i }}">{{ i }} {{ i == 1 ? 'Cup' : 'Cups' }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="weight_kg">Weight (kg)</label>
+                                <input type="number" name="weight_kg" step="0.01" class="form-control" placeholder="Optional">
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Weight (kg) *</label>
-                            <input type="number" name="weight" step="0.1" required placeholder="e.g., 5.5">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="buy_price">Buy Price (₹)</label>
+                                <input type="number" name="buy_price" step="0.01" class="form-control" placeholder="Optional">
+                            </div>
+                            <div class="form-group">
+                                <label for="rent_price">Rent Price (₹/day)</label>
+                                <input type="number" name="rent_price" step="0.01" class="form-control" placeholder="Optional">
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Buy Price (₹) *</label>
-                            <input type="number" name="buy_price" step="0.01" required>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="deposit">Deposit (₹)</label>
+                                <input type="number" name="deposit" step="0.01" class="form-control" placeholder="Optional">
+                            </div>
+                            <div class="form-group">
+                                <label for="cup_image">Cup Image</label>
+                                <input type="file" name="cup_image" accept="image/*" class="form-control">
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Rent Price (₹/day) *</label>
-                            <input type="number" name="rent_price" step="0.01" required>
-                        </div>
+                        <button type="submit" class="btn btn-success btn-sm">➕ Add Cup Configuration</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Add New Size Form -->
+        <div class="add-size-form">
+            <h4 class="form-title">Add New Size</h4>
+            <form class="size-form" method="POST" data-product-id="{{ product.id }}">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="size_label">Size *</label>
+                        <select name="size_label" class="form-control" required>
+                            <option value="">-- Select Size --</option>
+                            {% for size in available_sizes %}
+                            <option value="{{ size }}">{{ size }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                     <div class="form-group">
-                        <label>Deposit (₹)</label>
-                        <input type="number" name="deposit" step="0.01" placeholder="0">
+                        <label for="weight">Weight (kg) *</label>
+                        <input type="number" name="weight" step="0.1" class="form-control" placeholder="e.g., 5.5" required>
                     </div>
-                    <button type="submit" class="btn btn-info">➕ Add Size</button>
-                </form>
-            </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="buy_price">Buy Price (₹) *</label>
+                        <input type="number" name="buy_price" step="0.01" class="form-control" placeholder="e.g., 5000" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="rent_price">Rent Price (₹/day) *</label>
+                        <input type="number" name="rent_price" step="0.01" class="form-control" placeholder="e.g., 600" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="deposit">Deposit (₹)</label>
+                        <input type="number" name="deposit" step="0.01" class="form-control" placeholder="e.g., 500">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg">➕ Add Size</button>
+            </form>
         </div>
     </div>
 </div>
 
+<!-- Global Object for JS -->
 <script>
 const cupOptions = {{ cup_options|tojson }};
 
-// Populate cup options for existing sizes
+// Populate cup options
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.cup-form').forEach(form => {
         const sizeLabel = form.dataset.sizeLabel;
-        const cupSelect = form.querySelector('.cup-count-select');
+        const cupSelect = form.querySelector('select[name="cup_count"]');
         const availableCups = cupOptions[sizeLabel] || [];
         
         availableCups.forEach(cupCount => {
@@ -198,335 +201,478 @@ document.addEventListener('DOMContentLoaded', function() {
             cupSelect.appendChild(option);
         });
     });
-});
 
-// Handle add size form submission
-document.querySelectorAll('.size-form').forEach(form => {
-    form.addEventListener('submit', function(event) {
-        event.preventDefault();
-        const productId = this.dataset.productId;
-        const formData = new FormData(this);
+// Global handler for adding size (triggered via window property to avoid conflicts)
+window.addSize = function(event) {
+    event.preventDefault();
+    const form = event.target;
+    const productId = form.dataset.productId;
+    const formData = new FormData(form);
+    
+    fetch(`/admin/vertical/${productId}/size/add`, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Size added successfully!');
+            window.location.reload();
+        } else {
+            alert('Error: ' + (data.message || 'Failed to add size'));
+        }
+    })
+    .catch(err => alert('Error: ' + err));
+};
 
-        const url = `/admin/vertical/${productId}/size/add`;
-        
-        fetch(url, {
-            method: 'POST',
-            body: formData
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                alert('Size added! Reloading...');
-                location.reload();
-            } else {
-                alert('Error: ' + data.message);
-            }
-        })
-        .catch(err => alert('Error: ' + err));
-    });
-});
+// Global handler for deleting size
+window.deleteSize = function(sizeId) {
+    if (!confirm('Are you sure you want to delete this size and all its cup configurations?')) return;
+    
+    fetch(`/admin/vertical/size/${sizeId}/delete`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Size deleted successfully!');
+            window.location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(err => alert('Error: ' + err));
+};
 
-// Handle add cup form submission
-document.querySelectorAll('.cup-form').forEach(form => {
-    form.addEventListener('submit', function(event) {
-        event.preventDefault();
-        const sizeId = this.dataset.sizeId;
-        const formData = new FormData(this);
-
-        const url = `/admin/vertical/size/${sizeId}/cup/add`;
-        
-        fetch(url, {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message || 'Cup configuration added!');
-                location.reload();
-            } else {
-                alert('Error: ' + (data.message || 'Failed to add cup configuration'));
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error: ' + (error.message || 'Failed to add cup configuration'));
-        });
-    });
-});
-
-// Handle delete size button clicks
-document.querySelectorAll('.delete-size-btn').forEach(button => {
-    button.addEventListener('click', function() {
-        if (!confirm('Delete this size and all its cup configurations?')) return;
-        const sizeId = this.dataset.sizeId;
-        
-        const url = `/admin/vertical/size/${sizeId}/delete`;
-        
-        fetch(url, { method: 'POST' })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                alert('Size deleted!');
-                location.reload();
-            } else {
-                alert('Error: ' + data.message);
-            }
-        });
-    });
-});
-
-// Handle delete cup button clicks
-document.querySelectorAll('.delete-cup-btn').forEach(button => {
-    button.addEventListener('click', function() {
-        if (!confirm('Are you sure you want to remove this cup configuration?')) return;
-        const cupId = this.dataset.cupId;
-        
-        const url = `/admin/vertical/cup/${cupId}/delete`;
-        
-        fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                alert(data.message || 'Cup configuration removed!');
-                location.reload();
-            } else {
-                throw new Error(data.message || 'Failed to remove cup configuration');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error: ' + (error.message || 'Failed to remove cup configuration'));
-        });
-    });
-});
+// Global handler for deleting cup
+window.deleteCup = function(cupId) {
+    if (!confirm('Are you sure you want to remove this cup configuration?')) return;
+    
+    fetch(`/admin/vertical/cup/${cupId}/delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message || 'Cup configuration removed!');
+            window.location.reload();
+        } else {
+            alert('Error: ' + (data.message || 'Failed to remove cup configuration'));
+        }
+    })
+    .catch(err => alert('Error: ' + err));
+};
 </script>
 
 <style>
-.admin-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-}
+    /* ===== GLOBAL RESETS ===== */
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
 
-.page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-}
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f8f9fa;
+        color: #333;
+        line-height: 1.6;
+        padding-bottom: 80px; /* Space for scrolling */
+    }
 
-.form-container {
-    background: white;
-    border-radius: 8px;
-    padding: 2rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
+    /* ===== MAIN WRAPPER ===== */
+    .admin-wrapper {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1.5rem;
+    }
 
-.form-section {
-    margin-bottom: 2rem;
-    padding-bottom: 2rem;
-    border-bottom: 1px solid #e0e0e0;
-}
+    /* ===== HEADER ===== */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e0e0e0;
+    }
 
-.form-section:last-child {
-    border-bottom: none;
-}
+    .page-header h1 {
+        font-size: 1.8rem;
+        color: #1e3a8a;
+        margin: 0;
+        font-weight: 700;
+        flex: 1;
+    }
 
-.form-section h3 {
-    color: #001d3d;
-    margin-bottom: 1.5rem;
-}
+    /* ===== FORM CONTAINER ===== */
+    .form-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        margin-bottom: 2rem;
+    }
 
-.info-alert {
-    background: #fff3cd;
-    border-left: 4px solid #ffc107;
-    padding: 1rem;
-    margin-bottom: 2rem;
-    border-radius: 4px;
-}
+    /* ===== SECTIONS ===== */
+    .form-section {
+        padding: 2rem;
+        margin-bottom: 2rem;
+        background: white;
+        border: 1px solid #f0f0f0;
+        border-radius: 8px;
+    }
 
-.info-alert ul {
-    margin: 0.5rem 0 0 1.5rem;
-}
+    .form-section h3 {
+        font-size: 1.4rem;
+        color: #1e3a8a;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 1rem;
+    }
 
-.sizes-list {
-    margin-bottom: 2rem;
-}
+    .info-alert {
+        background: #e3f2fd;
+        border-left: 5px solid #1e3a8a;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
 
-.size-card {
-    border: 2px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    background: #f9f9f9;
-}
+    /* ===== BUTTONS (General) ===== */
+    .btn {
+        border: none;
+        border-radius: 8px;
+        padding: 0.8rem 1.5rem;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
 
-.size-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 1rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #ddd;
-}
+    .btn-back {
+        background: transparent;
+        color: #6c757d;
+        border: 1px solid #6c757d;
+    }
+    .btn-back:hover {
+        background: #f0f0f0;
+        color: #333;
+    }
 
-.size-header h4 {
-    margin: 0 0 0.5rem 0;
-    color: #001d3d;
-}
+    .btn-primary {
+        background: linear-gradient(135deg, #002855, #004080);
+        color: white;
+        box-shadow: 0 4px 12px rgba(0, 40, 80, 0.2);
+    }
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #003366, #0059b3);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 40, 80, 0.3);
+    }
 
-.size-details {
-    color: #666;
-    font-size: 0.9rem;
-    margin: 0;
-}
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+        border: 1px solid #5a6268;
+    }
+    .btn-secondary:hover {
+        background: #5a6268;
+    }
 
-.cups-list {
-    background: white;
-    padding: 1rem;
-    border-radius: 6px;
-    margin-bottom: 1.5rem;
-}
+    .btn-lg {
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+    }
 
-.cup-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.75rem;
-    border-bottom: 1px solid #eee;
-}
+    /* ===== FORM GROUPS ===== */
+    .form-group {
+        margin-bottom: 1.5rem;
+        width: 100%;
+    }
 
-.cup-item:last-child {
-    border-bottom: none;
-}
+    .form-group label {
+        display: block;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        color: #444;
+        font-size: 1rem;
+    }
 
-.cup-info {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
+    /* Mobile Critical Styles for Inputs */
+    input[type="text"], input[type="number"], textarea, select {
+        width: 100%;
+        padding: 14px 16px; /* Large touch targets */
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 16px; /* 16px prevents iOS zoom */
+        background-color: #fff;
+        transition: border-color 0.3s ease;
+        font-family: inherit;
+        -webkit-appearance: none;
+    }
 
-.cup-badge {
-    background: #4e73df;
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-weight: 600;
-    font-size: 0.9rem;
-}
+    input:focus, textarea:focus, select:focus {
+        border-color: #1e3a8a;
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(30, 58, 138, 0.15);
+        background-color: #fafbff;
+    }
 
-.add-cup-form, .add-size-form {
-    background: #f0f7ff;
-    padding: 1.5rem;
-    border-radius: 6px;
-    border: 1px solid #b3d9ff;
-}
+    textarea {
+        resize: vertical;
+    }
 
-.form-group {
-    margin-bottom: 1rem;
-}
+    /* ===== SIZES LIST ===== */
+    .sizes-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
 
-.form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-    color: #333;
-}
+    .size-card {
+        background: #ffffff;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
 
-.form-control, input, select, textarea {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 0.9rem;
-}
+    .size-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #eee;
+    }
 
-.form-control:focus, input:focus, select:focus, textarea:focus {
-    outline: none;
-    border-color: #002855;
-    box-shadow: 0 0 5px rgba(0,40,85,0.3);
-}
+    .size-title {
+        font-size: 1.25rem;
+        color: #1e3a8a;
+        font-weight: 700;
+        margin: 0;
+    }
 
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-}
+    .size-meta {
+        font-size: 0.9rem;
+        color: #666;
+    }
 
-.btn {
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
-}
+    .btn-delete {
+        background: transparent;
+        color: #dc3545;
+        border: none;
+        padding: 0.5rem;
+        cursor: pointer;
+        font-size: 1.2rem;
+    }
 
-.btn-primary {
-    background: #002855;
-    color: white;
-}
+    .btn-delete:hover {
+        color: #c82333;
+        background: #f8d7da;
+        border-radius: 50%;
+    }
 
-.btn-secondary {
-    background: #6c757d;
-    color: white;
-}
+    /* ===== CUPS LIST ===== */
+    .cups-list {
+        background: #f8f9fa;
+        border-radius: 6px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
 
-.btn-danger {
-    background: #dc3545;
-    color: white;
-}
+    .cup-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .cup-item:last-child { border-bottom: none; }
 
-.btn-info {
-    background: #0d6efd;
-    color: white;
-}
+    .cup-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
 
-.btn-success {
-    background: #198754;
-    color: white;
-}
+    .cup-badge {
+        background: #002855;
+        color: white;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
 
-.btn-sm {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.8rem;
-}
+    .cup-details {
+        display: flex;
+        flex-direction: column;
+    }
 
-.empty-msg {
-    color: #999;
-    font-style: italic;
-    padding: 1rem;
-    background: #f5f5f5;
-    border-radius: 4px;
-}
+    .cup-date {
+        font-size: 0.85rem;
+        color: #999;
+        margin: 0;
+    }
 
-.button-group {
-    display: flex;
-    gap: 1rem;
-    margin-top: 2rem;
-    padding-top: 1rem;
-    border-top: 2px solid #e0e0e0;
-}
+    .empty-cups {
+        text-align: center;
+        padding: 2rem;
+        color: #999;
+        background: #f0f0f0;
+        border-radius: 4px;
+        font-style: italic;
+    }
 
-.btn-save-product {
-    padding: 0.75rem 2rem !important;
-    font-size: 1.1rem !important;
-    background: linear-gradient(135deg, #198754, #20c997) !important;
-    transition: all 0.3s;
-}
+    /* ===== FORMS (Nested) ===== */
+    .add-cup-form, .add-size-form {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        border: 1px solid #e9ecef;
+        margin-top: 1.5rem;
+    }
 
-.btn-save-product:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(25, 135, 84, 0.3);
-}
+    .form-title {
+        font-size: 1.1rem;
+        color: #1e3a8a;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
 
+    .form-row {
+        display: flex;
+        flex-direction: row;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        align-items: flex-end;
+    }
+
+    .form-control {
+        width: 100%; /* Forces full width in flex container */
+        padding: 12px 15px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 1rem;
+    }
+
+    .btn-icon {
+        padding: 0.5rem 1rem;
+        font-size: 1.2rem;
+    }
+
+    .btn-sm {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+    }
+
+    .btn-success {
+        background: #198754;
+        color: white;
+    }
+    .btn-success:hover {
+        background: #157347;
+    }
+
+    /* ===== BUTTON GROUP ===== */
+    .button-group {
+        display: flex;
+        gap: 1.5rem;
+        margin-top: 2rem;
+        justify-content: center;
+    }
+
+    /* ===== MOBILE RESPONSIVE DESIGN ===== */
+    @media (max-width: 768px) {
+        /* 1. Container & Header Adjustments */
+        .admin-wrapper {
+            padding: 1rem;
+            margin: 0 auto; /* Ensure no margin */
+        }
+
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+            text-align: left;
+        }
+
+        .page-header h1 {
+            font-size: 1.5rem;
+            text-align: left;
+        }
+
+        .form-container {
+            padding: 1.5rem; /* Less padding on mobile */
+        }
+
+        /* 2. Grid Layout Adjustments */
+        .sizes-list {
+            display: flex; /* Stack sizes vertically on mobile */
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .size-card {
+            width: 100%; /* Full width card on mobile */
+        }
+
+        /* 3. Size Card Layout */
+        .size-header {
+            align-items: flex-start; /* Left align on mobile */
+        }
+
+        /* 4. Nested Forms (Cups/Size) Adjustments */
+        .add-cup-form, .add-size-form {
+            margin-top: 0; /* No top margin inside card */
+        }
+
+        /* 5. Form Row Stacking (Critical) */
+        .form-row {
+            flex-direction: column; /* Stack inputs vertically */
+            gap: 1rem;
+            align-items: stretch;
+        }
+
+        /* 6. Input Adjustments */
+        input, select {
+            padding: 14px !important; /* Larger touch area */
+            font-size: 16px !important; /* Prevent zoom */
+        }
+
+        /* 7. Button Groups */
+        .button-group {
+            flex-direction: column; /* Stack buttons vertically */
+            width: 100%;
+        }
+
+        .btn, .btn-primary, .btn-secondary {
+            width: 100%; /* Full width buttons */
+            padding: 14px 20px; /* Taller touch targets */
+            font-size: 1rem;
+            justify-content: center;
+        }
+
+        .btn-lg {
+            width: 100%;
+            padding: 16px 20px;
+        }
+
+        /* 8. Specific Adjustments */
+        .info-alert {
+            padding: 0.75rem;
+            font-size: 0.9rem;
+        }
+    }
 </style>
 {% endblock %}
