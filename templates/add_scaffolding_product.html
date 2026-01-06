@@ -480,14 +480,129 @@ document.addEventListener('DOMContentLoaded', function() {
     .alert-error { color: #721c24; background-color: #f8d7da; border-color: #f5c6cb; }
     .alert-warning { color: #856404; background-color: #fff3cd; border-color: #ffeaa7; }
 
-    /* ===== MOBILE RESPONSIVE CSS ===== */
-    @media (max-width: 768px) {
-        /* Adjust Container */
+    /* ===== LARGE DESKTOP SCREENS (1200px and up) ===== */
+    @media (min-width: 1200px) {
+        .admin-container {
+            max-width: 1200px;
+            padding: 30px;
+        }
+        
+        .form-container {
+            padding: 40px;
+        }
+        
+        .form-section h3 {
+            font-size: 1.5rem;
+        }
+    }
+
+    /* ===== DESKTOP SCREENS (992px to 1199px) ===== */
+    @media (min-width: 992px) and (max-width: 1199px) {
+        .admin-container {
+            max-width: 960px;
+            padding: 25px;
+        }
+        
+        .form-container {
+            padding: 35px;
+        }
+    }
+
+    /* ===== TABLET LANDSCAPE (768px to 991px) ===== */
+    @media (min-width: 768px) and (max-width: 991px) {
+        .admin-container {
+            padding: 20px;
+        }
+        
+        .form-container {
+            padding: 25px;
+        }
+        
+        .page-header {
+            flex-direction: row;
+            align-items: center;
+        }
+        
+        .page-header h1 {
+            font-size: 1.8rem;
+        }
+        
+        .form-row {
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .button-group {
+            flex-direction: row;
+            justify-content: center;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+        }
+    }
+
+    /* ===== TABLET PORTRAIT AND LARGE PHONES (576px to 767px) ===== */
+    @media (min-width: 576px) and (max-width: 767px) {
         .admin-container {
             padding: 15px;
         }
 
-        /* Header: Stack vertically on mobile */
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .page-header h1 {
+            font-size: 1.6rem;
+            margin-bottom: 5px;
+        }
+
+        .form-container {
+            padding: 20px;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .button-group {
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px 20px;
+        }
+
+        .size-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .btn-remove {
+            width: auto;
+            margin-top: 10px;
+        }
+
+        .btn-add-size {
+            width: 100%;
+        }
+
+        .info-box {
+            padding: 12px;
+        }
+    }
+
+    /* ===== MOBILE PHONES (575px and below) ===== */
+    @media (max-width: 575px) {
+        .admin-container {
+            padding: 10px;
+        }
+
         .page-header {
             flex-direction: column;
             align-items: flex-start;
@@ -499,39 +614,55 @@ document.addEventListener('DOMContentLoaded', function() {
             margin-bottom: 5px;
         }
 
-        /* Make buttons full width for easy tapping */
-        .btn {
-            width: 100%;
-            padding: 14px 20px; /* Taller buttons */
+        .form-container {
+            padding: 15px;
         }
 
-        /* Stack main buttons */
-        .button-group {
-            flex-direction: column;
-            width: 100%;
+        .form-section h3 {
+            font-size: 1.2rem;
+            margin-top: 20px;
+            margin-bottom: 15px;
         }
 
-        /* Stack form rows into single column */
-        .form-row {
-            grid-template-columns: 1fr;
-            gap: 15px;
+        .form-group {
+            margin-bottom: 15px;
         }
 
-        /* Adjust labels */
         .form-group label {
             margin-bottom: 5px;
             font-size: 14px;
         }
 
-        /* Reduce padding slightly on mobile */
         .form-group input[type="text"],
         .form-group input[type="number"],
         .form-group textarea,
         .form-group select {
             padding: 10px;
+            font-size: 16px;
         }
 
-        /* Adjust Size Options Header */
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .button-group {
+            flex-direction: column;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px 20px;
+            font-size: 16px;
+        }
+
+        .size-option {
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
         .size-header {
             flex-direction: column;
             align-items: flex-start;
@@ -550,8 +681,63 @@ document.addEventListener('DOMContentLoaded', function() {
             padding: 12px;
         }
 
+        #cuplockInfo {
+            padding: 12px;
+        }
+
+        #cuplockInfo h4 {
+            font-size: 1rem;
+        }
+
+        #cuplockInfo p {
+            font-size: 14px;
+        }
+
+        #cuplockInfo ul {
+            padding-left: 20px;
+        }
+
+        #cuplockInfo ul li {
+            font-size: 14px;
+        }
+    }
+
+    /* ===== EXTRA SMALL SCREENS (320px to 375px) ===== */
+    @media (max-width: 375px) {
+        .admin-container {
+            padding: 5px;
+        }
+
+        .page-header h1 {
+            font-size: 1.3rem;
+        }
+
         .form-container {
-            padding: 15px;
+            padding: 10px;
+        }
+
+        .form-section h3 {
+            font-size: 1.1rem;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group textarea,
+        .form-group select {
+            padding: 8px;
+        }
+
+        .btn {
+            padding: 12px 15px;
+            font-size: 14px;
+        }
+
+        .size-option {
+            padding: 10px;
+        }
+
+        .size-header h4 {
+            font-size: 1rem;
         }
     }
 </style>

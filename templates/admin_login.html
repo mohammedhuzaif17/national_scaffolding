@@ -202,47 +202,306 @@
         box-shadow: 0 6px 20px rgba(0, 40, 80, 0.3);
     }
 
-    /* ===== MOBILE RESPONSIVE FIXES ===== */
-    @media (max-width: 768px) {
+    /* ===== LARGE DESKTOP SCREENS (1200px and up) ===== */
+    @media (min-width: 1200px) {
         .login-wrapper {
-            padding: 1rem; /* Less padding on mobile */
+            padding: 2rem;
         }
-
+        
         .login-card {
-            padding: 1.5rem; /* Less padding to fit screen */
-            box-shadow: none; /* Remove heavy shadow on small screens for cleaner look */
-            border: 1px solid rgba(0,0,0,0.1);
+            max-width: 500px;
+            padding: 3rem;
         }
-
+        
         .page-title {
-            font-size: 1.5rem;
+            font-size: 2rem;
         }
+    }
 
+    /* ===== DESKTOP SCREENS (992px to 1199px) ===== */
+    @media (min-width: 992px) and (max-width: 1199px) {
+        .login-wrapper {
+            padding: 1.8rem;
+        }
+        
+        .login-card {
+            padding: 2.8rem;
+        }
+    }
+
+    /* ===== TABLET LANDSCAPE (768px to 991px) ===== */
+    @media (min-width: 768px) and (max-width: 991px) {
+        .login-wrapper {
+            padding: 1.5rem;
+        }
+        
+        .login-card {
+            padding: 2.2rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        }
+        
+        .page-title {
+            font-size: 1.7rem;
+        }
+        
         .alert-text {
             font-size: 0.9rem;
         }
+    }
 
-        /* Ensure inputs use full width properly */
+    /* ===== TABLET PORTRAIT (600px to 767px) ===== */
+    @media (min-width: 600px) and (max-width: 767px) {
+        .login-wrapper {
+            padding: 1.2rem;
+        }
+        
+        .login-card {
+            padding: 2rem;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .page-title {
+            font-size: 1.6rem;
+        }
+        
+        .alert-text {
+            font-size: 0.9rem;
+            margin-bottom: 1.8rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.3rem;
+        }
+        
+        input[type="text"],
+        input[type="password"],
+        select {
+            padding: 13px 15px;
+        }
+        
+        .btn-primary {
+            padding: 1.1rem 1.5rem;
+        }
+    }
+
+    /* ===== LARGE PHONES (480px to 599px) ===== */
+    @media (min-width: 480px) and (max-width: 599px) {
+        .login-wrapper {
+            padding: 1rem;
+        }
+        
+        .login-card {
+            padding: 1.8rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(0,0,0,0.08);
+        }
+        
+        .page-title {
+            font-size: 1.5rem;
+        }
+        
+        .alert-text {
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        
+        .form-group label {
+            font-size: 0.9rem;
+        }
+        
         input[type="text"],
         input[type="password"],
         select {
             padding: 14px !important; /* Larger touch area */
             font-size: 16px !important; /* Maintain 16px */
         }
+        
+        .btn-primary {
+            padding: 1.2rem 1.5rem;
+            font-size: 1rem;
+        }
+        
+        .footer-link {
+            margin-top: 1.5rem;
+            font-size: 0.85rem;
+        }
+    }
 
+    /* ===== MOBILE PHONES (479px and below) ===== */
+    @media (max-width: 479px) {
+        .login-wrapper {
+            padding: 0.8rem;
+        }
+        
+        .form-header {
+            margin-bottom: 1.2rem;
+        }
+        
+        .login-card {
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        .page-title {
+            font-size: 1.4rem;
+            margin-bottom: 0.8rem;
+        }
+        
+        .alert-text {
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+        }
+        
         .form-group {
-            margin-bottom: 1.2rem; /* Compact spacing */
+            margin-bottom: 1rem;
         }
-
-        /* Button Adjustments */
-        .btn {
-            width: 100% !important; /* Force full width */
-            padding: 14px 20px !important; /* Taller buttons for touch */
+        
+        .form-group label {
+            font-size: 0.85rem;
+            margin-bottom: 0.4rem;
         }
+        
+        input[type="text"],
+        input[type="password"],
+        select {
+            padding: 14px !important; /* Larger touch area */
+            font-size: 16px !important; /* Maintain 16px */
+        }
+        
+        .btn-primary {
+            padding: 1.2rem 1.5rem;
+            font-size: 0.95rem;
+        }
+        
+        .footer-link {
+            margin-top: 1.2rem;
+            font-size: 0.8rem;
+        }
+    }
 
-        .form-header .btn {
-            width: auto !important; /* Back button stays auto */
-            padding: 0.6rem 1.2rem !important;
+    /* ===== EXTRA SMALL SCREENS (320px to 379px) ===== */
+    @media (max-width: 379px) {
+        .login-wrapper {
+            padding: 0.5rem;
+        }
+        
+        .form-header {
+            margin-bottom: 1rem;
+        }
+        
+        .login-card {
+            padding: 1.2rem;
+            border-radius: 8px;
+        }
+        
+        .page-title {
+            font-size: 1.3rem;
+        }
+        
+        .alert-text {
+            font-size: 0.8rem;
+            margin-bottom: 1.2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 0.9rem;
+        }
+        
+        input[type="text"],
+        input[type="password"],
+        select {
+            padding: 12px !important;
+        }
+        
+        .btn-primary {
+            padding: 1.1rem 1.2rem;
+            font-size: 0.9rem;
+        }
+        
+        .btn-secondary {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+    }
+
+    /* ===== IPAD PRO SPECIFIC FIXES ===== */
+    @media only screen 
+      and (min-device-width: 1024px) 
+      and (max-device-width: 1366px) 
+      and (-webkit-min-device-pixel-ratio: 2) {
+        .login-wrapper {
+            padding: 1.8rem;
+        }
+        
+        .login-card {
+            max-width: 480px;
+            padding: 2.5rem;
+        }
+        
+        .page-title {
+            font-size: 1.9rem;
+        }
+    }
+
+    /* ===== IPAD SPECIFIC FIXES ===== */
+    @media only screen 
+      and (min-device-width: 768px) 
+      and (max-device-width: 1023px) 
+      and (-webkit-min-device-pixel-ratio: 2) {
+        .login-wrapper {
+            padding: 1.5rem;
+        }
+        
+        .login-card {
+            padding: 2.2rem;
+        }
+        
+        .page-title {
+            font-size: 1.7rem;
+        }
+    }
+
+    /* ===== SURFACE DUO AND FOLDABLES ===== */
+    @media screen and (max-width: 540px) and (orientation: landscape) {
+        .login-wrapper {
+            flex-direction: row;
+            padding: 1rem;
+        }
+        
+        .form-header {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            max-width: auto;
+        }
+        
+        .login-card {
+            max-width: 450px;
+            padding: 1.5rem;
+        }
+        
+        .page-title {
+            font-size: 1.3rem;
+            margin-bottom: 0.8rem;
+        }
+        
+        .alert-text {
+            font-size: 0.8rem;
+            margin-bottom: 1.2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 0.9rem;
+        }
+        
+        .btn-primary {
+            padding: 1rem 1.5rem;
         }
     }
 </style>

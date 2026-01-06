@@ -1,678 +1,513 @@
 {% extends "base.html" %}
 
-{% block title %}Edit Vertical Cuplock - Admin{% endblock %}
+{% block title %}H-Frames Pricing Management{% endblock %}
 
 {% block content %}
-<!-- Main Wrapper -->
-<div class="admin-wrapper">
-    <!-- Page Header -->
-    <div class="page-header">
-        <h1>Edit Vertical Cuplock: {{ product.name }}</h1>
-        <a href="{{ url_for('cuplock.vertical_list') }}" class="btn btn-back">← Back</a>
+
+<!-- Wrapper for clean CSS control -->
+<div class="pricing-wrapper">
+    <!-- Header Section -->
+    <div class="top-header">
+        <button class="btn btn-secondary" onclick="window.location.href='{{ url_for('admin_scaffoldings') }}'">
+            ← Back to Admin Panel
+        </button>
     </div>
-
-    <!-- Main Content Container -->
-    <div class="form-container">
-        <!-- Top Form: Product Info -->
-        <form method="POST" id="product-form" class="admin-form" enctype="multipart/form-data">
-            <div class="form-section">
-                <h3>Product Information</h3>
-                
-                <div class="form-group">
-                    <label for="name">Product Name</label>
-                    <input type="text" id="name" name="name" value="{{ product.name }}" readonly>
-                </div>
-
-                <div class="form-group">
-                    <label for="description">Description</label>
-                    <textarea id="description" name="description" rows="4">{{ product.description or '' }}</textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="image">Product Image</label>
-                    <input type="file" id="image" name="image" accept="image/*" placeholder="Upload product image">
-                    <div style="margin-top: 1rem; padding: 1rem; background: #f9f9f9; border-radius: 4px;">
-                        <p style="margin: 0 0 0.5rem 0; color: #666; font-size: 0.9rem;">Current image:</p>
-                        {% if product.image_url %}
-                            <img src="{{ url_for('static', filename=product.image_url) }}" 
-                                 style="max-width: 200px; max-height: 200px; object-fit: contain; border-radius: 4px;">
-                        {% else %}
-                            <span style="color: #999; font-style: italic; font-size: 0.8rem;">No image uploaded</span>
-                        {% endif %}
+    
+    <h1 class="page-title">H-Frames Pricing Management</h1>
+    <p class="subtitle">Set buy and rent prices for all H-Frame products organized by quantity sets</p>
+    
+    <!-- Products Grid Section -->
+    <div class="products-grid-wrapper">
+        {% if hframe_products %}
+            <div class="products-grid">
+                {% for product in hframe_products %}
+                <div class="pricing-card">
+                    <h3 class="product-name">{{ product.name }}</h3>
+                    <p class="product-desc">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
+                    
+                    <div class="form-group">
+                        <label for="buy_{{ product.id }}_{{ sets }}">Buy Price (₹/set)</label>
+                        <input type="number" id="buy_{{ product.id }}_{{ sets }}" step="0.01" placeholder="₹5000" class="pricing-input" data-product-id="{{ product.id }}" data-sets="{{ sets }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="rent_{{ product.id }}_{{ sets }}">Rent Price (₹/set/month)</label>
+                        <input type="number" id="rent_{{ product.id }}_{{ sets }}" step="0.01" placeholder="₹1000" class="pricing-input" data-product-id="{{ product.id }}" data-sets="{{ sets }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="deposit_{{ product.id }}_{{ sets }}">Deposit (₹/set)</label>
+                        <input type="number" id="deposit_{{ product.id }}_{{ sets }}" step="0.01" placeholder="₹500" class="pricing-input" data-product-id="{{ product.id }}" data-sets="{{ sets }}">
                     </div>
                 </div>
-
-                <div class="button-group">
-                    <button type="submit" class="btn btn-primary btn-lg">💾 Save Product Information</button>
-                    <a href="{{ url_for('cuplock.vertical_list') }}" class="btn btn-secondary btn-lg">Cancel</a>
-                </div>
+                {% endfor %}
             </div>
-        </form>
-    </div>
-
-    <!-- Sizes & Cups Section -->
-    <div id="sizes" class="form-section">
-        <h3>Manage Sizes & Cup Configurations</h3>
-        
-        <div class="info-alert">
-            <p><strong>💡 Tip:</strong> You can add sizes like "1.5m", "2m", etc., and configure specific cup quantities for each size.</p>
-        </div>
-
-        {% if product.vertical_sizes %}
-        <div class="sizes-list">
-            {% for size in product.vertical_sizes %}
-            <div class="size-card">
-                <div class="size-header">
-                    <div>
-                        <h4 class="size-title">{{ size.size_label }}</h4>
-                        <p class="size-meta">Weight: {{ size.weight }}kg</p>
-                    </div>
-                    <button type="button" class="btn-icon btn-delete" onclick="window.deleteSize({{ size.id }})">
-                        🗑️
-                    </button>
-                </div>
-
-                <!-- Cup Configurations for this Size -->
-                {% if size.cups %}
-                <div class="cups-list">
-                    {% for cup in size.cups %}
-                    <div class="cup-item">
-                        <div class="cup-info">
-                            <span class="cup-badge">{{ cup.quantity }} Cups</span>
-                            <div class="cup-details">
-                                <p class="cup-date">Added: {{ cup.created_at.strftime('%d %b %Y') if cup.created_at else 'N/A' }}</p>
-                            </div>
-                        </div>
-                        <button type="button" class="btn-icon btn-delete" onclick="window.deleteCup({{ cup.id }})">
-                            ✖
-                        </button>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <div class="empty-cups">
-                    <p>No cup configurations added yet.</p>
-                </div>
-                {% endif %}
-
-                <!-- Add Cup Configuration Form -->
-                <div class="add-cup-form">
-                    <h5 class="form-title">Add Cup Configuration</h5>
-                    <form class="cup-form" method="POST" enctype="multipart/form-data" data-size-id="{{ size.id }}" data-size-label="{{ size.size_label }}">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="cup_count">Number of Cups *</label>
-                                <select name="cup_count" class="form-control" required>
-                                    <option value="">-- Choose --</option>
-                                    {% for i in range(1, 7) %}
-                                    <option value="{{ i }}">{{ i }} {{ i == 1 ? 'Cup' : 'Cups' }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="weight_kg">Weight (kg)</label>
-                                <input type="number" name="weight_kg" step="0.01" class="form-control" placeholder="Optional">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="buy_price">Buy Price (₹)</label>
-                                <input type="number" name="buy_price" step="0.01" class="form-control" placeholder="Optional">
-                            </div>
-                            <div class="form-group">
-                                <label for="rent_price">Rent Price (₹/day)</label>
-                                <input type="number" name="rent_price" step="0.01" class="form-control" placeholder="Optional">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="deposit">Deposit (₹)</label>
-                                <input type="number" name="deposit" step="0.01" class="form-control" placeholder="Optional">
-                            </div>
-                            <div class="form-group">
-                                <label for="cup_image">Cup Image</label>
-                                <input type="file" name="cup_image" accept="image/*" class="form-control">
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-success btn-sm">➕ Add Cup Configuration</button>
-                    </form>
-                </div>
-            </div>
-            {% endfor %}
+        {% else %}
+        <div class="empty-state">
+            <p>No H-Frame products found. Add products first from Admin Panel.</p>
         </div>
         {% endif %}
-
-        <!-- Add New Size Form -->
-        <div class="add-size-form">
-            <h4 class="form-title">Add New Size</h4>
-            <form class="size-form" method="POST" data-product-id="{{ product.id }}">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="size_label">Size *</label>
-                        <select name="size_label" class="form-control" required>
-                            <option value="">-- Select Size --</option>
-                            {% for size in available_sizes %}
-                            <option value="{{ size }}">{{ size }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="weight">Weight (kg) *</label>
-                        <input type="number" name="weight" step="0.1" class="form-control" placeholder="e.g., 5.5" required>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="buy_price">Buy Price (₹) *</label>
-                        <input type="number" name="buy_price" step="0.01" class="form-control" placeholder="e.g., 5000" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="rent_price">Rent Price (₹/day) *</label>
-                        <input type="number" name="rent_price" step="0.01" class="form-control" placeholder="e.g., 600" required>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="deposit">Deposit (₹)</label>
-                        <input type="number" name="deposit" step="0.01" class="form-control" placeholder="e.g., 500">
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary btn-lg">➕ Add Size</button>
-            </form>
-        </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <button class="btn btn-primary" onclick="saveAllPricing()">💾 Save All H-Frames Pricing</button>
+        <button class="btn btn-secondary" onclick="window.location.href='{{ url_for('admin_scaffoldings') }}'">Cancel</button>
     </div>
 </div>
 
-<!-- Global Object for JS -->
+{% endblock %}
+
+{% block scripts %}
 <script>
-const cupOptions = {{ cup_options|tojson }};
+const pricingData = {{ pricing_data|tojson|safe }};
 
-// Populate cup options
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.cup-form').forEach(form => {
-        const sizeLabel = form.dataset.sizeLabel;
-        const cupSelect = form.querySelector('select[name="cup_count"]');
-        const availableCups = cupOptions[sizeLabel] || [];
+// Load existing pricing data
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('Loading H-Frames pricing data:', pricingData);
+    
+    if (pricingData && Object.keys(pricingData).length > 0) {
+        for (const productId in pricingData) {
+            const productPricing = pricingData[productId];
+            
+            if (productPricing && typeof productPricing === 'object') {
+                for (const sets in productPricing) {
+                    const priceData = productPricing[sets];
+                    
+                    if (typeof priceData === 'object') {
+                        const buyInputId = `buy_${productId}_${sets}`;
+                        const rentInputId = `rent_${productId}_${sets}`;
+                        const depositInputId = `deposit_${productId}_${sets}`;
+                        
+                        const buyInput = document.getElementById(buyInputId);
+                        const rentInput = document.getElementById(rentInputId);
+                        const depositInput = document.getElementById(depositInputId);
+                        
+                        if (buyInput && priceData.buy) {
+                            buyInput.value = priceData.buy;
+                        }
+                        if (rentInput && priceData.rent) {
+                            rentInput.value = priceData.rent;
+                        }
+                        if (depositInput && priceData.deposit) {
+                            depositInput.value = priceData.deposit;
+                        }
+                    }
+                }
+            }
+        }
+    }
+});
+
+function saveAllPricing() {
+    const allPricing = {};
+    const buyInputs = document.querySelectorAll('.pricing-input');
+    
+    buyInputs.forEach(input => {
+        const productId = input.dataset.productId;
+        const sets = input.dataset.sets;
+        const value = parseFloat(input.value);
         
-        availableCups.forEach(cupCount => {
-            const option = document.createElement('option');
-            option.value = cupCount;
-            option.textContent = `${cupCount} ${cupCount === 1 ? 'Cup' : 'Cups'}`;
-            cupSelect.appendChild(option);
-        });
+        if (!productId || !sets) {
+            return;
+        }
+
+        if (!isNaN(value) && value > 0) {
+            if (!allPricing[productId]) {
+                allPricing[productId] = {};
+            }
+            if (!allPricing[productId][sets]) {
+                allPricing[productId][sets] = {};
+            }
+            allPricing[productId][sets].buy = value;
+        }
     });
-
-// Global handler for adding size (triggered via window property to avoid conflicts)
-window.addSize = function(event) {
-    event.preventDefault();
-    const form = event.target;
-    const productId = form.dataset.productId;
-    const formData = new FormData(form);
     
-    fetch(`/admin/vertical/${productId}/size/add`, {
+    // Collect rent prices
+    const rentInputs = document.querySelectorAll('.rent-pricing-input');
+    rentInputs.forEach(input => {
+        const productId = input.dataset.productId;
+        const sets = input.dataset.sets;
+        const rentValue = parseFloat(input.value);
+        
+        if (rentValue && rentValue > 0) {
+            if (!allPricing[productId]) {
+                allPricing[productId] = {};
+            }
+            if (!allPricing[productId][sets]) {
+                allPricing[productId][sets] = {};
+            }
+            if (!allPricing[productId][sets]) {
+                allPricing[productId][sets] = {};
+            }
+            allPricing[productId][sets].rent = rentValue;
+        }
+    });
+    
+    // Collect deposit amounts
+    const depositInputs = document.querySelectorAll('.deposit-pricing-input');
+    depositInputs.forEach(input => {
+        const productId = input.dataset.productId;
+        const sets = input.dataset.sets;
+        const depositValue = parseFloat(input.value);
+        
+        if (depositValue && depositValue > 0) {
+            if (!allPricing[productId]) {
+                allPricing[productId] = {};
+            }
+            if (!allPricing[productId][sets]) {
+                allPricing[productId][sets] = {};
+            }
+            if (!allPricing[productId][sets]) {
+                allPricing[productId][sets] = {};
+            }
+            allPricing[productId][sets].deposit = depositValue;
+        }
+    });
+    
+    if (Object.keys(allPricing).length === 0) {
+        alert('Please enter at least one price (buy or rent) for at least one product!');
+        return;
+    }
+    
+    console.log('Saving H-Frames pricing:', allPricing);
+    
+    fetch('/admin_update_hframes_pricing', {
         method: 'POST',
-        body: formData
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            pricing_data: allPricing
+        })
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('Size added successfully!');
-            window.location.reload();
+            alert('✅ H-Frames pricing updated successfully!');
+            window.location.href = '{{ url_for("admin_scaffoldings") }}';
         } else {
-            alert('Error: ' + (data.message || 'Failed to add size'));
+            alert('❌ Error: ' + (data.message || 'Failed to update pricing'));
         }
     })
-    .catch(err => alert('Error: ' + err));
-};
-
-// Global handler for deleting size
-window.deleteSize = function(sizeId) {
-    if (!confirm('Are you sure you want to delete this size and all its cup configurations?')) return;
-    
-    fetch(`/admin/vertical/size/${sizeId}/delete`, {
-        method: 'POST'
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('Size deleted successfully!');
-            window.location.reload();
-        } else {
-            alert('Error: ' + data.message);
-        }
-    })
-    .catch(err => alert('Error: ' + err));
-};
-
-// Global handler for deleting cup
-window.deleteCup = function(cupId) {
-    if (!confirm('Are you sure you want to remove this cup configuration?')) return;
-    
-    fetch(`/admin/vertical/cup/${cupId}/delete`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert(data.message || 'Cup configuration removed!');
-            window.location.reload();
-        } else {
-            alert('Error: ' + (data.message || 'Failed to remove cup configuration'));
-        }
-    })
-    .catch(err => alert('Error: ' + err));
-};
+    .catch(error => {
+        console.error('Error:', error);
+        alert('❌ Error updating H-Frames pricing');
+    });
+}
 </script>
 
 <style>
     /* ===== GLOBAL RESETS ===== */
     * {
         box-sizing: border-box;
-        margin: 0;
-        padding: 0;
     }
 
-    body {
-        font-family: 'Poppins', sans-serif;
-        background-color: #f8f9fa;
-        color: #333;
-        line-height: 1.6;
-        padding-bottom: 80px; /* Space for scrolling */
-    }
-
-    /* ===== MAIN WRAPPER ===== */
-    .admin-wrapper {
+    /* Main Wrapper */
+    .pricing-wrapper {
         width: 100%;
-        max-width: 1200px;
+        max-width: 1400px;
         margin: 0 auto;
         padding: 1.5rem;
     }
 
-    /* ===== HEADER ===== */
-    .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+    /* Header Section */
+    .top-header {
         margin-bottom: 2rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid #e0e0e0;
     }
 
-    .page-header h1 {
+    .page-title {
         font-size: 1.8rem;
-        color: #1e3a8a;
-        margin: 0;
+        color: #ffd966; /* Gold */
         font-weight: 700;
-        flex: 1;
+        margin-bottom: 0.5rem;
     }
 
-    /* ===== FORM CONTAINER ===== */
-    .form-container {
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    .subtitle {
+        color: #d4af37;
         margin-bottom: 2rem;
+        font-weight: 500;
     }
 
-    /* ===== SECTIONS ===== */
-    .form-section {
+    /* Grid Layouts */
+    .products-grid-wrapper {
+        background: rgba(30, 58, 138, 0.1);
         padding: 2rem;
+        border-radius: 10px;
         margin-bottom: 2rem;
-        background: white;
-        border: 1px solid #f0f0f0;
-        border-radius: 8px;
     }
 
-    .form-section h3 {
-        font-size: 1.4rem;
-        color: #1e3a8a;
+    .products-grid {
+        display: grid;
+        /* Desktop: Grid with columns based on screen width */
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    /* Product Cards */
+    .pricing-card {
+        background: rgba(212, 175, 55, 0.05); /* Orange tint */
+        padding: 1.5rem;
+        border-radius: 8px;
+        border: 2px solid rgba(212, 175, 55, 0.2);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-name {
+        color: #d4af37;
+        margin-bottom: 1rem;
+        font-size: 1.25rem;
+    }
+
+    .product-desc {
+        color: #a0a0a0;
+        font-size: 0.9rem;
         margin-bottom: 1.5rem;
-        border-bottom: 2px solid #f0f0f0;
-        padding-bottom: 1rem;
+        min-height: 3em; /* Uniform height */
     }
 
-    .info-alert {
-        background: #e3f2fd;
-        border-left: 5px solid #1e3a8a;
-        padding: 1rem;
-        border-radius: 8px;
-        margin-bottom: 1.5rem;
-    }
-
-    /* ===== BUTTONS (General) ===== */
-    .btn {
-        border: none;
-        border-radius: 8px;
-        padding: 0.8rem 1.5rem;
-        font-weight: 600;
-        font-size: 1rem;
-        cursor: pointer;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.3s ease;
-    }
-
-    .btn-back {
-        background: transparent;
-        color: #6c757d;
-        border: 1px solid #6c757d;
-    }
-    .btn-back:hover {
-        background: #f0f0f0;
-        color: #333;
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, #002855, #004080);
-        color: white;
-        box-shadow: 0 4px 12px rgba(0, 40, 80, 0.2);
-    }
-    .btn-primary:hover {
-        background: linear-gradient(135deg, #003366, #0059b3);
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(0, 40, 80, 0.3);
-    }
-
-    .btn-secondary {
-        background: #6c757d;
-        color: white;
-        border: 1px solid #5a6268;
-    }
-    .btn-secondary:hover {
-        background: #5a6268;
-    }
-
-    .btn-lg {
-        padding: 1rem 2rem;
-        font-size: 1.1rem;
-    }
-
-    /* ===== FORM GROUPS ===== */
+    /* Form Inputs */
     .form-group {
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.2rem;
         width: 100%;
     }
 
     .form-group label {
         display: block;
-        margin-bottom: 0.75rem;
         font-weight: 600;
-        color: #444;
-        font-size: 1rem;
+        margin-bottom: 8px;
+        color: #555;
+        font-size: 0.95rem;
     }
 
-    /* Mobile Critical Styles for Inputs */
-    input[type="text"], input[type="number"], textarea, select {
+    /* Input Styling - Critical for Mobile */
+    .pricing-input {
         width: 100%;
-        padding: 14px 16px; /* Large touch targets */
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        font-size: 16px; /* 16px prevents iOS zoom */
-        background-color: #fff;
-        transition: border-color 0.3s ease;
-        font-family: inherit;
-        -webkit-appearance: none;
-    }
-
-    input:focus, textarea:focus, select:focus {
-        border-color: #1e3a8a;
-        outline: none;
-        box-shadow: 0 0 0 4px rgba(30, 58, 138, 0.15);
-        background-color: #fafbff;
-    }
-
-    textarea {
-        resize: vertical;
-    }
-
-    /* ===== SIZES LIST ===== */
-    .sizes-list {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 2rem;
-        margin-bottom: 2rem;
-    }
-
-    .size-card {
-        background: #ffffff;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        padding: 1.5rem;
-        display: flex;
-        flex-direction: column;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    }
-
-    .size-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid #eee;
-    }
-
-    .size-title {
-        font-size: 1.25rem;
-        color: #1e3a8a;
-        font-weight: 700;
-        margin: 0;
-    }
-
-    .size-meta {
-        font-size: 0.9rem;
-        color: #666;
-    }
-
-    .btn-delete {
-        background: transparent;
-        color: #dc3545;
-        border: none;
-        padding: 0.5rem;
-        cursor: pointer;
-        font-size: 1.2rem;
-    }
-
-    .btn-delete:hover {
-        color: #c82333;
-        background: #f8d7da;
-        border-radius: 50%;
-    }
-
-    /* ===== CUPS LIST ===== */
-    .cups-list {
-        background: #f8f9fa;
-        border-radius: 6px;
-        padding: 1rem;
-        margin-top: 1rem;
-    }
-
-    .cup-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.75rem;
-        border-bottom: 1px solid #e9ecef;
-    }
-    .cup-item:last-child { border-bottom: none; }
-
-    .cup-info {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .cup-badge {
-        background: #002855;
-        color: white;
-        padding: 0.4rem 0.8rem;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 0.9rem;
-    }
-
-    .cup-details {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .cup-date {
-        font-size: 0.85rem;
-        color: #999;
-        margin: 0;
-    }
-
-    .empty-cups {
-        text-align: center;
-        padding: 2rem;
-        color: #999;
-        background: #f0f0f0;
-        border-radius: 4px;
-        font-style: italic;
-    }
-
-    /* ===== FORMS (Nested) ===== */
-    .add-cup-form, .add-size-form {
-        background: white;
-        border-radius: 8px;
-        padding: 1.5rem;
-        border: 1px solid #e9ecef;
-        margin-top: 1.5rem;
-    }
-
-    .form-title {
-        font-size: 1.1rem;
-        color: #1e3a8a;
-        margin-bottom: 1rem;
-        font-weight: 600;
-    }
-
-    .form-row {
-        display: flex;
-        flex-direction: row;
-        gap: 1rem;
-        margin-bottom: 1rem;
-        align-items: flex-end;
-    }
-
-    .form-control {
-        width: 100%; /* Forces full width in flex container */
         padding: 12px 15px;
-        border: 1px solid #ccc;
+        border: 2px solid #ccc;
         border-radius: 6px;
-        font-size: 1rem;
+        font-size: 16px; /* 16px prevents iOS auto-zoom */
+        background: #fff;
+        transition: border-color 0.3s;
     }
 
-    .btn-icon {
-        padding: 0.5rem 1rem;
-        font-size: 1.2rem;
+    .pricing-input:focus {
+        border-color: #d4af37;
+        outline: none;
+        background-color: #fff;
     }
 
-    .btn-sm {
-        padding: 0.6rem 1.2rem;
-        font-size: 0.9rem;
-    }
-
-    .btn-success {
-        background: #198754;
-        color: white;
-    }
-    .btn-success:hover {
-        background: #157347;
-    }
-
-    /* ===== BUTTON GROUP ===== */
-    .button-group {
+    /* Action Buttons */
+    .action-buttons {
         display: flex;
-        gap: 1.5rem;
-        margin-top: 2rem;
+        gap: 1rem;
         justify-content: center;
+        margin-top: 2rem;
     }
 
-    /* ===== MOBILE RESPONSIVE DESIGN ===== */
+    .btn {
+        padding: 1rem 3rem;
+        border: none;
+        border-radius: 5px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #002855, #004080);
+        color: white;
+        box-shadow: 0 4px 10px rgba(0, 40, 80, 0.2);
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary:hover, .btn-secondary:hover {
+        transform: translateY(-2px);
+        opacity: 0.9;
+    }
+
+    /* Empty State */
+    .empty-state {
+        background: rgba(212, 175, 55, 0.1);
+        padding: 2rem;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    /* ===== RESPONSIVE BREAKPOINTS ===== */
+    
+    /* Large Tablets and Small Desktops */
+    @media (max-width: 1024px) {
+        .pricing-wrapper {
+            padding: 1.25rem;
+        }
+        
+        .products-grid {
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.25rem;
+        }
+        
+        .pricing-card {
+            padding: 1.25rem;
+        }
+        
+        .products-grid-wrapper {
+            padding: 1.5rem;
+        }
+    }
+    
+    /* Tablets (iPad) */
     @media (max-width: 768px) {
-        /* 1. Container & Header Adjustments */
-        .admin-wrapper {
+        .pricing-wrapper {
             padding: 1rem;
-            margin: 0 auto; /* Ensure no margin */
         }
 
-        .page-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 1rem;
-            text-align: left;
-        }
-
-        .page-header h1 {
+        /* Typography Adjustments */
+        .page-title {
             font-size: 1.5rem;
-            text-align: left;
+            text-align: center;
         }
-
-        .form-container {
-            padding: 1.5rem; /* Less padding on mobile */
-        }
-
-        /* 2. Grid Layout Adjustments */
-        .sizes-list {
-            display: flex; /* Stack sizes vertically on mobile */
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-
-        .size-card {
-            width: 100%; /* Full width card on mobile */
-        }
-
-        /* 3. Size Card Layout */
-        .size-header {
-            align-items: flex-start; /* Left align on mobile */
-        }
-
-        /* 4. Nested Forms (Cups/Size) Adjustments */
-        .add-cup-form, .add-size-form {
-            margin-top: 0; /* No top margin inside card */
-        }
-
-        /* 5. Form Row Stacking (Critical) */
-        .form-row {
-            flex-direction: column; /* Stack inputs vertically */
-            gap: 1rem;
-            align-items: stretch;
-        }
-
-        /* 6. Input Adjustments */
-        input, select {
-            padding: 14px !important; /* Larger touch area */
-            font-size: 16px !important; /* Prevent zoom */
-        }
-
-        /* 7. Button Groups */
-        .button-group {
-            flex-direction: column; /* Stack buttons vertically */
-            width: 100%;
-        }
-
-        .btn, .btn-primary, .btn-secondary {
-            width: 100%; /* Full width buttons */
-            padding: 14px 20px; /* Taller touch targets */
-            font-size: 1rem;
-            justify-content: center;
-        }
-
-        .btn-lg {
-            width: 100%;
-            padding: 16px 20px;
-        }
-
-        /* 8. Specific Adjustments */
-        .info-alert {
-            padding: 0.75rem;
+        
+        .subtitle {
+            text-align: center;
             font-size: 0.9rem;
+        }
+
+        /* FIX: Force Single Column Grid on Mobile */
+        /* This overrides the desktop grid-template-columns */
+        .products-grid {
+            display: grid !important;
+            grid-template-columns: 1fr !important; /* Force single column stack */
+            gap: 1rem !important;
+        }
+
+        /* Adjust Card Padding */
+        .pricing-card {
+            padding: 1rem !important; /* Tighter fit for mobile */
+            border-width: 1px;
+        }
+
+        /* Adjust Labels */
+        .product-name {
+            font-size: 1.1rem;
+        }
+
+        /* Fix Inputs for Touch */
+        .pricing-input {
+            padding: 14px !important; /* Larger touch area */
+            font-size: 16px !important; /* Maintain 16px to prevent zoom */
+        }
+
+        /* Stack Action Buttons */
+        .action-buttons {
+            flex-direction: column !important; /* Stack vertically */
+            width: 100%;
+            gap: 1rem;
+        }
+
+        .btn {
+            width: 100% !important; /* Full width buttons for tapping */
+            padding: 14px 20px; /* Taller buttons */
+        }
+
+        .empty-state {
+            padding: 1.5rem;
+        }
+    }
+    
+    /* Large Mobile Phones */
+    @media (max-width: 480px) {
+        .pricing-wrapper {
+            padding: 0.75rem;
+        }
+        
+        .page-title {
+            font-size: 1.4rem;
+        }
+        
+        .subtitle {
+            font-size: 0.85rem;
+        }
+        
+        .products-grid-wrapper {
+            padding: 1rem;
+            border-radius: 8px;
+        }
+        
+        .pricing-card {
+            padding: 0.875rem !important;
+            border-radius: 6px;
+        }
+        
+        .product-name {
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .product-desc {
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            min-height: 2.5em;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+        }
+        
+        .pricing-input {
+            padding: 12px !important;
+            border-radius: 4px;
+        }
+        
+        .btn {
+            padding: 12px 16px !important;
+            font-size: 0.9rem;
+        }
+        
+        .empty-state {
+            padding: 1.25rem;
+        }
+    }
+    
+    /* Small Mobile Phones */
+    @media (max-width: 360px) {
+        .pricing-wrapper {
+            padding: 0.5rem;
+        }
+        
+        .page-title {
+            font-size: 1.3rem;
+        }
+        
+        .products-grid-wrapper {
+            padding: 0.75rem;
+        }
+        
+        .pricing-card {
+            padding: 0.75rem !important;
+        }
+        
+        .pricing-input {
+            padding: 10px !important;
+        }
+        
+        .btn {
+            padding: 10px 14px !important;
+            font-size: 0.85rem;
         }
     }
 </style>
-{% endblock %}

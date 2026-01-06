@@ -1,286 +1,863 @@
 {% extends "base.html" %}
-{% block title %}Dashboard - National Scaffolding{% endblock %}
+
+{% block title %}Vertical Cuplock - {{ product.name }}{% endblock %}
+
 {% block content %}
-
-<!-- PREMIUM FONT -->
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
 <style>
-/* =========================================
-   BASE STYLES (Desktop Default)
-   ========================================= */
-* { 
-    font-family:'Inter', sans-serif;
-    box-sizing: border-box; /* Ensures padding doesn't add to width */
-}
-
-/* Grid Layout */
-.products-grid {
-    display: flex;
-    justify-content: center;
-    gap: 3rem;
-    flex-wrap: wrap;
-    margin-top: 1rem;
-}
-
-/* Card Box - Responsive Width */
-.product-card {
-    background: white;
-    border-radius: 16px;
-    width: 100%; /* Allows shrinking */
-    max-width: 420px; /* Limits size on desktop */
-    min-height: 380px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.12);
-    transition: 0.25s;
-    cursor: pointer;
-    border: 1px solid rgba(0,0,0,0.05);
-}
-
-.product-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 12px 28px rgba(0,0,0,0.18);
-}
-
-/* Card Inner Content */
-.product-info {
-    padding: 2.5rem 2rem;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: 100%;
-}
-
-.product-info div:first-child {
-    font-size: 3.8rem;
-    margin-bottom: 0.5rem;
-}
-
-/* Main Titles */
-.product-name {
-    font-size: 1.7rem !important;
-    font-weight: 700;
-    color: #001d3d;
-    margin-bottom: 0.7rem;
-    line-height: 1.2;
-}
-
-/* Category Badge */
-.product-category {
-    background: #e6b325; /* Darker gold */
-    color: #001d3d;
-    padding: 0.4rem 1.2rem;
-    border-radius: 50px;
-    font-weight: 700;
-    font-size: 0.85rem;
-    margin: 0 auto 1.5rem;
-    display: inline-block;
-    letter-spacing: 0.5px;
-    box-shadow: 0 2px 5px rgba(230, 179, 37, 0.3);
-}
-
-/* Description Text */
-.product-description {
-    color: #555;
-    font-size: 1rem;
-    line-height: 1.6;
-    padding: 0;
-    margin-bottom: auto; /* Pushes button to bottom */
-}
-
-/* CTA Button */
-.view-btn {
-    padding: 0.8rem 2rem;
-    background: #f0f2f5;
-    display: inline-block;
-    margin-top: 2rem;
-    border-radius: 8px;
-    font-weight: 600;
-    color: #001d3d;
-    transition: all 0.2s;
-}
-
-.view-btn:hover {
-    background: #e2e6ea;
-}
-
-/* Page Layout */
-.page-container {
-    max-width: 1250px;
-    margin: auto;
-    padding: 3rem 1.5rem;
-}
-
-.page-header {
-    text-align: center;
-    margin-bottom: 3rem;
-}
-
-.page-title {
-    font-size: 2.8rem;
-    color: #001d3d;
-    font-weight: 800;
-    margin-bottom: 0.5rem;
-}
-
-.page-subtitle {
-    color: #666;
-    font-size: 1.2rem;
-    font-weight: 400;
-}
-
-/* Help Box */
-.help-box {
-    margin-top: 4rem;
-    background: rgba(212, 175, 55, 0.12);
-    padding: 2.5rem;
-    border-radius: 16px;
-    border: 1px solid rgba(212,175,55,0.3);
-    text-align: center;
-}
-
-.help-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #d4af37;
-    margin-bottom: 1rem;
-}
-
-/* =========================================
-   RESPONSIVE / MOBILE STYLES
-   ========================================= */
-@media (max-width: 768px) {
-    .page-container {
-        padding: 1.5rem 1rem;
+    /* ===== GLOBAL RESETS ===== */
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
     }
 
-    .page-header {
-        margin-bottom: 2rem;
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f8f9fa;
+        color: #333;
+        padding-bottom: 60px; /* Space for scrolling */
     }
 
-    .page-title {
+    /* ===== MAIN CONTAINER ===== */
+    .product-container {
+        width: 100%;
+        max-width: 900px; /* Reasonable width for desktop */
+        margin: 20px auto;
+        padding: 20px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        overflow-x: hidden; /* Prevents horizontal scroll */
+    }
+
+    /* ===== HEADER & IMAGE ===== */
+    h1 {
         font-size: 2rem;
+        color: #1e3a8a; /* Royal Blue */
+        margin-bottom: 1.5rem;
+        font-weight: 700;
     }
 
-    .page-subtitle {
-        font-size: 1rem;
-    }
-
-    .products-grid {
-        gap: 1.5rem; /* Reduce gap between cards on mobile */
-        flex-direction: column; /* Stack vertically */
+    /* Image Container - Centered and Responsive */
+    .product-image {
+        width: 100%;
+        display: flex;
+        justify-content: center;
         align-items: center;
+        margin: 0 auto 30px auto; /* Margin on desktop */
+        overflow: hidden;
+        background: #f9f9f9;
+        border-radius: 8px;
+        padding: 20px;
+        min-height: 200px;
     }
 
-    .product-card {
-        min-height: auto; /* Let content decide height */
-        width: 100%; /* Full width of container */
-        max-width: 400px;
+    .product-image img {
+        max-width: 100%;
+        max-height: 300px;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        border-radius: 4px;
     }
 
-    .product-info {
-        padding: 2rem 1.5rem;
-    }
-
-    .product-info div:first-child {
-        font-size: 3rem; /* Slightly smaller emoji */
-    }
-
-    .product-name {
-        font-size: 1.5rem !important;
-    }
-
-    .product-description {
+    /* ===== INFO BOX (Sizes) ===== */
+    .info-box {
+        background: #e3f2fd; /* Light Blue */
+        border-left: 5px solid #1976d2;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
         font-size: 0.95rem;
     }
 
-    .view-btn {
-        padding: 0.7rem 1.5rem;
-        margin-top: 1.5rem;
-        width: 100%; /* Full width button on mobile */
-        box-sizing: border-box;
+    .info-box strong {
+        color: #1976d2;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        display: block;
+        font-size: 1rem;
     }
 
-    .help-box {
-        margin-top: 2.5rem;
+    .info-box ul {
+        list-style: none;
+        margin: 0;
+        padding-left: 1rem;
+    }
+
+    .info-box li {
+        color: #444;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    /* ===== PURCHASE TYPE (Radio Buttons) ===== */
+    .purchase-type-section {
+        margin-bottom: 2rem;
         padding: 1.5rem;
+        background: #f9f9f9;
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
     }
 
-    .help-title {
-        font-size: 1.25rem;
+    .purchase-type-section label {
+        cursor: pointer;
+        font-weight: 600;
+        margin-bottom: 0;
+        padding: 0;
+        display: block; /* Stacks labels on mobile */
     }
-}
 
-/* Extra small devices (phones under 360px) */
-@media (max-width: 360px) {
-    .product-name {
-        font-size: 1.3rem !important;
+    /* Custom Radio Group */
+    .radio-group {
+        display: flex;
+        gap: 2rem;
+        margin-top: 1rem;
+    }
+
+    .radio-group input[type="radio"] {
+        appearance: none;
+        width: 0;
+        height: 0;
+        opacity: 0;
+        position: absolute;
+    }
+
+    .radio-group label {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        border: 2px solid #ddd;
+        background: white;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        width: 100%; /* Full width label for tap target */
+        font-weight: 600;
+        color: #444;
+    }
+
+    .radio-group label:hover {
+        border-color: #1e3a8a;
+        background: #f0f7ff;
+    }
+
+    .radio-group input[type="radio"]:checked + label {
+        border-color: #1e3a8a;
+        background: #1e3a8a;
+        color: white;
+        box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);
+    }
+
+    /* Custom Radio Dot */
+    .radio-group label::before {
+        content: '';
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid #ccc;
+        background: #fff;
+        margin-right: 15px;
+        flex-shrink: 0;
+    }
+
+    .radio-group input[type="radio"]:checked + label::before {
+        background: #fff;
+        border-color: #fff;
+        box-shadow: inset 0 0 0 4px rgba(0,0,0,0.3);
+    }
+
+    /* ===== FORM GROUPS ===== */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        color: #333;
+        font-size: 1rem;
+    }
+
+    /* Mobile Critical Styles for Inputs */
+    .form-group select, .form-group input {
+        width: 100%;
+        padding: 14px 16px; /* Comfortable padding */
+        border: 2px solid #ddd;
+        border-radius: 8px; /* Softer corners */
+        font-size: 16px !important; /* 16px prevents iOS auto-zoom */
+        background-color: #fff;
+        font-family: inherit;
+        color: #333;
+        transition: border-color 0.3s ease;
+        -webkit-appearance: none;
+    }
+
+    .form-group select:focus, .form-group input:focus {
+        border-color: #1e3a8a;
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(30, 58, 138, 0.15);
+    }
+
+    /* ===== CUP OPTIONS GRID ===== */
+    .cup-options-grid {
+        display: grid;
+        /* Desktop: Responsive columns based on width */
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .cup-option-card {
+        border: 3px solid #ddd;
+        border-radius: 10px;
+        padding: 1.5rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: white;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .cup-option-card:hover {
+        border-color: #1e3a8a;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .cup-option-card.selected {
+        border-color: #1e3a8a;
+        background: #e3f2fd;
+        color: #1e3a8a;
+        font-weight: 700;
+    }
+
+    .cup-option-card.selected::after {
+        content: '✓';
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #1e3a8a;
+        color: white;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+    }
+
+    .cup-options-grid .empty-msg {
+        grid-column: 1 / -1; /* Span all columns */
+        padding: 2rem;
+        color: #999;
+        font-style: italic;
+    }
+
+    /* ===== ADD CUP FORM ===== */
+    .add-cup-form {
+        background: #fff3cd; /* Light Orange */
+        border: 1px solid #ffecb5;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+        text-align: center;
+    }
+
+    .add-cup-form h5 {
+        margin: 0 0 1rem 0;
+        color: #333;
+        font-size: 1.1rem;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    /* ===== PRICE DISPLAY ===== */
+    .price-display {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+
+    .price-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        font-size: 1.1rem;
+    }
+
+    .price-row:last-child {
+        margin-top: 0.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .total-row {
+        font-weight: 800;
+        font-size: 1.5rem;
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .btn-warning {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        width: 100%;
+        padding: 1.2rem 2rem;
+        font-size: 1.1rem;
+        box-shadow: 0 6px 20px rgba(240, 87, 108, 0.3);
+    }
+
+    .btn-warning:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(240, 87, 108, 0.4);
+    }
+
+    .btn-warning:disabled {
+        background: #bdc3c7;
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+
+    /* ===== MOBILE RESPONSIVE DESIGN ===== */
+    @media (max-width: 768px) {
+        .product-container {
+            width: 100%; /* Full width on mobile */
+            margin: 10px auto;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .product-image {
+            margin: 0 auto 20px auto;
+            padding: 15px;
+            min-height: 150px;
+        }
+
+        /* Stack Purchase Type Vertically */
+        .radio-group {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .radio-group label {
+            width: 100%;
+            padding: 1rem;
+        }
+
+        /* Stack Form Groups */
+        .form-row {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: stretch;
+        }
+
+        /* Force Single Column Cup Grid */
+        .cup-options-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .cup-option-card {
+            width: 100%;
+            min-height: 60px;
+            padding: 1rem;
+        }
+
+        /* Stack Price Display Rows */
+        .price-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+            padding: 0.5rem 0;
+        }
+
+        .total-row {
+            font-size: 1.3rem;
+            width: 100%;
+            text-align: right;
+            margin-top: 0;
+            padding-top: 0.5rem;
+            flex-direction: row;
+            justify-content: space-between;
+        }
+
+        /* Adjust Button */
+        .btn-warning {
+            padding: 1rem 2rem;
+            font-size: 1rem;
+        }
     }
     
-    .product-info div:first-child {
-        font-size: 2.5rem;
+    /* Tablet Responsive Design */
+    @media (min-width: 769px) and (max-width: 1024px) {
+        .product-container {
+            padding: 18px;
+            margin: 15px auto;
+        }
+        
+        .cup-options-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
     }
-}
+    
+    /* Small Mobile Responsive Design */
+    @media (max-width: 480px) {
+        .product-container {
+            padding: 12px;
+            margin: 5px auto;
+            border-radius: 6px;
+        }
+        
+        h1 {
+            font-size: 1.3rem;
+        }
+        
+        .info-box {
+            padding: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .form-group label {
+            font-size: 0.9rem;
+        }
+        
+        .price-display {
+            padding: 1rem;
+        }
+        
+        .price-row {
+            font-size: 1rem;
+        }
+        
+        .total-row {
+            font-size: 1.2rem;
+        }
+    }
 </style>
 
-<div class="page-container">
-
-    <!-- HEADER -->
-    <header class="page-header">
-        <h1 class="page-title">
-            Welcome{% if current_user.is_authenticated %}, {{ current_user.username }}{% endif %}!
-        </h1>
-        <p class="page-subtitle">Choose a category to explore our products</p>
-    </header>
-
-    <!-- PRODUCT CATEGORY CARDS -->
-    <section>
-        <div style="text-align:center; margin-bottom:2rem;">
-            <h2 style="color:#d4af37; font-size:1.8rem; font-weight:700;">
-                🏗️ Our Product Categories
-            </h2>
-            <p style="color:#666; font-size:1rem; margin-top:0.5rem;">Browse our scaffolding and fabrication products</p>
-        </div>
-
-        <div class="products-grid">
-
-            <!-- Scaffolding Card -->
-            <div class="product-card" onclick="window.location.href='{{ url_for('national_scaffoldings') }}'">
-                <div class="product-info">
-                    <div>🏗️</div>
-                    <h2 class="product-name">The National Scaffolding</h2>
-                    <span class="product-category">SCAFFOLDING</span>
-                    <p class="product-description">
-                        Professional scaffolding systems and equipment designed for quality, safety, and durability.
-                    </p>
-                    <div class="view-btn">View Products →</div>
-                </div>
-            </div>
-
-            <!-- Fabrications Card -->
-            <div class="product-card" onclick="window.location.href='{{ url_for('fabrications') }}'">
-                <div class="product-info">
-                    <div>🔧</div>
-                    <h2 class="product-name">Fabrications</h2>
-                    <span class="product-category">CUSTOM WORKS</span>
-                    <p class="product-description">
-                        Custom furniture, metal structures, and fabrication work crafted with precision.
-                    </p>
-                    <div class="view-btn">View Products →</div>
-                </div>
-            </div>
-
-        </div>
-    </section>
-
-    <!-- HELP BOX -->
-    <div class="help-box">
-        <h3 class="help-title">Need Help?</h3>
-        <p style="color:#555; line-height:1.6;">
-            Our team is here to assist you with product selection, pricing, and orders. Feel free to reach out!
-        </p>
+<div class="product-container">
+    <!-- Header & Image -->
+    <h1>Vertical Cuplock: {{ product.name }}</h1>
+    
+    <div class="product-image">
+        {% if product.display_image_url %}
+            {% set first_image = product.display_image_url.split(',')[0].strip() %}
+            {% if first_image.startswith('uploads/') or first_image.startswith('images/') %}
+                {% set img_src = url_for('static', filename=first_image) %}
+            {% else %}
+                {% set img_src = url_for('static', filename='uploads/' + first_image) %}
+            {% endif %}
+            <img src="{{ img_src }}" alt="{{ product.name }}">
+        {% else %}
+            <span style="font-size: 3rem; color: #ccc;">🔗 No Image</span>
+        {% endif %}
     </div>
 
-</div>
+    <!-- Available Sizes Info -->
+    <div class="info-box">
+        <strong>💡 Available Sizes:</strong> 1m, 1.5m, 2m, 2.5m, 3m, 3.5m, 4m, 4.5m, 5m, 5.5m, 6m
+        <ul>
+            <li><strong>Cup Options by Size:</strong> 1m: 1 or 2 cups, 1.5m: 2 or 3 cups, etc.</li>
+        </ul>
+    </div>
 
+    <!-- Purchase Type Section -->
+    <div class="purchase-type-section">
+        <div class="radio-group">
+            <label>
+                <input type="radio" name="purchaseType" value="buy" checked onchange="updatePurchaseType()">
+                Buy (One-time Payment)
+            </label>
+            <label>
+                <input type="radio" name="purchaseType" value="rent" onchange="updatePurchaseType()">
+                Rent (Per Day)
+            </label>
+        </div>
+    </div>
+
+    <!-- Size & Cup Options -->
+    <div class="form-group">
+        <label for="sizeSelect">Select Size *</label>
+        <select id="sizeSelect" onchange="loadCups()">
+            <option value="">-- Select Size --</option>
+            {% for size in sizes %}
+                <option
+                    value="{{ size.id }}"
+                    data-label="{{ size.size_label }}"
+                    data-buy="{{ size.buy_price|default(0) }}"
+                    data-rent="{{ size.rent_price|default(0) }}"
+                    data-deposit="{{ size.deposit|default(0) }}">
+                    {{ size.size_label }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Cup Options Grid -->
+    <div id="cupSection" class="cup-options-grid">
+        <p style="color:#666; margin-bottom: 0.5rem;">Please select a size first</p>
+        <!-- Loaded via JS -->
+    </div>
+
+    <!-- Quantity -->
+    <div class="form-group">
+        <label for="quantity">Quantity *</label>
+        <input type="number" id="quantity" value="1" min="1" onchange="updatePrice()">
+    </div>
+
+    <!-- Price Display -->
+    <div class="price-display">
+        <div class="price-row">
+            <span>Unit Price:</span>
+            <span id="unitPrice">₹0.00</span>
+        </div>
+        <div class="price-row" id="depositRow" style="display:none">
+            <span>Deposit (per unit):</span>
+            <span id="depositAmount">₹0.00</span>
+        </div>
+        <div class="price-row total-row">
+            <span>Total:</span>
+            <span id="totalPrice">₹0.00</span>
+        </div>
+    </div>
+
+    <!-- Add to Cart -->
+    <button type="button" class="btn btn-warning" id="addToCartBtn" onclick="addToCart()">
+        🛒 Add to Cart
+    </button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+console.log('🔵 Vertical Cuplock page loaded');
+
+// ============================================
+// GLOBALS
+// ============================================
+const PRODUCT_ID = {{ product.id }};
+const PRODUCT_BASE_PRICE = {{ product.price|default(0) }};
+
+let selectedCupPrice = 0;
+let rentPrice = 0;
+let depositPrice = 0;
+let selectedSizeLabel = null;
+let selectedCupId = null;
+let currentSizeBuyPrice = 0;
+
+// ============================================
+// PURCHASE TYPE
+// ============================================
+function updatePurchaseType() {
+    try {
+        console.log('🔄 Purchase type changed');
+        
+        const purchaseTypeRadios = document.querySelectorAll('input[name="purchaseType"]');
+        const cupSection = document.getElementById('cupSection');
+        
+        if (!purchaseTypeRadios || !cupSection) {
+            console.error('❌ Required elements not found');
+            return;
+        }
+        
+        let isBuySelected = false;
+        purchaseTypeRadios.forEach(function(radio) {
+            if (radio.checked && radio.value === 'buy') {
+                isBuySelected = true;
+            }
+        });
+        
+        console.log('📊 Buy selected:', isBuySelected);
+        
+        // Show/hide cup section
+        cupSection.style.display = isBuySelected ? 'block' : 'none';
+        
+        // Reset cup selection when switching to rent
+        if (!isBuySelected) {
+            selectedCupPrice = 0;
+            selectedCupId = null;
+            document.querySelectorAll('.cup-option-card').forEach(function(card) {
+                card.classList.remove('selected');
+            });
+        }
+        
+        updatePrice();
+    } catch (error) {
+        console.error('❌ Error in updatePurchaseType:', error);
+    }
+}
+
+// ============================================
+// LOAD CUP OPTIONS
+// ============================================
+function loadCups() {
+    try {
+        console.log('🔄 loadCups() called');
+        
+        const sizeSelect = document.getElementById('sizeSelect');
+        const container = document.getElementById('cupSection');
+        
+        if (!sizeSelect || !container) {
+            console.error('❌ Required elements not found');
+            return;
+        }
+        
+        const selectedOption = sizeSelect.options[sizeSelect.selectedIndex];
+
+        // Clear if no selection
+        if (!selectedOption || !selectedOption.value) {
+            selectedCupPrice = 0;
+            selectedCupId = null;
+            selectedSizeLabel = null;
+            container.innerHTML = '<p style="color:#666; text-align:center; padding: 2rem;">Please select a size first</p>';
+            updatePrice();
+            return;
+        }
+
+        const sizeId = selectedOption.value;
+        selectedSizeLabel = selectedOption.getAttribute('data-label') || '';
+
+        // Get prices from data attributes
+        const rentValue = selectedOption.getAttribute('data-rent');
+        const depositValue = selectedOption.getAttribute('data-deposit');
+        const buyValue = selectedOption.getAttribute('data-buy');
+        
+        rentPrice = rentValue ? parseFloat(rentValue) : 0;
+        depositPrice = depositValue ? parseFloat(depositValue) : 0;
+        currentSizeBuyPrice = buyValue ? parseFloat(buyValue) : 0;
+
+        console.log('📊 Size selected:', {
+            label: selectedSizeLabel,
+            buy: currentSizeBuyPrice,
+            rent: rentPrice,
+            deposit: depositPrice
+        });
+
+        // Show loading
+        container.innerHTML = '<p>Loading cup options...</p>';
+
+        // Fetch cups
+        fetch('/cuplock/api/vertical/size/' + encodeURIComponent(sizeId) + '/cups')
+            .then(function(response) {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(function(data) {
+                console.log('✅ Cups loaded:', data);
+                
+                container.innerHTML = '';
+                selectedCupPrice = 0;
+                selectedCupId = null;
+
+                if (!data.success || !data.cups || data.cups.length === 0) {
+                    container.innerHTML = '<p style="color:#666; text-align:center; padding: 2rem;">No cup options available</p>';
+                    updatePrice();
+                    return;
+                }
+
+                data.cups.forEach(function(c) {
+                    const card = document.createElement('div');
+                    card.className = 'cup-option-card';
+
+                    const cupPrice = c.price || 0;
+                    const cupCount = c.cup_count || 0;
+
+                    card.textContent = cupCount + (cupCount === 1 ? ' Cup' : ' Cups');
+                    card.dataset.price = cupPrice;
+                    card.dataset.cupId = c.id;
+
+                    card.addEventListener('click', function() {
+                        selectedCupPrice = parseFloat(this.dataset.price);
+                        selectedCupId = this.dataset.cupId;
+
+                        console.log('🎯 Cup selected:', cupCount, 'Price:', selectedCupPrice);
+
+                        document.querySelectorAll('.cup-option-card').forEach(function(el) {
+                            el.classList.remove('selected');
+                        });
+                        card.classList.add('selected');
+
+                        updatePrice();
+                    });
+
+                    container.appendChild(card);
+                });
+
+                updatePrice();
+            })
+            .catch(function(error) {
+                console.error('❌ Error loading cups:', error);
+                container.innerHTML = '<p style="color: red; text-align:center;">Error loading cups. Please try again.</p>';
+            });
+    } catch (error) {
+        console.error('❌ Error in loadCups:', error);
+    }
+}
+
+// ============================================
+// UPDATE PRICE
+// ============================================
+function updatePrice() {
+    try {
+        const qtyInput = document.getElementById('quantity');
+        const purchaseTypeRadios = document.querySelectorAll('input[name="purchaseType"]');
+        
+        const qty = qtyInput ? (parseInt(qtyInput.value) || 1) : 1;
+        
+        let type = 'buy';
+        if (purchaseTypeRadios) {
+            purchaseTypeRadios.forEach(function(radio) {
+                if (radio.checked && radio.value === 'rent') {
+                    type = 'rent';
+                }
+            });
+        }
+
+        let unit = 0;
+        let deposit = 0;
+
+        if (type === 'buy') {
+            unit = currentSizeBuyPrice + selectedCupPrice;
+        } else {
+            unit = rentPrice;
+            deposit = depositPrice;
+        }
+
+        const total = (unit * qty) + (deposit * qty);
+
+        console.log('💰 Price calculated:', {
+            type: type,
+            unit: unit,
+            deposit: deposit,
+            qty: qty,
+            total: total
+        });
+
+        // Update display
+        const unitPriceEl = document.getElementById('unitPrice');
+        const depositAmountEl = document.getElementById('depositAmount');
+        const totalPriceEl = document.getElementById('totalPrice');
+        const depositRowEl = document.getElementById('depositRow');
+
+        if (unitPriceEl) unitPriceEl.innerText = '₹' + unit.toFixed(2);
+        if (depositAmountEl) depositAmountEl.innerText = '₹' + deposit.toFixed(2);
+        if (totalPriceEl) totalPriceEl.innerText = '₹' + total.toFixed(2);
+        if (depositRowEl) {
+            depositRowEl.style.display = (type === 'rent' && deposit > 0) ? 'flex' : 'none';
+        }
+    } catch (error) {
+        console.error('❌ Error in updatePrice:', error);
+    }
+}
+
+// ============================================
+// ADD TO CART
+// ============================================
+function addToCart() {
+    try {
+        const qtyInput = document.getElementById('quantity');
+        const purchaseTypeRadios = document.querySelectorAll('input[name="purchaseType"]');
+        
+        const qty = qtyInput ? (parseInt(qtyInput.value) || 1) : 1;
+        
+        let type = 'buy';
+        if (purchaseTypeRadios) {
+            purchaseTypeRadios.forEach(function(radio) {
+                if (radio.checked && radio.value === 'rent') {
+                    type = 'rent';
+                }
+            });
+        }
+
+        // Validation
+        if (!selectedSizeLabel) {
+            alert("⚠️ Please select a size");
+            return;
+        }
+
+        if (type === 'buy' && !selectedCupId) {
+            alert("⚠️ Please select a cup configuration");
+            return;
+        }
+
+        const customization = {
+            component: "vertical",
+            purchase_type: type,
+            size: selectedSizeLabel,
+            cup_id: selectedCupId,
+            cup_price: selectedCupPrice
+        };
+
+        console.log('🛒 Adding to cart:', customization);
+
+        const btn = document.getElementById('addToCartBtn');
+        btn.disabled = true;
+        btn.textContent = 'Adding...';
+
+        fetch('/add_to_cart', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                product_id: PRODUCT_ID,
+                quantity: qty,
+                customization: customization
+            })
+        })
+        .then(function(response) {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+        })
+        .then(function(data) {
+            if (data.success) {
+                console.log('✅ Added to cart successfully');
+                window.location.href = '/cart';
+            } else {
+                alert('❌ ' + (data.message || 'Failed to add to cart'));
+                btn.disabled = false;
+                btn.textContent = '🛒 Add to Cart';
+            }
+        })
+        .catch(function(error) {
+            console.error('❌ Error:', error);
+            alert('❌ Error adding to cart. Please try again.');
+            btn.disabled = false;
+            btn.textContent = '🛒 Add to Cart';
+        });
+    } catch (error) {
+        console.error('❌ Error in addToCart:', error);
+        alert('❌ Error: ' + error.message);
+    }
+}
+</script>
 {% endblock %}

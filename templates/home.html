@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -196,6 +198,9 @@
             display: none;
             cursor: pointer;
             z-index: 1001; /* Above menu */
+            background: none;
+            border: none;
+            padding: 5px;
         }
 
         .hamburger span {
@@ -1135,21 +1140,24 @@
         @media (max-width: 768px) {
             .hamburger {
                 display: block;
+                position: relative;
+                z-index: 1001;
             }
 
             .nav-menu {
                 position: fixed;
                 left: -100%;
-                top: 70px; /* Starts below navbar */
+                top: 0;
                 flex-direction: column;
                 background-color: #f8f9fa;
                 width: 100%;
                 text-align: center;
                 transition: 0.3s;
                 box-shadow: 0 10px 27px rgba(0, 0, 0, 0.05);
-                padding: 20px 0;
-                height: calc(100vh - 70px); /* Full height minus header */
+                padding: 70px 0 20px;
+                height: 100vh;
                 overflow-y: auto;
+                z-index: 1000;
             }
 
             .nav-menu.active {
@@ -1976,6 +1984,13 @@
             
             hamburger.addEventListener('click', function() {
                 navMenu.classList.toggle('active');
+                
+                // Animate hamburger to X when menu is open
+                if (navMenu.classList.contains('active')) {
+                    hamburger.classList.add('active');
+                } else {
+                    hamburger.classList.remove('active');
+                }
             });
             
             // Close menu when clicking on a link
@@ -1983,6 +1998,7 @@
             navLinks.forEach(link => {
                 link.addEventListener('click', function() {
                     navMenu.classList.remove('active');
+                    hamburger.classList.remove('active');
                 });
             });
             

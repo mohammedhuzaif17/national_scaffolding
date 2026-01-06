@@ -473,13 +473,54 @@ if (typeof Chart === 'undefined') {
         width: 100%;
     }
 
-    /* ===== MOBILE RESPONSIVE DESIGN ===== */
-    @media (max-width: 768px) {
+    /* ===== LARGE DESKTOP SCREENS (1200px and up) ===== */
+    @media (min-width: 1200px) {
         .analytics-wrapper {
-            padding: 1rem;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .metrics-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .chart-row {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .canvas-container {
+            height: 350px;
+        }
+    }
+
+    /* ===== DESKTOP SCREENS (992px to 1199px) ===== */
+    @media (min-width: 992px) and (max-width: 1199px) {
+        .analytics-wrapper {
+            padding: 1.8rem;
+        }
+        
+        .metrics-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.2rem;
+        }
+        
+        .chart-row {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+        
+        .canvas-container {
+            height: 320px;
+        }
+    }
+
+    /* ===== TABLET LANDSCAPE (768px to 991px) ===== */
+    @media (min-width: 768px) and (max-width: 991px) {
+        .analytics-wrapper {
+            padding: 1.5rem;
         }
 
-        /* Header: Stack Title and Buttons */
         .page-header {
             flex-direction: column;
             align-items: flex-start;
@@ -488,25 +529,91 @@ if (typeof Chart === 'undefined') {
 
         .header-actions {
             width: 100%;
-            flex-direction: column;
-            gap: 1rem;
+            justify-content: space-between;
         }
 
         .btn {
-            width: 100%; /* Full width buttons for touch */
-            padding: 1rem;
-            font-size: 1rem;
-            justify-content: flex-start; /* Left align icon+text */
+            padding: 0.8rem 1rem;
+            font-size: 0.85rem;
         }
 
-        /* Stack Metrics */
+        .btn-text {
+            display: none; /* Hide text on tablets */
+        }
+
         .metrics-grid {
-            grid-template-columns: 1fr; /* Single column */
-            gap: 1rem;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.2rem;
         }
 
         .metric-card {
             padding: 1.2rem;
+        }
+
+        .metric-icon {
+            font-size: 2.2rem;
+        }
+
+        .metric-value {
+            font-size: 1.8rem;
+        }
+
+        .chart-row {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .chart-card {
+            padding: 1.2rem;
+        }
+
+        .chart-title {
+            font-size: 1.1rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .canvas-container {
+            height: 280px;
+        }
+    }
+
+    /* ===== TABLET PORTRAIT (600px to 767px) ===== */
+    @media (min-width: 600px) and (max-width: 767px) {
+        .analytics-wrapper {
+            padding: 1.2rem;
+        }
+
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1.2rem;
+        }
+
+        .header-actions {
+            width: 100%;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .btn {
+            flex: 1;
+            min-width: calc(33.33% - 0.7rem);
+            padding: 0.8rem 0.5rem;
+            font-size: 0.8rem;
+            justify-content: center;
+        }
+
+        .btn-text {
+            display: none; /* Hide text on tablets */
+        }
+
+        .metrics-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .metric-card {
+            padding: 1rem;
         }
 
         .metric-icon {
@@ -517,14 +624,13 @@ if (typeof Chart === 'undefined') {
             font-size: 1.6rem;
         }
 
-        /* Stack Charts */
         .chart-row {
-            grid-template-columns: 1fr; /* Single column */
-            gap: 1.5rem;
+            grid-template-columns: 1fr;
+            gap: 1.2rem;
         }
 
         .chart-card {
-            padding: 1.2rem;
+            padding: 1rem;
         }
 
         .chart-title {
@@ -533,25 +639,292 @@ if (typeof Chart === 'undefined') {
             margin-bottom: 1rem;
         }
 
-        /* Adjust Chart Heights for mobile */
         .canvas-container {
-            height: 250px; /* Shorter height to fit screen better */
+            height: 250px;
         }
     }
 
-    /* Extra small phone adjustments */
-    @media (max-width: 480px) {
+    /* ===== LARGE PHONES (480px to 599px) ===== */
+    @media (min-width: 480px) and (max-width: 599px) {
+        .analytics-wrapper {
+            padding: 1rem;
+        }
+
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .page-title {
+            font-size: 1.4rem;
+            text-align: center;
+            width: 100%;
+        }
+
+        .header-actions {
+            width: 100%;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            font-size: 0.9rem;
+            justify-content: flex-start;
+        }
+
+        .btn-text {
+            display: inline-block;
+        }
+
+        .metrics-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .metric-card {
+            padding: 1.2rem;
+        }
+
+        .metric-icon {
+            font-size: 2.2rem;
+        }
+
+        .metric-value {
+            font-size: 1.8rem;
+        }
+
+        .chart-row {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .chart-card {
+            padding: 1rem;
+        }
+
+        .chart-title {
+            font-size: 1rem;
+            text-align: left;
+            margin-bottom: 1rem;
+        }
+
+        .canvas-container {
+            height: 220px;
+        }
+    }
+
+    /* ===== MOBILE PHONES (479px and below) ===== */
+    @media (max-width: 479px) {
+        .analytics-wrapper {
+            padding: 0.8rem;
+        }
+
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
         .page-title {
             font-size: 1.2rem;
             text-align: center;
+            width: 100%;
         }
 
-        .metric-label {
-            font-size: 0.8rem;
+        .header-actions {
+            width: 100%;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.9rem;
+            font-size: 0.9rem;
+            justify-content: flex-start;
+        }
+
+        .btn-text {
+            display: inline-block;
+        }
+
+        .metrics-grid {
+            grid-template-columns: 1fr;
+            gap: 0.8rem;
+        }
+
+        .metric-card {
+            padding: 1rem;
+        }
+
+        .metric-icon {
+            font-size: 2rem;
+        }
+
+        .metric-value {
+            font-size: 1.6rem;
+        }
+
+        .chart-row {
+            grid-template-columns: 1fr;
+            gap: 0.8rem;
+        }
+
+        .chart-card {
+            padding: 0.8rem;
+        }
+
+        .chart-title {
+            font-size: 0.9rem;
+            text-align: left;
+            margin-bottom: 0.8rem;
+        }
+
+        .canvas-container {
+            height: 200px;
+        }
+    }
+
+    /* ===== EXTRA SMALL SCREENS (320px to 379px) ===== */
+    @media (max-width: 379px) {
+        .analytics-wrapper {
+            padding: 0.5rem;
+        }
+
+        .page-title {
+            font-size: 1.1rem;
+        }
+
+        .btn {
+            padding: 0.8rem;
+            font-size: 0.85rem;
+        }
+
+        .metric-card {
+            padding: 0.8rem;
+        }
+
+        .metric-icon {
+            font-size: 1.8rem;
         }
 
         .metric-value {
             font-size: 1.4rem;
         }
+
+        .chart-card {
+            padding: 0.6rem;
+        }
+
+        .chart-title {
+            font-size: 0.85rem;
+        }
+
+        .canvas-container {
+            height: 180px;
+        }
+    }
+
+    /* ===== IPAD PRO SPECIFIC FIXES ===== */
+    @media only screen 
+      and (min-device-width: 1024px) 
+      and (max-device-width: 1366px) 
+      and (-webkit-min-device-pixel-ratio: 2) {
+        .analytics-wrapper {
+            padding: 1.8rem;
+        }
+        
+        .metrics-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+        
+        .chart-row {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+        
+        .canvas-container {
+            height: 300px;
+        }
+    }
+
+    /* ===== IPAD SPECIFIC FIXES ===== */
+    @media only screen 
+      and (min-device-width: 768px) 
+      and (max-device-width: 1023px) 
+      and (-webkit-min-device-pixel-ratio: 2) {
+        .analytics-wrapper {
+            padding: 1.5rem;
+        }
+        
+        .metrics-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.2rem;
+        }
+        
+        .chart-row {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.2rem;
+        }
+        
+        .canvas-container {
+            height: 280px;
+        }
+    }
+
+    /* ===== SURFACE DUO AND FOLDABLES ===== */
+    @media screen and (max-width: 540px) and (orientation: landscape) {
+        .analytics-wrapper {
+            padding: 0.8rem;
+        }
+        
+        .page-header {
+            flex-direction: row;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .page-title {
+            font-size: 1.1rem;
+            width: auto;
+            flex: 1;
+        }
+        
+        .header-actions {
+            width: auto;
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            width: auto;
+            min-width: 100px;
+            padding: 0.6rem 0.8rem;
+            font-size: 0.8rem;
+        }
+        
+        .btn-text {
+            display: none;
+        }
+        
+        .metrics-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.8rem;
+        }
+        
+        .chart-row {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.8rem;
+        }
+        
+        .canvas-container {
+            height: 200px;
+        }
     }
 </style>
+
+{% endblock %}

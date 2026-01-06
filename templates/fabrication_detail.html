@@ -729,6 +729,33 @@ updateFabricationPrice();
         opacity: 1;
     }
 
+    /* ===== TABLET RESPONSIVE DESIGN ===== */
+    @media (min-width: 769px) and (max-width: 1024px) {
+        .glass-container {
+            padding: 1.2rem;
+        }
+        
+        .detail-grid {
+            gap: 1.5rem;
+        }
+        
+        .product-detail-gallery {
+            height: 350px;
+        }
+        
+        .gallery-thumbnails {
+            grid-template-columns: repeat(4, 1fr);
+        }
+        
+        .customization-section {
+            padding: 1.5rem;
+        }
+        
+        .page-title {
+            font-size: 1.8rem;
+        }
+    }
+    
     /* ===== MOBILE RESPONSIVE DESIGN ===== */
     @media (max-width: 768px) {
         .glass-container {
@@ -753,8 +780,8 @@ updateFabricationPrice();
 
         .gallery-thumbnails {
             display: grid !important;
-            grid-template-columns: 1fr !important; /* Stack thumbnails vertically */
-            gap: 1rem;
+            grid-template-columns: repeat(4, 1fr) !important; /* 4 columns for thumbnails */
+            gap: 0.5rem;
             margin-top: 1rem;
         }
 
@@ -792,7 +819,7 @@ updateFabricationPrice();
         }
 
         .modal-image-wrap {
-            height: 0; /* Remove height constraint for wrap */
+            height: 60vh; /* Fixed height for mobile */
             padding-bottom: 0;
         }
 
@@ -806,12 +833,14 @@ updateFabricationPrice();
         .gallery-counter {
             bottom: 0.5rem;
             right: 0.5rem;
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
         }
 
         .gallery-navigation {
-            width: 50px;
-            height: 50px;
-            font-size: 22px;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
         }
 
         /* 7. Gallery Buttons Positioning */
@@ -848,6 +877,37 @@ updateFabricationPrice();
         .btn-lg {
             padding: 0.8rem 2rem;
             font-size: 1rem;
+        }
+    }
+    
+    /* ===== SMALL MOBILE RESPONSIVE DESIGN ===== */
+    @media (max-width: 480px) {
+        .glass-container {
+            padding: 0.8rem;
+        }
+        
+        .product-detail-gallery {
+            height: 250px !important;
+        }
+        
+        .gallery-thumbnails {
+            grid-template-columns: repeat(3, 1fr) !important; /* 3 columns for very small screens */
+        }
+        
+        .page-title {
+            font-size: 1.3rem;
+        }
+        
+        .customization-section {
+            padding: 1rem;
+        }
+        
+        .price-display {
+            padding: 1.5rem;
+        }
+        
+        .modal-image-wrap {
+            height: 50vh;
         }
     }
 </style>

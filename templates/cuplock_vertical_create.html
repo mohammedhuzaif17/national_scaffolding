@@ -290,6 +290,56 @@ function removePreviewImage(btn) {
 /* =========================================
    RESPONSIVE / MOBILE STYLES
    ========================================= */
+   
+/* Large Tablets */
+@media (max-width: 992px) {
+    .admin-container {
+        padding: 1.5rem;
+    }
+    
+    .form-container {
+        padding: 1.8rem;
+    }
+    
+    .page-header {
+        margin-bottom: 1.8rem;
+    }
+    
+    .form-section {
+        margin-bottom: 1.8rem;
+        padding-bottom: 1.8rem;
+    }
+}
+
+/* Medium Tablets */
+@media (max-width: 768px) {
+    .admin-container {
+        padding: 1.2rem;
+    }
+    
+    .form-container {
+        padding: 1.5rem;
+    }
+    
+    .page-header {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-section {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+    }
+    
+    .form-section h3 {
+        font-size: 1.2rem;
+    }
+    
+    .size-input-group {
+        gap: 0.8rem;
+    }
+}
+
+/* Small Tablets & Large Phones */
 @media (max-width: 600px) {
     /* Adjust Container */
     .admin-container {
@@ -358,6 +408,93 @@ function removePreviewImage(btn) {
         font-size: 0.85rem;
         display: block;
         margin-top: 5px;
+    }
+}
+
+/* Medium Phones */
+@media (max-width: 480px) {
+    .admin-container {
+        padding: 0.8rem;
+    }
+    
+    .form-container {
+        padding: 1.2rem 0.8rem;
+    }
+    
+    .page-header h1 {
+        font-size: 1.4rem;
+    }
+    
+    .form-section h3 {
+        font-size: 1.1rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.2rem;
+    }
+    
+    .form-group label {
+        font-size: 0.95rem;
+    }
+    
+    .form-control, textarea, select {
+        padding: 10px;
+    }
+    
+    .preview-image {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .form-actions .btn {
+        padding: 12px;
+        font-size: 0.95rem;
+    }
+}
+
+/* Small Phones */
+@media (max-width: 360px) {
+    .admin-container {
+        padding: 0.6rem;
+    }
+    
+    .form-container {
+        padding: 1rem 0.6rem;
+    }
+    
+    .page-header h1 {
+        font-size: 1.3rem;
+    }
+    
+    .form-section h3 {
+        font-size: 1rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .form-group label {
+        font-size: 0.9rem;
+    }
+    
+    .form-control, textarea, select {
+        padding: 8px;
+    }
+    
+    .preview-image {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .form-actions .btn {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+    
+    .btn-sm {
+        padding: 8px 12px;
+        font-size: 0.85rem;
     }
 }
 </style>

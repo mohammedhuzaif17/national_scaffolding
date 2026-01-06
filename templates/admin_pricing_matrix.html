@@ -438,14 +438,100 @@ function savePricingMatrix() {
         color: #888;
     }
 
-    /* ===== MOBILE RESPONSIVE DESIGN ===== */
-    @media (max-width: 992px) {
+    /* ===== LARGE DESKTOP SCREENS (1200px and up) ===== */
+    @media (min-width: 1200px) {
         .matrix-wrapper {
-            padding: 1rem;
+            padding: 2rem;
+            max-width: 1400px;
+        }
+        
+        .height-grid {
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1.5rem;
+        }
+        
+        .height-card {
+            padding: 1.5rem;
+        }
+        
+        .page-title {
+            font-size: 2.2rem;
+        }
+    }
+
+    /* ===== DESKTOP SCREENS (992px to 1199px) ===== */
+    @media (min-width: 992px) and (max-width: 1199px) {
+        .matrix-wrapper {
+            padding: 1.8rem;
+        }
+        
+        .height-grid {
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.3rem;
+        }
+        
+        .height-card {
+            padding: 1.3rem;
+        }
+        
+        .page-title {
+            font-size: 1.8rem;
+        }
+    }
+
+    /* ===== TABLET LANDSCAPE (768px to 991px) ===== */
+    @media (min-width: 768px) and (max-width: 991px) {
+        .matrix-wrapper {
+            padding: 1.5rem;
+        }
+        
+        .page-title {
+            font-size: 1.7rem;
         }
 
+        .subtitle {
+            font-size: 0.9rem;
+        }
+
+        .width-section {
+            padding: 1.3rem;
+        }
+        
+        .height-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.2rem;
+        }
+        
+        .height-card {
+            padding: 1.2rem;
+        }
+        
+        .height-card h4 {
+            font-size: 1rem;
+            margin-bottom: 0.8rem;
+        }
+        
+        .input-group {
+            margin-bottom: 0.8rem;
+        }
+        
+        .pricing-input, .rent-input {
+            padding: 12px;
+        }
+        
+        .info-box {
+            padding: 1.2rem;
+        }
+    }
+
+    /* ===== TABLET PORTRAIT (600px to 767px) ===== */
+    @media (min-width: 600px) and (max-width: 767px) {
+        .matrix-wrapper {
+            padding: 1.2rem;
+        }
+        
         .page-title {
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             text-align: center;
         }
 
@@ -454,76 +540,328 @@ function savePricingMatrix() {
             text-align: center;
         }
 
-        /* Stack Sections Vertically on Mobile */
         .width-section {
-            display: flex; /* Override inline grid */
-            flex-direction: column;
-            width: 100%;
-            margin-bottom: 1.5rem;
+            padding: 1.2rem;
         }
-
-        /* Ensure Grid inside Section uses full width */
+        
         .height-grid {
-            display: grid;
-            /* Mobile: Stack height cards vertically */
-            grid-template-columns: 1fr;
+            grid-template-columns: repeat(2, 1fr);
             gap: 1rem;
         }
-
-        /* Adjust Height Card for Mobile */
+        
         .height-card {
-            padding: 1rem; /* Reduce padding */
-            margin: 0; /* Remove horizontal margin from grid gap */
+            padding: 1rem;
         }
-
+        
         .height-card h4 {
-            font-size: 1rem;
+            font-size: 0.95rem;
             margin-bottom: 0.8rem;
         }
-
-        /* Adjust Inputs for Mobile */
+        
         .input-group {
             margin-bottom: 0.8rem;
         }
-
-        .pricing-input, .rent-input {
-            padding: 14px; /* Larger touch target */
-            font-size: 16px; /* Maintain 16px */
+        
+        .input-group label {
+            font-size: 0.85rem;
         }
-
-        /* Stack Buttons on Mobile */
+        
+        .pricing-input, .rent-input {
+            padding: 12px;
+            font-size: 16px;
+        }
+        
         .button-group {
             flex-direction: column;
             width: 100%;
             margin-top: 2rem;
         }
-
+        
         .btn {
-            width: 100%; /* Full width buttons */
-            padding: 14px 20px; /* Taller buttons */
+            width: 100%;
+            padding: 14px 20px;
         }
-
+        
         .info-box {
+            padding: 1rem;
             font-size: 0.9rem;
         }
     }
 
-    /* ===== DESKTOP OVERRIDES ===== */
-    @media (min-width: 993px) {
-        /* Desktop: Use Horizontal Grid for Height Cards */
-        .height-grid {
-            display: grid;
-            /* Calculate columns: (1200px width) / (min 280px card + 20px gap) */
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
+    /* ===== LARGE PHONES (480px to 599px) ===== */
+    @media (min-width: 480px) and (max-width: 599px) {
+        .matrix-wrapper {
+            padding: 1rem;
+        }
+        
+        .page-title {
+            font-size: 1.5rem;
+            text-align: center;
         }
 
-        /* Desktop: Use Side-by-Side Layout for Sections */
+        .subtitle {
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
         .width-section {
-            display: flex;
-            flex-direction: row;
+            padding: 1rem;
+        }
+        
+        .height-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.8rem;
+        }
+        
+        .height-card {
+            padding: 0.8rem;
+        }
+        
+        .height-card h4 {
+            font-size: 0.9rem;
+            margin-bottom: 0.7rem;
+        }
+        
+        .input-group {
+            margin-bottom: 0.7rem;
+        }
+        
+        .input-group label {
+            font-size: 0.8rem;
+        }
+        
+        .pricing-input, .rent-input {
+            padding: 14px;
+            font-size: 16px;
+        }
+        
+        .button-group {
+            flex-direction: column;
             width: 100%;
-            gap: 2rem;
+            margin-top: 2rem;
+            gap: 1rem;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 14px 20px;
+        }
+        
+        .info-box {
+            padding: 0.8rem;
+            font-size: 0.85rem;
+        }
+        
+        .section-header h2 {
+            font-size: 1.1rem;
+        }
+    }
+
+    /* ===== MOBILE PHONES (479px and below) ===== */
+    @media (max-width: 479px) {
+        .matrix-wrapper {
+            padding: 0.8rem;
+        }
+        
+        .page-title {
+            font-size: 1.4rem;
+            text-align: center;
+        }
+
+        .subtitle {
+            font-size: 0.8rem;
+            text-align: center;
+        }
+
+        .width-section {
+            padding: 0.8rem;
+        }
+        
+        .height-grid {
+            grid-template-columns: 1fr;
+            gap: 0.8rem;
+        }
+        
+        .height-card {
+            padding: 0.8rem;
+        }
+        
+        .height-card h4 {
+            font-size: 0.9rem;
+            margin-bottom: 0.7rem;
+        }
+        
+        .input-group {
+            margin-bottom: 0.7rem;
+        }
+        
+        .input-group label {
+            font-size: 0.8rem;
+        }
+        
+        .pricing-input, .rent-input {
+            padding: 14px;
+            font-size: 16px;
+        }
+        
+        .button-group {
+            flex-direction: column;
+            width: 100%;
+            margin-top: 1.5rem;
+            gap: 1rem;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 14px 20px;
+        }
+        
+        .info-box {
+            padding: 0.8rem;
+            font-size: 0.8rem;
+        }
+        
+        .section-header h2 {
+            font-size: 1.1rem;
+        }
+        
+        .section-header p {
+            font-size: 0.8rem;
+        }
+    }
+
+    /* ===== EXTRA SMALL SCREENS (320px to 379px) ===== */
+    @media (max-width: 379px) {
+        .matrix-wrapper {
+            padding: 0.5rem;
+        }
+        
+        .page-title {
+            font-size: 1.3rem;
+        }
+
+        .width-section {
+            padding: 0.6rem;
+        }
+        
+        .height-card {
+            padding: 0.6rem;
+        }
+        
+        .height-card h4 {
+            font-size: 0.85rem;
+        }
+        
+        .input-group label {
+            font-size: 0.75rem;
+        }
+        
+        .pricing-input, .rent-input {
+            padding: 12px;
+        }
+        
+        .btn {
+            padding: 12px 15px;
+            font-size: 0.9rem;
+        }
+        
+        .info-box {
+            padding: 0.6rem;
+            font-size: 0.75rem;
+        }
+        
+        .section-header h2 {
+            font-size: 1rem;
+        }
+    }
+
+    /* ===== IPAD PRO SPECIFIC FIXES ===== */
+    @media only screen 
+      and (min-device-width: 1024px) 
+      and (max-device-width: 1366px) 
+      and (-webkit-min-device-pixel-ratio: 2) {
+        .matrix-wrapper {
+            padding: 1.8rem;
+        }
+        
+        .height-grid {
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.2rem;
+        }
+        
+        .height-card {
+            padding: 1.2rem;
+        }
+    }
+
+    /* ===== IPAD SPECIFIC FIXES ===== */
+    @media only screen 
+      and (min-device-width: 768px) 
+      and (max-device-width: 1023px) 
+      and (-webkit-min-device-pixel-ratio: 2) {
+        .matrix-wrapper {
+            padding: 1.5rem;
+        }
+        
+        .height-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.1rem;
+        }
+        
+        .height-card {
+            padding: 1.1rem;
+        }
+    }
+
+    /* ===== SURFACE DUO AND FOLDABLES ===== */
+    @media screen and (max-width: 540px) and (orientation: landscape) {
+        .matrix-wrapper {
+            padding: 0.8rem;
+        }
+        
+        .page-title {
+            font-size: 1.3rem;
+        }
+        
+        .width-section {
+            padding: 0.8rem;
+        }
+        
+        .height-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.8rem;
+        }
+        
+        .height-card {
+            padding: 0.7rem;
+        }
+        
+        .height-card h4 {
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .input-group {
+            margin-bottom: 0.5rem;
+        }
+        
+        .input-group label {
+            font-size: 0.75rem;
+        }
+        
+        .pricing-input, .rent-input {
+            padding: 10px;
+            font-size: 14px;
+        }
+        
+        .button-group {
+            flex-direction: row;
+            gap: 0.8rem;
+        }
+        
+        .btn {
+            padding: 10px 15px;
+            font-size: 0.9rem;
         }
     }
 </style>

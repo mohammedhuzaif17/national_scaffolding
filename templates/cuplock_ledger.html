@@ -249,67 +249,139 @@
 }
 
 /* ==========================================
-   MOBILE SPECIFIC FIXES
+   ENHANCED RESPONSIVE DESIGN
    ========================================== */
-@media (max-width: 480px) {
+
+/* Large Tablets */
+@media (max-width: 1200px) {
     .glass-container {
-        padding: 10px;
+        max-width: 1000px;
+        padding: 20px;
     }
-
-    .detail-grid {
-        gap: 1rem;
-    }
-
-    /* Increase image height slightly on mobile for better visibility */
+    
     .product-detail-gallery {
-        height: 280px;
+        height: 450px;
     }
-
+    
     .page-title {
-        font-size: 1.4rem;
+        font-size: 1.7rem;
     }
+    
+    .ledger-pricing-box {
+        padding: 20px;
+    }
+    
+    .final-price-display {
+        font-size: 2rem;
+    }
+}
 
+/* Medium Tablets */
+@media (max-width: 992px) {
+    .glass-container {
+        max-width: 900px;
+        padding: 18px;
+    }
+    
+    .product-detail-gallery {
+        height: 400px;
+    }
+    
+    .page-title {
+        font-size: 1.6rem;
+    }
+    
+    .ledger-pricing-box {
+        padding: 18px;
+    }
+    
+    .ledger-pricing-box h3 {
+        font-size: 1.2rem;
+    }
+    
+    .price-info-row {
+        padding: 10px 12px;
+    }
+    
+    .final-price-display {
+        font-size: 1.9rem;
+        padding: 14px;
+    }
+}
+
+/* Small Tablets */
+@media (max-width: 768px) {
+    .glass-container {
+        padding: 15px;
+        margin: 10px auto;
+    }
+    
+    .detail-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .product-detail-gallery {
+        height: 350px;
+    }
+    
+    .page-title {
+        font-size: 1.5rem;
+    }
+    
     .product-meta {
         font-size: 0.75rem;
-        padding: 4px 10px;
+        padding: 5px 12px;
     }
-
+    
+    .product-description {
+        font-size: 0.9rem;
+        margin-bottom: 1.2rem;
+    }
+    
     .ledger-pricing-box {
         padding: 16px;
         border-radius: 12px;
     }
-
+    
     .ledger-pricing-box h3 {
         font-size: 1.1rem;
         margin-bottom: 16px;
     }
-
+    
     .price-info-row {
         padding: 10px;
         margin-bottom: 8px;
-        flex-direction: row; /* Keep row, but adjust font sizes */
-        justify-content: space-between;
     }
-
+    
     .price-info-row strong {
-        font-size: 0.85rem;
+        font-size: 0.9rem;
     }
-
+    
     .price-info-row span {
         font-size: 1rem;
     }
-
-    .form-group select {
-        padding: 12px; /* Slightly smaller touch target */
-        font-size: 16px; /* Prevents iOS zoom on focus */
+    
+    .form-group {
+        margin-bottom: 14px;
     }
-
+    
+    .form-group label {
+        font-size: 0.85rem;
+        margin-bottom: 6px;
+    }
+    
+    .form-group select {
+        padding: 12px;
+        font-size: 16px; /* Prevents iOS zoom */
+    }
+    
     .final-price-display {
         font-size: 1.8rem;
-        margin: 16px 0;
-        padding: 12px;
+        margin: 20px 0;
+        padding: 14px;
     }
-
+    
     .btn-primary {
         padding: 16px;
         font-size: 1rem;
@@ -319,6 +391,275 @@
         width: 100%;
         justify-content: center;
         margin-bottom: 10px;
+    }
+}
+
+/* Large Phones */
+@media (max-width: 576px) {
+    .glass-container {
+        padding: 12px;
+        margin: 8px auto;
+    }
+    
+    .detail-grid {
+        gap: 1.2rem;
+    }
+    
+    .product-detail-gallery {
+        height: 300px;
+    }
+    
+    .page-title {
+        font-size: 1.4rem;
+    }
+    
+    .product-meta {
+        font-size: 0.7rem;
+        padding: 4px 10px;
+    }
+    
+    .product-description {
+        font-size: 0.85rem;
+        margin-bottom: 1rem;
+    }
+    
+    .ledger-pricing-box {
+        padding: 14px;
+        border-radius: 10px;
+    }
+    
+    .ledger-pricing-box h3 {
+        font-size: 1rem;
+        margin-bottom: 14px;
+    }
+    
+    .price-info-row {
+        padding: 8px;
+        margin-bottom: 6px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    
+    .price-info-row strong {
+        font-size: 0.85rem;
+    }
+    
+    .price-info-row span {
+        font-size: 0.95rem;
+        align-self: flex-end;
+    }
+    
+    .form-group {
+        margin-bottom: 12px;
+    }
+    
+    .form-group label {
+        font-size: 0.8rem;
+        margin-bottom: 5px;
+    }
+    
+    .form-group select {
+        padding: 12px;
+        font-size: 16px; /* Prevents iOS zoom */
+    }
+    
+    .final-price-display {
+        font-size: 1.6rem;
+        margin: 16px 0;
+        padding: 12px;
+    }
+    
+    .deposit-display {
+        padding: 10px;
+        margin-top: 10px;
+    }
+    
+    .btn-primary {
+        padding: 14px;
+        font-size: 0.95rem;
+    }
+    
+    .admin-warning {
+        padding: 10px;
+        margin-top: 14px;
+    }
+}
+
+/* Medium Phones */
+@media (max-width: 480px) {
+    .glass-container {
+        padding: 10px;
+        margin: 5px auto;
+    }
+
+    .detail-grid {
+        gap: 1rem;
+    }
+
+    .product-detail-gallery {
+        height: 280px;
+    }
+
+    .page-title {
+        font-size: 1.3rem;
+    }
+
+    .product-meta {
+        font-size: 0.65rem;
+        padding: 3px 8px;
+    }
+
+    .product-description {
+        font-size: 0.8rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .ledger-pricing-box {
+        padding: 12px;
+        border-radius: 8px;
+    }
+
+    .ledger-pricing-box h3 {
+        font-size: 0.95rem;
+        margin-bottom: 12px;
+    }
+
+    .price-info-row {
+        padding: 8px;
+        margin-bottom: 6px;
+    }
+
+    .price-info-row strong {
+        font-size: 0.8rem;
+    }
+
+    .price-info-row span {
+        font-size: 0.9rem;
+    }
+
+    .form-group {
+        margin-bottom: 10px;
+    }
+
+    .form-group label {
+        font-size: 0.75rem;
+        margin-bottom: 4px;
+    }
+
+    .form-group select {
+        padding: 12px;
+        font-size: 16px; /* Prevents iOS zoom */
+    }
+
+    .final-price-display {
+        font-size: 1.5rem;
+        margin: 14px 0;
+        padding: 10px;
+    }
+
+    .deposit-display {
+        padding: 8px;
+        margin-top: 8px;
+    }
+
+    .btn-primary {
+        padding: 14px;
+        font-size: 0.9rem;
+    }
+    
+    .btn-secondary {
+        width: 100%;
+        justify-content: center;
+        margin-bottom: 10px;
+    }
+}
+
+/* Small Phones */
+@media (max-width: 360px) {
+    .glass-container {
+        padding: 8px;
+        margin: 5px auto;
+    }
+
+    .detail-grid {
+        gap: 0.8rem;
+    }
+
+    .product-detail-gallery {
+        height: 240px;
+    }
+
+    .page-title {
+        font-size: 1.2rem;
+    }
+
+    .product-meta {
+        font-size: 0.6rem;
+        padding: 2px 6px;
+    }
+
+    .product-description {
+        font-size: 0.75rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .ledger-pricing-box {
+        padding: 10px;
+        border-radius: 6px;
+    }
+
+    .ledger-pricing-box h3 {
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+    }
+
+    .price-info-row {
+        padding: 6px;
+        margin-bottom: 5px;
+    }
+
+    .price-info-row strong {
+        font-size: 0.75rem;
+    }
+
+    .price-info-row span {
+        font-size: 0.85rem;
+    }
+
+    .form-group {
+        margin-bottom: 8px;
+    }
+
+    .form-group label {
+        font-size: 0.7rem;
+        margin-bottom: 3px;
+    }
+
+    .form-group select {
+        padding: 10px;
+        font-size: 16px; /* Prevents iOS zoom */
+    }
+
+    .final-price-display {
+        font-size: 1.4rem;
+        margin: 12px 0;
+        padding: 8px;
+    }
+
+    .deposit-display {
+        padding: 6px;
+        margin-top: 6px;
+    }
+
+    .btn-primary {
+        padding: 12px;
+        font-size: 0.85rem;
+    }
+    
+    .admin-warning {
+        padding: 8px;
+        margin-top: 12px;
     }
 }
 </style>

@@ -792,10 +792,93 @@ setTimeout(function() {
         display: block; /* Ensure text is visible */
     }
 
-    /* ===== MOBILE RESPONSIVE FIXES ===== */
-    @media (max-width: 768px) {
+    /* ===== ENHANCED RESPONSIVE DESIGN ===== */
+    
+    /* Large Tablets */
+    @media (max-width: 1200px) {
+        .orders-wrapper {
+            padding: 1.2rem;
+        }
+        
+        .summary-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .order-footer {
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .totals-section, .meta-section {
+            flex: 1 0 45%;
+        }
+    }
+    
+    /* Tablets */
+    @media (max-width: 992px) {
         .orders-wrapper {
             padding: 1rem;
+        }
+        
+        .top-nav {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.8rem;
+        }
+        
+        .header-actions {
+            justify-content: center;
+        }
+        
+        .page-title {
+            text-align: center;
+            font-size: 1.4rem;
+        }
+        
+        .summary-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .stat-card {
+            padding: 1.2rem;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+        }
+        
+        .filter-bar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .filter-group, .search-group {
+            width: 100%;
+        }
+        
+        .order-footer {
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .meta-section {
+            text-align: left;
+        }
+        
+        .meta-info {
+            justify-content: flex-start;
+        }
+        
+        .actions-section {
+            justify-content: center;
+        }
+    }
+    
+    /* Small Tablets */
+    @media (max-width: 768px) {
+        .orders-wrapper {
+            padding: 0.8rem;
         }
 
         /* Stack Header */
@@ -814,6 +897,7 @@ setTimeout(function() {
         .page-title {
             text-align: center;
             margin-bottom: 1rem;
+            font-size: 1.3rem;
         }
 
         /* Stack Stats Grid */
@@ -898,6 +982,190 @@ setTimeout(function() {
         .item-table td {
             padding: 0.6rem;
             font-size: 0.9rem;
+        }
+    }
+    
+    /* Large Phones */
+    @media (max-width: 576px) {
+        .orders-wrapper {
+            padding: 0.6rem;
+        }
+        
+        .page-title {
+            font-size: 1.2rem;
+        }
+        
+        .stat-card {
+            padding: 1rem;
+        }
+        
+        .stat-value {
+            font-size: 1.6rem;
+        }
+        
+        .order-header {
+            padding: 0.8rem 1rem;
+        }
+        
+        .order-body {
+            padding: 1rem;
+        }
+        
+        .order-footer {
+            padding: 1rem;
+        }
+        
+        .customer-section h4, .items-section h4 {
+            font-size: 1rem;
+        }
+        
+        .btn {
+            padding: 0.7rem 0.9rem;
+            font-size: 0.9rem;
+        }
+        
+        .item-table th {
+            font-size: 0.75rem;
+            padding: 0.5rem;
+        }
+        
+        .item-table td {
+            padding: 0.5rem;
+            font-size: 0.85rem;
+        }
+    }
+    
+    /* Medium Phones */
+    @media (max-width: 480px) {
+        .orders-wrapper {
+            padding: 0.5rem;
+        }
+        
+        .page-title {
+            font-size: 1.1rem;
+        }
+        
+        .stat-card {
+            padding: 0.8rem;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+        }
+        
+        .filter-bar {
+            padding: 0.8rem;
+        }
+        
+        .filter-select, .search-input {
+            padding: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .order-header {
+            padding: 0.7rem 0.8rem;
+        }
+        
+        .order-body {
+            padding: 0.8rem;
+        }
+        
+        .order-footer {
+            padding: 0.8rem;
+        }
+        
+        .customer-section h4, .items-section h4 {
+            font-size: 0.95rem;
+        }
+        
+        .btn {
+            padding: 0.6rem 0.8rem;
+            font-size: 0.85rem;
+        }
+        
+        .item-table {
+            min-width: 500px;
+        }
+        
+        .item-table th {
+            font-size: 0.7rem;
+            padding: 0.4rem;
+        }
+        
+        .item-table td {
+            padding: 0.4rem;
+            font-size: 0.8rem;
+        }
+    }
+    
+    /* Small Phones */
+    @media (max-width: 360px) {
+        .orders-wrapper {
+            padding: 0.4rem;
+        }
+        
+        .page-title {
+            font-size: 1rem;
+        }
+        
+        .stat-card {
+            padding: 0.6rem;
+        }
+        
+        .stat-value {
+            font-size: 1.4rem;
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+        }
+        
+        .filter-bar {
+            padding: 0.6rem;
+        }
+        
+        .filter-select, .search-input {
+            padding: 7px;
+            font-size: 0.85rem;
+        }
+        
+        .order-header {
+            padding: 0.6rem;
+        }
+        
+        .order-body {
+            padding: 0.6rem;
+        }
+        
+        .order-footer {
+            padding: 0.6rem;
+        }
+        
+        .customer-section h4, .items-section h4 {
+            font-size: 0.9rem;
+        }
+        
+        .btn {
+            padding: 0.5rem 0.7rem;
+            font-size: 0.8rem;
+        }
+        
+        .item-table {
+            min-width: 450px;
+        }
+        
+        .item-table th {
+            font-size: 0.65rem;
+            padding: 0.3rem;
+        }
+        
+        .item-table td {
+            padding: 0.3rem;
+            font-size: 0.75rem;
         }
     }
 </style>
