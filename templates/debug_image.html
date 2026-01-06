@@ -1,314 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}{{ product.name }} – Fabrication{% endblock %}
+{% block title %}Vertical Cuplock - {{ product.name }}{% endblock %}
 
 {% block content %}
-<!-- Main Container -->
-<div class="glass-container">
-    <!-- Back Button -->
-    <button class="btn btn-secondary" onclick="history.back()" style="margin-bottom: 1rem;">← Back to Products</button>
-
-    <div class="detail-grid">
-        <!-- Left Column: Product Gallery -->
-        <div class="gallery-section">
-            <div class="product-detail-gallery">
-                <div class="gallery-main-container">
-                    {% set valid_images = product.image_url.split(',').map(s=>s.strip()).filter(s=>s) %}
-                    {% for img_url in valid_images %}
-                        <div class="gallery-main-image {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}">
-                            <img src="{{ url_for('static', filename=img_url) }}"
-                                 alt="{{ product.name }}"
-                                 loading="lazy">
-                        </div>
-                    {% endfor %}
-                </div>
-                
-                {% if valid_images|length > 1 %}
-                    <div class="gallery-counter">
-                        <span id="currentImageNum">1</span> / {{ valid_images|length }}
-                    </div>
-                    <button class="gallery-navigation gallery-prev" id="galleryPrev">‹</button>
-                    <button class="gallery-navigation gallery-next" id="galleryNext">›</button>
-                {% endif %}
-            </div>
-
-            <!-- Thumbnails List -->
-            {% if valid_images|length > 1 %}
-                <div class="gallery-thumbnails">
-                    {% for img_url in valid_images %}
-                        <img src="{{ url_for('static', filename=img_url) }}"
-                             class="gallery-thumbnail {% if loop.first %}active{% endif %}"
-                             onclick="setMainImage({{ loop.index0 }})"
-                             alt="Thumbnail {{ loop.index0 }}">
-                    {% endfor %}
-                </div>
-            {% endif %}
-
-            {% if not product.image_url or valid_images|length == 0 %}
-                <div class="no-image-box">
-                    <p style="font-size: 2rem; color: #ffa500;">📷</p>
-                    <p>No Image Available</p>
-                </div>
-            {% endif %}
-        </div>
-
-        <!-- Right Column: Product Info & Customization -->
-        <div>
-            <!-- Product Header -->
-            <div class="product-header">
-                <h1 class="page-title">{{ product.name }}</h1>
-                <p class="product-meta">{{ product.category|title if product.category else 'N/A' }}</p>
-            </div>
-
-            <!-- Description -->
-            <p class="product-description">{{ product.description }}</p>
-
-            <!-- Customization Section -->
-            <div class="customization-section">
-                <h3 class="section-title">Product Details</h3>
-                
-                <div class="form-group">
-                    <label for="quantity">Quantity</label>
-                    <select id="quantity" onchange="updateFabricationPrice()">
-                        {% for i in range(1,51) %}
-                        <option value="{{ i }}" {% if i == 1 %}selected{% endif %}>{{ i }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <!-- Price Display -->
-                <div class="price-display">
-                    <div class="price-row">
-                        <span>Unit Price:</span>
-                        <span id="final_price_display">₹{{ "%.2f"|format(product.price|float) }}</span>
-                    </div>
-                    <div class="price-row total-row">
-                        <span>Total:</span>
-                        <span id="final_total_display">₹{{ "%.2f"|format(product.price|float) }}</span>
-                    </div>
-                </div>
-
-                <!-- Product Note -->
-                <div class="product-note">
-                    <strong>Fabrication Product</strong><br>
-                    Custom sizes and specifications are available on request.
-                </div>
-
-                <!-- Buttons -->
-                <div class="button-section">
-                    {% if current_user.is_authenticated and session.get('user_type') == 'admin' %}
-                        <div class="admin-alert">
-                            <p style="margin: 0; font-weight: 700; color: #ffa500;">⚠️ Admin accounts cannot make purchases.</p>
-                        </div>
-                    {% elif current_user.is_authenticated %}
-                        <div class="button-wrapper">
-                            <button class="btn btn-primary btn-lg" id="addToCartBtn" onclick="addToCartCustom()">🛒 Add to Cart</button>
-                        </div>
-                    {% else %}
-                        <div class="button-wrapper">
-                            <button class="btn btn-primary btn-lg" onclick="window.location.href='{{ url_for('login') }}'">🔐 Login to Purchase</button>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal -->
-<div id="imageModal" class="modal-overlay">
-    <div class="modal-content">
-        <button class="modal-close" onclick="closeModal()">✕</button>
-        <button class="modal-nav modal-prev" onclick="modalPrev()">‹</button>
-        <div class="modal-image-wrap">
-            <img id="modalImage" src="" alt="">
-        </div>
-        <button class="modal-nav modal-next" onclick="modalNext()">›</button>
-    </div>
-</div>
-
-<div id="toast" class="toast-notification"></div>
-
-{% endblock %}
-
-{% block scripts %}
-<script>
-// Gallery functionality
-let galleryImages = [];
-let totalImages = 0;
-let currentIndex = 0;
-
-function buildImageUrl(relativePath) {
-    if (!relativePath) return '';
-    return '{{ url_for("static", filename="__PLACEHOLDER__") }}'.replace('__PLACEHOLDER__', relativePath);
-}
-
-{% if product.image_url %}
-    const rawImages = `{{ product.image_url }}`.split(',');
-    galleryImages = rawImages.map(s => s.trim()).filter(s => s !== '').map(url => buildImageUrl(url));
-    totalImages = galleryImages.length;
-{% endif %}
-
-const prevBtn = document.getElementById('galleryPrev');
-const nextBtn = document.getElementById('galleryNext');
-const counterEl = document.getElementById('currentImageNum');
-
-function setActiveImage(index) {
-    index = Math.max(0, Math.min(index, totalImages - 1));
-    const mainItems = document.querySelectorAll('.gallery-main-image');
-    const thumbs = document.querySelectorAll('.gallery-thumbnail');
-
-    if (mainItems[currentIndex]) mainItems[currentIndex].classList.remove('active');
-    if (thumbs[currentIndex]) thumbs[currentIndex].classList.remove('active');
-
-    currentIndex = index;
-
-    if (mainItems[currentIndex]) mainItems[currentIndex].classList.add('active');
-    if (thumbs[currentIndex]) thumbs[currentIndex].classList.add('active');
-    if (counterEl) counterEl.textContent = (currentIndex + 1);
-}
-
-window.setMainImage = function(i) {
-    setActiveImage(parseInt(i));
-};
-
-function prevImage() { 
-    if (totalImages > 1) setActiveImage((currentIndex - 1 + totalImages) % totalImages); 
-}
-
-function nextImage() { 
-    if (totalImages > 1) setActiveImage((currentIndex + 1) % totalImages); 
-}
-
-if (prevBtn) prevBtn.addEventListener('click', prevImage);
-if (nextBtn) nextBtn.addEventListener('click', nextImage);
-
-// Keyboard support
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft') prevImage();
-    if (e.key === 'ArrowRight') nextImage();
-    if (e.key === 'Escape') closeModal();
-});
-
-// Modal functionality
-const modal = document.getElementById('imageModal');
-const modalImg = document.getElementById('modalImage');
-
-window.openModal = function(index) {
-    if (!galleryImages || galleryImages.length === 0) return;
-    index = Math.max(0, Math.min(index, galleryImages.length - 1));
-    modal.classList.add('show');
-    modalImg.src = galleryImages[index];
-    modalCurrentIndex = index;
-};
-
-window.closeModal = function() {
-    modal.classList.remove('show');
-    modalImg.src = '';
-};
-
-let modalCurrentIndex = 0;
-window.modalPrev = function() {
-    if (!galleryImages || galleryImages.length <= 1) return;
-    modalCurrentIndex = (modalCurrentIndex - 1 + galleryImages.length) % galleryImages.length;
-    modalImg.src = galleryImages[modalCurrentIndex];
-};
-
-window.modalNext = function() {
-    if (!galleryImages || galleryImages.length <= 1) return;
-    modalCurrentIndex = (modalCurrentIndex + 1) % galleryImages.length;
-    modalImg.src = galleryImages[modalCurrentIndex];
-};
-
-modal.addEventListener('click', function(e) {
-    if (e.target === modal) closeModal();
-});
-
-// Fabrication pricing
-let basePrice = {{ product.price | default(0) | float }};
-
-window.updateFabricationPrice = function() {
-    const quantity = parseInt(document.getElementById('quantity').value);
-    const total = basePrice * quantity;
-    document.getElementById('final_price_display').textContent = '₹' + total.toFixed(2);
-    document.getElementById('final_total_display').textContent = '₹' + total.toFixed(2);
-};
-
-// Add to cart functionality
-window.addToCartCustom = function() {
-    const btn = document.getElementById('addToCartBtn');
-    if (!btn) return;
-    btn.disabled = true;
-    btn.innerHTML = 'Adding...';
-
-    const qty = parseInt(document.getElementById('quantity').value);
-    
-    const customization = { 
-        product_type: 'fabrication', 
-        quantity: qty 
-    };
-
-    const payload = {
-        product_id: {{ product.id }},
-        quantity: qty,
-        customization: customization
-    };
-
-    fetch("{{ url_for('add_to_cart') }}", {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-    })
-    .then(async res => {
-        const json = await res.json().catch(()=>({ success:false, message:'Invalid JSON' }));
-        if (!res.ok) {
-            showToast('❌ ' + (json.message || `Server error ${res.status}`));
-            btn.disabled = false;
-            btn.innerHTML = '🛒 Add to Cart';
-            return;
-        }
-        if (json.success) {
-            showToast('✓ Added to cart!');
-            setTimeout(() => { window.location.href = '/cart'; }, 700);
-        } else {
-            showToast('❌ ' + (json.message || 'Failed to add to cart'));
-            btn.disabled = false;
-            btn.innerHTML = '🛒 Add to Cart';
-        }
-    })
-    .catch(err => {
-        console.error(err);
-        showToast('❌ Network error');
-        btn.disabled = false;
-        btn.innerHTML = '🛒 Add to Cart';
-    });
-};
-
-window.showToast = function(message) {
-    const t = document.getElementById('toast');
-    if (!t) return;
-    t.textContent = message;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3000);
-};
-
-// Initialize pricing on load
-updateFabricationPrice();
-</script>
-{% endblock %}
-
 <style>
-    /* ===== CSS VARIABLES ===== */
-    :root {
-        --brand-900: #001d3d;
-        --brand-700: #002855;
-        --accent: #ffd966; /* Gold */
-        --muted: #666;
-        --bg-light: #f8f9fa;
-        --bg-white: #ffffff;
-        --border-color: #e0e0e0;
-    }
-
     /* ===== GLOBAL RESETS ===== */
     * {
         box-sizing: border-box;
@@ -317,207 +12,165 @@ updateFabricationPrice();
     }
 
     body {
-        font-family: 'Inter', sans-serif;
-        margin: 0;
-        padding-bottom: 60px; /* Space for scrolling past navbar */
-        background-color: var(--bg-light);
+        font-family: 'Poppins', sans-serif;
+        background-color: #f8f9fa;
         color: #333;
-        overflow-x: hidden; /* Prevents horizontal scrolling */
+        padding-bottom: 60px; /* Space for scrolling */
     }
 
     /* ===== MAIN CONTAINER ===== */
-    .glass-container {
+    .product-container {
         width: 100%;
-        max-width: 1100px; /* Reasonable width for desktop */
-        margin: 0 auto;
-        padding: 1.5rem;
-        overflow-x: hidden; /* Ensure no scroll */
+        max-width: 900px; /* Reasonable width for desktop */
+        margin: 20px auto;
+        padding: 20px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        overflow-x: hidden; /* Prevents horizontal scroll */
     }
 
-    /* ===== DETAIL GRID (Core Layout) ===== */
-    .detail-grid {
-        display: grid;
-        /* Desktop: 2 Columns */
-        grid-template-columns: 1fr 1fr;
-        gap: 2rem;
-        align-items: start;
-    }
-
-    /* ===== GALLERY SECTION (Left Column) ===== */
-    .gallery-section {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-    }
-
-    .product-detail-gallery {
-        position: relative;
-        width: 100%;
-        /* Desktop: Fixed height */
-        /* Mobile: Reduced height */
-        height: 400px;
-        overflow: hidden;
-        border-radius: 10px;
-        background: var(--bg-white);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-
-    .gallery-main-container {
-        width: 100%;
-        height: 100%;
-        position: relative;
-    }
-
-    /* Main Image */
-    .gallery-main-image {
-        position: absolute;
-        inset: 0;
-        opacity: 0;
-        transition: opacity 0.45s ease-in-out;
-        pointer-events: none;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: var(--bg-light);
-        z-index: 1;
-    }
-
-    .gallery-main-image.active {
-        opacity: 1;
-        pointer-events: auto;
-    }
-
-    .gallery-main-image img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        display: block;
-    }
-
-    /* Gallery Navigation */
-    .gallery-counter {
-        position: absolute;
-        bottom: 1rem;
-        right: 1rem;
-        background: rgba(0,0,0,0.75);
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        font-size: 0.9rem;
+    /* ===== HEADER & IMAGE ===== */
+    h1 {
+        font-size: 2rem;
+        color: #1e3a8a; /* Royal Blue */
+        margin-bottom: 1.5rem;
         font-weight: 700;
-        z-index: 10;
     }
 
-    .gallery-navigation {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        background: rgba(0,0,0,0.75);
-        color: white;
-        border: 2px solid rgba(255,255,255,0.9);
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        z-index: 20;
+    /* Image Container - Centered and Responsive */
+    .product-image {
+        width: 100%;
         display: flex;
-        align-items: center;
         justify-content: center;
-        cursor: pointer;
-        font-size: 24px; /* Large touch target */
+        align-items: center;
+        margin: 0 auto 30px auto; /* Margin on desktop */
+        overflow: hidden;
+        background: #f9f9f9;
+        border-radius: 8px;
+        padding: 20px;
+        min-height: 200px;
     }
-    .gallery-prev { left: 12px; }
-    .gallery-next { right: 12px; }
-    .gallery-navigation.single-image { display: none !important; }
 
-    /* Thumbnails */
-    .gallery-thumbnails {
-        display: grid;
-        /* Desktop: Multi-column grid */
-        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-        gap: 10px;
+    .product-image img {
+        max-width: 100%;
+        max-height: 300px;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        border-radius: 4px;
+    }
+
+    /* ===== INFO BOX (Sizes) ===== */
+    .info-box {
+        background: #e3f2fd; /* Light Blue */
+        border-left: 5px solid #1976d2;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        font-size: 0.95rem;
+    }
+
+    .info-box strong {
+        color: #1976d2;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        display: block;
+        font-size: 1rem;
+    }
+
+    .info-box ul {
+        list-style: none;
+        margin: 0;
+        padding-left: 1rem;
+    }
+
+    .info-box li {
+        color: #444;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    /* ===== PURCHASE TYPE (Radio Buttons) ===== */
+    .purchase-type-section {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: #f9f9f9;
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+    }
+
+    .purchase-type-section label {
+        cursor: pointer;
+        font-weight: 600;
+        margin-bottom: 0;
+        padding: 0;
+        display: block; /* Stacks labels on mobile */
+    }
+
+    /* Custom Radio Group */
+    .radio-group {
+        display: flex;
+        gap: 2rem;
         margin-top: 1rem;
     }
 
-    .gallery-thumbnail {
-        width: 100%;
-        padding-top: 100%; /* Aspect ratio 1:1 container */
-        border: 3px solid transparent;
-        border-radius: 6px;
-        cursor: pointer;
+    .radio-group input[type="radio"] {
+        appearance: none;
+        width: 0;
+        height: 0;
+        opacity: 0;
+        position: absolute;
+    }
+
+    .radio-group label {
         position: relative;
-        overflow: hidden;
-        background: var(--bg-white);
-        transition: all 0.2s ease;
-    }
-
-    .gallery-thumbnail:hover {
-        transform: scale(1.03);
-        border-color: rgba(212, 175, 55, 0.4);
-    }
-
-    .gallery-thumbnail.active {
-        border-color: var(--brand-900); /* Dark Blue Active State */
-        box-shadow: 0 0 0 0 4px var(--brand-900);
-    }
-
-    /* No Image Box */
-    .no-image-box {
-        background: rgba(255,255,255,0.1);
-        padding: 3rem 1rem;
+        display: inline-flex;
+        align-items: center;
+        padding: 1rem 1.5rem;
         border-radius: 8px;
-        text-align: center;
-        border: 2px dashed #ccc;
-    }
-
-    /* ===== INFO & FORM SECTION (Right Column) ===== */
-    .product-header {
-        margin-bottom: 2rem;
-        text-align: center;
-    }
-
-    .page-title {
-        font-size: 2rem;
-        color: var(--brand-900);
-        margin-bottom: 0.5rem;
-        font-weight: 800;
-        line-height: 1.2;
-    }
-
-    .product-meta {
-        color: var(--muted);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        font-size: 0.9rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .product-description {
+        border: 2px solid #ddd;
+        background: white;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        width: 100%; /* Full width label for tap target */
+        font-weight: 600;
         color: #444;
-        font-size: 1rem;
-        line-height: 1.6;
-        margin-bottom: 2rem;
     }
 
-    /* Customization Section */
-    .customization-section {
-        background: var(--bg-white);
-        padding: 2rem;
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        border: 1px solid var(--border-color);
+    .radio-group label:hover {
+        border-color: #1e3a8a;
+        background: #f0f7ff;
     }
 
-    .section-title {
-        color: var(--brand-700);
-        margin-bottom: 1.5rem;
-        font-size: 1.2rem;
-        font-weight: 700;
+    .radio-group input[type="radio"]:checked + label {
+        border-color: #1e3a8a;
+        background: #1e3a8a;
+        color: white;
+        box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);
     }
 
-    /* Form Groups */
+    /* Custom Radio Dot */
+    .radio-group label::before {
+        content: '';
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid #ccc;
+        background: #fff;
+        margin-right: 15px;
+        flex-shrink: 0;
+    }
+
+    .radio-group input[type="radio"]:checked + label::before {
+        background: #fff;
+        border-color: #fff;
+        box-shadow: inset 0 0 0 4px rgba(0,0,0,0.3);
+    }
+
+    /* ===== FORM GROUPS ===== */
     .form-group {
         margin-bottom: 1.5rem;
-        width: 100%;
     }
 
     .form-group label {
@@ -528,74 +181,140 @@ updateFabricationPrice();
         font-size: 1rem;
     }
 
-    /* Responsive Inputs */
-    select {
+    /* Mobile Critical Styles for Inputs */
+    .form-group select, .form-group input {
         width: 100%;
-        padding: 14px 16px; /* Large touch target */
+        padding: 14px 16px; /* Comfortable padding */
         border: 2px solid #ddd;
-        border-radius: 8px;
-        background-color: var(--bg-white);
+        border-radius: 8px; /* Softer corners */
         font-size: 16px !important; /* 16px prevents iOS auto-zoom */
+        background-color: #fff;
         font-family: inherit;
         color: #333;
-        -webkit-appearance: none;
-        appearance: none;
         transition: border-color 0.3s ease;
+        -webkit-appearance: none;
     }
 
-    select:focus {
-        border-color: var(--brand-700);
+    .form-group select:focus, .form-group input:focus {
+        border-color: #1e3a8a;
         outline: none;
-        box-shadow: 0 0 0 4px rgba(0, 40, 85, 0.15);
+        box-shadow: 0 0 0 4px rgba(30, 58, 138, 0.15);
     }
 
-    /* Price Display */
-    .price-display {
-        background: var(--bg-light);
+    /* ===== CUP OPTIONS GRID ===== */
+    .cup-options-grid {
+        display: grid;
+        /* Desktop: Responsive columns based on width */
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .cup-option-card {
+        border: 3px solid #ddd;
+        border-radius: 10px;
+        padding: 1.5rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: white;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .cup-option-card:hover {
+        border-color: #1e3a8a;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .cup-option-card.selected {
+        border-color: #1e3a8a;
+        background: #e3f2fd;
+        color: #1e3a8a;
+        font-weight: 700;
+    }
+
+    .cup-option-card.selected::after {
+        content: '✓';
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #1e3a8a;
+        color: white;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+    }
+
+    .cup-options-grid .empty-msg {
+        grid-column: 1 / -1; /* Span all columns */
         padding: 2rem;
+        color: #999;
+        font-style: italic;
+    }
+
+    /* ===== ADD CUP FORM ===== */
+    .add-cup-form {
+        background: #fff3cd; /* Light Orange */
+        border: 1px solid #ffecb5;
         border-radius: 8px;
-        border: 1px solid var(--border-color);
-        margin-top: 2rem;
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+        text-align: center;
+    }
+
+    .add-cup-form h5 {
+        margin: 0 0 1rem 0;
+        color: #333;
+        font-size: 1.1rem;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    /* ===== PRICE DISPLAY ===== */
+    .price-display {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
     }
 
     .price-row {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 1rem;
-        font-size: 1.2rem;
+        padding: 0.5rem 0;
+        font-size: 1.1rem;
+    }
+
+    .price-row:last-child {
+        margin-top: 0.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(255,255,255,0.2);
     }
 
     .total-row {
         font-weight: 800;
-        color: var(--brand-900);
-        font-size: 1.4rem;
+        font-size: 1.5rem;
     }
 
-    .product-note {
-        background: rgba(255, 217, 102, 0.1); /* Light Orange */
-        border-left: 4px solid var(--accent);
-        padding: 1rem 1.5rem;
-        border-radius: 8px;
-        margin-top: 2rem;
-        font-weight: 600;
-    }
-
-    /* Buttons */
-    .button-section {
-        margin-top: 2rem;
-        padding-top: 2rem;
-        border-top: 2px solid var(--border-color);
-    }
-
-    .btn-wrapper {
-        display: flex;
-        justify-content: center;
-    }
-
+    /* ===== BUTTONS ===== */
     .btn {
         border: none;
-        border-radius: 8px;
+        border-radius: 10px;
         font-weight: 600;
         cursor: pointer;
         text-decoration: none;
@@ -605,309 +324,490 @@ updateFabricationPrice();
         transition: all 0.3s ease;
     }
 
-    .btn-secondary {
-        background: #6c757d;
-        color: white;
-        padding: 0.6rem 1.2rem;
-    }
-
-    .btn-secondary:hover {
-        background: #5a6268;
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, var(--brand-700), var(--brand-900));
+    .btn-warning {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         color: white;
         width: 100%;
-        padding: 1rem 2rem;
+        padding: 1.2rem 2rem;
         font-size: 1.1rem;
+        box-shadow: 0 6px 20px rgba(240, 87, 108, 0.3);
     }
 
-    .btn-primary:hover {
-        background: linear-gradient(135deg, #003366, var(--brand-700));
-        box-shadow: 0 6px 20px rgba(0, 40, 85, 0.3);
-        transform: translateY(-2px);
+    .btn-warning:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(240, 87, 108, 0.4);
     }
 
-    .btn-lg {
-        font-size: 1.1rem;
-        padding: 1rem 2.5rem;
+    .btn-warning:disabled {
+        background: #bdc3c7;
+        cursor: not-allowed;
+        opacity: 0.7;
     }
 
-    /* Admin Alert */
-    .admin-alert {
-        background: #f8d7da;
-        border-left: 4px solid #dc3545;
-        padding: 1rem;
-        border-radius: 8px;
-        margin-bottom: 1rem;
-        text-align: center;
-    }
-
-    /* ===== MODAL ===== */
-    .modal-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.85);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 3000;
-    }
-
-    .modal-overlay.show {
-        display: flex;
-    }
-
-    .modal-content {
-        position: relative;
-        width: 95%;
-        max-width: 1200px; /* Modal width */
-        max-height: 95vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .modal-image-wrap {
-        width: 100%;
-        height: 0;
-        padding-bottom: 56%;
-        position: relative;
-    }
-
-    .modal-image-wrap img {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        border-radius: 8px;
-    }
-
-    .modal-close, .modal-nav {
-        position: absolute;
-        background: rgba(255,255,255,0.3);
-        color: #fff;
-        border: none;
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        z-index: 3050;
-        font-size: 18px;
-        transition: all 0.2s ease;
-    }
-
-    .modal-close { right: 18px; top: 18px; }
-    .modal-nav { top: 50%; transform: translateY(-50%); width: 56px; height: 56px; font-size: 28px; }
-    .modal-prev { left: 12px; }
-    .modal-next { right: 12px; }
-
-    /* ===== TOAST ===== */
-    .toast-notification {
-        position: fixed;
-        bottom: 30px;
-        left: 50%;
-        transform: translateX(-50%) translateY(100px);
-        background-color: #333;
-        color: white;
-        padding: 12px 24px;
-        border-radius: 8px;
-        z-index: 4000;
-        opacity: 0;
-        transition: all 0.3s ease;
-        width: 90%;
-        text-align: center;
-    }
-
-    .toast-notification.show {
-        transform: translateX(-50%) translateY(0);
-        opacity: 1;
-    }
-
-    /* ===== TABLET RESPONSIVE DESIGN ===== */
-    @media (min-width: 769px) and (max-width: 1024px) {
-        .glass-container {
-            padding: 1.2rem;
-        }
-        
-        .detail-grid {
-            gap: 1.5rem;
-        }
-        
-        .product-detail-gallery {
-            height: 350px;
-        }
-        
-        .gallery-thumbnails {
-            grid-template-columns: repeat(4, 1fr);
-        }
-        
-        .customization-section {
-            padding: 1.5rem;
-        }
-        
-        .page-title {
-            font-size: 1.8rem;
-        }
-    }
-    
     /* ===== MOBILE RESPONSIVE DESIGN ===== */
     @media (max-width: 768px) {
-        .glass-container {
-            width: 100%;
-            max-width: 100%;
-            padding: 1rem;
+        .product-container {
+            width: 100%; /* Full width on mobile */
             margin: 0 auto;
+            padding: 15px 1rem; /* Less padding */
         }
 
-        /* 1. Stack Layout on Mobile */
-        .detail-grid {
-            display: grid;
-            grid-template-columns: 1fr !important; /* Force single column stack */
-            gap: 1.5rem;
+        h1 {
+            font-size: 1.5rem;
+        }
+
+        .product-image {
+            margin: 0 auto 20px auto; /* Adjust margin */
+            padding: 15px;
+            min-height: 150px;
+        }
+
+        /* Stack Purchase Type Vertically */
+        .radio-group {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .radio-group label {
+            width: 100%; /* Full width radio buttons */
+            padding: 1rem; /* Taller touch target */
+        }
+
+        /* Stack Form Groups */
+        .form-row {
+            flex-direction: column; /* Stack inputs vertically */
+            gap: 1rem;
             align-items: stretch;
         }
 
-        /* 2. Adjust Gallery Height on Mobile */
-        .product-detail-gallery {
-            height: 300px !important; /* Reduced height for mobile screens */
-        }
-
-        .gallery-thumbnails {
+        /* Force Single Column Cup Grid */
+        .cup-options-grid {
             display: grid !important;
-            grid-template-columns: repeat(4, 1fr) !important; /* 4 columns for thumbnails */
-            gap: 0.5rem;
-            margin-top: 1rem;
+            grid-template-columns: 1fr !important; /* Single column on mobile */
+            gap: 1rem;
         }
 
-        .gallery-thumbnail {
-            width: 100% !important;
-            padding-top: 100%;
-            height: auto;
-            aspect-ratio: 1/1; /* Maintain square shape */
+        .cup-option-card {
+            width: 100%; /* Full width card */
+            min-height: 60px; /* Allow content to fit */
         }
 
-        /* 3. Form Adjustments */
-        .page-title {
-            font-size: 1.5rem;
-            text-align: center;
-            margin-bottom: 1rem;
-        }
-
-        .customization-section {
-            padding: 1.5rem;
-            margin-top: 1rem;
-        }
-
-        /* 4. Full Width Buttons */
-        .btn, .btn-primary, .btn-secondary {
-            width: 100% !important; /* Force full width for tapping */
-            padding: 0.9rem 2rem; /* Adjust height */
-            font-size: 1rem;
-            justify-content: center;
-        }
-
-        /* 5. Modal Adjustments */
-        .modal-content {
-            width: 95% !important; /* Nearly full screen width */
-            padding: 0;
-        }
-
-        .modal-image-wrap {
-            height: 60vh; /* Fixed height for mobile */
-            padding-bottom: 0;
-        }
-
-        .modal-close, .modal-nav {
-            width: 50px; /* Larger touch target */
-            height: 50px;
-            font-size: 20px;
-        }
-
-        /* 6. Gallery Nav Positioning */
-        .gallery-counter {
-            bottom: 0.5rem;
-            right: 0.5rem;
-            font-size: 0.8rem;
-            padding: 0.4rem 0.8rem;
-        }
-
-        .gallery-navigation {
-            width: 40px;
-            height: 40px;
-            font-size: 20px;
-        }
-
-        /* 7. Gallery Buttons Positioning */
-        .gallery-prev { left: 8px; }
-        .gallery-next { right: 8px; }
-
-        /* 8. Typography Scaling */
-        .total-row {
-            font-size: 1.2rem;
-        }
-
+        /* Stack Price Display Rows */
         .price-row {
-            font-size: 1rem;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+            padding: 0.5rem 0;
         }
 
-        .section-title {
-            font-size: 1.1rem;
-        }
-
-        .product-description {
-            font-size: 0.95rem;
-        }
-
-        .admin-alert {
-            font-size: 0.9rem;
-            padding: 0.75rem;
-        }
-
-        /* 9. Button Section Wrapper */
-        .button-section {
-            padding-top: 1.5rem;
-        }
-
-        .btn-lg {
-            padding: 0.8rem 2rem;
-            font-size: 1rem;
-        }
-    }
-    
-    /* ===== SMALL MOBILE RESPONSIVE DESIGN ===== */
-    @media (max-width: 480px) {
-        .glass-container {
-            padding: 0.8rem;
-        }
-        
-        .product-detail-gallery {
-            height: 250px !important;
-        }
-        
-        .gallery-thumbnails {
-            grid-template-columns: repeat(3, 1fr) !important; /* 3 columns for very small screens */
-        }
-        
-        .page-title {
+        .total-row {
             font-size: 1.3rem;
+            width: 100%;
+            text-align: right;
+            margin-top: 0;
+            padding-top: 0.5rem;
         }
-        
-        .customization-section {
-            padding: 1rem;
-        }
-        
-        .price-display {
-            padding: 1.5rem;
-        }
-        
-        .modal-image-wrap {
-            height: 50vh;
+
+        /* Adjust Button */
+        .btn-warning {
+            padding: 1rem 2rem; /* Taller button */
+            font-size: 1rem;
         }
     }
 </style>
+
+<div class="product-container">
+    <!-- Header & Image -->
+    <h1>Vertical Cuplock: {{ product.name }}</h1>
+    
+    <div class="product-image">
+        {% if product.display_image_url %}
+            {% set first_image = product.display_image_url.split(',')[0].strip() %}
+            {% if first_image.startswith('uploads/') or first_image.startswith('images/') %}
+                {% set img_src = url_for('static', filename=first_image) %}
+            {% else %}
+                {% set img_src = url_for('static', filename='uploads/' + first_image) %}
+            {% endif %}
+            <img src="{{ img_src }}" alt="{{ product.name }}">
+        {% else %}
+            <span style="font-size: 3rem; color: #ccc;">🔗 No Image</span>
+        {% endif %}
+    </div>
+
+    <!-- Available Sizes Info -->
+    <div class="info-box">
+        <strong>💡 Available Sizes:</strong> 1m, 1.5m, 2m, 2.5m, 3m, 3.5m, 4m, 4.5m, 5m, 5.5m, 6m
+        <ul>
+            <li><strong>Cup Options by Size:</strong> 1m: 1 or 2 cups, 1.5m: 2 or 3 cups, etc.</li>
+        </ul>
+    </div>
+
+    <!-- Purchase Type Section -->
+    <div class="purchase-type-section">
+        <div class="radio-group">
+            <label>
+                <input type="radio" name="purchaseType" value="buy" checked onchange="updatePurchaseType()">
+                Buy (One-time Payment)
+            </label>
+            <label>
+                <input type="radio" name="purchaseType" value="rent" onchange="updatePurchaseType()">
+                Rent (Per Day)
+            </label>
+        </div>
+    </div>
+
+    <!-- Size & Cup Options -->
+    <div class="form-group">
+        <label for="sizeSelect">Select Size *</label>
+        <select id="sizeSelect" onchange="loadCups()">
+            <option value="">-- Select Size --</option>
+            {% for size in sizes %}
+                <option
+                    value="{{ size.id }}"
+                    data-label="{{ size.size_label }}"
+                    data-buy="{{ size.buy_price|default(0) }}"
+                    data-rent="{{ size.rent_price|default(0) }}"
+                    data-deposit="{{ size.deposit|default(0) }}">
+                    {{ size.size_label }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Cup Options Grid -->
+    <div id="cupSection" class="cup-options-grid">
+        <p style="color:#666; margin-bottom: 0.5rem;">Please select a size first</p>
+        <!-- Loaded via JS -->
+    </div>
+
+    <!-- Quantity -->
+    <div class="form-group">
+        <label for="quantity">Quantity *</label>
+        <input type="number" id="quantity" value="1" min="1" onchange="updatePrice()">
+    </div>
+
+    <!-- Price Display -->
+    <div class="price-display">
+        <div class="price-row">
+            <span>Unit Price:</span>
+            <span id="unitPrice">₹0.00</span>
+        </div>
+        <div class="price-row" id="depositRow" style="display:none">
+            <span>Deposit (per unit):</span>
+            <span id="depositAmount">₹0.00</span>
+        </div>
+        <div class="price-row total-row">
+            <span>Total:</span>
+            <span id="totalPrice">₹0.00</span>
+        </div>
+    </div>
+
+    <!-- Add to Cart -->
+    <button type="button" class="btn btn-warning" id="addToCartBtn" onclick="addToCart()">
+        🛒 Add to Cart
+    </button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+console.log('🔵 Vertical Cuplock page loaded');
+
+// ============================================
+// GLOBALS
+// ============================================
+const PRODUCT_ID = {{ product.id }};
+const PRODUCT_BASE_PRICE = {{ product.price|default(0) }};
+
+let selectedCupPrice = 0;
+let rentPrice = 0;
+let depositPrice = 0;
+let selectedSizeLabel = null;
+let selectedCupId = null;
+let currentSizeBuyPrice = 0;
+
+// ============================================
+// PURCHASE TYPE
+// ============================================
+function updatePurchaseType() {
+    try {
+        console.log('🔄 Purchase type changed');
+        
+        const purchaseTypeRadios = document.querySelectorAll('input[name="purchaseType"]');
+        const cupSection = document.getElementById('cupSection');
+        
+        if (!purchaseTypeRadios || !cupSection) {
+            console.error('❌ Required elements not found');
+            return;
+        }
+        
+        let isBuySelected = false;
+        purchaseTypeRadios.forEach(function(radio) {
+            if (radio.checked && radio.value === 'buy') {
+                isBuySelected = true;
+            }
+        });
+        
+        console.log('📊 Buy selected:', isBuySelected);
+        
+        // Show/hide cup section
+        cupSection.style.display = isBuySelected ? 'block' : 'none';
+        
+        // Reset cup selection when switching to rent
+        if (!isBuySelected) {
+            selectedCupPrice = 0;
+            selectedCupId = null;
+            document.querySelectorAll('.cup-option-card').forEach(function(card) {
+                card.classList.remove('selected');
+            });
+        }
+        
+        updatePrice();
+    } catch (error) {
+        console.error('❌ Error in updatePurchaseType:', error);
+    }
+}
+
+// ============================================
+// LOAD CUP OPTIONS
+// ============================================
+function loadCups() {
+    try {
+        console.log('🔄 loadCups() called');
+        
+        const sizeSelect = document.getElementById('sizeSelect');
+        const container = document.getElementById('cupSection');
+        
+        if (!sizeSelect || !container) {
+            console.error('❌ Required elements not found');
+            return;
+        }
+        
+        const selectedOption = sizeSelect.options[sizeSelect.selectedIndex];
+
+        // Clear if no selection
+        if (!selectedOption || !selectedOption.value) {
+            selectedCupPrice = 0;
+            selectedCupId = null;
+            selectedSizeLabel = null;
+            container.innerHTML = '<p style="color:#666; text-align:center; padding: 2rem;">Please select a size first</p>';
+            updatePrice();
+            return;
+        }
+
+        const sizeId = selectedOption.value;
+        selectedSizeLabel = selectedOption.getAttribute('data-label') || '';
+
+        // Get prices from data attributes
+        const rentValue = selectedOption.getAttribute('data-rent');
+        const depositValue = selectedOption.getAttribute('data-deposit');
+        const buyValue = selectedOption.getAttribute('data-buy');
+        
+        rentPrice = rentValue ? parseFloat(rentValue) : 0;
+        depositPrice = depositValue ? parseFloat(depositValue) : 0;
+        currentSizeBuyPrice = buyValue ? parseFloat(buyValue) : 0;
+
+        console.log('📊 Size selected:', {
+            label: selectedSizeLabel,
+            buy: currentSizeBuyPrice,
+            rent: rentPrice,
+            deposit: depositPrice
+        });
+
+        // Show loading
+        container.innerHTML = '<p>Loading cup options...</p>';
+
+        // Fetch cups
+        fetch('/cuplock/api/vertical/size/' + encodeURIComponent(sizeId) + '/cups')
+            .then(function(response) {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(function(data) {
+                console.log('✅ Cups loaded:', data);
+                
+                container.innerHTML = '';
+                selectedCupPrice = 0;
+                selectedCupId = null;
+
+                if (!data.success || !data.cups || data.cups.length === 0) {
+                    container.innerHTML = '<p style="color:#666; text-align:center; padding: 2rem;">No cup options available</p>';
+                    updatePrice();
+                    return;
+                }
+
+                data.cups.forEach(function(c) {
+                    const card = document.createElement('div');
+                    card.className = 'cup-option-card';
+
+                    const cupPrice = c.price || 0;
+                    const cupCount = c.cup_count || 0;
+
+                    card.textContent = cupCount + (cupCount === 1 ? ' Cup' : ' Cups');
+                    card.dataset.price = cupPrice;
+                    card.dataset.cupId = c.id;
+
+                    card.addEventListener('click', function() {
+                        selectedCupPrice = parseFloat(this.dataset.price);
+                        selectedCupId = this.dataset.cupId;
+
+                        console.log('🎯 Cup selected:', cupCount, 'Price:', selectedCupPrice);
+
+                        document.querySelectorAll('.cup-option-card').forEach(function(el) {
+                            el.classList.remove('selected');
+                        });
+                        card.classList.add('selected');
+
+                        updatePrice();
+                    });
+
+                    container.appendChild(card);
+                });
+
+                updatePrice();
+            })
+            .catch(function(error) {
+                console.error('❌ Error loading cups:', error);
+                container.innerHTML = '<p style="color: red; text-align:center;">Error loading cups. Please try again.</p>';
+            });
+    } catch (error) {
+        console.error('❌ Error in loadCups:', error);
+    }
+}
+
+// ============================================
+// UPDATE PRICE
+// ============================================
+function updatePrice() {
+    try {
+        const qtyInput = document.getElementById('quantity');
+        const purchaseTypeRadios = document.querySelectorAll('input[name="purchaseType"]');
+        
+        const qty = qtyInput ? (parseInt(qtyInput.value) || 1) : 1;
+        
+        let type = 'buy';
+        if (purchaseTypeRadios) {
+            purchaseTypeRadios.forEach(function(radio) {
+                if (radio.checked && radio.value === 'rent') {
+                    type = 'rent';
+                }
+            });
+        }
+
+        let unit = 0;
+        let deposit = 0;
+
+        if (type === 'buy') {
+            unit = currentSizeBuyPrice + selectedCupPrice;
+        } else {
+            unit = rentPrice;
+            deposit = depositPrice;
+        }
+
+        const total = (unit * qty) + (deposit * qty);
+
+        console.log('💰 Price calculated:', {
+            type: type,
+            unit: unit,
+            deposit: deposit,
+            qty: qty,
+            total: total
+        });
+
+        // Update display
+        const unitPriceEl = document.getElementById('unitPrice');
+        const depositAmountEl = document.getElementById('depositAmount');
+        const totalPriceEl = document.getElementById('totalPrice');
+        const depositRowEl = document.getElementById('depositRow');
+
+        if (unitPriceEl) unitPriceEl.innerText = '₹' + unit.toFixed(2);
+        if (depositAmountEl) depositAmountEl.innerText = '₹' + deposit.toFixed(2);
+        if (totalPriceEl) totalPriceEl.innerText = '₹' + total.toFixed(2);
+        if (depositRowEl) {
+            depositRowEl.style.display = (type === 'rent' && deposit > 0) ? 'flex' : 'none';
+        }
+    } catch (error) {
+        console.error('❌ Error in updatePrice:', error);
+    }
+}
+
+// ============================================
+// ADD TO CART
+// ============================================
+function addToCart() {
+    try {
+        const qtyInput = document.getElementById('quantity');
+        const purchaseTypeRadios = document.querySelectorAll('input[name="purchaseType"]');
+        
+        const qty = qtyInput ? (parseInt(qtyInput.value) || 1) : 1;
+        
+        let type = 'buy';
+        if (purchaseTypeRadios) {
+            purchaseTypeRadios.forEach(function(radio) {
+                if (radio.checked && radio.value === 'rent') {
+                    type = 'rent';
+                }
+            });
+        }
+
+        // Validation
+        if (!selectedSizeLabel) {
+            alert("⚠️ Please select a size");
+            return;
+        }
+
+        if (type === 'buy' && !selectedCupId) {
+            alert("⚠️ Please select a cup configuration");
+            return;
+        }
+
+        const customization = {
+            component: "vertical",
+            purchase_type: type,
+            size: selectedSizeLabel,
+            cup_id: selectedCupId,
+            cup_price: selectedCupPrice
+        };
+
+        console.log('🛒 Adding to cart:', customization);
+
+        const btn = document.getElementById('addToCartBtn');
+        btn.disabled = true;
+        btn.textContent = 'Adding...';
+
+        fetch('/add_to_cart', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                product_id: PRODUCT_ID,
+                quantity: qty,
+                customization: customization
+            })
+        })
+        .then(function(response) {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+        })
+        .then(function(data) {
+            if (data.success) {
+                console.log('✅ Added to cart successfully');
+                window.location.href = '/cart';
+            } else {
+                alert('❌ ' + (data.message || 'Failed to add to cart'));
+                btn.disabled = false;
+                btn.textContent = '🛒 Add to Cart';
+            }
+        })
+        .catch(function(error) {
+            console.error('❌ Error:', error);
+            alert('❌ Error adding to cart. Please try again.');
+            btn.disabled = false;
+            btn.textContent = '🛒 Add to Cart';
+        });
+    } catch (error) {
+        console.error('❌ Error in addToCart:', error);
+        alert('❌ Error: ' + error.message);
+    }
+}
+</script>
+{% endblock %}

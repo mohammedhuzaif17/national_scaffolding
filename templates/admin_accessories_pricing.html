@@ -1,343 +1,216 @@
 {% extends "base.html" %}
 
-{% block title %}Add New Scaffolding Product - Admin{% endblock %}
+{% block title %}Accessories Pricing Management{% endblock %}
 
 {% block content %}
-<div class="admin-container">
-    <div class="page-header">
-        <h1>Add New Scaffolding Product</h1>
-        <a href="{{ url_for('admin_scaffoldings') }}" class="btn btn-secondary">← Back to Admin</a>
+<div class="glass-container">
+    <!-- Top Header -->
+    <div class="top-header-wrapper">
+        <button class="btn-secondary" onclick="window.location.href='{{ url_for('admin_scaffoldings') }}'" style="width: auto;">← Back to Admin Panel</button>
     </div>
-
-    <!-- Flash Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{ category }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
-    <div class="form-container">
-        <!-- The action attribute is crucial. It tells the form where to submit the data. -->
-        <form method="POST" action="{{ url_for('admin_add_product') }}" enctype="multipart/form-data" class="admin-form" id="productForm">
-            <div class="form-section">
-                <h3>Product Information</h3>
-                
-                <div class="form-group">
-                    <label for="name">Product Name *</label>
-                    <input type="text" id="name" name="name" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="description">Description</label>
-                    <textarea id="description" name="description" rows="4"></textarea>
-                </div>
-
-                <div class="form-row">
-                    <!-- Category Selection -->
-                    <div class="form-group">
-                        <label for="category">Category *</label>
-                        <select id="category" name="category" required onchange="handleCategoryChange()">
-                            <option value="">-- Select Category --</option>
-                            <option value="aluminium">Aluminium Scaffolding</option>
-                            <option value="h-frames">H Frames</option>
-                            <option value="cuplock">Cuplock</option>
-                            <option value="accessories">Accessories</option>
-                        </select>
-                    </div>
-
-                    <!-- Cuplock Type (only shown for Cuplock category) -->
-                    <div class="form-group" id="cuplockTypeGroup" style="display: none;">
-                        <label for="cuplock_type">Cuplock Type *</label>
-                        <select id="cuplock_type" name="cuplock_type" onchange="handleCuplockTypeChange()">
-                            <option value="">-- Select Type --</option>
-                            <option value="ledger">Ledger</option>
-                            <option value="vertical">Vertical</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="weight_per_unit">Weight per Unit (kg)</label>
-                    <input type="number" id="weight_per_unit" name="weight_per_unit" step="0.01" value="0">
-                </div>
-
-                <!-- Cuplock Ledger Sizes Section -->
-                <div id="cuplockLedgerSizes" style="display: none;">
-                    <h3>Ledger Sizes & Pricing</h3>
-                    <div class="info-box">
-                        <p>Add different sizes for this Cuplock Ledger product with individual pricing.</p>
-                    </div>
+    
+    <h1 class="page-title">Accessories Pricing Management</h1>
+    <p style="color: #d4af37; margin-bottom: 2rem;">Set buy and rent prices for all Accessory products</p>
+    
+    <div id="accessoriesPricingForm">
+        {% if accessory_products %}
+        <!-- Grid Container for Products -->
+        <div class="products-grid-wrapper">
+            <h2 class="section-header">All Accessories</h2>
+            <div class="products-grid">
+                {% for product in accessory_products %}
+                <div class="product-card">
+                    <h3 class="product-name">{{ product.name }}</h3>
+                    <p class="product-desc">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
                     
-                    <div id="sizesContainer">
-                        <!-- Sizes will be dynamically added here -->
-                    </div>
-                    
-                    <button type="button" id="addSizeBtn" class="btn btn-secondary btn-add-size">+ Add Another Size</button>
-                </div>
-
-                <!-- Standard Pricing Section (for non-ledger products) -->
-                <div id="standardPricing">
-                    <h3>Pricing Information</h3>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="price">Buy Price (₹) *</label>
-                            <input type="number" id="price" name="price" step="0.01" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="rent_price">Rent Price (₹/day)</label>
-                            <input type="number" id="rent_price" name="rent_price" step="0.01" value="0">
-                        </div>
-                    </div>
-
                     <div class="form-group">
-                        <label for="deposit_amount">Deposit Amount (₹)</label>
-                        <input type="number" id="deposit_amount" name="deposit_amount" step="0.01" value="0">
+                        <label for="buy_{{ product.id }}">Buy Price (₹)</label>
+                        <input type="number" id="buy_{{ product.id }}" step="0.01" placeholder="₹50" class="pricing-input" data-product-id="{{ product.id }}" data-type="buy">
+                    </div>
+                    <div class="form-group">
+                        <label for="rent_{{ product.id }}">Rent Price (₹/month)</label>
+                        <input type="number" id="rent_{{ product.id }}" step="0.01" placeholder="₹10" class="pricing-input" data-product-id="{{ product.id }}" data-type="rent">
+                    </div>
+                    <div class="form-group">
+                        <label for="deposit_{{ product.id }}">Deposit (₹)</label>
+                        <input type="number" id="deposit_{{ product.id }}" step="0.01" placeholder="₹20" class="pricing-input" data-product-id="{{ product.id }}" data-type="deposit">
                     </div>
                 </div>
-
-                <h3>Product Images</h3>
-
-                <div class="form-group">
-                    <label for="product_images">Upload Images</label>
-                    <input type="file" id="product_images" name="product_images" multiple accept="image/*">
-                    <small>You can upload multiple images. Supported formats: JPG, PNG, GIF, WebP</small>
-                </div>
-
-                <!-- Info Box for Cuplock Products -->
-                <div id="cuplockInfo" style="display: none; background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #2196F3;">
-                    <h4 style="margin-top: 0; color: #1976D2;">ℹ️ Cuplock Product Setup</h4>
-                    <p style="margin-bottom: 8px;"><strong>After creating this product, you will need to:</strong></p>
-                    <ul style="margin: 0;">
-                        <li><strong>Ledger:</strong> Add sizes (0.9m, 1m, 1.2m, etc.) with individual pricing</li>
-                        <li><strong>Vertical:</strong> Add sizes and cup configurations with images</li>
-                    </ul>
-                    <p style="margin-top: 10px; margin-bottom: 0; font-size: 14px; color: #666;">
-                        The prices you set above will be used as base/reference prices. 
-                        You can configure detailed pricing in the edit page after creation.
-                    </p>
-                </div>
-
-                <div class="button-group">
-                    <button type="submit" class="btn btn-primary btn-save-product">➕ Create Product</button>
-                    <a href="{{ url_for('admin_scaffoldings') }}" class="btn btn-secondary">Cancel</a>
-                </div>
+                {% endfor %}
             </div>
-        </form>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p class="empty-text">No accessory products found. Add products first from Admin Panel.</p>
+        </div>
+        {% endif %}
+        
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="btn-primary save-btn" onclick="saveAllPricing()">💾 Save All Accessories Pricing</button>
+            <button class="btn-secondary cancel-btn" onclick="window.location.href='{{ url_for('admin_scaffoldings') }}'">Cancel</button>
+        </div>
     </div>
 </div>
 
 <script>
-    function setStandardPricingRequired(isRequired) {
-    const price = document.getElementById('price');
-    const rent = document.getElementById('rent_price');
-    const deposit = document.getElementById('deposit_amount');
+const pricingData = {{ pricing_data|tojson|safe }};
 
-    if (isRequired) {
-        price.setAttribute('required', 'required');
-    } else {
-        price.removeAttribute('required');
-        price.value = '';
-        rent.value = '';
-        deposit.value = '';
-    }
-}
-
-// Track the number of size options added. This is a global variable.
-let sizeCount = 0;
-
-// This function runs when the main category dropdown changes.
-function handleCategoryChange() {
-    const category = document.getElementById('category').value;
-    const cuplockTypeGroup = document.getElementById('cuplockTypeGroup');
-    const cuplockTypeSelect = document.getElementById('cuplock_type');
-    const cuplockInfo = document.getElementById('cuplockInfo');
-    const cuplockLedgerSizes = document.getElementById('cuplockLedgerSizes');
-    const standardPricing = document.getElementById('standardPricing');
+// Load existing pricing data
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('Loading Accessories pricing data:', pricingData);
     
-    if (category === 'cuplock') {
-        // Show cuplock type selector and info box
-        cuplockTypeGroup.style.display = 'block';
-        cuplockTypeSelect.required = true;
-        cuplockInfo.style.display = 'block';
-        // IMPORTANT: We do NOT hide/show pricing sections here. 
-        // handleCuplockTypeChange() will do that based on the cuplock type.
-    }else {
-    cuplockTypeGroup.style.display = 'none';
-    cuplockTypeSelect.required = false;
-    cuplockTypeSelect.value = '';
-    cuplockInfo.style.display = 'none';
-    cuplockLedgerSizes.style.display = 'none';
-    standardPricing.style.display = 'block';
-
-    // 🔥 REQUIRED for non-cuplock products
-    setStandardPricingRequired(true);
-}
-
-// This function runs when the cuplock type dropdown changes.
-function handleCuplockTypeChange() {
-    const cuplockType = document.getElementById('cuplock_type').value;
-    const cuplockLedgerSizes = document.getElementById('cuplockLedgerSizes');
-    const standardPricing = document.getElementById('standardPricing');
-
-    if (cuplockType === 'ledger') {
-        // Ledger → sizes only
-        cuplockLedgerSizes.style.display = 'block';
-        standardPricing.style.display = 'none';
-
-        // 🔥 FIX: disable required on hidden pricing
-        setStandardPricingRequired(false);
-
-        if (sizeCount === 0) {
-            addSizeOption();
+    if (pricingData && Object.keys(pricingData).length > 0) {
+        for (const productId in pricingData) {
+            const productPricing = pricingData[productId];
+            
+            if (productPricing && typeof productPricing === 'object') {
+                const buyInputId = `buy_${productId}`;
+                const rentInputId = `rent_${productId}`;
+                
+                const buyInput = document.getElementById(buyInputId);
+                const rentInput = document.getElementById(rentInputId);
+                const depositInputId = `deposit_${productId}`;
+                const depositInput = document.getElementById(depositInputId);
+                
+                if (buyInput && productPricing.buy) {
+                    buyInput.value = productPricing.buy;
+                }
+                if (rentInput && productPricing.rent) {
+                    rentInput.value = productPricing.rent;
+                }
+                if (depositInput && productPricing.deposit) {
+                    depositInput.value = productPricing.deposit;
+                }
+            }
         }
-    } else {
-        // Non-ledger → normal pricing
-        cuplockLedgerSizes.style.display = 'none';
-        standardPricing.style.display = 'block';
-
-        // 🔥 FIX: enable required back
-        setStandardPricingRequired(true);
     }
-}
-
-// This function adds a new size option to the form.
-// This function adds a new size option to the form.
-function addSizeOption() {
-    sizeCount++; 
-    const sizesContainer = document.getElementById('sizesContainer');
-    
-    const sizeDiv = document.createElement('div');
-    sizeDiv.className = 'size-option';
-    sizeDiv.id = `size-${sizeCount}`;
-    
-    // Use template literals to build the HTML for the new size
-    sizeDiv.innerHTML = `
-        <div class="size-header">
-            <h4>Size Option ${sizeCount}</h4>
-            ${sizeCount > 1 ? `<button type="button" class="btn btn-remove" onclick="removeSizeOption(${sizeCount})">Remove</button>` : ''}
-        </div>
-        <div class="form-row">
-            <div class="form-group">
-                <label for="size_name_${sizeCount}">Size Name *</label>
-                <!-- ADDED maxlength="50" TO THIS LINE BELOW -->
-                <input type="text" id="size_name_${sizeCount}" name="size_name_${sizeCount}" placeholder="e.g., 0.9m, 1m, 1.2m" required maxlength="50">
-            </div>
-            <div class="form-group">
-                <label for="size_price_${sizeCount}">Buy Price (₹) *</label>
-                <input type="number" id="size_price_${sizeCount}" name="size_price_${sizeCount}" step="0.01" required>
-            </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group">
-                <label for="size_rent_price_${sizeCount}">Rent Price (₹/day)</label>
-                <input type="number" id="size_rent_price_${sizeCount}" name="size_rent_price_${sizeCount}" step="0.01" value="0">
-            </div>
-            <div class="form-group">
-                <label for="size_deposit_${sizeCount}">Deposit Amount (₹)</label>
-                <input type="number" id="size_deposit_${sizeCount}" name="size_deposit_${sizeCount}" step="0.01" value="0">
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="size_weight_${sizeCount}">Weight (kg)</label>
-            <input type="number" id="size_weight_${sizeCount}" name="size_weight_${sizeCount}" step="0.01" value="0">
-        </div>
-    `;
-    
-    sizesContainer.appendChild(sizeDiv);
-}
-
-// This function removes a size option.
-function removeSizeOption(id) {
-    const sizeDiv = document.getElementById(`size-${id}`);
-    if (sizeDiv) {
-        sizeDiv.remove();
-        // Optional: Decrement the counter if you want, but it's not strictly necessary
-        // sizeCount--; 
-    }
-}
-
-// This is a key validation function that runs on form submission.
-document.getElementById('productForm').addEventListener('submit', function(e) {
-    const category = document.getElementById('category').value;
-    const cuplockType = document.getElementById('cuplock_type').value;
-    
-    // IMPORTANT: Check if category is cuplock but no type is selected
-    if (category === 'cuplock' && !cuplockType) {
-        e.preventDefault(); // Stop the form from submitting
-        alert('⚠️ Please select a Cuplock Type (Ledger or Vertical)');
-        document.getElementById('cuplock_type').focus();
-        return false; // Explicitly return false
-    }
-    
-    // IMPORTANT: Check if category is cuplock ledger but no sizes were added
-    if (category === 'cuplock' && cuplockType === 'ledger' && sizeCount === 0) {
-        e.preventDefault(); // Stop the form from submitting
-        alert('⚠️ Please add at least one size option for the Cuplock Ledger product');
-        return false; // Explicitly return false
-    }
-    
-    // If all checks pass, the form will submit normally.
-    console.log("Form validation passed. Submitting...");
-    return true;
 });
 
-// Event listener for the add size button
-document.getElementById('addSizeBtn').addEventListener('click', function() {
-    addSizeOption();
-});
+function saveAllPricing() {
+    const allPricing = {};
+    const allInputs = document.querySelectorAll('.pricing-input');
 
-// Initialize the form state on page load
-document.addEventListener('DOMContentLoaded', function() {
-    handleCategoryChange();
-});
+    allInputs.forEach(input => {
+        const productId = input.dataset.productId;
+        const priceType = input.dataset.type; // 'buy', 'rent', or 'deposit'
+        const value = parseFloat(input.value);
+
+        if (!productId || !priceType) {
+            return;
+        }
+
+        if (!isNaN(value) && value > 0) {
+            if (!allPricing[productId]) {
+                allPricing[productId] = {};
+            }
+            allPricing[productId][priceType] = value;
+        }
+    });
+
+    if (Object.keys(allPricing).length === 0) {
+        alert('Please enter at least one price (buy, rent, or deposit) for at least one product!');
+        return;
+    }
+
+    console.log('Saving Accessories pricing:', allPricing);
+
+    fetch('/admin_update_accessories_pricing', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            pricing_data: allPricing
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Accessories pricing updated successfully!');
+            window.location.href = '{{ url_for("admin_scaffoldings") }}';
+        } else {
+            alert('Error: ' + (data.message || 'Failed to update pricing'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error updating Accessories pricing');
+    });
+}
 </script>
 
 <style>
-    /* ===== GLOBAL RESETS ===== */
+    /* ===== GLOBAL LAYOUT FIXES ===== */
     * {
         box-sizing: border-box;
     }
 
-    .admin-container {
-        max-width: 1000px;
+    .glass-container {
+        padding: 2rem;
+        max-width: 1400px;
         margin: 0 auto;
-        padding: 20px;
     }
 
-    .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 30px;
-        flex-wrap: wrap; /* Allow wrapping if needed */
-        gap: 15px;
+    /* Top Header Area */
+    .top-header-wrapper {
+        margin-bottom: 1.5rem;
     }
 
-    .form-container {
-        background: white;
-        padding: 30px;
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    .form-section h3 {
+    /* Typography */
+    .page-title {
+        font-size: 2rem;
         color: #333;
-        border-bottom: 2px solid #e0e0e0;
-        padding-bottom: 10px;
-        margin-top: 30px;
-        margin-bottom: 20px;
-        font-size: 1.4rem;
+        margin-bottom: 0.5rem;
     }
 
-    .form-section h3:first-child {
-        margin-top: 0;
+    .section-header {
+        color: #ffa500;
+        margin-bottom: 1.5rem;
+        font-size: 1.5rem;
     }
 
+    /* Product Grid Wrapper */
+    .products-grid-wrapper {
+        background: rgba(30, 58, 138, 0.2);
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Desktop: Grid */
+        gap: 1.5rem;
+    }
+
+    /* Product Cards */
+    .product-card {
+        background: rgba(212, 175, 55, 0.05);
+        padding: 1.5rem;
+        border-radius: 8px;
+        border: 2px solid rgba(212, 175, 55, 0.2);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-name {
+        color: #d4af37;
+        margin-bottom: 1rem;
+        font-size: 1.25rem;
+    }
+
+    .product-desc {
+        color: #a0a0a0;
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+        min-height: 3em; /* Ensure uniform height */
+    }
+
+    /* Form Inputs */
     .form-group {
-        margin-bottom: 20px;
+        margin-bottom: 1.2rem;
+        width: 100%;
     }
 
     .form-group label {
@@ -345,68 +218,59 @@ document.addEventListener('DOMContentLoaded', function() {
         font-weight: 600;
         margin-bottom: 8px;
         color: #555;
+        font-size: 0.95rem;
     }
 
-    /* Input Styling - Optimized for Touch */
-    .form-group input[type="text"],
-    .form-group input[type="number"],
-    .form-group textarea,
-    .form-group select {
+    .pricing-input {
         width: 100%;
-        padding: 12px; /* Larger padding for touch targets */
-        border: 2px solid #ddd;
-        border-radius: 5px;
-        font-size: 16px; /* 16px prevents iOS zoom on focus */
-        background-color: #fff;
+        padding: 12px 15px;
+        border: 2px solid #ccc;
+        border-radius: 6px;
+        font-size: 16px; /* Prevents iOS auto-zoom */
         transition: border-color 0.3s;
+        font-family: inherit;
     }
 
-    .form-group input:focus,
-    .form-group textarea:focus,
-    .form-group select:focus {
-        border-color: #667eea;
+    .pricing-input:focus {
+        border-color: #ffa500;
         outline: none;
+        background-color: #fff;
     }
 
-    .form-group input[type="file"] {
-        width: 100%;
-        padding: 10px;
-        border: 2px dashed #ddd;
-        border-radius: 5px;
-        background-color: #f9f9f9;
+    /* Empty State */
+    .empty-state {
+        background: rgba(212, 175, 55, 0.1);
+        padding: 2rem;
+        border-radius: 10px;
+        text-align: center;
     }
 
-    .form-group small {
-        display: block;
-        margin-top: 5px;
-        color: #666;
-        font-size: 13px;
+    .empty-text {
+        color: #d4af37;
+        font-size: 1.1rem;
+        margin: 0;
     }
 
-    /* Form Grid Layouts */
-    .form-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-    }
-
-    .button-group {
+    /* Action Buttons Area */
+    .action-buttons {
         display: flex;
-        gap: 15px;
-        margin-top: 30px;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
     }
 
-    /* Button Styling */
-    .btn {
-        padding: 12px 30px;
+    .btn-primary, .btn-secondary {
+        padding: 1rem 3rem;
         border: none;
         border-radius: 5px;
-        font-size: 16px; /* Larger font for mobile */
+        font-size: 1rem;
         font-weight: 600;
         cursor: pointer;
         text-decoration: none;
-        display: inline-block;
-        text-align: center;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s, opacity 0.2s;
     }
 
     .btn-primary {
@@ -419,496 +283,56 @@ document.addEventListener('DOMContentLoaded', function() {
         color: white;
     }
 
-    .btn-remove {
-        background: #dc3545;
-        color: white;
-        padding: 8px 15px;
-        font-size: 14px;
-    }
-
-    .btn:hover {
+    .btn-primary:hover, .btn-secondary:hover {
         opacity: 0.9;
         transform: translateY(-2px);
-        transition: all 0.3s ease;
     }
 
-    /* Dynamic Size Options */
-    .size-option {
-        background: #f9f9f9;
-        padding: 20px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        border: 1px solid #e0e0e0;
-    }
-
-    .size-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 15px;
-        gap: 10px;
-    }
-
-    .size-header h4 {
-        margin: 0;
-        color: #555;
-        font-size: 1.1rem;
-    }
-
-    .info-box {
-        background: #f0f7ff;
-        padding: 15px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        border-left: 4px solid #2196F3;
-    }
-
-    .info-box p {
-        margin: 0;
-        color: #555;
-    }
-
-    /* Alerts */
-    .alert {
-        padding: 15px;
-        margin-bottom: 20px;
-        border: 1px solid transparent;
-        border-radius: 4px;
-    }
-
-    .alert-success { color: #155724; background-color: #d4edda; border-color: #c3e6cb; }
-    .alert-error { color: #721c24; background-color: #f8d7da; border-color: #f5c6cb; }
-    .alert-warning { color: #856404; background-color: #fff3cd; border-color: #ffeaa7; }
-
-    /* ===== LARGE DESKTOP SCREENS (1200px and up) ===== */
-    @media (min-width: 1200px) {
-        .admin-container {
-            max-width: 1200px;
-            padding: 30px;
+    /* ===== MOBILE RESPONSIVE FIXES ===== */
+    @media (max-width: 768px) {
+        /* Adjust Container Padding */
+        .glass-container {
+            padding: 1rem;
         }
-        
-        .form-container {
-            padding: 40px;
-        }
-        
-        .form-section h3 {
+
+        /* Typography Adjustments */
+        .page-title {
             font-size: 1.5rem;
-        }
-    }
-
-    /* ===== DESKTOP SCREENS (992px to 1199px) ===== */
-    @media (min-width: 992px) and (max-width: 1199px) {
-        .admin-container {
-            max-width: 960px;
-            padding: 25px;
+            text-align: center;
         }
         
-        .form-container {
-            padding: 35px;
-        }
-    }
-
-    /* ===== TABLET LANDSCAPE (768px to 991px) ===== */
-    @media (min-width: 768px) and (max-width: 991px) {
-        .admin-container {
-            padding: 20px;
-        }
-        
-        .form-container {
-            padding: 25px;
-        }
-        
-        .page-header {
-            flex-direction: row;
-            align-items: center;
-        }
-        
-        .page-header h1 {
-            font-size: 1.8rem;
-        }
-        
-        .form-row {
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        
-        .button-group {
-            flex-direction: row;
-            justify-content: center;
-        }
-        
-        .btn {
-            padding: 12px 25px;
-        }
-    }
-
-    /* ===== TABLET PORTRAIT (600px to 767px) ===== */
-    @media (min-width: 600px) and (max-width: 767px) {
-        .admin-container {
-            padding: 15px;
-        }
-
-        .page-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 15px;
-        }
-
-        .page-header h1 {
-            font-size: 1.6rem;
-            margin-bottom: 5px;
-        }
-
-        .form-container {
-            padding: 20px;
-        }
-
-        .form-row {
-            grid-template-columns: 1fr;
-            gap: 15px;
-        }
-
-        .button-group {
-            flex-direction: column;
-            width: 100%;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 14px 20px;
-        }
-
-        .size-header {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        
-        .btn-remove {
-            width: auto;
-            margin-top: 10px;
-        }
-
-        .btn-add-size {
-            width: 100%;
-        }
-
-        .info-box {
-            padding: 12px;
-        }
-    }
-
-    /* ===== LARGE PHONES (480px to 599px) ===== */
-    @media (min-width: 480px) and (max-width: 599px) {
-        .admin-container {
-            padding: 12px;
-        }
-
-        .page-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 12px;
-        }
-
-        .page-header h1 {
-            font-size: 1.5rem;
-            margin-bottom: 5px;
-        }
-
-        .form-container {
-            padding: 18px;
-        }
-
-        .form-section h3 {
+        .section-header {
             font-size: 1.3rem;
-            margin-top: 25px;
-            margin-bottom: 18px;
+            text-align: center;
         }
 
-        .form-group {
-            margin-bottom: 18px;
+        /* Fix Grid: Force Single Column on Mobile */
+        .products-grid {
+            grid-template-columns: 1fr !important; /* Override inline style */
+            gap: 1rem !important;
         }
 
-        .form-group label {
-            margin-bottom: 6px;
-            font-size: 14px;
+        /* Reduce Card Padding */
+        .product-card {
+            padding: 1.2rem !important; /* Override inline style */
         }
 
-        .form-row {
-            grid-template-columns: 1fr;
-            gap: 15px;
+        /* Fix Inputs for Touch */
+        .pricing-input {
+            padding: 14px !important; /* Larger touch target */
+            font-size: 16px !important; /* Prevent zoom */
         }
 
-        .button-group {
-            flex-direction: column;
-            width: 100%;
-            margin-top: 25px;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 14px 20px;
-            font-size: 16px;
-        }
-
-        .size-option {
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-
-        .size-header {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        
-        .btn-remove {
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        .btn-add-size {
+        /* Stack Action Buttons */
+        .action-buttons {
+            flex-direction: column !important; /* Stack vertically */
             width: 100%;
         }
 
-        .info-box {
-            padding: 12px;
-        }
-
-        #cuplockInfo {
-            padding: 12px;
-        }
-
-        #cuplockInfo h4 {
-            font-size: 1rem;
-        }
-
-        #cuplockInfo p {
-            font-size: 14px;
-        }
-
-        #cuplockInfo ul {
-            padding-left: 20px;
-        }
-
-        #cuplockInfo ul li {
-            font-size: 14px;
-        }
-    }
-
-    /* ===== MOBILE PHONES (479px and below) ===== */
-    @media (max-width: 479px) {
-        .admin-container {
-            padding: 10px;
-        }
-
-        .page-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 10px;
-        }
-
-        .page-header h1 {
-            font-size: 1.4rem;
-            margin-bottom: 5px;
-        }
-
-        .form-container {
-            padding: 15px;
-        }
-
-        .form-section h3 {
-            font-size: 1.2rem;
-            margin-top: 20px;
-            margin-bottom: 15px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-
-        .form-group input[type="text"],
-        .form-group input[type="number"],
-        .form-group textarea,
-        .form-group select {
-            padding: 12px;
-            font-size: 16px;
-        }
-
-        .form-row {
-            grid-template-columns: 1fr;
-            gap: 15px;
-        }
-
-        .button-group {
-            flex-direction: column;
-            width: 100%;
-            margin-top: 20px;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 14px 20px;
-            font-size: 16px;
-        }
-
-        .size-option {
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-
-        .size-header {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        
-        .btn-remove {
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        .btn-add-size {
-            width: 100%;
-        }
-
-        .info-box {
-            padding: 12px;
-        }
-
-        #cuplockInfo {
-            padding: 12px;
-        }
-
-        #cuplockInfo h4 {
-            font-size: 1rem;
-        }
-
-        #cuplockInfo p {
-            font-size: 14px;
-        }
-
-        #cuplockInfo ul {
-            padding-left: 20px;
-        }
-
-        #cuplockInfo ul li {
-            font-size: 14px;
-        }
-    }
-
-    /* ===== EXTRA SMALL SCREENS (320px to 379px) ===== */
-    @media (max-width: 379px) {
-        .admin-container {
-            padding: 8px;
-        }
-
-        .page-header h1 {
-            font-size: 1.3rem;
-        }
-
-        .form-container {
-            padding: 12px;
-        }
-
-        .form-section h3 {
-            font-size: 1.1rem;
-        }
-
-        .form-group input[type="text"],
-        .form-group input[type="number"],
-        .form-group textarea,
-        .form-group select {
-            padding: 12px;
-        }
-
-        .btn {
-            padding: 14px 15px;
-            font-size: 15px;
-        }
-
-        .size-option {
-            padding: 12px;
-        }
-
-        .size-header h4 {
-            font-size: 1rem;
-        }
-    }
-
-    /* ===== IPAD PRO SPECIFIC FIXES ===== */
-    @media only screen 
-      and (min-device-width: 1024px) 
-      and (max-device-width: 1366px) 
-      and (-webkit-min-device-pixel-ratio: 2) {
-        .admin-container {
-            padding: 25px;
-        }
-        
-        .form-container {
-            padding: 30px;
-        }
-        
-        .form-row {
-            gap: 18px;
-        }
-    }
-
-    /* ===== IPAD SPECIFIC FIXES ===== */
-    @media only screen 
-      and (min-device-width: 768px) 
-      and (max-device-width: 1023px) 
-      and (-webkit-min-device-pixel-ratio: 2) {
-        .admin-container {
-            padding: 20px;
-        }
-        
-        .form-container {
-            padding: 25px;
-        }
-        
-        .form-row {
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-    }
-
-    /* ===== SURFACE DUO AND FOLDABLES ===== */
-    @media screen and (max-width: 540px) and (orientation: landscape) {
-        .admin-container {
-            padding: 10px;
-        }
-        
-        .page-header {
-            flex-direction: row;
-            align-items: center;
-        }
-        
-        .page-header h1 {
-            font-size: 1.3rem;
-        }
-        
-        .form-container {
-            padding: 15px;
-        }
-        
-        .form-row {
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-        
-        .button-group {
-            flex-direction: row;
-            width: 100%;
-        }
-        
-        .btn {
-            width: 48%;
-            padding: 12px 15px;
+        .btn-primary, .btn-secondary {
+            width: 100% !important; /* Full width buttons */
+            padding: 14px 20px; /* Taller buttons */
         }
     }
 </style>
-
 {% endblock %}

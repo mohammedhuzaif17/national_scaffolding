@@ -120,86 +120,6 @@
         padding-bottom: 80px; /* Space for scrolling past navbar */
     }
 
-    /* ===== NAVIGATION FIX FOR MOBILE ===== */
-    /* This targets the navigation in base.html */
-    .navbar, .nav, .navigation, header {
-        position: relative;
-    }
-    
-    /* Hamburger menu icon */
-    .nav-toggle {
-        display: none;
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        cursor: pointer;
-        z-index: 1000;
-        background: none;
-        border: none;
-        padding: 5px;
-    }
-    
-    .nav-toggle span {
-        display: block;
-        width: 25px;
-        height: 3px;
-        background-color: #002855;
-        margin: 5px 0;
-        transition: 0.3s;
-    }
-    
-    /* Hide the regular navigation on mobile and show hamburger */
-    @media (max-width: 992px) {
-        .nav-toggle {
-            display: block;
-        }
-        
-        .navbar .nav-links, 
-        .navbar .menu, 
-        .nav ul, 
-        .navigation ul,
-        header nav ul {
-            display: none;
-            position: absolute;
-            top: 60px;
-            left: 0;
-            width: 100%;
-            background-color: white;
-            flex-direction: column;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            z-index: 999;
-        }
-        
-        .navbar .nav-links.active, 
-        .navbar .menu.active, 
-        .nav ul.active,
-        .navigation ul.active,
-        header nav ul.active {
-            display: flex;
-        }
-        
-        .navbar .nav-links li, 
-        .navbar .menu li, 
-        .nav ul li,
-        .navigation ul li,
-        header nav ul li {
-            margin: 0;
-            width: 100%;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .navbar .nav-links a, 
-        .navbar .menu a, 
-        .nav ul a,
-        .navigation ul a,
-        header nav ul a {
-            display: block;
-            padding: 15px 20px;
-            color: #002855;
-            text-decoration: none;
-        }
-    }
-    
     /* ===== MAIN CONTAINER ===== */
     .cuplock-shop-container {
         width: 100%;
@@ -414,528 +334,88 @@
         font-style: italic;
     }
 
-    /* ===== LARGE DESKTOP SCREENS (1200px and up) ===== */
-    @media (min-width: 1200px) {
+    /* ===== MOBILE RESPONSIVE DESIGN ===== */
+    @media (max-width: 768px) {
+        /* 1. Container Adjustments */
         .cuplock-shop-container {
-            max-width: 1400px;
-            padding: 2.5rem;
+            width: 100% !important; /* Force full width */
+            max-width: 100% !important;
+            margin: 0 auto;
+            padding: 1rem; /* Less padding on mobile */
         }
-        
-        .shop-header h1 {
-            font-size: 2.8rem;
-        }
-        
-        .section-title {
-            font-size: 2rem;
-        }
-        
-        .products-grid {
-            grid-template-columns: repeat(4, 1fr);
-            gap: 2.5rem;
-        }
-        
-        .product-image {
-            height: 300px;
-        }
-        
-        .product-name {
-            font-size: 1.6rem;
-        }
-        
-        .cta-section {
-            padding: 3.5rem;
-        }
-        
-        .cta-title {
-            font-size: 2rem;
-        }
-    }
 
-    /* ===== DESKTOP SCREENS (992px to 1199px) ===== */
-    @media (min-width: 992px) and (max-width: 1199px) {
-        .cuplock-shop-container {
-            padding: 2rem;
-        }
-        
-        .products-grid {
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
-        }
-        
-        .product-image {
-            height: 280px;
-        }
-    }
-
-    /* ===== TABLET LANDSCAPE (768px to 991px) ===== */
-    @media (min-width: 768px) and (max-width: 991px) {
-        .cuplock-shop-container {
-            padding: 1.8rem;
-        }
-        
-        .shop-header {
-            margin-bottom: 2.5rem;
-            padding-bottom: 1.5rem;
-        }
-        
-        .shop-header h1 {
-            font-size: 2.2rem;
-        }
-        
-        .section-header-bg {
-            padding: 1.8rem;
-            margin-bottom: 1.8rem;
-        }
-        
-        .section-title {
-            font-size: 1.6rem;
-        }
-        
-        .products-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1.8rem;
-        }
-        
-        .product-image {
-            height: 260px;
-        }
-        
-        .product-info {
-            padding: 1.8rem;
-        }
-        
-        .product-name {
-            font-size: 1.4rem;
-        }
-        
-        .description {
-            font-size: 0.95rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .cta-section {
-            padding: 2.5rem;
-        }
-        
-        .cta-title {
-            font-size: 1.6rem;
-        }
-    }
-
-    /* ===== TABLET PORTRAIT (600px to 767px) ===== */
-    @media (min-width: 600px) and (max-width: 767px) {
-        .cuplock-shop-container {
-            padding: 1.5rem;
-        }
-        
+        /* 2. Typography Adjustments */
         .shop-header {
             margin-bottom: 2rem;
-            padding-bottom: 1.2rem;
-        }
-        
-        .shop-header h1 {
-            font-size: 2rem;
-        }
-        
-        .subtitle {
-            font-size: 1rem;
-        }
-        
-        .section-header-bg {
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .section-title {
-            font-size: 1.5rem;
-        }
-        
-        .section-desc {
-            font-size: 0.95rem;
-        }
-        
-        .products-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1.5rem;
-        }
-        
-        .product-image {
-            height: 240px;
-        }
-        
-        .product-info {
-            padding: 1.5rem;
-        }
-        
-        .product-name {
-            font-size: 1.3rem;
-            margin-bottom: 0.8rem;
-        }
-        
-        .description {
-            font-size: 0.9rem;
-            margin-bottom: 1.2rem;
-        }
-        
-        .btn-primary {
-            padding: 0.8rem 1.5rem;
-            font-size: 1rem;
-        }
-        
-        .cta-section {
-            padding: 2rem;
-        }
-        
-        .cta-title {
-            font-size: 1.5rem;
-        }
-        
-        .cta-text {
-            font-size: 1rem;
-        }
-    }
-
-    /* ===== LARGE PHONES (480px to 599px) ===== */
-    @media (min-width: 480px) and (max-width: 599px) {
-        .cuplock-shop-container {
-            padding: 1.2rem;
-        }
-        
-        .shop-header {
-            margin-bottom: 1.8rem;
             padding-bottom: 1rem;
         }
-        
-        .shop-header h1 {
-            font-size: 1.8rem;
-        }
-        
-        .section-header-bg {
-            padding: 1.3rem;
-            margin-bottom: 1.3rem;
-        }
-        
-        .section-title {
-            font-size: 1.4rem;
-        }
-        
-        .products-grid {
-            grid-template-columns: 1fr;
-            gap: 1.3rem;
-        }
-        
-        .product-image {
-            height: 220px;
-        }
-        
-        .product-info {
-            padding: 1.3rem;
-        }
-        
-        .product-name {
-            font-size: 1.2rem;
-            margin-bottom: 0.7rem;
-        }
-        
-        .description {
-            font-size: 0.9rem;
-            margin-bottom: 1.2rem;
-        }
-        
-        .btn-primary {
-            padding: 0.8rem 1.2rem;
-            font-size: 0.95rem;
-        }
-        
-        .cta-section {
-            padding: 1.8rem;
-        }
-        
-        .cta-title {
-            font-size: 1.4rem;
-        }
-        
-        .btn-large {
-            padding: 0.9rem 2rem;
-            font-size: 1rem;
-        }
-    }
 
-    /* ===== MOBILE PHONES (479px and below) ===== */
-    @media (max-width: 479px) {
-        .cuplock-shop-container {
-            padding: 1rem;
-        }
-        
-        .shop-header {
-            margin-bottom: 1.5rem;
-            padding-bottom: 0.8rem;
-        }
-        
         .shop-header h1 {
-            font-size: 1.6rem;
+            font-size: 2rem; /* Smaller title */
         }
-        
-        .subtitle {
-            font-size: 0.9rem;
-        }
-        
+
         .section-header-bg {
-            padding: 1.2rem;
-            margin-bottom: 1.2rem;
+            padding: 1.5rem; /* Tighter padding */
         }
-        
+
         .section-title {
-            font-size: 1.3rem;
+            font-size: 1.4rem; /* Smaller heading */
         }
-        
-        .section-desc {
-            font-size: 0.9rem;
-        }
-        
+
+        /* 3. Grid Layout (CRITICAL FIX) */
         .products-grid {
-            grid-template-columns: 1fr;
-            gap: 1.2rem;
+            display: grid !important;
+            grid-template-columns: 1fr !important; /* Stack items vertically on mobile */
+            gap: 1rem; /* Smaller gaps */
+            margin-bottom: 1rem;
         }
-        
+
+        /* 4. Product Card Adjustments */
         .product-card {
-            border-radius: 8px;
+            padding: 1.5rem; /* Reduce padding */
+            margin-bottom: 0; /* Remove grid gap margin */
         }
-        
+
         .product-image {
-            height: 200px;
+            height: 250px; /* Slightly shorter image on mobile */
         }
-        
-        .product-info {
-            padding: 1.2rem;
-        }
-        
+
         .product-name {
-            font-size: 1.1rem;
-            margin-bottom: 0.6rem;
-        }
-        
-        .description {
-            font-size: 0.85rem;
-            margin-bottom: 1rem;
-            line-height: 1.5;
-        }
-        
-        .btn-primary {
-            padding: 0.8rem 1rem;
-            font-size: 0.9rem;
-        }
-        
-        .cta-section {
-            padding: 1.5rem;
-        }
-        
-        .cta-title {
-            font-size: 1.3rem;
-        }
-        
-        .cta-text {
-            font-size: 0.9rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .btn-large {
-            padding: 0.8rem 1.5rem;
-            font-size: 0.9rem;
-        }
-    }
-
-    /* ===== EXTRA SMALL SCREENS (320px to 379px) ===== */
-    @media (max-width: 379px) {
-        .cuplock-shop-container {
-            padding: 0.8rem;
-        }
-        
-        .shop-header h1 {
-            font-size: 1.4rem;
-        }
-        
-        .section-header-bg {
-            padding: 1rem;
-        }
-        
-        .section-title {
-            font-size: 1.2rem;
-        }
-        
-        .product-image {
-            height: 180px;
-        }
-        
-        .product-info {
-            padding: 1rem;
-        }
-        
-        .product-name {
-            font-size: 1rem;
-        }
-        
-        .description {
-            font-size: 0.8rem;
-        }
-        
-        .btn-primary {
-            padding: 0.7rem 0.8rem;
-            font-size: 0.85rem;
-        }
-        
-        .cta-section {
-            padding: 1.2rem;
-        }
-        
-        .cta-title {
-            font-size: 1.1rem;
-        }
-        
-        .btn-large {
-            padding: 0.7rem 1rem;
-            font-size: 0.85rem;
-        }
-    }
-
-    /* ===== IPAD PRO SPECIFIC FIXES ===== */
-    @media only screen 
-      and (min-device-width: 1024px) 
-      and (max-device-width: 1366px) 
-      and (-webkit-min-device-pixel-ratio: 2) {
-        .cuplock-shop-container {
-            padding: 2rem;
-        }
-        
-        .products-grid {
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.8rem;
-        }
-        
-        .product-image {
-            height: 270px;
-        }
-    }
-
-    /* ===== IPAD SPECIFIC FIXES ===== */
-    @media only screen 
-      and (min-device-width: 768px) 
-      and (max-device-width: 1023px) 
-      and (-webkit-min-device-pixel-ratio: 2) {
-        .cuplock-shop-container {
-            padding: 1.5rem;
-        }
-        
-        .products-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1.5rem;
-        }
-        
-        .product-image {
-            height: 250px;
-        }
-    }
-
-    /* ===== SURFACE DUO AND FOLDABLES ===== */
-    @media screen and (max-width: 540px) and (orientation: landscape) {
-        .cuplock-shop-container {
-            padding: 1rem;
-        }
-        
-        .shop-header {
-            margin-bottom: 1.2rem;
-        }
-        
-        .shop-header h1 {
-            font-size: 1.5rem;
-        }
-        
-        .section-header-bg {
-            padding: 1rem;
-            margin-bottom: 1rem;
-        }
-        
-        .section-title {
-            font-size: 1.2rem;
-        }
-        
-        .products-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-        }
-        
-        .product-image {
-            height: 160px;
-        }
-        
-        .product-info {
-            padding: 1rem;
-        }
-        
-        .product-name {
-            font-size: 1rem;
+            font-size: 1.25rem; /* Smaller text */
             margin-bottom: 0.5rem;
         }
-        
+
         .description {
-            font-size: 0.8rem;
-            margin-bottom: 0.8rem;
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
         }
-        
-        .btn-primary {
-            padding: 0.6rem 0.8rem;
-            font-size: 0.8rem;
+
+        /* 5. Button Adjustments */
+        .btn, .btn-primary, .btn-success {
+            width: 100% !important; /* Force full width for easy tapping */
+            padding: 1rem 20px; /* Taller buttons */
+            font-size: 1rem;
+            justify-content: center;
         }
-        
+
+        .btn-large {
+            width: 100% !important; /* Full width CTA button */
+            padding: 1rem 2rem;
+            font-size: 1rem;
+        }
+
+        /* CTA Adjustments */
         .cta-section {
-            padding: 1.2rem;
+            padding: 2rem;
         }
-        
+
         .cta-title {
-            font-size: 1.1rem;
+            font-size: 1.5rem;
+        }
+
+        .cta-text {
+            font-size: 1rem;
         }
     }
 </style>
-
-<script>
-// Add this script to handle the hamburger menu toggle
-document.addEventListener('DOMContentLoaded', function() {
-    // Try to find common navigation elements
-    const navToggle = document.createElement('button');
-    navToggle.className = 'nav-toggle';
-    navToggle.setAttribute('aria-label', 'Toggle navigation');
-    navToggle.innerHTML = '<span></span><span></span><span></span>';
-    
-    // Find the navigation container
-    const navbar = document.querySelector('.navbar') || 
-                   document.querySelector('.nav') || 
-                   document.querySelector('.navigation') || 
-                   document.querySelector('header');
-    
-    if (navbar) {
-        // Add the hamburger menu to the navigation
-        navbar.appendChild(navToggle);
-        
-        // Find the navigation links
-        const navLinks = navbar.querySelector('.nav-links') || 
-                         navbar.querySelector('.menu') || 
-                         navbar.querySelector('ul');
-        
-        if (navLinks) {
-            // Toggle the navigation when the hamburger is clicked
-            navToggle.addEventListener('click', function() {
-                navLinks.classList.toggle('active');
-            });
-            
-            // Close the navigation when a link is clicked
-            const links = navLinks.querySelectorAll('a');
-            links.forEach(link => {
-                link.addEventListener('click', function() {
-                    navLinks.classList.remove('active');
-                });
-            });
-        }
-    }
-});
-</script>
 {% endblock %}

@@ -2,658 +2,333 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>{% block title %}THE NATIONAL SCAFFOLDING{% endblock %}</title>
-    
-    <!-- Font Awesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Base Styles -->
-    <style>
-        /* ===== CSS VARIABLES ===== */
-        :root {
-            --royal-blue: #1e3a8a;
-            --royal-gold: #d4af37;
-            --royal-dark-blue: #0c2340;
-            --royal-purple: #4b0082;
-            --premium-gold: #f0c14b;
-            --white: #ffffff;
-            --black: #000000;
-            --gray: #e9ecef;
-            --light-gray: #f8f9fa;
-            --dark-gray: #333333;
-            --text-color: #000000;
-            --transition: all 0.3s ease;
-            --footer-bg: linear-gradient(135deg, #0c2340, #1a3a6e);
-            --premium-text: #f8f9fa;
-        }
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}National Scaffolding{% endblock %}</title>
 
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- Chart.js (Safe) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- MOBILE RESPONSIVE FIXES -->
+    <style>
         /* ===== GLOBAL RESETS ===== */
         * {
-            margin: 0;
-            padding: 0;
             box-sizing: border-box;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--white);
-            color: var(--text-color);
-            line-height: 1.6;
-            overflow-x: hidden; /* Prevents horizontal scroll on mobile */
-        }
-
-        /* Add smooth scrolling */
-        html {
-            scroll-behavior: smooth;
-        }
-
-        /* Add offset for anchor links to account for fixed navbar */
-        section {
-            scroll-margin-top: 80px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 15px;
-        }
-
-        /* ===== NAVIGATION ===== */
-        .navbar {
-            background-color: var(--white);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 1000;
-        }
-
-        .nav-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
-            position: relative;
-        }
-
-        .nav-logo a {
-            font-size: 1.8rem;
-            font-weight: 700;
-            font-family: 'Playfair Display', serif;
-            color: var(--royal-blue);
-            text-decoration: none;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            position: relative;
-            transition: var(--transition);
-        }
-
-        .nav-logo a::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 3px;
-            background-color: var(--royal-gold);
-            transition: var(--transition);
-        }
-
-        .nav-logo a:hover::after {
-            width: 100%;
-        }
-
-        .nav-menu {
-            display: flex;
-            list-style: none;
+            overflow-x: hidden;
+            font-family: 'Poppins', sans-serif;
+            color: #333;
             margin: 0;
             padding: 0;
         }
 
-        .nav-menu li {
-            margin-left: 30px;
-        }
-
-        .nav-menu a {
-            text-decoration: none;
-            color: var(--black);
-            font-weight: 600;
-            font-size: 1rem;
-            transition: var(--transition);
-            position: relative;
-        }
-
-        .nav-menu a::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 3px;
-            background-color: var(--royal-gold);
-            transition: var(--transition);
-        }
-
-        .nav-menu a:hover {
-            color: var(--royal-blue);
-        }
-
-        .nav-menu a:hover::after {
-            width: 100%;
-        }
-
-        .nav-menu a.active {
-            color: var(--royal-blue);
-        }
-
-        .nav-menu a.active::after {
-            width: 100%;
-        }
-
-        /* Cart icon styling */
-        .nav-menu .cart-icon {
-            font-size: 1.1rem;
-            color: var(--white);
-            background-color: var(--royal-blue);
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: var(--transition);
-        }
-
-        .nav-menu .cart-icon:hover {
-            background-color: var(--royal-gold);
-            color: var(--white);
-            transform: scale(1.1);
-        }
-
-        /* Hamburger menu button */
-        .hamburger {
-            display: none;
-            flex-direction: column;
-            cursor: pointer;
-            z-index: 1001;
-        }
-
-        .hamburger span {
-            width: 25px;
-            height: 3px;
-            background-color: var(--dark-gray);
-            margin: 3px 0;
-            transition: var(--transition);
-        }
-
-        /* Close button for mobile menu */
-        .close-menu {
-            display: none;
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 1.5rem;
-            color: var(--royal-blue);
-            cursor: pointer;
-            z-index: 1002;
-        }
-
-        /* ===== MAIN CONTENT ===== */
-        main {
-            margin-top: 80px; /* Account for fixed navbar */
-            min-height: calc(100vh - 80px);
-        }
-
-        /* ===== FOOTER ===== */
-        footer {
-            background: var(--footer-bg);
-            color: var(--premium-text);
-            padding: 50px 0 20px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        footer::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
-            background: linear-gradient(to right, var(--royal-gold), var(--royal-blue), var(--royal-purple));
-        }
-
-        .footer-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 15px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .footer-main {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-
-        .footer-column {
-            flex: 1;
-            min-width: 250px;
-        }
-
-        .footer-logo h3 {
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-            color: var(--white);
-            font-family: 'Playfair Display', serif;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        .footer-logo p {
-            margin-bottom: 20px;
-            color: var(--premium-text);
-            font-family: 'Source Sans Pro', sans-serif;
-            font-weight: 400;
-            line-height: 1.6;
-        }
-
-        .footer-column .social-links {
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .footer-column .social-links a {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.1);
-            color: var(--white);
-            transition: var(--transition);
-            font-size: 1.1rem;
-        }
-
-        .footer-column .social-links a:hover {
-            background-color: var(--premium-gold);
-            transform: translateY(-3px);
-        }
-
-        .footer-column h4 {
-            font-size: 1.1rem;
-            margin-bottom: 20px;
-            position: relative;
-            padding-bottom: 10px;
-            color: var(--white);
-            font-family: 'Source Sans Pro', sans-serif;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-
-        .footer-column h4::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 40px;
-            height: 2px;
-            background-color: var(--premium-gold);
-        }
-
-        .footer-column ul {
-            list-style: none;
-        }
-
-        .footer-column ul li {
-            margin-bottom: 10px;
-        }
-
-        .footer-column ul li a {
-            color: var(--premium-text);
-            text-decoration: none;
-            transition: var(--transition);
-            font-family: 'Source Sans Pro', sans-serif;
-            font-weight: 400;
-        }
-
-        .footer-column ul li a:hover {
-            color: var(--premium-gold);
-            padding-left: 5px;
-        }
-
-        .footer-bottom {
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 20px 0;
+        /* ===== NAVBAR RESPONSIVENESS ===== */
+        .navbar {
             display: flex;
             justify-content: space-between;
-            flex-wrap: wrap;
-        }
-
-        .footer-bottom-links a {
-            color: var(--premium-text);
-            text-decoration: none;
-            margin-left: 20px;
-            transition: var(--transition);
-            font-family: 'Source Sans Pro', sans-serif;
-        }
-
-        .footer-bottom-links a:hover {
-            color: var(--premium-gold);
-        }
-
-        /* ===== BUTTON STYLES ===== */
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
             align-items: center;
-            justify-content: center;
-            transition: var(--transition);
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky; /* Keeps navbar at top */
+            top: 0;
+            z-index: 1000;
+            padding: 0.75rem 1.5rem;
+            width: 100%;
+            min-height: 80px; /* Ensure consistent height */
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, var(--royal-blue), var(--royal-dark-blue));
-            color: var(--white);
-            box-shadow: 0 4px 10px rgba(30, 58, 138, 0.2);
+        /* Brand Container */
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: color 0.3s;
+            flex: 1; /* Takes up available space */
         }
 
-        .btn-primary:hover {
-            background: linear-gradient(135deg, var(--royal-dark-blue), var(--royal-blue));
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(30, 58, 138, 0.3);
+        .navbar-brand:hover {
+            color: #d4af37;
         }
 
-        .btn-secondary {
-            background-color: #6c757d;
-            color: var(--white);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        /* Logo Styling */
+        .navbar-logo {
+            height: 60px; /* Optimized height */
+            width: auto;
+            max-width: 140px;
+            object-fit: contain;
         }
 
-        .btn-secondary:hover {
-            background-color: #5a6268;
-            transform: translateY(-2px);
+        .brand-text {
+            margin-left: 12px;
+            font-size: 1.3rem;
+            display: none; /* Hidden on very small mobile, shown on desktop/tablet */
         }
 
-        .btn-success {
-            background-color: #28a745;
-            color: var(--white);
+        /* Navigation Links */
+        .navbar-links {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            align-items: center;
+            gap: 1.5rem;
         }
 
-        .btn-success:hover {
-            background-color: #218838;
-            transform: translateY(-2px);
+        .navbar-links li {
+            position: relative;
         }
 
-        .btn-danger {
-            background-color: #dc3545;
-            color: var(--white);
+        .navbar-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            font-size: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: background 0.3s;
+            display: block;
         }
 
-        .btn-danger:hover {
-            background-color: #c82333;
-            transform: translateY(-2px);
+        .navbar-links a:hover {
+            background-color: #f0f0f0;
+            color: #000;
         }
 
-        /* ===== RESPONSIVE STYLES ===== */
-        
-        /* Tablets and below */
+        /* =========================================
+           PERFECT MOBILE MENU BUTTON (HAMBURGER)
+           ========================================= */
+        .mobile-menu-btn {
+            display: none; /* Hidden on desktop by default */
+            flex-direction: column;
+            justify-content: space-between;
+            width: 32px;   /* Nice touch target width */
+            height: 28px;   /* Nice touch target height */
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            z-index: 1001;
+            padding: 0;
+            margin: 0;
+            outline: none;
+        }
+
+        /* The Lines (Bars) */
+        .mobile-menu-btn span {
+            width: 100%;
+            height: 3px;       /* Thickness of bars */
+            background-color: #333;
+            margin: 0;
+            border-radius: 3px;    /* Rounded edges */
+            transition: all 0.3s ease-in-out; /* Smooth animation */
+            display: block;
+            transform-origin: center;
+            
+            /* FIX: Hides the text "Back" so it doesn't break alignment */
+            font-size: 0;
+            line-height: 0;
+            color: transparent;
+        }
+
+        /* ===== ANIMATION TO "X" STATE ===== */
+        /* Top Bar rotates down */
+        .mobile-menu-btn.active span:nth-child(1) {
+            transform: translateY(10px) rotate(45deg); 
+            background-color: #d4af37; /* Gold color when active */
+        }
+
+        /* Middle Bar fades out */
+        .mobile-menu-btn.active span:nth-child(2) {
+            opacity: 0;
+            transform: translateX(-10px);
+        }
+
+        /* Bottom Bar rotates up */
+        .mobile-menu-btn.active span:nth-child(3) {
+            transform: translateY(-10px) rotate(-45deg);
+            background-color: #d4af37;
+        }
+
+        /* ===== MOBILE RESPONSIVE DESIGN ===== */
         @media (max-width: 992px) {
-            .nav-logo a {
-                font-size: 1.5rem;
-            }
-            
-            .nav-menu li {
-                margin-left: 20px;
-            }
-            
-            .footer-main {
-                gap: 20px;
+            .brand-text {
+                display: block;
             }
         }
 
-        /* Mobile Landscape and Portrait */
         @media (max-width: 768px) {
-            .hamburger {
+            .navbar {
+                padding: 1rem;
+                height: 70px;
+            }
+
+            .navbar-brand {
+                margin-bottom: 0;
+                justify-content: flex-start; /* Logo to left */
+            }
+
+            .navbar-logo {
+                height: 45px;
+                max-width: 110px;
+            }
+
+            .brand-text {
+                font-size: 1rem;
+                margin-left: 10px;
+            }
+
+            /* Show Hamburger Button */
+            .mobile-menu-btn {
                 display: flex;
             }
-            
-            .close-menu {
-                display: block;
-            }
-            
-            .nav-menu {
-                position: fixed;
-                top: 0;
-                right: -100%;
-                width: 80%;
-                max-width: 300px;
-                height: 100vh;
-                background-color: var(--white);
+
+            /* Transform Links into a Mobile Dropdown */
+            .navbar-links {
+                display: none; /* Hidden by default */
                 flex-direction: column;
-                align-items: flex-start;
-                justify-content: flex-start;
-                padding-top: 60px;
-                padding-left: 30px;
-                box-shadow: -2px 0 10px rgba(0,0,0,0.1);
-                transition: var(--transition);
-                z-index: 999;
-                overflow-y: auto;
+                width: 100%;
+                gap: 0;
+                background: white;
+                position: absolute;
+                top: 100%; /* Directly below navbar */
+                left: 0;
+                padding: 1rem 0;
+                box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+                border-top: 1px solid #eee;
+                animation: slideDown 0.3s ease-out;
             }
-            
-            .nav-menu.active {
-                right: 0;
+
+            /* Animation for Menu appearing */
+            @keyframes slideDown {
+                from { opacity: 0; transform: translateY(-10px); }
+                to { opacity:1; transform: translateY(0); }
             }
-            
-            .nav-menu li {
-                margin: 15px 0;
+
+            /* Show menu when active */
+            .navbar-links.show {
+                display: flex;
+            }
+
+            .navbar-links li {
                 width: 100%;
             }
-            
-            .nav-menu a {
-                font-size: 1.1rem;
-                display: block;
-                padding: 10px 0;
+
+            .navbar-links a {
+                width: 100%;
+                padding: 15px 2rem; /* More padding for touch */
+                text-align: left;
+                border-bottom: 1px solid #f5f5f5;
+                font-size: 1.05rem;
             }
-            
-            .nav-menu .cart-icon {
-                margin-top: 10px;
-                width: 40px;
-                height: 40px;
+
+            .navbar-links a:hover {
+                background-color: #fafafa;
+                color: #d4af37; /* Gold hover */
             }
-            
-            .footer-bottom {
-                flex-direction: column;
-                text-align: center;
-                gap: 15px;
-            }
-            
-            .footer-bottom-links a {
-                margin: 0 10px;
+
+            .navbar-links a:last-child {
+                border-bottom: none;
             }
         }
 
-        /* Small Mobile Phones */
-        @media (max-width: 480px) {
-            .nav-logo a {
-                font-size: 1.2rem;
-            }
-            
-            .nav-container {
-                padding: 10px 0;
-            }
-            
-            .footer-column {
-                min-width: 100%;
-            }
-            
-            .footer-main {
-                gap: 30px;
-            }
+        /* ===== ALERTS ===== */
+        .alert {
+            max-width: 100%;
+            margin: 1rem auto;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+            word-wrap: break-word;
+            border-left: 5px solid #ccc;
         }
+        .alert-success { border-left-color: #4CAF50; background: #e8f5e9; color: #2e7d32; }
+        .alert-error { border-left-color: #f44336; background: #ffebee; color: #c62828; }
+        .alert-warning { border-left-color: #ff9800; background: #fff3e0; color: #ef6c00; }
     </style>
-    
-    <!-- Additional Page-Specific Styles -->
-    {% block styles %}{% endblock %}
 </head>
+
 <body>
-    <!-- Navigation -->
     <nav class="navbar">
-        <div class="container nav-container">
-            <div class="nav-logo">
-                <a href="{{ url_for('index') }}">THE NATIONAL SCAFFOLDING</a>
-            </div>
-            <ul class="nav-menu">
-                <li><a href="{{ url_for('index') }}">Home</a></li>
-                <li><a href="{{ url_for('about') }}">About Us</a></li>
-                <li><a href="{{ url_for('products') }}">Products</a></li>
-                <li><a href="{{ url_for('contact') }}">Contact</a></li>
-                {% if session.get('user_id') %}
+        <!-- Navbar Brand -->
+        <a href="{% if current_user.is_authenticated %}{{ url_for('dashboard') }}{% else %}{{ url_for('national_scaffoldings') }}{% endif %}" class="navbar-brand">
+            <img src="{{ url_for('static', filename='images/logo.jpeg') }}" alt="Crest Technocrat Logo" class="navbar-logo">
+            <span class="brand-text">Crest Technocrat</span>
+        </a>
+
+        <!-- Navigation Links -->
+        <ul class="navbar-links" id="navbarLinks">
+            {% if current_user.is_authenticated %}
+                {% if session.get('user_type') == 'admin' %}
                     <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
                     <li><a href="{{ url_for('logout') }}">Logout</a></li>
                 {% else %}
-                    <li><a href="{{ url_for('login') }}">Login</a></li>
-                    <li><a href="{{ url_for('register') }}">Register</a></li>
+                    <li><a href="{{ url_for('national_scaffoldings') }}">Products</a></li>
+                    <li><a href="{{ url_for('cart') }}">Cart</a></li>
+                    <li><a href="{{ url_for('my_orders') }}">My Orders</a></li>
+                    <li><a href="{{ url_for('about') }}">About</a></li>
+                    <li><a href="{{ url_for('logout') }}">Logout</a></li>
                 {% endif %}
-                <li><a href="#" class="cart-icon"><i class="fas fa-shopping-cart"></i></a></li>
-            </ul>
-            <div class="hamburger">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-            <div class="close-menu">
-                <i class="fas fa-times"></i>
-            </div>
-        </div>
+            {% else %}
+                <li><a href="{{ url_for('national_scaffoldings') }}">Products</a></li>
+                <li><a href="{{ url_for('about') }}">About</a></li>
+                <li><a href="{{ url_for('login') }}">Login</a></li>
+                <li><a href="{{ url_for('register') }}">Register</a></li>
+            {% endif %}
+        </ul>
+
+        <!-- PERFECT MOBILE MENU BUTTON -->
+        <!-- The text "Back" is inside, but hidden by CSS (font-size: 0) to preserve alignment -->
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle Navigation Menu">
+            <span>Back</span>
+            <span>Back</span>
+            <span>Back</span>
+        </button>
     </nav>
 
-    <!-- Main Content -->
-    <main>
-        {% block content %}{% endblock %}
-    </main>
-
-    <!-- Footer -->
-    <footer>
-        <div class="footer-container">
-            <div class="footer-main">
-                <div class="footer-column">
-                    <div class="footer-logo">
-                        <h3>THE NATIONAL SCAFFOLDING</h3>
-                        <p>Providing safe, reliable scaffolding solutions for all your construction needs</p>
-                    </div>
-                    <div class="social-links">
-                        <a href="https://www.instagram.com/the_national_scaffolding?igsh=NWI3MnRhY3RrMm52" target="_blank"><i class="fab fa-instagram"></i></a>
-                        <a href="#" target="_blank"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" target="_blank"><i class="fab fa-twitter"></i></a>
-                        <a href="#" target="_blank"><i class="fab fa-linkedin-in"></i></a>
-                    </div>
-                </div>
-                
-                <div class="footer-column">
-                    <h4>Quick Links</h4>
-                    <ul>
-                        <li><a href="{{ url_for('index') }}">Home</a></li>
-                        <li><a href="{{ url_for('about') }}">About Us</a></li>
-                        <li><a href="{{ url_for('products') }}">Products</a></li>
-                        <li><a href="{{ url_for('contact') }}">Contact Us</a></li>
-                        {% if not session.get('user_id') %}
-                            <li><a href="{{ url_for('login') }}">Login</a></li>
-                            <li><a href="{{ url_for('register') }}">Register</a></li>
-                        {% endif %}
-                    </ul>
-                </div>
-                
-                <div class="footer-column">
-                    <h4>Our Services</h4>
-                    <ul>
-                        <li><a href="#">Scaffolding Design</a></li>
-                        <li><a href="#">Erection & Dismantling</a></li>
-                        <li><a href="#">Safety Inspections</a></li>
-                        <li><a href="#">Project Management</a></li>
-                        <li><a href="#">Consultation</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-column">
-                    <h4>Contact Info</h4>
-                    <ul>
-                        <li><i class="fas fa-phone"></i> +91 8105934759</li>
-                        <li><i class="fas fa-phone"></i> +91 9035415933</li>
-                        <li><i class="fas fa-envelope"></i> cresttechnocrat@gmail.com</li>
-                        <li><i class="fas fa-map-marker-alt"></i> Bangalore, India</li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="footer-bottom">
-                <div class="copyright">
-                    <p>&copy; 2023 THE NATIONAL SCAFFOLDING. All Rights Reserved.</p>
-                </div>
-                <div class="footer-bottom-links">
-                    <a href="#privacy-policy">Privacy Policy</a>
-                    <a href="#terms-of-use">Terms of Use</a>
-                </div>
-            </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div style="max-width: 1200px; margin: 1rem auto; padding: 0 1rem;">
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
         </div>
-    </footer>
+        {% endif %}
+    {% endwith %}
 
-    <!-- JavaScript -->
+    {% block content %}{% endblock %}
+
+    {% block scripts %}{% endblock %}
+
+    <!-- Simple JS for Mobile Menu Toggle -->
     <script>
-        // Hamburger menu toggle functionality
         document.addEventListener('DOMContentLoaded', function() {
-            const hamburger = document.querySelector('.hamburger');
-            const closeMenu = document.querySelector('.close-menu');
-            const navMenu = document.querySelector('.nav-menu');
+            const menuBtn = document.getElementById('mobileMenuBtn');
+            const navbarLinks = document.getElementById('navbarLinks');
             
-            if (hamburger && navMenu) {
-                hamburger.addEventListener('click', function() {
-                    navMenu.classList.toggle('active');
+            if (menuBtn && navbarLinks) {
+                menuBtn.addEventListener('click', function() {
+                    // Toggle animation on button
+                    menuBtn.classList.toggle('active');
+                    // Toggle visibility of menu
+                    navbarLinks.classList.toggle('show');
                 });
             }
-            
-            if (closeMenu && navMenu) {
-                closeMenu.addEventListener('click', function() {
-                    navMenu.classList.remove('active');
-                });
-            }
-            
-            // Close menu when clicking on a link
-            const navLinks = document.querySelectorAll('.nav-menu a');
-            navLinks.forEach(link => {
-                link.addEventListener('click', function() {
-                    if (navMenu) {
-                        navMenu.classList.remove('active');
-                    }
-                });
-            });
-            
-            // Close menu when clicking outside
+
+            // Optional: Close menu when clicking outside
             document.addEventListener('click', function(event) {
-                if (navMenu && !navMenu.contains(event.target) && !hamburger.contains(event.target)) {
-                    navMenu.classList.remove('active');
+                const isClickInside = navbarLinks.contains(event.target) || menuBtn.contains(event.target);
+                if (!isClickInside && navbarLinks.classList.contains('show')) {
+                    menuBtn.classList.remove('active');
+                    navbarLinks.classList.remove('show');
                 }
             });
         });
     </script>
-    
-    <!-- Additional Page-Specific Scripts -->
-    {% block scripts %}{% endblock %}
 </body>
 </html>

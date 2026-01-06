@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Edit Product - National Scaffolding{% endblock %}
+{% block title %}Dashboard - National Scaffolding{% endblock %}
 {% block content %}
 
 <!-- PREMIUM FONT -->
@@ -12,6 +12,96 @@
 * { 
     font-family:'Inter', sans-serif;
     box-sizing: border-box; /* Ensures padding doesn't add to width */
+}
+
+/* Grid Layout */
+.products-grid {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+}
+
+/* Card Box - Responsive Width */
+.product-card {
+    background: white;
+    border-radius: 16px;
+    width: 100%; /* Allows shrinking */
+    max-width: 420px; /* Limits size on desktop */
+    min-height: 380px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+    transition: 0.25s;
+    cursor: pointer;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.product-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+}
+
+/* Card Inner Content */
+.product-info {
+    padding: 2.5rem 2rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+}
+
+.product-info div:first-child {
+    font-size: 3.8rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Main Titles */
+.product-name {
+    font-size: 1.7rem !important;
+    font-weight: 700;
+    color: #001d3d;
+    margin-bottom: 0.7rem;
+    line-height: 1.2;
+}
+
+/* Category Badge */
+.product-category {
+    background: #e6b325; /* Darker gold */
+    color: #001d3d;
+    padding: 0.4rem 1.2rem;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    margin: 0 auto 1.5rem;
+    display: inline-block;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 5px rgba(230, 179, 37, 0.3);
+}
+
+/* Description Text */
+.product-description {
+    color: #555;
+    font-size: 1rem;
+    line-height: 1.6;
+    padding: 0;
+    margin-bottom: auto; /* Pushes button to bottom */
+}
+
+/* CTA Button */
+.view-btn {
+    padding: 0.8rem 2rem;
+    background: #f0f2f5;
+    display: inline-block;
+    margin-top: 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    color: #001d3d;
+    transition: all 0.2s;
+}
+
+.view-btn:hover {
+    background: #e2e6ea;
 }
 
 /* Page Layout */
@@ -39,216 +129,29 @@
     font-weight: 400;
 }
 
-/* Form Container */
-.form-container {
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+/* Help Box */
+.help-box {
+    margin-top: 4rem;
+    background: rgba(212, 175, 55, 0.12);
     padding: 2.5rem;
-    max-width: 900px;
-    margin: 0 auto;
-}
-
-/* Form Groups */
-.form-group {
-    margin-bottom: 1.5rem;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-    color: #001d3d;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-    width: 100%;
-    padding: 0.8rem 1rem;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 1rem;
-}
-
-.form-group textarea {
-    min-height: 120px;
-    resize: vertical;
-}
-
-/* Image Upload Section */
-.image-upload-section {
-    margin-bottom: 2rem;
-}
-
-.image-preview {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin-top: 1rem;
-}
-
-.image-preview-item {
-    position: relative;
-    width: 150px;
-    height: 150px;
-    border-radius: 8px;
-    overflow: hidden;
-    border: 1px solid #ddd;
-}
-
-.image-preview-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.remove-image {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background: rgba(0,0,0,0.7);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 12px;
-}
-
-/* Buttons */
-.btn {
-    display: inline-block;
-    padding: 0.8rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 600;
-    text-decoration: none;
-    cursor: pointer;
-    border: none;
-    transition: all 0.2s;
-}
-
-.btn-primary {
-    background: #001d3d;
-    color: white;
-}
-
-.btn-primary:hover {
-    background: #001529;
-}
-
-.btn-secondary {
-    background: #f0f2f5;
-    color: #001d3d;
-    margin-left: 1rem;
-}
-
-.btn-secondary:hover {
-    background: #e2e6ea;
-}
-
-/* Form Actions */
-.form-actions {
+    border-radius: 16px;
+    border: 1px solid rgba(212,175,55,0.3);
     text-align: center;
-    margin-top: 2rem;
 }
 
-/* =========================================
-   NAVIGATION RESPONSIVENESS
-   ========================================= */
-/* Hamburger menu button */
-.hamburger {
-    display: none;
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
-    cursor: pointer;
-    background: #001d3d;
-    padding: 10px;
-    border-radius: 5px;
-}
-
-.hamburger span {
-    display: block;
-    width: 25px;
-    height: 3px;
-    margin: 5px 0;
-    background-color: #fff;
-    border-radius: 3px;
-    transition: all 0.3s ease-in-out;
-}
-
-/* Mobile navigation menu */
-.mobile-nav {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
-    background-color: rgba(0, 29, 61, 0.95);
-    z-index: 999;
-    padding-top: 60px;
-    overflow-y: auto;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease-in-out;
-}
-
-.mobile-nav.active {
-    transform: translateX(0);
-}
-
-.mobile-nav ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.mobile-nav li {
-    padding: 15px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.mobile-nav a {
-    color: #fff;
-    text-decoration: none;
-    font-size: 18px;
-    font-weight: 500;
-    display: block;
-}
-
-.mobile-nav a:hover {
+.help-title {
+    font-size: 1.5rem;
+    font-weight: 700;
     color: #d4af37;
+    margin-bottom: 1rem;
 }
 
 /* =========================================
    RESPONSIVE / MOBILE STYLES
    ========================================= */
 @media (max-width: 768px) {
-    /* Show hamburger menu on mobile */
-    .hamburger {
-        display: block;
-    }
-    
-    /* Hide desktop navigation on mobile */
-    .navbar {
-        display: none;
-    }
-    
-    /* Show mobile navigation when active */
-    .mobile-nav {
-        display: block;
-    }
-    
-    /* Adjust page container for mobile */
     .page-container {
         padding: 1.5rem 1rem;
-        margin-top: 60px; /* Add space for hamburger menu */
     }
 
     .page-header {
@@ -263,219 +166,121 @@
         font-size: 1rem;
     }
 
-    .form-container {
+    .products-grid {
+        gap: 1.5rem; /* Reduce gap between cards on mobile */
+        flex-direction: column; /* Stack vertically */
+        align-items: center;
+    }
+
+    .product-card {
+        min-height: auto; /* Let content decide height */
+        width: 100%; /* Full width of container */
+        max-width: 400px;
+    }
+
+    .product-info {
+        padding: 2rem 1.5rem;
+    }
+
+    .product-info div:first-child {
+        font-size: 3rem; /* Slightly smaller emoji */
+    }
+
+    .product-name {
+        font-size: 1.5rem !important;
+    }
+
+    .product-description {
+        font-size: 0.95rem;
+    }
+
+    .view-btn {
+        padding: 0.7rem 1.5rem;
+        margin-top: 1.5rem;
+        width: 100%; /* Full width button on mobile */
+        box-sizing: border-box;
+    }
+
+    .help-box {
+        margin-top: 2.5rem;
         padding: 1.5rem;
     }
 
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-        padding: 0.7rem 0.9rem;
-        font-size: 16px; /* Prevents zoom on iOS */
-    }
-
-    .image-preview-item {
-        width: 100px;
-        height: 100px;
-    }
-
-    .form-actions {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .btn-secondary {
-        margin-left: 0;
+    .help-title {
+        font-size: 1.25rem;
     }
 }
 
 /* Extra small devices (phones under 360px) */
 @media (max-width: 360px) {
-    .form-container {
-        padding: 1rem;
+    .product-name {
+        font-size: 1.3rem !important;
     }
     
-    .image-preview-item {
-        width: 80px;
-        height: 80px;
+    .product-info div:first-child {
+        font-size: 2.5rem;
     }
 }
 </style>
 
-<!-- Hamburger Menu Button -->
-<div class="hamburger" onclick="toggleMobileMenu()">
-    <span></span>
-    <span></span>
-    <span></span>
-</div>
-
-<!-- Mobile Navigation Menu -->
-<nav class="mobile-nav" id="mobileNav">
-    <ul>
-        <li><a href="{{ url_for('home') }}">Home</a></li>
-        <li><a href="{{ url_for('national_scaffoldings') }}">Scaffolding</a></li>
-        <li><a href="{{ url_for('fabrications') }}">Fabrications</a></li>
-        {% if current_user.is_authenticated %}
-            <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
-            <li><a href="{{ url_for('logout') }}">Logout</a></li>
-        {% else %}
-            <li><a href="{{ url_for('login') }}">Login</a></li>
-            <li><a href="{{ url_for('register') }}">Register</a></li>
-        {% endif %}
-    </ul>
-</nav>
-
 <div class="page-container">
+
     <!-- HEADER -->
     <header class="page-header">
-        <h1 class="page-title">Edit Product</h1>
-        <p class="page-subtitle">Update product information and images</p>
+        <h1 class="page-title">
+            Welcome{% if current_user.is_authenticated %}, {{ current_user.username }}{% endif %}!
+        </h1>
+        <p class="page-subtitle">Choose a category to explore our products</p>
     </header>
 
-    <!-- EDIT FORM -->
-    <div class="form-container">
-        <form method="POST" enctype="multipart/form-data">
-            {{ form.hidden_tag() }}
-            
-            <div class="form-group">
-                {{ form.name.label(class="form-label") }}
-                {{ form.name(class="form-control") }}
-                {% if form.name.errors %}
-                    <div class="text-danger">
-                        {% for error in form.name.errors %}
-                            <small>{{ error }}</small>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            </div>
+    <!-- PRODUCT CATEGORY CARDS -->
+    <section>
+        <div style="text-align:center; margin-bottom:2rem;">
+            <h2 style="color:#d4af37; font-size:1.8rem; font-weight:700;">
+                🏗️ Our Product Categories
+            </h2>
+            <p style="color:#666; font-size:1rem; margin-top:0.5rem;">Browse our scaffolding and fabrication products</p>
+        </div>
 
-            <div class="form-group">
-                {{ form.description.label(class="form-label") }}
-                {{ form.description(class="form-control") }}
-                {% if form.description.errors %}
-                    <div class="text-danger">
-                        {% for error in form.description.errors %}
-                            <small>{{ error }}</small>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            </div>
+        <div class="products-grid">
 
-            <div class="form-group">
-                {{ form.price.label(class="form-label") }}
-                {{ form.price(class="form-control") }}
-                {% if form.price.errors %}
-                    <div class="text-danger">
-                        {% for error in form.price.errors %}
-                            <small>{{ error }}</small>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            </div>
-
-            <div class="form-group">
-                {{ form.category.label(class="form-label") }}
-                {{ form.category(class="form-control") }}
-                {% if form.category.errors %}
-                    <div class="text-danger">
-                        {% for error in form.category.errors %}
-                            <small>{{ error }}</small>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            </div>
-
-            <div class="image-upload-section">
-                <h3>Product Images</h3>
-                <div class="image-preview">
-                    {% if product.display_image_url %}
-                        {% set images = product.display_image_url.split(',') %}
-                        {% for image in images %}
-                            <div class="image-preview-item">
-                                <img src="{{ url_for('static', filename=image.strip()) }}" alt="Product Image">
-                                <button type="button" class="remove-image" data-image="{{ image.strip() }}">×</button>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-                </div>
-                <div class="form-group">
-                    {{ form.images.label(class="form-label") }}
-                    {{ form.images(class="form-control", multiple="true") }}
-                    <small>Upload new images (optional)</small>
+            <!-- Scaffolding Card -->
+            <div class="product-card" onclick="window.location.href='{{ url_for('national_scaffoldings') }}'">
+                <div class="product-info">
+                    <div>🏗️</div>
+                    <h2 class="product-name">The National Scaffolding</h2>
+                    <span class="product-category">SCAFFOLDING</span>
+                    <p class="product-description">
+                        Professional scaffolding systems and equipment designed for quality, safety, and durability.
+                    </p>
+                    <div class="view-btn">View Products →</div>
                 </div>
             </div>
 
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Update Product</button>
-                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Cancel</a>
+            <!-- Fabrications Card -->
+            <div class="product-card" onclick="window.location.href='{{ url_for('fabrications') }}'">
+                <div class="product-info">
+                    <div>🔧</div>
+                    <h2 class="product-name">Fabrications</h2>
+                    <span class="product-category">CUSTOM WORKS</span>
+                    <p class="product-description">
+                        Custom furniture, metal structures, and fabrication work crafted with precision.
+                    </p>
+                    <div class="view-btn">View Products →</div>
+                </div>
             </div>
-        </form>
+
+        </div>
+    </section>
+
+    <!-- HELP BOX -->
+    <div class="help-box">
+        <h3 class="help-title">Need Help?</h3>
+        <p style="color:#555; line-height:1.6;">
+            Our team is here to assist you with product selection, pricing, and orders. Feel free to reach out!
+        </p>
     </div>
+
 </div>
-
-<script>
-// Toggle mobile menu
-function toggleMobileMenu() {
-    const mobileNav = document.getElementById('mobileNav');
-    mobileNav.classList.toggle('active');
-    
-    // Animate hamburger menu
-    const hamburger = document.querySelector('.hamburger');
-    const spans = hamburger.querySelectorAll('span');
-    
-    if (mobileNav.classList.contains('active')) {
-        spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
-        spans[1].style.opacity = '0';
-        spans[2].style.transform = 'rotate(-45deg) translate(7px, -6px)';
-    } else {
-        spans[0].style.transform = 'none';
-        spans[1].style.opacity = '1';
-        spans[2].style.transform = 'none';
-    }
-}
-
-// Close mobile menu when clicking outside
-document.addEventListener('click', function(event) {
-    const mobileNav = document.getElementById('mobileNav');
-    const hamburger = document.querySelector('.hamburger');
-    
-    if (!mobileNav.contains(event.target) && !hamburger.contains(event.target)) {
-        mobileNav.classList.remove('active');
-        
-        // Reset hamburger menu
-        const spans = hamburger.querySelectorAll('span');
-        spans[0].style.transform = 'none';
-        spans[1].style.opacity = '1';
-        spans[2].style.transform = 'none';
-    }
-});
-
-// Remove image functionality
-document.querySelectorAll('.remove-image').forEach(button => {
-    button.addEventListener('click', function() {
-        if (confirm('Are you sure you want to remove this image?')) {
-            const imageName = this.getAttribute('data-image');
-            const imageItem = this.closest('.image-preview-item');
-            imageItem.remove();
-            
-            // Add to a hidden input to track removed images
-            const removedImagesInput = document.getElementById('removed_images') || 
-                document.createElement('input');
-            removedImagesInput.type = 'hidden';
-            removedImagesInput.id = 'removed_images';
-            removedImagesInput.name = 'removed_images';
-            
-            let currentValues = removedImagesInput.value ? removedImagesInput.value.split(',') : [];
-            currentValues.push(imageName);
-            removedImagesInput.value = currentValues.join(',');
-            
-            if (!document.getElementById('removed_images')) {
-                document.querySelector('form').appendChild(removedImagesInput);
-            }
-        }
-    });
-});
-</script>
 
 {% endblock %}

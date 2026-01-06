@@ -7,62 +7,6 @@
 /* Base Reset */
 * { box-sizing: border-box; }
 
-/* Navigation Styles for Mobile Responsiveness */
-.nav-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 2rem;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-}
-
-.nav-logo {
-    color: #ffa500;
-    font-size: 1.5rem;
-    font-weight: 700;
-    text-decoration: none;
-}
-
-.nav-menu {
-    display: flex;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    gap: 1.5rem;
-}
-
-.nav-menu a {
-    color: #fff;
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.3s;
-}
-
-.nav-menu a:hover {
-    color: #ffa500;
-}
-
-.hamburger {
-    display: none;
-    flex-direction: column;
-    cursor: pointer;
-    padding: 0.5rem;
-}
-
-.hamburger span {
-    width: 25px;
-    height: 3px;
-    background: #fff;
-    margin: 3px 0;
-    transition: 0.3s;
-}
-
-/* Order Card Styles */
 .order-card {
     background: rgba(255, 255, 255, 0.05);
     padding: 1.5rem;
@@ -209,94 +153,10 @@
     transform: translateY(-2px);
 }
 
-.btn-secondary {
-    padding: 8px 16px;
-    font-size: 0.9rem;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 8px;
-    background: transparent;
-    color: #fff;
-    cursor: pointer;
-    font-weight: 500;
-    transition: background 0.2s;
-}
-
-.btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.glass-container {
-    background: rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(10px);
-    border-radius: 16px;
-    padding: 2rem;
-    margin: 2rem auto;
-    max-width: 1200px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.page-title {
-    color: #fff;
-    font-size: 2rem;
-    margin-bottom: 1.5rem;
-    font-weight: 700;
-}
-
 /* =========================================
    RESPONSIVE MOBILE STYLES
    ========================================= */
-@media (max-width: 992px) {
-    .nav-container {
-        padding: 1rem;
-    }
-    
-    .glass-container {
-        margin: 1rem;
-        padding: 1.5rem;
-    }
-}
-
 @media (max-width: 768px) {
-    /* Navigation Mobile Styles */
-    .hamburger {
-        display: flex;
-    }
-    
-    .nav-menu {
-        position: fixed;
-        left: -100%;
-        top: 70px;
-        flex-direction: column;
-        background-color: rgba(0, 0, 0, 0.9);
-        width: 100%;
-        text-align: center;
-        transition: 0.3s;
-        box-shadow: 0 10px 27px rgba(0, 0, 0, 0.05);
-        padding: 2rem 0;
-        gap: 0;
-    }
-    
-    .nav-menu.active {
-        left: 0;
-    }
-    
-    .nav-menu li {
-        margin: 1rem 0;
-    }
-    
-    .hamburger.active span:nth-child(2) {
-        opacity: 0;
-    }
-    
-    .hamburger.active span:nth-child(1) {
-        transform: translateY(9px) rotate(45deg);
-    }
-    
-    .hamburger.active span:nth-child(3) {
-        transform: translateY(-9px) rotate(-45deg);
-    }
-    
-    /* Order Card Mobile Styles */
     .glass-container {
         padding: 15px; /* Less padding on mobile */
     }
@@ -341,10 +201,6 @@
         border-top: 1px solid rgba(255,255,255,0.05);
         padding-top: 5px;
     }
-    
-    .page-title {
-        font-size: 1.5rem;
-    }
 }
 
 @media (max-width: 480px) {
@@ -371,29 +227,8 @@
     .empty-state {
         padding: 2rem 1rem;
     }
-    
-    .page-title {
-        font-size: 1.3rem;
-    }
 }
 </style>
-
-<!-- Mobile Navigation -->
-<nav class="nav-container">
-    <a href="{{ url_for('home') }}" class="nav-logo">National Scaffolding</a>
-    <ul class="nav-menu">
-        <li><a href="{{ url_for('home') }}">Home</a></li>
-        <li><a href="{{ url_for('products') }}">Products</a></li>
-        <li><a href="{{ url_for('about') }}">About</a></li>
-        <li><a href="{{ url_for('contact') }}">Contact</a></li>
-        <li><a href="{{ url_for('my_orders') }}">My Orders</a></li>
-    </ul>
-    <div class="hamburger">
-        <span></span>
-        <span></span>
-        <span></span>
-    </div>
-</nav>
 
 <div class="glass-container">
     <button class="btn-secondary" onclick="history.back()" style="margin-bottom: 1.5rem; width: auto; padding: 8px 16px;">
@@ -463,20 +298,4 @@
     </div>
     {% endif %}
 </div>
-
-<script>
-// Mobile Navigation Toggle
-const hamburger = document.querySelector(".hamburger");
-const navMenu = document.querySelector(".nav-menu");
-
-hamburger.addEventListener("click", () => {
-    hamburger.classList.toggle("active");
-    navMenu.classList.toggle("active");
-});
-
-document.querySelectorAll(".nav-menu a").forEach(n => n.addEventListener("click", () => {
-    hamburger.classList.remove("active");
-    navMenu.classList.remove("active");
-}));
-</script>
 {% endblock %}

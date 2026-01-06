@@ -16,7 +16,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask import render_template, request
 from models import Product, CuplockLedgerSize
 
-from storage import delete_image
 
 # FIX: Import both datetime class and timedelta class
 from datetime import datetime, timedelta 
@@ -172,7 +171,7 @@ db_user = os.environ.get('DB_USER', 'cresttechnocrat')
 db_password = os.environ.get('DB_PASSWORD', 'syedzubairarbaazkhan123Ert678')
 db_host = os.environ.get('DB_HOST', 'thenationalscaffolding.cofeca2iwshi.us-east-1.rds.amazonaws.com')
 db_port = os.environ.get('DB_PORT', '5432')
-db_name = os.environ.get('DB_NAME', 'national_scaffolding')
+db_name = os.environ.get('DB_NAME', 'postgres')
 
 app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -617,6 +616,21 @@ def calculate_price(product, customization=None):
             'price': 0,
             'deposit': 0
         }
+
+# ... (keep the rest of your app.py code, but make sure to REMOVE the HTML block at the very end) ...
+
+# The following HTML block was at the end of your Python file and MUST BE DELETED:
+#
+# {% extends "base.html" %}
+#
+# {% block title %}National Scaffolding - Fabrications{% endblock %}
+#
+# ... (rest of the HTML code) ...
+#
+# COMPLETE product_detail ROUTE WITH CUPLOCK REDIRECT
+# Replace your existing @app.route('/product/<int:product_id>') (around line 350) with this
+# ============================================================================
+
 @app.route('/product/<int:product_id>')
 def product_detail(product_id):
     try:
@@ -745,8 +759,7 @@ def load_user(user_id):
         # Check if user_type is in session
         if 'user_type' in session and session.get('user_type') == 'admin':
             return Admin.query.get(user_id)
-        return db.session.get(User, user_id)
-
+        return User.query.get(user_id)
     except (ValueError, TypeError):
         return None
 
@@ -2342,8 +2355,8 @@ def admin_add_product():
                 if file and file.filename and allowed_file(file.filename):
                     filename = f"{uuid.uuid4().hex}_{secure_filename(file.filename)}"
                     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                    image_url = save_image(file)
-                    image_urls.append(image_url)
+                    file.save(filepath)
+                    image_urls.append(f"uploads/{filename}")
 
         product.image_url = ','.join(image_urls) if image_urls else 'images/no-image.png'
 
@@ -2407,7 +2420,6 @@ def admin_add_product():
         app.logger.error(f"admin_add_product error: {e}", exc_info=True)
         flash(f'Error creating product: {str(e)}', 'error')
         return render_template('add_scaffolding_product.html')
-    
 @app.route('/check_categories')
 def check_categories():
     try:
@@ -2873,8 +2885,9 @@ def admin_update_product(product_id):
                     unique_name = f"{uuid.uuid4().hex}_{filename}"
                     filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
                     try:
-                        image_url = save_image(file)
-                        new_urls.append(image_url)
+                        file.save(filepath)
+                        saved_new_filepaths.append(filepath)
+                        new_urls.append(f"uploads/{unique_name}")
                         app.logger.info(f"Saved uploaded file for update product {product_id}: {filepath}")
                     except Exception as e:
                         app.logger.error(f"Error saving uploaded file: {e}")
@@ -2903,7 +2916,7 @@ def admin_update_product(product_id):
             old_image_path = os.path.join('static', img) if not img.startswith('static') else img
             if os.path.exists(old_image_path):
                 try:
-                    delete_image(img)
+                    os.remove(old_image_path)
                     app.logger.info(f"Removed old image file for product {product_id}: {old_image_path}")
                 except Exception as e:
                     app.logger.warning(f"Error removing old file {old_image_path}: {e}")
@@ -2967,7 +2980,7 @@ def admin_update_product(product_id):
     except Exception as e:
         app.logger.error(f"Admin update product error: {e}")
         return jsonify({'success': False, 'message': 'Error updating product'}), 500
-    
+
 @app.route('/admin_get_product_pricing/<int:product_id>')
 @login_required
 def admin_get_product_pricing(product_id):
@@ -3299,7 +3312,7 @@ def admin_remove_photo(product_id):
             old_image_path = os.path.join(app.static_folder, image_url)
             if os.path.exists(old_image_path):
                 try:
-                    delete_image(img)
+                    os.remove(old_image_path)
                     app.logger.info(f"Removed image file: {old_image_path}")
                 except Exception as e:
                     app.logger.error(f"Error removing file: {e}")
@@ -3345,7 +3358,7 @@ def admin_delete_product(product_id):
                 old_image_path = img_path.strip().replace('/static/', 'static/')
                 if os.path.exists(old_image_path):
                     try:
-                        delete_image(img)
+                        os.remove(old_image_path)
                         app.logger.info(f"Deleted image file: {old_image_path}")
                     except Exception as e:
                         app.logger.error(f"Error removing file {old_image_path}: {e}")

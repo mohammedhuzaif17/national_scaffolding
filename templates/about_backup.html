@@ -199,7 +199,6 @@
             flex-direction: column;
             cursor: pointer;
             z-index: 1001;
-            position: relative;
         }
 
         .hamburger span {
@@ -208,18 +207,6 @@
             background-color: var(--dark-color);
             margin: 3px 0;
             transition: var(--transition);
-        }
-
-        /* Close button for mobile menu */
-        .close-menu {
-            display: none;
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 1.5rem;
-            color: var(--royal-blue);
-            cursor: pointer;
-            z-index: 1002;
         }
 
         /* ===== Hero Section ===== */
@@ -1113,27 +1100,22 @@
                 display: flex;
             }
             
-            .close-menu {
-                display: block;
-            }
-            
             .nav-menu {
                 position: fixed;
-                top: 0;
-                right: -100%;
+                top: 0; /* Full screen menu */
+                right: -100%; /* Slide from right */
                 width: 80%;
                 max-width: 300px;
                 height: 100vh;
                 background-color: var(--white);
                 flex-direction: column;
-                align-items: flex-start;
+                align-items: flex-start; /* Align left */
                 justify-content: flex-start;
-                padding-top: 60px;
+                padding-top: 80px; /* Space for close button */
                 padding-left: 30px;
                 box-shadow: -2px 0 10px rgba(0,0,0,0.1);
                 transition: var(--transition);
                 z-index: 999;
-                overflow-y: auto;
             }
             
             .nav-menu.active {
@@ -1141,7 +1123,7 @@
             }
             
             .nav-menu li {
-                margin: 15px 0;
+                margin: 20px 0;
                 width: 100%;
             }
             
@@ -1151,14 +1133,8 @@
                 padding: 10px 0;
             }
             
-            .nav-menu .cart-icon {
-                margin-top: 10px;
-                width: 40px;
-                height: 40px;
-            }
-            
             .hero-stats {
-                grid-template-columns: 1fr 1fr;
+                grid-template-columns: 1fr 1fr; /* Keep 2 columns but tighter */
                 gap: 15px;
             }
             
@@ -1185,7 +1161,7 @@
             }
             
             .expertise-item {
-                min-width: 85%;
+                min-width: 85%; /* Show most of card */
             }
         }
 
@@ -1220,7 +1196,7 @@
             }
             
             .expertise-item {
-                min-width: 95%;
+                min-width: 95%; /* Full width card on very small phones */
                 padding: 20px 15px;
             }
             
@@ -1237,7 +1213,7 @@
             .client-item, .project-item {
                 font-size: 0.8rem;
                 padding: 8px 10px;
-                width: 45%;
+                width: 45%; /* 2 per row */
             }
             
             .contact-info li span {
@@ -1292,9 +1268,6 @@
                 <span></span>
                 <span></span>
                 <span></span>
-            </div>
-            <div class="close-menu">
-                <i class="fas fa-times"></i>
             </div>
         </div>
     </nav>
@@ -1750,15 +1723,10 @@
         // Simple JavaScript for hamburger menu toggle
         document.addEventListener('DOMContentLoaded', function() {
             const hamburger = document.querySelector('.hamburger');
-            const closeMenu = document.querySelector('.close-menu');
             const navMenu = document.querySelector('.nav-menu');
             
             hamburger.addEventListener('click', function() {
                 navMenu.classList.toggle('active');
-            });
-            
-            closeMenu.addEventListener('click', function() {
-                navMenu.classList.remove('active');
             });
             
             // Close menu when clicking on a link
