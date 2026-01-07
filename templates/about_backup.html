@@ -1072,6 +1072,18 @@
             transform: translateY(-3px);
         }
 
+        /* ===== Animation Utilities ===== */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+        
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
         /* ===== Responsive Styles ===== */
         
         /* Tablet and below */
@@ -1275,10 +1287,11 @@
     <!-- Hero Section with Image and Stats -->
     <section id="hero" class="hero">
         <div class="container hero-container">
-            <div class="hero-image">
+            <div class="hero-image reveal">
+                <!-- Note: Using the provided URL. If image breaks locally, replace src with a placeholder -->
                 <img src="https://z-cdn-media.chatglm.cn/files/0face00d-359f-4d9e-b2f6-339b6e6e55ba_pasted_image_1760871849173.jpg?auth_key=1792407998-c12ab30faf1d4b8b9fd655a35c42d96e-0-640668e647f81948a21e7a6507f8eac1" alt="Scaffolding Work">
             </div>
-            <div class="hero-stats">
+            <div class="hero-stats reveal">
                 <div class="stat-item">
                     <h3>1000+</h3>
                     <p>COMPLETED PROJECTS</p>
@@ -1302,11 +1315,11 @@
     <!-- Attractive Expertise Section -->
     <section id="expertise" class="expertise-new">
         <div class="container">
-            <div class="section-title">
+            <div class="section-title reveal">
                 <h2>Our Expertise</h2>
             </div>
             <div class="expertise-container">
-                <div class="expertise-item">
+                <div class="expertise-item reveal">
                     <div class="expertise-icon">
                         <i class="fas fa-drafting-compass"></i>
                     </div>
@@ -1316,7 +1329,7 @@
                     </div>
                     <p>95%</p>
                 </div>
-                <div class="expertise-item">
+                <div class="expertise-item reveal">
                     <div class="expertise-icon">
                         <i class="fas fa-shield-alt"></i>
                     </div>
@@ -1326,7 +1339,7 @@
                     </div>
                     <p>100%</p>
                 </div>
-                <div class="expertise-item">
+                <div class="expertise-item reveal">
                     <div class="expertise-icon">
                         <i class="fas fa-project-diagram"></i>
                     </div>
@@ -1336,7 +1349,7 @@
                     </div>
                     <p>90%</p>
                 </div>
-                <div class="expertise-item">
+                <div class="expertise-item reveal">
                     <div class="expertise-icon">
                         <i class="fas fa-headset"></i>
                     </div>
@@ -1353,7 +1366,7 @@
     <!-- Our Journey Section -->
     <section id="journey" class="journey">
         <div class="container journey-container">
-            <div class="clients-section">
+            <div class="clients-section reveal">
                 <h3>Our Prestigious Clients</h3>
                 <div class="clients-grid">
                     <div class="client-item">Toyota</div>
@@ -1368,7 +1381,7 @@
                 </div>
             </div>
             
-            <div class="projects-section">
+            <div class="projects-section reveal">
                 <h3>Major Commercial Projects</h3>
                 <div class="projects-grid">
                     <div class="project-item">Phoenix Mall of Asia</div>
@@ -1386,12 +1399,13 @@
     <!-- Board of Administrators Section -->
     <section id="administrators" class="administrators">
         <div class="container">
-            <div class="section-title">
+            <div class="section-title reveal">
                 <h2>Board Of Administrators</h2>
             </div>
             <div class="administrators-container">
-                <div class="administrator">
+                <div class="administrator reveal">
                     <div class="administrator-image">
+                        <!-- Note: Using local filename provided. Ensure file exists in folder or update src -->
                         <img src="arbaaz.jpeg" alt="Chief Administrator">
                     </div>
                     <h3>Syed Arbaaz</h3>
@@ -1401,7 +1415,7 @@
                         <a href="https://www.facebook.com/share/1A8c5B3BLV/?mibextid=LQQJ4d" target="_blank"><i class="fab fa-facebook-f"></i></a>
                     </div>
                 </div>
-                <div class="administrator">
+                <div class="administrator reveal">
                     <div class="administrator-image">
                         <img src="zubair.jpeg" alt="Senior Administrator">
                     </div>
@@ -1411,7 +1425,7 @@
                         <a href="https://www.instagram.com/zubyrbinnoor?igsh=MWM3N2UyOWZ4YWRicA==" target="_blank"><i class="fab fa-instagram"></i></a>
                     </div>
                 </div>
-                <div class="administrator">
+                <div class="administrator reveal">
                     <div class="administrator-image">
                         <img src="nayeem.jpeg" alt="Associate Administrator">
                     </div>
@@ -1429,7 +1443,7 @@
     <!-- User Manual Section -->
     <section id="user-manual" class="user-manual">
         <div class="container user-manual-container">
-            <div class="user-manual-content">
+            <div class="user-manual-content reveal">
                 <h2>THE NATIONAL SCAFFOLDING (Aluminium)</h2>
                 
                 <h3>Overview</h3>
@@ -1758,6 +1772,26 @@
                     }
                 });
             });
+
+            // Scroll Animation (Intersection Observer)
+            // This adds the "reveal" animation when sections scroll into view
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                        observer.unobserve(entry.target); // Only animate once
+                    }
+                });
+            }, observerOptions);
+
+            const revealElements = document.querySelectorAll('.reveal');
+            revealElements.forEach(el => observer.observe(el));
         });
     </script>
 </body>

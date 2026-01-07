@@ -171,7 +171,7 @@ db_user = os.environ.get('DB_USER', 'cresttechnocrat')
 db_password = os.environ.get('DB_PASSWORD', 'syedzubairarbaazkhan123Ert678')
 db_host = os.environ.get('DB_HOST', 'thenationalscaffolding.cofeca2iwshi.us-east-1.rds.amazonaws.com')
 db_port = os.environ.get('DB_PORT', '5432')
-db_name = os.environ.get('DB_NAME', 'postgres')
+db_name = os.environ.get('DB_NAME', 'national_scaffolding')
 
 app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -759,7 +759,7 @@ def load_user(user_id):
         # Check if user_type is in session
         if 'user_type' in session and session.get('user_type') == 'admin':
             return Admin.query.get(user_id)
-        return User.query.get(user_id)
+        return db.session.get(User, user_id)
     except (ValueError, TypeError):
         return None
 
@@ -3660,6 +3660,6 @@ def check_payment_status():
     """
     return jsonify({'payment_in_progress': False})
 
-
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)
+

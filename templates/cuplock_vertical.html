@@ -415,7 +415,6 @@
         }
     }
 </style>
-
 <div class="product-container">
     <!-- Header & Image -->
     <h1>Vertical Cuplock: {{ product.name }}</h1>
@@ -423,11 +422,21 @@
     <div class="product-image">
         {% if product.display_image_url %}
             {% set first_image = product.display_image_url.split(',')[0].strip() %}
-            {% if first_image.startswith('uploads/') or first_image.startswith('images/') %}
-                {% set img_src = url_for('static', filename=first_image) %}
+            
+            {# FIX: Check if it's a full URL (S3) or a local file #}
+            {% if first_image.startswith('http://') or first_image.startswith('https://') %}
+                {% set img_src = first_image %}
+            {% elif first_image.startswith('/') %}
+                {% set img_src = first_image %}
             {% else %}
-                {% set img_src = url_for('static', filename='uploads/' + first_image) %}
+                {# Fallback for local static files #}
+                {% if first_image.startswith('uploads/') or first_image.startswith('images/') %}
+                    {% set img_src = url_for('static', filename=first_image) %}
+                {% else %}
+                    {% set img_src = url_for('static', filename='uploads/' + first_image) %}
+                {% endif %}
             {% endif %}
+            
             <img src="{{ img_src }}" alt="{{ product.name }}">
         {% else %}
             <span style="font-size: 3rem; color: #ccc;">🔗 No Image</span>
@@ -461,16 +470,20 @@
         <label for="sizeSelect">Select Size *</label>
         <select id="sizeSelect" onchange="loadCups()">
             <option value="">-- Select Size --</option>
-            {% for size in sizes %}
-                <option
-                    value="{{ size.id }}"
-                    data-label="{{ size.size_label }}"
-                    data-buy="{{ size.buy_price|default(0) }}"
-                    data-rent="{{ size.rent_price|default(0) }}"
-                    data-deposit="{{ size.deposit|default(0) }}">
-                    {{ size.size_label }}
-                </option>
-            {% endfor %}
+            {% if sizes %}
+                {% for size in sizes %}
+                    <option
+                        value="{{ size.id }}"
+                        data-label="{{ size.size_label }}"
+                        data-buy="{{ size.buy_price|default(0) }}"
+                        data-rent="{{ size.rent_price|default(0) }}"
+                        data-deposit="{{ size.deposit|default(0) }}">
+                        {{ size.size_label }}
+                    </option>
+                {% endfor %}
+            {% else %}
+                <option value="" disabled>No sizes available</option>
+            {% endif %}
         </select>
     </div>
 
@@ -517,7 +530,9 @@ console.log('🔵 Vertical Cuplock page loaded');
 // GLOBALS
 // ============================================
 const PRODUCT_ID = {{ product.id }};
-const PRODUCT_BASE_PRICE = {{ product.price|default(0) }};
+// Note: Logic relies on Size Prices being the total unit price. 
+// If size.buy_price is only an increment, add PRODUCT_BASE_PRICE to the calculation.
+const PRODUCT_BASE_PRICE = {{ product.price|default(0) }}; 
 
 let selectedCupPrice = 0;
 let rentPrice = 0;
@@ -557,9 +572,12 @@ function updatePurchaseType() {
         if (!isBuySelected) {
             selectedCupPrice = 0;
             selectedCupId = null;
-            document.querySelectorAll('.cup-option-card').forEach(function(card) {
-                card.classList.remove('selected');
-            });
+            const cards = document.querySelectorAll('.cup-option-card');
+            if (cards.length > 0) {
+                cards.forEach(function(card) {
+                    card.classList.remove('selected');
+                });
+            }
         }
         
         updatePrice();
@@ -583,18 +601,19 @@ function loadCups() {
             return;
         }
         
-        const selectedOption = sizeSelect.options[sizeSelect.selectedIndex];
-
-        // Clear if no selection
-        if (!selectedOption || !selectedOption.value) {
-            selectedCupPrice = 0;
-            selectedCupId = null;
-            selectedSizeLabel = null;
-            container.innerHTML = '<p style="color:#666; text-align:center; padding: 2rem;">Please select a size first</p>';
-            updatePrice();
-            return;
+        const selectedIndex = sizeSelect.selectedIndex;
+        if (selectedIndex <= 0) { // 0 is usually "Select Size..." placeholder
+             // User selected the placeholder or nothing
+             selectedCupPrice = 0;
+             selectedCupId = null;
+             selectedSizeLabel = null;
+             container.innerHTML = '<p style="color:#666; text-align:center; padding: 2rem;">Please select a size first</p>';
+             updatePrice();
+             return;
         }
 
+        const selectedOption = sizeSelect.options[selectedIndex];
+        
         const sizeId = selectedOption.value;
         selectedSizeLabel = selectedOption.getAttribute('data-label') || '';
 
@@ -631,7 +650,7 @@ function loadCups() {
                 selectedCupId = null;
 
                 if (!data.success || !data.cups || data.cups.length === 0) {
-                    container.innerHTML = '<p style="color:#666; text-align:center; padding: 2rem;">No cup options available</p>';
+                    container.innerHTML = '<p style="color:#666; text-align:center; padding: 2rem;">No cup options available for this size.</p>';
                     updatePrice();
                     return;
                 }
@@ -810,4 +829,5 @@ function addToCart() {
     }
 }
 </script>
+
 {% endblock %}
