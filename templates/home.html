@@ -822,7 +822,7 @@
         }
 
         .footer-column h3 {
-            font-size: 1.5rem;
+            font-size: 1.4 rem;
             margin-bottom: 20px;
             color: #f0c14b;
         }
@@ -887,7 +887,7 @@
         .contact-info li i {
             color: #f0c14b;
             margin-right: 15px;
-            font-size: 1.1rem;
+            font-size: 0.5rem;
             margin-top: 5px;
         }
 
@@ -1165,8 +1165,10 @@
                 width: 55px;
             }
             
+            /* Fixed: Keep brand text visible on mobile devices */
             .brand-text {
-                display: none;
+                font-size: 0.9rem;
+                margin-left: 8px;
             }
 
             .hero-title {
@@ -1289,10 +1291,10 @@
 
     <!-- Navigation with Logo -->
     <nav class="navbar">
-        <a href="home.html" class="navbar-brand">
-            <img src="{{ url_for('static', filename='images/logo.jpeg') }}" alt="Crest Technocrat Logo" class="navbar-logo">
-            <span class="brand-text">Crest Technocrat</span>
-        </a>
+    <a href="javascript:void(0)" onclick="location.reload()" class="navbar-brand">
+        <img src="{{ url_for('static', filename='images/logo.jpeg') }}" alt="Crest Technocrat Logo" class="navbar-logo">
+        <span class="brand-text">Crest Technocrat</span>
+    </a>
         <ul class="nav-menu">
             <!-- <li><a href="home.html" class="active">Home</a></li> -->
             <!-- <li><a href="#" class="cart-icon"><i class="fas fa-shopping-cart"></i></a></li>

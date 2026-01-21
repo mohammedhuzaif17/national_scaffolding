@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -62,6 +60,9 @@
             margin-left: 10px;
             font-family: 'Poppins', sans-serif;
             text-transform: uppercase;
+            font-size: 0.9rem; /* Adjusted font size */
+            display: block !important; /* Force display on all devices */
+            line-height: 1.2; /* Adjust line height for better readability */
         }
 
         .navbar-logo {
@@ -123,7 +124,7 @@
         /* 3. Hero Section */
         #hero {
             padding: 80px 20px;
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            background: linear-gradient(135deg, #0c0727, #4f014d);
         }
 
         .hero-container {
@@ -326,7 +327,7 @@
             color: #1a3a6e;
             margin-top: 20px;
             margin-bottom: 15px;
-            font-size: 0.3rem; /* Reduced from default */
+            font-size: 1.3rem; /* Reduced from default */
             border-bottom: 2px solid #f0c14b;
             padding-bottom: 8px;
             word-wrap: break-word; /* Prevent text overflow */
@@ -374,7 +375,7 @@
             background-color: #f0c14b;
             color: #1a3a6e;
             border: none;
-            font-size: 1.1rem;
+            font-size: 1.0rem;
             font-weight: 700;
             border-radius: 5px;
             cursor: pointer;
@@ -387,40 +388,45 @@
 
         .download-manual-btn:hover {
             background-color: #d4a017;
-
         }
 
-        /* User Manual Title - Responsive Font Size */
+        /* User Manual Title - Fixed Font Size */
+        /* ===== USER MANUAL MAIN TITLE FIX ===== */
 .user-manual-title {
-    color: #1a3a6e;
     text-align: center;
     margin-bottom: 20px;
-    font-size: 1.8rem; /* Reduced from default */
-    word-wrap: break-word; /* Prevent text overflow */
+    padding: 0 16px;
 }
 
-/* Mobile adjustments for User Manual Title */
-@media (max-width: 768px) {
-    .user-manual-title {
-        font-size: 1.5rem; /* Smaller on mobile */
-    }
+/* BIG TITLE */
+.user-manual-title .title-main {
+    display: block;
+    font-size: clamp(1.2rem, 5vw, 1.9rem);
+    font-weight: 900;
+    color: #1a3a6e;
+    line-height: 1.25;
+
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: normal;
 }
 
-@media (max-width: 480px) {
-    .user-manual-title {
-        font-size: 1.3rem; /* Even smaller on very small screens */
-    }
+/* SUB TITLE */
+.user-manual-title .title-sub {
+    display: block;
+    margin-top: 6px;
+    font-size: clamp(1rem, 4vw, 1.4rem);
+    font-weight: 700;
+    color: #07152c;
 }
 
-@media (min-width: 1200px) {
-    .user-manual-title {
-        font-size: 2rem; /* Slightly larger on large screens */
-    }
-}
+
+      
+
 
         /* 8. Footer */
         footer {
-            background: #1a3a6e;
+            background: #061429;
             color: #fff;
             padding: 60px 20px 20px;
         }
@@ -533,7 +539,10 @@
 
         /* ===== RESPONSIVE MEDIA QUERIES ===== */
         @media (max-width: 768px) {
-            .navbar { padding: 0.8rem 1rem; }
+            .navbar { 
+                padding: 0.8rem 1rem; 
+                height: auto; /* Allow navbar to expand */
+            }
             
             /* Mobile Hamburger */
             .hamburger { display: block; }
@@ -552,26 +561,69 @@
             }
             .nav-menu.active { left: 0; }
             .nav-menu li { margin: 1rem 0; }
-            .navbar-logo { height: 50px; width: 50px; }
-            .brand-text { display: none; }
+            .navbar-logo { 
+                height: 50px; 
+                width: 50px; 
+            }
+            
+            /* Ensure brand text is visible on mobile */
+            .brand-text { 
+                display: block !important; 
+                font-size: 0.8rem; /* Smaller font size for mobile */
+                color: #333; /* Ensure color is visible */
+                white-space: normal; /* Allow text to wrap if needed */
+                max-width: 150px; /* Increased max-width */
+                line-height: 1.1; /* Adjusted line height for wrapped text */
+            }
+            
+            /* Adjust navbar brand for mobile */
+            .navbar-brand {
+                flex: 1; /* Allow brand to take available space */
+                max-width: 75%; /* Increased max-width */
+            }
             
             /* Mobile Hero */
-            .hero-container { flex-direction: column; text-align: center; }
-            .hero-stats { width: 100%; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .hero-container { 
+                flex-direction: column; 
+                text-align: center; 
+            }
+            .hero-stats { 
+                width: 100%; 
+                grid-template-columns: repeat(2, 1fr); 
+                gap: 10px; 
+            }
             .stat-item h3 { font-size: 1.5rem; }
             .stat-item p { font-size: 0.7rem; }
             
             /* Mobile Admins */
-            .administrators-container { flex-direction: column; align-items: center; }
-            .administrator { width: 100%; max-width: 100%; transform: none !important; margin-bottom: 20px; }
-            .administrators-container .administrator:nth-child(2) { transform: none !important; }
+            .administrators-container { 
+                flex-direction: column; 
+                align-items: center; 
+            }
+            .administrator { 
+                width: 100%; 
+                max-width: 100%; 
+                transform: none !important; 
+                margin-bottom: 20px; 
+            }
+            .administrators-container .administrator:nth-child(2) { 
+                transform: none !important; 
+            }
             
             /* Mobile Footer */
-            .footer-main { flex-direction: column; }
-            .map-wrapper iframe { height: 150px; }
+            .footer-main { 
+                flex-direction: column; 
+            }
+            .map-wrapper iframe { 
+                height: 150px; 
+            }
             
             /* Mobile Policy Content */
-            .policy-content { margin: 20px; padding: 20px; width: auto; }
+            .policy-content { 
+                margin: 20px; 
+                padding: 20px; 
+                width: auto; 
+            }
             
             /* Mobile User Manual Headings */
             .user-manual-content h3 { 
@@ -585,6 +637,26 @@
         
         /* Extra Small Mobile */
         @media (max-width: 480px) {
+            .navbar {
+                padding: 0.5rem 0.8rem; /* Reduced padding for very small screens */
+            }
+            
+            .navbar-brand {
+                max-width: 70%; /* Further limit width for very small screens */
+            }
+            
+            .brand-text {
+                font-size: 0.7rem; /* Even smaller font for very small screens */
+                max-width: 120px; /* Increased max-width */
+                white-space: normal; /* Allow text to wrap */
+                line-height: 1.0; /* Adjusted line height for very small screens */
+            }
+            
+            .navbar-logo {
+                height: 40px;
+                width: 40px;
+            }
+            
             .hero-container, .expertise-container, .journey-container, .administrators-container, .footer-container {
                 padding-left: 10px;
                 padding-right: 10px;
@@ -638,8 +710,8 @@
     <nav class="navbar">
         <a href="{{ url_for('index') }}" class="navbar-brand">
             <!-- Placeholder logo for demo purposes if url_for fails in local environment -->
-            <img src="{{ url_for('static', filename='images/logo.jpeg') }}" onerror="this.src='https://picsum.photos/seed/logo/60/60.jpg'" alt="THE NATIONAL SCAFFOLDING Logo" class="navbar-logo">
-            <span class="brand-text">THE NATIONAL SCAFFOLDING</span>
+            <img src="{{ url_for('static', filename='images/logo.jpeg') }}" onerror="this.src='https://picsum.photos/seed/logo/60/60.jpg'" alt="CRESTTECHNOCRAT Logo" class="navbar-logo">
+            <span class="brand-text">Crest technocrat</span>
         </a>
         <ul class="nav-menu">
             <li><a href="{{ url_for('index') }}">Home</a></li>
@@ -815,7 +887,11 @@
         </div>
         <div class="user-manual-container">
             <div class="user-manual-content">
-               <h2 class="user-manual-title">THE NATIONAL SCAFFOLDING (Aluminium)</h2>
+               <h2 class="user-manual-title">
+    <span class="title-main">THE NATIONAL SCAFFOLDING</span>
+    <span class="title-sub">(Aluminium)</span>
+</h2>
+
                 
                 <h3>Overview</h3>
                 <p>This manual provides detailed guidance on safe use, assembly, maintenance, and care of aluminium scaffolding systems supplied by The National Scaffoldings. Please read and follow all sections carefully before operating or assembling your scaffolding.</p>

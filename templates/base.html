@@ -67,7 +67,7 @@
         .brand-text {
             margin-left: 12px;
             font-size: 1.3rem;
-            display: none; /* Hidden on very small mobile, shown on desktop/tablet */
+            display: block; /* FIX: Show on all screen sizes by default */
         }
 
         /* Navigation Links */
@@ -109,37 +109,46 @@
             justify-content: space-between;
             width: 32px;   /* Nice touch target width */
             height: 28px;   /* Nice touch target height */
-            background: transparent;
-            border: none;
+            background: transparent !important;
+            border: none !important;
             cursor: pointer;
             z-index: 1001;
-            padding: 0;
-            margin: 0;
+            padding: 0 !important;
+            margin: 0 !important;
             outline: none;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            color: transparent !important;
         }
 
         /* The Lines (Bars) */
         .mobile-menu-btn span {
             width: 100%;
             height: 3px;       /* Thickness of bars */
-            background-color: #333;
-            margin: 0;
+            background-color: #333 !important;
+            margin: 0 !important;
             border-radius: 3px;    /* Rounded edges */
             transition: all 0.3s ease-in-out; /* Smooth animation */
-            display: block;
+            display: block !important;
             transform-origin: center;
+            opacity: 1 !important;
+            visibility: visible !important;
+            position: relative !important;
             
             /* FIX: Hides the text "Back" so it doesn't break alignment */
             font-size: 0;
             line-height: 0;
             color: transparent;
+            padding: 0;
+            border: none;
+            box-shadow: none;
         }
 
         /* ===== ANIMATION TO "X" STATE ===== */
         /* Top Bar rotates down */
         .mobile-menu-btn.active span:nth-child(1) {
             transform: translateY(10px) rotate(45deg); 
-            background-color: #d4af37; /* Gold color when active */
+            background-color: #d4af37 !important; /* Gold color when active */
         }
 
         /* Middle Bar fades out */
@@ -151,11 +160,12 @@
         /* Bottom Bar rotates up */
         .mobile-menu-btn.active span:nth-child(3) {
             transform: translateY(-10px) rotate(-45deg);
-            background-color: #d4af37;
+            background-color: #d4af37 !important;
         }
 
         /* ===== MOBILE RESPONSIVE DESIGN ===== */
         @media (max-width: 992px) {
+            /* Brand text remains visible on tablets and smaller screens */
             .brand-text {
                 display: block;
             }
@@ -184,7 +194,7 @@
 
             /* Show Hamburger Button */
             .mobile-menu-btn {
-                display: flex;
+                display: flex !important;
             }
 
             /* Transform Links into a Mobile Dropdown */
