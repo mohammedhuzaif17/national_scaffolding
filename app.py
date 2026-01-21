@@ -8,6 +8,7 @@ import qrcode
 import io
 import base64
 from utils import get_image_url
+
 import random
 from flask import abort
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -15,7 +16,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 # from cuplock_routes import get_image_url
 from flask import render_template, request
 from models import Product, CuplockLedgerSize
-
 
 # FIX: Import both datetime class and timedelta class
 from datetime import datetime, timedelta 
@@ -202,7 +202,6 @@ db.init_app(app)
 # Register Jinja filters
 app.jinja_env.filters['indian'] = indian_format
 
-
 IST = ZoneInfo("Asia/Kolkata")
 
 def utc_to_ist(dt):
@@ -211,7 +210,6 @@ def utc_to_ist(dt):
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=timezone.utc)
     return dt.astimezone(IST)
-
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -263,6 +261,39 @@ def validate_image_file(filepath):
     
     return diagnostic
 
+def upload_file_locally(file, filename):
+    """Upload file to local filesystem"""
+    if file and allowed_file(file.filename):
+        # Create a unique filename to avoid overwrites
+        unique_filename = f"{uuid.uuid4().hex}_{filename}"
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+        
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        
+        # Save the file
+        file.save(file_path)
+        
+        # Return the relative path for database storage
+        return f"uploads/{unique_filename}"
+    return None
+
+def delete_local_file(file_path):
+    """Delete file from local filesystem"""
+    if file_path:
+        # Convert URL path to filesystem path
+        if file_path.startswith('uploads/'):
+            full_path = os.path.join(app.static_folder, file_path)
+        else:
+            full_path = file_path
+            
+        if os.path.exists(full_path):
+            try:
+                os.remove(full_path)
+                return True
+            except Exception as e:
+                app.logger.error(f"Error deleting file {full_path}: {e}")
+    return False
 
 # ============================================================================
 # ADMIN OTP FUNCTIONS
@@ -304,7 +335,6 @@ def send_admin_otp(admin_id):
     except Exception as e:
         app.logger.error(f"Failed to send OTP email: {e}")
         raise
-
 
 # ============================================================================
 # ADMIN LOGIN WITH OTP
@@ -368,7 +398,6 @@ def admin_login():
             return render_template('admin_login.html')
     
     return render_template('admin_login.html')
-
 
 @app.route('/admin_otp', methods=['GET', 'POST'])
 def admin_otp():
@@ -441,7 +470,6 @@ def admin_otp():
     
     return render_template('admin_otp.html', admin=admin, time_remaining=time_remaining)
 
-
 @app.route('/admin_resend_otp', methods=['POST'])
 def admin_resend_otp():
     """Resend OTP to admin"""
@@ -455,7 +483,6 @@ def admin_resend_otp():
     except Exception as e:
         app.logger.error(f"OTP resend failed: {e}")
         return jsonify({'success': False, 'message': 'Failed to resend OTP'}), 500
-
 
 def safe_float(value):
     if value is None:
@@ -484,13 +511,6 @@ def validate_price(price_value, field_name='Price'):
         return True, None
     except (ValueError, TypeError):
         return False, f"{field_name} must be a valid number"
-
-# Updated calculate_price function to handle Cuplock
-# ============================================================================
-# COMPLETE calculate_price FUNCTION WITH CUPLOCK SUPPORT
-# Replace your existing calculate_price function (around line 250) with this entire function
-# ============================================================================
-# ... (keep all your code from the top of the file up to the calculate_price function) ...
 
 # ============================================================================
 # CORRECTED calculate_price FUNCTION
@@ -617,20 +637,7 @@ def calculate_price(product, customization=None):
             'deposit': 0
         }
 
-# ... (keep the rest of your app.py code, but make sure to REMOVE the HTML block at the very end) ...
-
-# The following HTML block was at the end of your Python file and MUST BE DELETED:
-#
-# {% extends "base.html" %}
-#
-# {% block title %}National Scaffolding - Fabrications{% endblock %}
-#
-# ... (rest of the HTML code) ...
-#
 # COMPLETE product_detail ROUTE WITH CUPLOCK REDIRECT
-# Replace your existing @app.route('/product/<int:product_id>') (around line 350) with this
-# ============================================================================
-
 @app.route('/product/<int:product_id>')
 def product_detail(product_id):
     try:
@@ -650,7 +657,7 @@ def product_detail(product_id):
             if product.cuplock_type == 'vertical':
                 return redirect(url_for('cuplock.vertical_product_page', product_id=product_id))
             elif product.cuplock_type == 'ledger':
-                return redirect(url_for('cuplock.ledger_product_page', product_id=product_id))
+                return redirect(url_for('cuplock.ledger_product_page', product_id=product.id))
             
             # Fallback: If cuplock_type is not set properly, try to load sizes
             try:
@@ -861,48 +868,6 @@ def index():
 def home():
     """Redirect to index to show welcome popup"""
     return redirect(url_for('index'))
-# ... keep the rest of your app.py code unchanged ...
-    # try:
-    #     from cuplock_routes import get_image_url
-        
-    #     category = request.args.get('category', 'all')
-
-    #     if category == 'all':
-    #         products = Product.query.filter(
-    #             Product.is_active == True
-    #         ).all()
-    #     else:
-    #         category_map = {
-    #             'aluminium': 'aluminium',
-    #             'h-frames': 'h-frames',
-    #             'cuplock': 'cuplock',
-    #             'accessories': 'accessories'
-    #         }
-
-    #         db_category = category_map.get(category.lower(), category)
-
-    #         products = Product.query.filter(
-    #             Product.category == db_category,
-    #             Product.is_active == True
-    #         ).all()
-
-    #     for product in products:
-    #         product.display_image_url = get_image_url(product.image_url)
-
-    #     return render_template(
-    #         'national_scaffoldings.html',
-    #         products=products,
-    #         category=category
-    #     )
-
-    # except Exception as e:
-    #     app.logger.error(f"Index route error: {e}", exc_info=True)
-    #     return render_template(
-    #         'national_scaffoldings.html',
-    #         products=[],
-    #         category='all'
-    #     )
-
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -996,14 +961,9 @@ def login():
 
     return render_template('login.html')
 
-  
-# =================================================================
-# PASTE THE FABRICATION_DETAIL FUNCTION HERE (at the top level)
-# =================================================================
 # =================================================================
 # FABRICATION ROUTES
 # =================================================================
-
 
 @app.route('/logout')
 @login_required
@@ -1059,13 +1019,86 @@ def switch_admin_panel(panel_type):
     except Exception as e:
         app.logger.error(f"Switch admin panel error: {e}")
         return redirect(url_for('dashboard'))
-    
+
+# ==========================================
+# FIXED: national_scaffoldings route
+# ==========================================
+@app.route('/national_scaffoldings')
+def national_scaffoldings():
+    category = request.args.get('category', 'all')
+
+    scaffolding_categories = ['aluminium', 'h-frames', 'cuplock', 'accessories']
+
+    query = Product.query.filter(
+        Product.is_active == True,
+        Product.category.in_(scaffolding_categories)
+    )
+
+    if category != 'all':
+        query = query.filter(Product.category == category)
+
+    products = query.all()
+
+    for product in products:
+        # ✅ Use get_local_image_url instead of S3
+        product.display_image_url = get_image_url(product.image_url)
+
+        product.display_price = product.price if product.price else 0
+
+        # Handle ledger pricing
+        if product.category == 'cuplock' and product.cuplock_type == 'ledger':
+            min_size = CuplockLedgerSize.query.filter_by(
+                product_id=product.id,
+                is_active=True
+            ).order_by(CuplockLedgerSize.buy_price.asc()).first()
+
+            product.display_price = min_size.buy_price if min_size else 0
+
+    return render_template(
+        'national_scaffoldings.html',
+        products=products
+    )
+
+# ==========================================
+# FIXED: cuplock_shop route
+# ==========================================
+@app.route('/cuplock/api/vertical/product/<int:product_id>/sizes')
+def api_vertical_sizes(product_id):
+    """API endpoint to get sizes for a vertical cuplock product"""
+    try:
+        from models import CuplockVerticalSize
+        
+        sizes = CuplockVerticalSize.query.filter_by(
+            product_id=product_id,
+            is_active=True
+        ).order_by(CuplockVerticalSize.display_order.asc(), CuplockVerticalSize.size_label.asc()).all()
+        
+        size_data = []
+        for size in sizes:
+            size_data.append({
+                'id': size.id,
+                'size_label': size.size_label,
+                'weight': float(size.weight) if size.weight else 0,
+                'buy_price': float(size.buy_price) if size.buy_price else 0,
+                'rent_price': float(size.rent_price) if size.rent_price else 0,
+                'deposit': float(size.deposit) if size.deposit else 0
+            })
+        
+        return jsonify({
+            'success': True,
+            'sizes': size_data
+        })
+    except Exception as e:
+        app.logger.error(f"Error fetching vertical sizes: {e}")
+        return jsonify({
+            'success': False,
+            'message': 'Error fetching sizes'
+        }), 500
+        
 @app.route('/cuplock-shop')
 def cuplock_shop():
-    """Display all cuplock products - both vertical and ledger"""
+    """Display all cuplock products"""
     try:
-        # from cuplock_routes import get_image_url
-        
         # Get vertical products
         vertical_products = Product.query.filter_by(
             category='cuplock',
@@ -1080,209 +1113,58 @@ def cuplock_shop():
             is_active=True
         ).all()
         
-        # Debug logging
-        app.logger.info(f"Cuplock Shop - Vertical: {len(vertical_products)}, Ledger: {len(ledger_products)}")
-        
-        # Add display_image_url to each product for template rendering
+        # ✅ Process images with local filesystem support
         for product in vertical_products:
             product.display_image_url = get_image_url(product.image_url)
         
         for product in ledger_products:
             product.display_image_url = get_image_url(product.image_url)
-            app.logger.info(f"Ledger Product: {product.name}, Image: {product.display_image_url}")
         
         return render_template('cuplock_shop.html',
                              vertical_products=vertical_products,
                              ledger_products=ledger_products)
     except Exception as e:
-        app.logger.error(f"Cuplock shop error: {e}")
-        import traceback
-        app.logger.error(traceback.format_exc())
+        app.logger.error(f"Cuplock shop error: {e}", exc_info=True)
         return render_template('cuplock_shop.html', vertical_products=[], ledger_products=[])
-        
-# @app.route('/national_scaffoldings')
-# def national_scaffoldings():
-#     category = request.args.get('category', 'all')
 
-#     allowed_categories = ['aluminium', 'h-frames', 'cuplock', 'accessories']
-
-#     products = Product.query.filter(
-#         Product.is_active == True,
-#         Product.category.in_(allowed_categories)
-#     ).order_by(Product.id.desc()).all()
-
-#     # Category filter
-#     if category != 'all':
-#         products = [p for p in products if p.category == category]
-
-#     # IMAGE HANDLING
-#     for product in products:
-#         # Default image
-#         product.display_image_url = 'images/no-image.png'
-
-#         # CUPLOCK VERTICAL → image from size table
-#         if product.category == 'cuplock' and product.cuplock_type == 'vertical':
-#             try:
-#                 from models import CuplockVerticalSize
-
-#                 size = CuplockVerticalSize.query.filter_by(
-#                     product_id=product.id,
-#                     is_active=True
-#                 ).first()
-
-#                 if size:
-#                     # 🔴 CHANGE THIS IF YOUR COLUMN NAME IS DIFFERENT
-#                     if hasattr(size, 'image_url') and size.image_url:
-#                         product.display_image_url = size.image_url
-
-#             except Exception as e:
-#                 print(f"❌ Vertical image error (product {product.id}):", e)
-
-#         # ALL OTHER PRODUCTS
-#         elif product.image_url:
-#             images = [i.strip() for i in product.image_url.split(',') if i.strip()]
-#             if images:
-#                 product.display_image_url = images[0]
-
-#     return render_template(
-#         'national_scaffoldings.html',
-#         products=products,
-#         selected_category=category
-#     )
-# @app.route('/national_scaffoldings')
-# def national_scaffoldings():
-#     category = request.args.get('category', 'all')
-
-#     allowed_categories = ['aluminium', 'h-frames', 'cuplock', 'accessories']
-
-#     products = Product.query.filter(
-#         Product.is_active == True,
-#         Product.category.in_(allowed_categories)
-#     ).order_by(Product.id.desc()).all()
-
-#     if category != 'all':
-#         products = [p for p in products if p.category == category]
-
-#     # ================= IMAGE + PRICE HANDLING =================
-#     for product in products:
-
-#         # ---------- DEFAULTS ----------
-#         product.display_image_url = 'images/no-image.png'
-#         product.display_price = 0   # 🔥 THIS IS IMPORTANT
-
-#         # ---------- CUPLOCK ----------
-#         if product.category == 'cuplock':
-
-#             # ===== LEDGER =====
-#             if product.cuplock_type == 'ledger':
-#                 from models import CuplockLedgerSize
-
-#                 size = CuplockLedgerSize.query.filter_by(
-#                     product_id=product.id,
-#                     is_active=True
-#                 ).order_by(CuplockLedgerSize.buy_price).first()
-
-#                 if size:
-#                     product.display_price = float(size.buy_price or 0)
-
-#                     if hasattr(size, 'image_url') and size.image_url:
-#                         product.display_image_url = size.image_url
-
-#             # ===== VERTICAL =====
-#             elif product.cuplock_type == 'vertical':
-#                 from models import CuplockVerticalSize
-
-#                 size = CuplockVerticalSize.query.filter_by(
-#                     product_id=product.id,
-#                     is_active=True
-#                 ).order_by(CuplockVerticalSize.buy_price).first()
-
-#                 if size:
-#                     product.display_price = float(size.buy_price or 0)
-
-#                     if hasattr(size, 'image_url') and size.image_url:
-#                         product.display_image_url = size.image_url
-
-#         # ---------- NON-CUPLOCK ----------
-#         else:
-#             product.display_price = float(product.price or 0)
-
-#             if product.image_url:
-#                 images = [i.strip() for i in product.image_url.split(',') if i.strip()]
-#                 if images:
-#                     product.display_image_url = images[0]
-
-#     return render_template(
-#         'national_scaffoldings.html',
-#         products=products,
-#         selected_category=category
-#     )
-@app.route('/national_scaffoldings')
-def national_scaffoldings():
-    category = request.args.get('category', 'all')
-
-    # Define scaffolding categories
-    scaffolding_categories = ['aluminium', 'h-frames', 'cuplock', 'accessories']
-
-    query = Product.query.filter(
-        Product.is_active == True,
-        Product.category.in_(scaffolding_categories)  # Only scaffolding categories
-    )
-
-    if category != 'all':
-        query = query.filter(Product.category == category)
-
-    products = query.all()
-
-    for product in products:
-        product.display_image_url = get_image_url(product.image_url)
-
-        # 🔹 DEFAULT PRICE
-        product.display_price = product.price if product.price else 0
-
-        # 🔥 LEDGER PRICE (MIN BUY PRICE)
-        if product.category == 'cuplock' and product.cuplock_type == 'ledger':
-            min_size = CuplockLedgerSize.query.filter_by(
-                product_id=product.id,
-                is_active=True
-            ).order_by(CuplockLedgerSize.buy_price.asc()).first()
-
-            product.display_price = min_size.buy_price if min_size else 0
-
-    return render_template(
-        'national_scaffoldings.html',
-        products=products
-    )
-
-
-
-@app.route('/fix_old_fabrication_products')
-def fix_old_fabrication_products():
+# ==========================================
+# FIXED: fabrications route
+# ==========================================
+@app.route('/fabrications')
+def fabrications():
     try:
-        # Find products that might be fabrication products
-        # Update these patterns based on what you find in debug_all_products
-        possible_patterns = ['steel', 'aluminium', 'custom', 'parts']
+        category_filter = request.args.get('category', 'all')
         
-        updated_count = 0
-        for pattern in possible_patterns:
-            products = Product.query.filter(
-                Product.category == pattern,
-                Product.is_active == True
-            ).all()
-            
-            for product in products:
-                product.category = 'fabrication'
-                updated_count += 1
+        scaffolding_categories = ['aluminium', 'h-frames', 'cuplock', 'accessories']
         
-        db.session.commit()
+        query = Product.query.filter(
+            Product.category.notin_(scaffolding_categories),
+            Product.is_active == True
+        )
         
-        return jsonify({
-            'success': True,
-            'message': f'Updated {updated_count} products to category=fabrication'
-        })
+        if category_filter != 'all':
+            query = query.filter(Product.category == category_filter)
+        
+        products = query.order_by(Product.id.desc()).all()
+        
+        # ✅ Process images with local filesystem support
+        for product in products:
+            product.display_image_url = get_image_url(product.image_url)
+        
+        return render_template(
+            'fabrications.html',
+            products=products,
+            category=category_filter
+        )
+        
     except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)})
+        app.logger.error(f"Fabrications route error: {e}", exc_info=True)
+        return render_template(
+            'fabrications.html',
+            products=[],
+            category='all'
+        )
+
 @app.route('/fabrication/<int:product_id>')
 def fabrication_detail(product_id):
     try:
@@ -1306,6 +1188,7 @@ def fabrication_detail(product_id):
         print("🔥 FABRICATION DETAIL ERROR:", repr(e))
         flash('Error loading product details. Please try again.', 'error')
         return redirect(url_for('fabrications'))
+
 @app.route('/about')
 def about():
     return render_template('about.html')
@@ -1460,7 +1343,6 @@ def cart():
     except Exception as e:
         app.logger.error(f"Cart error: {e}", exc_info=True)
         return render_template('cart.html', cart_items=[])
-
 
 @app.route('/qr_scanner')
 @login_required
@@ -1669,9 +1551,6 @@ def remove_from_cart(index):
         app.logger.error(f"Remove from cart error: {e}")
         return redirect(url_for('cart'))
 
-
-
-    
 @app.route('/admin/vertical/product/<int:product_id>/delete', methods=['POST'])
 @login_required
 def vertical_delete(product_id):
@@ -1788,7 +1667,7 @@ def vertical_edit(product_id):
         db.session.commit()
         flash('Product updated successfully!', 'success')
         # Keep user on edit page after updating
-        return redirect(url_for('cuplock_vertical_edit`', product_id=product_id))
+        return redirect(url_for('cuplock_vertical_edit', product_id=product_id))
     
     return render_template('admin/vertical_edit.html', product=product)
 
@@ -1820,7 +1699,6 @@ def admin_complete_order(order_id):
         app.logger.error(f"Admin complete order error: {e}")
         db.session.rollback()
         return jsonify({'success': False, 'message': 'Error completing order'}), 500
-
     
 @app.route('/admin_scaffoldings')
 @login_required
@@ -1889,8 +1767,6 @@ def edit_scaffolding_product(product_id):
         flash(f'Error: {str(e)}', 'error')
         return redirect(url_for('admin_scaffoldings'))
 
-
-# ... your other imports ...
 @app.route('/debug/cuplock_ledger/<int:product_id>')
 def debug_cuplock_ledger(product_id):
     try:
@@ -1922,13 +1798,11 @@ def debug_cuplock_ledger(product_id):
         })
     except Exception as e:
         return jsonify({'error': str(e)})
-
+    
 @app.route('/cuplock_products')
 def cuplock_products():
     """List all Cuplock products"""
     try:
-        # from cuplock_routes import get_image_url
-        
         vertical_products = Product.query.filter_by(
             category='cuplock',
             cuplock_type='vertical',
@@ -2071,6 +1945,7 @@ def admin_analytics():
     except Exception as e:
         app.logger.error(f"Admin analytics error: {e}")
         return render_template('admin_analytics.html', monthly_data={}, yearly_data={}, category_data={}, sorted_months=[], total_revenue=0, total_orders=0, avg_order_value=0)
+
 @app.route('/admin_logout')
 @login_required
 def admin_logout():
@@ -2085,7 +1960,6 @@ def admin_logout():
     except Exception as e:
         app.logger.error(f"Logout error: {e}")
         return redirect(url_for('dashboard'))
-    
 
 @app.route('/admin_add_fabrication_product', methods=['POST'])
 def admin_add_fabrication_product():
@@ -2138,161 +2012,22 @@ def admin_add_fabrication_product():
         db.session.rollback()
         app.logger.error(f"Error adding fabrication product: {e}", exc_info=True)
         return jsonify({'success': False, 'message': str(e)})
-# @app.route('/admin_add_product', methods=['GET', 'POST'])
-# @login_required
-# def admin_add_product():
-#     """Add new scaffolding product with cuplock support (FIXED)"""
-#     try:
-#         # Admin check
-#         if session.get('user_type') != 'admin' or session.get('panel_type') != 'scaffolding':
-#             return redirect(url_for('dashboard'))
 
-#         # -------------------------------
-#         # GET REQUEST
-#         # -------------------------------
-#         if request.method == 'GET':
-#             return render_template('add_scaffolding_product.html')
-
-#         # -------------------------------
-#         # 1. READ FORM DATA (SAFE)
-#         # -------------------------------
-#         name = request.form.get('name')
-#         description = request.form.get('description', '')
-#         category = request.form.get('category')
-#         cuplock_type = request.form.get('cuplock_type', '')
-#         product_type = request.form.get('product_type', 'scaffolding')
-
-#         price = safe_float(request.form.get('price')) or 0.0
-#         rent_price = safe_float(request.form.get('rent_price')) or 0.0
-#         deposit_amount = safe_float(request.form.get('deposit_amount')) or 0.0
-#         weight_per_unit = safe_float(request.form.get('weight_per_unit')) or 0.0
-
-#         app.logger.info(
-#             f"[ADD PRODUCT] name={name}, category={category}, cuplock_type={cuplock_type}"
-#         )
-
-#         # -------------------------------
-#         # 2. VALIDATION
-#         # -------------------------------
-#         if not name or not category:
-#             flash('Product name and category are required', 'error')
-#             return render_template('add_scaffolding_product.html')
-
-#         if category == 'cuplock' and cuplock_type not in ['ledger', 'vertical']:
-#             flash('Please select Cuplock type (Ledger or Vertical)', 'error')
-#             return render_template('add_scaffolding_product.html')
-
-#         # -------------------------------
-#         # 3. LEDGER SAFETY
-#         # -------------------------------
-#         if category == 'cuplock' and cuplock_type == 'ledger':
-#             price = 0.0
-#             rent_price = 0.0
-#             deposit_amount = 0.0
-
-#         # -------------------------------
-#         # 4. CREATE PRODUCT
-#         # -------------------------------
-#         product = Product(
-#             name=name,
-#             description=description,
-#             category=category,
-#             cuplock_type=cuplock_type if category == 'cuplock' else None,
-#             product_type=product_type,
-#             price=price,
-#             rent_price=rent_price,
-#             deposit_amount=deposit_amount,
-#             weight_per_unit=weight_per_unit,
-#             is_active=True
-#         )
-
-#         # -------------------------------
-#         # 5. IMAGE UPLOAD
-#         # -------------------------------
-#         image_urls = []
-#         uploaded_files = request.files.getlist('product_images')
-
-#         if uploaded_files:
-#             os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-#             for file in uploaded_files:
-#                 if file and file.filename and allowed_file(file.filename):
-#                     filename = f"{uuid.uuid4().hex}_{secure_filename(file.filename)}"
-#                     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-#                     file.save(filepath)
-#                     image_urls.append(f"uploads/{filename}")
-
-#         product.image_url = ','.join(image_urls) if image_urls else 'images/no-image.png'
-
-#         db.session.add(product)
-#         db.session.flush()  # get product.id
-
-#         # -------------------------------
-#         # 6. HANDLE CUPLOCK LEDGER SIZES
-#         # -------------------------------
-#                # ... inside admin_add_product function ...
-
-#         # -------------------------------
-#         # 6. HANDLE CUPLOCK LEDGER SIZES
-#         # -------------------------------
-#                # -------------------------------
-#         # 8. REDIRECT
-#         # -------------------------------
-#         if category == 'cuplock' and cuplock_type == 'ledger':
-#             flash('✅ Ledger product created! Please add or edit sizes.', 'success')
-#             # ❌ THIS LINE IS CAUSING THE 404 ERROR:
-#             return redirect(url_for('edit_ledger_sizes', product_id=product.id))
-
-#         flash(f'✅ Product "{name}" created successfully!', 'success')
-#         return redirect(url_for('admin_scaffoldings'))
-
-#             # if size_count == 0:
-#             #     flash('Ledger product created, but no sizes were added.', 'warning')
-
-#         # -------------------------------
-#         # 7. COMMIT
-#         # -------------------------------
-#         db.session.commit()
-
-#         # -------------------------------
-#         # 8. REDIRECT
-#         # -------------------------------
-#                # -------------------------------
-#         # 8. REDIRECT
-#         # -------------------------------
-#         if category == 'cuplock' and cuplock_type == 'ledger':
-#             flash('✅ Ledger product created! Please add or edit sizes.', 'success')
-#             # ✅ FIXED: Redirect to the Cuplock Blueprint route (which exists)
-#             return redirect(url_for('cuplock.ledger_edit', product_id=product.id))
-
-#         flash(f'✅ Product "{name}" created successfully!', 'success')
-#         return redirect(url_for('admin_scaffoldings'))
-
-#     except Exception as e:
-#         db.session.rollback()
-#         app.logger.error(f"admin_add_product error: {e}", exc_info=True)
-#         flash(f'Error creating product: {str(e)}', 'error')
-#         return render_template('add_scaffolding_product.html')
-
-
-
+# ==========================================
+# FIXED: admin_add_product with local storage
+# ==========================================
 @app.route('/admin_add_product', methods=['GET', 'POST'])
 @login_required
 def admin_add_product():
-    """Add new scaffolding product with cuplock support (FIXED)"""
+    """Add new scaffolding product with local storage support"""
     try:
-        # Admin check
         if session.get('user_type') != 'admin' or session.get('panel_type') != 'scaffolding':
             return redirect(url_for('dashboard'))
 
-        # -------------------------------
-        # GET REQUEST
-        # -------------------------------
         if request.method == 'GET':
             return render_template('add_scaffolding_product.html')
 
-        # -------------------------------
-        # 1. READ FORM DATA (SAFE)
-        # -------------------------------
+        # Read form data
         name = request.form.get('name')
         description = request.form.get('description', '')
         category = request.form.get('category')
@@ -2304,32 +2039,22 @@ def admin_add_product():
         deposit_amount = safe_float(request.form.get('deposit_amount')) or 0.0
         weight_per_unit = safe_float(request.form.get('weight_per_unit')) or 0.0
 
-        app.logger.info(
-            f"[ADD PRODUCT] name={name}, category={category}, cuplock_type={cuplock_type}"
-        )
-
-        # -------------------------------
-        # 2. VALIDATION
-        # -------------------------------
+        # Validation
         if not name or not category:
             flash('Product name and category are required', 'error')
             return render_template('add_scaffolding_product.html')
 
         if category == 'cuplock' and cuplock_type not in ['ledger', 'vertical']:
-            flash('Please select Cuplock type (Ledger or Vertical)', 'error')
+            flash('Please select Cuplock type', 'error')
             return render_template('add_scaffolding_product.html')
 
-        # -------------------------------
-        # 3. LEDGER SAFETY
-        # -------------------------------
+        # Ledger safety
         if category == 'cuplock' and cuplock_type == 'ledger':
             price = 0.0
             rent_price = 0.0
             deposit_amount = 0.0
 
-        # -------------------------------
-        # 4. CREATE PRODUCT
-        # -------------------------------
+        # Create product
         product = Product(
             name=name,
             description=description,
@@ -2343,29 +2068,27 @@ def admin_add_product():
             is_active=True
         )
 
-        # -------------------------------
-        # 5. IMAGE UPLOAD
-        # -------------------------------
+        # ✅ Upload images to local filesystem
         image_urls = []
         uploaded_files = request.files.getlist('product_images')
 
         if uploaded_files:
-            os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
             for file in uploaded_files:
                 if file and file.filename and allowed_file(file.filename):
-                    filename = f"{uuid.uuid4().hex}_{secure_filename(file.filename)}"
-                    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                    file.save(filepath)
-                    image_urls.append(f"uploads/{filename}")
+                    filename = secure_filename(file.filename)
+                    unique_name = f"{uuid.uuid4().hex}_{filename}"
+                    
+                    # ✅ Upload to local filesystem
+                    file_path = upload_file_locally(file, unique_name)
+                    if file_path:
+                        image_urls.append(file_path)
 
         product.image_url = ','.join(image_urls) if image_urls else 'images/no-image.png'
 
         db.session.add(product)
-        db.session.flush()  # get product.id
+        db.session.flush()
 
-        # -------------------------------
-        # 6. HANDLE CUPLOCK LEDGER SIZES (FIXED)
-        # -------------------------------
+        # Handle Cuplock ledger sizes
         if category == 'cuplock' and cuplock_type == 'ledger':
             from models import CuplockLedgerSize
 
@@ -2377,10 +2100,8 @@ def admin_add_product():
                 if not size_name:
                     break
 
-                # ✅ FIX 1: Truncate size_name to 50 characters to prevent DB error
                 if len(size_name) > 50:
                     size_name = size_name[:50]
-                    app.logger.warning(f"Size name truncated to 50 chars: {size_name}")
 
                 ledger_size = CuplockLedgerSize(
                     product_id=product.id,
@@ -2399,17 +2120,10 @@ def admin_add_product():
             if size_count == 0:
                 flash('Ledger product created, but no sizes were added.', 'warning')
 
-        # -------------------------------
-        # 7. COMMIT
-        # -------------------------------
         db.session.commit()
 
-        # -------------------------------
-        # 8. REDIRECT (FIXED)
-        # -------------------------------
         if category == 'cuplock' and cuplock_type == 'ledger':
-            flash('✅ Ledger product created! Please add or edit sizes.', 'success')
-            # ✅ FIX 2: Redirect to the Blueprint route (cuplock.ledger_edit) instead of the local broken route
+            flash('✅ Ledger product created!', 'success')
             return redirect(url_for('cuplock.ledger_edit', product_id=product.id))
 
         flash(f'✅ Product "{name}" created successfully!', 'success')
@@ -2420,6 +2134,7 @@ def admin_add_product():
         app.logger.error(f"admin_add_product error: {e}", exc_info=True)
         flash(f'Error creating product: {str(e)}', 'error')
         return render_template('add_scaffolding_product.html')
+
 @app.route('/check_categories')
 def check_categories():
     try:
@@ -2498,7 +2213,8 @@ def debug_products():
                 'name': p.name,
                 'category': p.category,
                 'product_type': p.product_type,
-                'is_active': p.is_active
+                'is_active': p.is_active,
+                'price': float(p.price) if p.price else 0
             })
         
         return jsonify(debug_info)
@@ -2573,164 +2289,6 @@ def debug_fabrication_products():
         })
     except Exception as e:
         return jsonify({'error': str(e)})
-
-
-# Replace your existing fabrications route with this one
-@app.route('/fabrications')
-def fabrications():
-    try:
-        # Get category filter from URL
-        category_filter = request.args.get('category', 'all')
-        
-        app.logger.info(f"Fabrications route - Category filter: {category_filter}")
-        
-        # IMPORTANT: Exclude scaffolding categories from fabrication
-        scaffolding_categories = ['aluminium', 'h-frames', 'cuplock', 'accessories']
-        
-        # Base query - ONLY fabrication products (exclude scaffolding)
-        query = Product.query.filter(
-            Product.category.notin_(scaffolding_categories),  # FIXED: removed 'a' -> notin_
-            Product.is_active == True
-        )
-        
-        # Apply subcategory filter if specified
-        if category_filter != 'all':
-            query = query.filter(Product.category == category_filter)
-        
-        products = query.order_by(Product.id.desc()).all()
-        
-        app.logger.info(f"Found {len(products)} fabrication products")
-        
-        # Log what categories we actually found
-        found_categories = set()
-        for product in products:
-            found_categories.add(product.category)
-        app.logger.info(f"Categories found: {list(found_categories)}")
-        
-        return render_template(
-            'fabrications.html',
-            products=products,
-            category=category_filter
-        )
-        
-    except Exception as e:
-        app.logger.error(f"Fabrications route error: {e}", exc_info=True)
-        return render_template(
-            'fabrications.html',
-            products=[],
-            category='all'
-        )
-
-# Replace the duplicate function with this one
-@app.route('/fix_fabrication_categories')
-def fix_fabrication_categories():
-    """Fix products that should be fabrication"""
-    try:
-        # Define patterns that should be fabrication
-        fabrication_patterns = ['steel', 'aluminium', 'custom', 'parts', 'fabrications']
-        
-        updated_count = 0
-        updated_products = []
-        
-        # Check products with category matching fabrication patterns
-        for pattern in fabrication_patterns:
-            products = Product.query.filter(
-                Product.category == pattern,
-                Product.is_active == True
-            ).all()
-            
-            for product in products:
-                old_category = product.category
-                product.category = 'fabrication'
-                updated_count += 1
-                updated_products.append({
-                    'id': product.id,
-                    'name': product.name,
-                    'old_category': old_category,
-                    'new_category': 'fabrication'
-                })
-        
-        if updated_count > 0:
-            db.session.commit()
-            return jsonify({
-                'success': True,
-                'message': f'Updated {updated_count} products to category=fabrication',
-                'updated_products': updated_products
-            })
-        else:
-            return jsonify({
-                'success': False,
-                'message': 'No products found to update. You may need to create fabrication products manually.',
-                'hint': 'Go to admin panel and add products with category=fabrication'
-            })
-        
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)})
-
-
-@app.route('/create_test_fabrication_products')
-def create_test_fabrication_products():
-    """Create sample fabrication products for testing"""
-    try:
-        test_products = [
-            {
-                'name': 'Steel Gate',
-                'price': 5000.00,
-                'category': 'fabrication',
-                'product_type': 'steel',
-                'description': 'Custom steel gate fabrication',
-                'image_url': 'images/no-image.png'
-            },
-            {
-                'name': 'Aluminium Window Frame',
-                'price': 3000.00,
-                'category': 'fabrication',
-                'product_type': 'aluminium',
-                'description': 'Custom aluminium window frames',
-                'image_url': 'images/no-image.png'
-            },
-            {
-                'name': 'Custom Steel Structure',
-                'price': 15000.00,
-                'category': 'fabrication',
-                'product_type': 'custom',
-                'description': 'Custom steel structure fabrication',
-                'image_url': 'images/no-image.png'
-            }
-        ]
-        
-        created_products = []
-        for prod_data in test_products:
-            # Check if already exists
-            existing = Product.query.filter_by(name=prod_data['name']).first()
-            if not existing:
-                new_product = Product(
-                    name=prod_data['name'],
-                    price=prod_data['price'],
-                    category=prod_data['category'],
-                    product_type=prod_data['product_type'],
-                    description=prod_data['description'],
-                    image_url=prod_data['image_url'],
-                    is_active=True
-                )
-                db.session.add(new_product)
-                created_products.append(prod_data['name'])
-        
-        db.session.commit()
-        
-        return jsonify({
-            'success': True,
-            'message': f'Created {len(created_products)} test fabrication products',
-            'created_products': created_products
-        })
-        
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)})
-    
-# DEBUG ROUTE - Add this temporarily to check your data
-
 
 @app.route('/debug_form_submission', methods=['GET', 'POST'])
 def debug_form_submission():
@@ -2854,6 +2412,9 @@ def delete_ledger_size(size_id):
         flash(f'Error deleting size: {str(e)}', 'error')
         return redirect(url_for('admin_scaffoldings'))
 
+# ==========================================
+# FIXED: admin_update_product with local storage
+# ==========================================
 @app.route('/admin_update_product/<int:product_id>', methods=['POST'])
 @login_required
 def admin_update_product(product_id):
@@ -2862,6 +2423,8 @@ def admin_update_product(product_id):
             return jsonify({'success': False}), 403
         
         product = Product.query.get_or_404(product_id)
+        
+        # Get existing images
         existing_json = request.form.get('existing_image_urls')
         existing_list = []
         try:
@@ -2870,62 +2433,40 @@ def admin_update_product(product_id):
         except Exception:
             existing_list = []
 
-        # Determine which existing images will be removed (but do NOT delete yet)
+        # Determine which images were removed
         current_list = [u for u in (product.image_url or '').split(',') if u.strip()]
-        removed_old_images = [img for img in current_list if img not in existing_list]
+        removed_images = [img for img in current_list if img not in existing_list]
 
+        # ✅ Upload new images to local filesystem
         new_urls = []
-        saved_new_filepaths = []
         uploaded_files = request.files.getlist('product_images') if request.files else []
+        
         if uploaded_files:
-            os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
             for file in uploaded_files:
                 if file and file.filename and allowed_file(file.filename):
                     filename = secure_filename(file.filename)
                     unique_name = f"{uuid.uuid4().hex}_{filename}"
-                    filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
-                    try:
-                        file.save(filepath)
-                        saved_new_filepaths.append(filepath)
-                        new_urls.append(f"uploads/{unique_name}")
-                        app.logger.info(f"Saved uploaded file for update product {product_id}: {filepath}")
-                    except Exception as e:
-                        app.logger.error(f"Error saving uploaded file: {e}")
+                    
+                    # ✅ Upload to local filesystem
+                    file_path = upload_file_locally(file, unique_name)
+                    
+                    if file_path:
+                        new_urls.append(file_path)
+                        app.logger.info(f"Uploaded to local filesystem: {file_path}")
+                    else:
+                        app.logger.error(f"Failed to upload {filename} to local filesystem")
 
-            # Validate new files are present and valid images before deleting old ones
-            for p in saved_new_filepaths:
-                try:
-                    if not os.path.exists(p):
-                        raise FileNotFoundError(p)
-                    with Image.open(p) as im:
-                        im.verify()
-                except Exception as e:
-                    # cleanup any new files that were saved
-                    for q in saved_new_filepaths:
-                        try:
-                            if os.path.exists(q):
-                                os.remove(q)
-                        except Exception:
-                            pass
-                    app.logger.error(f"Uploaded image validation failed for product update {product_id}: {e}")
-                    return jsonify({'success': False, 'message': 'One or more uploaded images are invalid or corrupted. Please try different files.'}), 500
+        # ✅ Delete removed images from local filesystem
+        for img in removed_images:
+            delete_local_file(img)
 
-        # All new files validated — safe to delete removed old images
-        for img in removed_old_images:
-            # Convert relative path to full filesystem path
-            old_image_path = os.path.join('static', img) if not img.startswith('static') else img
-            if os.path.exists(old_image_path):
-                try:
-                    os.remove(old_image_path)
-                    app.logger.info(f"Removed old image file for product {product_id}: {old_image_path}")
-                except Exception as e:
-                    app.logger.warning(f"Error removing old file {old_image_path}: {e}")
-
+        # Update product image URLs
         merged_urls = existing_list + new_urls
         product.image_url = ','.join(merged_urls) if merged_urls else 'images/no-image.png'
 
-        
+        # Update other product fields
         product.name = request.form.get('name')
+        
         new_price = safe_float(request.form.get('price'))
         if new_price is not None:
             product.price = new_price
@@ -2951,13 +2492,14 @@ def admin_update_product(product_id):
         product.description = request.form.get('description', '')
         product.category = request.form.get('category')
         
-        # Validate price if provided
+        # Validate price
         if request.form.get('price'):
             price_valid, price_error = validate_price(request.form.get('price'), 'Price')
             if not price_valid:
                 db.session.rollback()
                 return jsonify({'success': False, 'message': price_error}), 400
 
+        # Handle pricing matrix
         pricing_matrix_str = request.form.get('pricing_matrix')
         if pricing_matrix_str is not None:
             try:
@@ -2966,19 +2508,15 @@ def admin_update_product(product_id):
                 product.customization_options['pricing_matrix'] = pricing_matrix_data
                 flag_modified(product, 'customization_options')
             except Exception as e:
-                app.logger.error(f"Error parsing pricing matrix for product {product_id}: {e}")
+                app.logger.error(f"Error parsing pricing matrix: {e}")
         
-        # FIX: Add database commit here
-        try:
-            db.session.commit()
-            app.logger.info(f"Product {product_id} updated. image_url={product.image_url}")
-            return jsonify({'success': True})
-        except Exception as e:
-            db.session.rollback()
-            app.logger.error(f"Error updating product {product_id}: {e}")
-            return jsonify({'success': False, 'message': 'Failed to update product'}), 500
+        db.session.commit()
+        app.logger.info(f"Product {product_id} updated. image_url={product.image_url}")
+        return jsonify({'success': True})
+        
     except Exception as e:
-        app.logger.error(f"Admin update product error: {e}")
+        db.session.rollback()
+        app.logger.error(f"Admin update product error: {e}", exc_info=True)
         return jsonify({'success': False, 'message': 'Error updating product'}), 500
 
 @app.route('/admin_get_product_pricing/<int:product_id>')
@@ -3001,7 +2539,6 @@ def admin_get_product_pricing(product_id):
 @app.route('/debug/images')
 def debug_images_page():
     return render_template('debug_images.html')
-
 
 @app.route('/debug/all_products')
 def debug_all_products_images():
@@ -3293,6 +2830,9 @@ def admin_update_pricing_matrix(product_id):
         db.session.rollback()
         return jsonify({'success': False, 'message': 'Error updating pricing matrix'}), 500
 
+# ==========================================
+# FIXED: admin_remove_photo with local storage
+# ==========================================
 @app.route('/admin_remove_photo/<int:product_id>', methods=['POST'])
 @login_required
 def admin_remove_photo(product_id):
@@ -3309,13 +2849,8 @@ def admin_remove_photo(product_id):
 
         current = [u for u in (product.image_url or '').split(',') if u.strip()]
         if image_url in current:
-            old_image_path = os.path.join(app.static_folder, image_url)
-            if os.path.exists(old_image_path):
-                try:
-                    os.remove(old_image_path)
-                    app.logger.info(f"Removed image file: {old_image_path}")
-                except Exception as e:
-                    app.logger.error(f"Error removing file: {e}")
+            # ✅ Delete from local filesystem
+            delete_local_file(image_url)
 
             current.remove(image_url)
             product.image_url = ','.join(current) if current else 'images/no-image.png'
@@ -3323,7 +2858,7 @@ def admin_remove_photo(product_id):
             db.session.commit()
             return jsonify({'success': True, 'message': 'Photo removed successfully'})
 
-        return jsonify({'success': False, 'message': 'Image not found on product'}), 404
+        return jsonify({'success': False, 'message': 'Image not found'}), 404
     except Exception as e:
         app.logger.error(f"Admin remove photo error: {e}")
         return jsonify({'success': False, 'message': 'Error removing photo'}), 500
@@ -3662,4 +3197,3 @@ def check_payment_status():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)
-
