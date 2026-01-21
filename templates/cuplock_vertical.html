@@ -344,6 +344,21 @@
         opacity: 0.7;
     }
 
+    /* ===== LOADING SPINNER ===== */
+    .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255,255,255,.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
     /* ===== MOBILE RESPONSIVE DESIGN ===== */
     @media (max-width: 768px) {
         .product-container {
@@ -415,6 +430,7 @@
         }
     }
 </style>
+
 <div class="product-container">
     <!-- Header & Image -->
     <h1>Vertical Cuplock: {{ product.name }}</h1>
@@ -423,19 +439,8 @@
         {% if product.display_image_url %}
             {% set first_image = product.display_image_url.split(',')[0].strip() %}
             
-            {# FIX: Check if it's a full URL (S3) or a local file #}
-            {% if first_image.startswith('http://') or first_image.startswith('https://') %}
-                {% set img_src = first_image %}
-            {% elif first_image.startswith('/') %}
-                {% set img_src = first_image %}
-            {% else %}
-                {# Fallback for local static files #}
-                {% if first_image.startswith('uploads/') or first_image.startswith('images/') %}
-                    {% set img_src = url_for('static', filename=first_image) %}
-                {% else %}
-                    {% set img_src = url_for('static', filename='uploads/' + first_image) %}
-                {% endif %}
-            {% endif %}
+            {# Use the get_image_url function to handle both S3 and local images #}
+            {% set img_src = get_image_url(first_image) %}
             
             <img src="{{ img_src }}" alt="{{ product.name }}">
         {% else %}
@@ -470,20 +475,7 @@
         <label for="sizeSelect">Select Size *</label>
         <select id="sizeSelect" onchange="loadCups()">
             <option value="">-- Select Size --</option>
-            {% if sizes %}
-                {% for size in sizes %}
-                    <option
-                        value="{{ size.id }}"
-                        data-label="{{ size.size_label }}"
-                        data-buy="{{ size.buy_price|default(0) }}"
-                        data-rent="{{ size.rent_price|default(0) }}"
-                        data-deposit="{{ size.deposit|default(0) }}">
-                        {{ size.size_label }}
-                    </option>
-                {% endfor %}
-            {% else %}
-                <option value="" disabled>No sizes available</option>
-            {% endif %}
+            <!-- Sizes will be loaded via JavaScript -->
         </select>
     </div>
 
@@ -540,6 +532,81 @@ let depositPrice = 0;
 let selectedSizeLabel = null;
 let selectedCupId = null;
 let currentSizeBuyPrice = 0;
+
+// ============================================
+// LOAD SIZES
+// ============================================
+function loadSizes() {
+    try {
+        console.log('🔄 loadSizes() called');
+        
+        const sizeSelect = document.getElementById('sizeSelect');
+        
+        if (!sizeSelect) {
+            console.error('❌ Size select element not found');
+            return;
+        }
+        
+        // Show loading
+        sizeSelect.innerHTML = '<option value="">Loading sizes...</option>';
+        
+        // Fetch sizes
+        fetch('/cuplock/api/vertical/product/' + PRODUCT_ID + '/sizes')
+            .then(function(response) {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(function(data) {
+                console.log('✅ Sizes loaded:', data);
+                
+                sizeSelect.innerHTML = '<option value="">-- Select Size --</option>';
+                
+                if (!data.success || !data.sizes || data.sizes.length === 0) {
+                    sizeSelect.innerHTML += '<option value="" disabled>No sizes available</option>';
+                    return;
+                }
+                
+                data.sizes.forEach(function(size) {
+                    const option = document.createElement('option');
+                    option.value = size.id;
+                    option.textContent = size.size_label;
+                    option.setAttribute('data-label', size.size_label);
+                    option.setAttribute('data-buy', size.buy_price);
+                    option.setAttribute('data-rent', size.rent_price);
+                    option.setAttribute('data-deposit', size.deposit);
+                    
+                    sizeSelect.appendChild(option);
+                });
+            })
+            .catch(function(error) {
+                console.error('❌ Error loading sizes:', error);
+                sizeSelect.innerHTML = '<option value="" disabled>Error loading sizes</option>';
+                
+                // Add fallback sizes for testing
+                const fallbackSizes = [
+                    { id: 'fallback-1', size_label: '1m', buy_price: 500, rent_price: 50, deposit: 100 },
+                    { id: 'fallback-2', size_label: '1.5m', buy_price: 750, rent_price: 75, deposit: 150 },
+                    { id: 'fallback-3', size_label: '2m', buy_price: 1000, rent_price: 100, deposit: 200 }
+                ];
+                
+                fallbackSizes.forEach(function(size) {
+                    const option = document.createElement('option');
+                    option.value = size.id;
+                    option.textContent = size.size_label;
+                    option.setAttribute('data-label', size.size_label);
+                    option.setAttribute('data-buy', size.buy_price);
+                    option.setAttribute('data-rent', size.rent_price);
+                    option.setAttribute('data-deposit', size.deposit);
+                    
+                    sizeSelect.appendChild(option);
+                });
+                
+                console.log('🔄 Using fallback sizes');
+            });
+    } catch (error) {
+        console.error('❌ Error in loadSizes:', error);
+    }
+}
 
 // ============================================
 // PURCHASE TYPE
@@ -688,6 +755,29 @@ function loadCups() {
             .catch(function(error) {
                 console.error('❌ Error loading cups:', error);
                 container.innerHTML = '<p style="color: red; text-align:center;">Error loading cups. Please try again.</p>';
+                
+                // Add a fallback option for testing
+                const fallbackCard = document.createElement('div');
+                fallbackCard.className = 'cup-option-card';
+                fallbackCard.textContent = '1 Cup';
+                fallbackCard.dataset.price = '100'; // Default price
+                fallbackCard.dataset.cupId = 'fallback-1';
+                
+                fallbackCard.addEventListener('click', function() {
+                    selectedCupPrice = parseFloat(this.dataset.price);
+                    selectedCupId = this.dataset.cupId;
+                    
+                    document.querySelectorAll('.cup-option-card').forEach(function(el) {
+                        el.classList.remove('selected');
+                    });
+                    fallbackCard.classList.add('selected');
+                    
+                    updatePrice();
+                });
+                
+                container.innerHTML = '<p style="color: orange; text-align:center;">Using fallback cup option</p>';
+                container.appendChild(fallbackCard);
+                updatePrice();
             });
     } catch (error) {
         console.error('❌ Error in loadCups:', error);
@@ -792,7 +882,7 @@ function addToCart() {
 
         const btn = document.getElementById('addToCartBtn');
         btn.disabled = true;
-        btn.textContent = 'Adding...';
+        btn.innerHTML = '<span class="loading-spinner"></span> Adding...';
 
         fetch('/add_to_cart', {
             method: 'POST',
@@ -814,20 +904,25 @@ function addToCart() {
             } else {
                 alert('❌ ' + (data.message || 'Failed to add to cart'));
                 btn.disabled = false;
-                btn.textContent = '🛒 Add to Cart';
+                btn.innerHTML = '🛒 Add to Cart';
             }
         })
         .catch(function(error) {
             console.error('❌ Error:', error);
             alert('❌ Error adding to cart. Please try again.');
             btn.disabled = false;
-            btn.textContent = '🛒 Add to Cart';
+            btn.innerHTML = '🛒 Add to Cart';
         });
     } catch (error) {
         console.error('❌ Error in addToCart:', error);
         alert('❌ Error: ' + error.message);
     }
 }
-</script>
 
+// Initialize the page
+document.addEventListener('DOMContentLoaded', function() {
+    loadSizes();
+    updatePurchaseType();
+});
+</script>
 {% endblock %}
