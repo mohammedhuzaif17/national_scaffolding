@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -132,6 +134,7 @@
             align-items: center;
             gap: 40px;
             flex-wrap: wrap; /* Allow wrapping if needed */
+            justify-content: center; /* Center content */
         }
 
         .hero-image {
@@ -189,6 +192,7 @@
             overflow-x: auto; /* Allow horizontal scroll on mobile */
             padding-bottom: 20px;
             -webkit-overflow-scrolling: touch;
+            justify-content: center; /* Center items */
         }
 
         .expertise-item {
@@ -235,7 +239,7 @@
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
-            justify-content: center;
+            justify-content: center; /* Center items */
             margin-top: 20px;
         }
 
@@ -279,10 +283,10 @@
         /* Image styling provided by user - tweaked slightly for mobile */
         .administrator-image {
             width: 200px;
-            height: 200px; /* Fixed height to make it circle-like */
+            height: 200px; /* Fixed height to make it rectangle-like */
             margin: 0 auto 20px;
             border: 5px solid #f0c14b;
-            border-radius: 50%; /* Make it circular */
+            border-radius: 10px; /* Changed from circle to rounded rectangle */
             overflow: hidden;
             background-color: #fff;
             display: flex;
@@ -293,9 +297,9 @@
         .administrator-image img {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Ensures image fills the circle without stretching */
+            object-fit: contain; /* Changed from cover to contain to show full faces */
             display: block;
-            border-radius: 50%;
+            border-radius: 5px; /* Match container */
         }
         
         /* Center admin emphasis */
@@ -315,6 +319,25 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+        }
+
+        /* User Manual Section Headings - Responsive Font Sizes */
+        .user-manual-content h3 {
+            color: #1a3a6e;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            font-size: 0.3rem; /* Reduced from default */
+            border-bottom: 2px solid #f0c14b;
+            padding-bottom: 8px;
+            word-wrap: break-word; /* Prevent text overflow */
+        }
+
+        .user-manual-content h4 {
+            color: #1a3a6e;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            font-size: 1.1rem; /* Reduced from default */
+            word-wrap: break-word; /* Prevent text overflow */
         }
 
         /* Mobile Fix for Tables */
@@ -364,7 +387,36 @@
 
         .download-manual-btn:hover {
             background-color: #d4a017;
+
         }
+
+        /* User Manual Title - Responsive Font Size */
+.user-manual-title {
+    color: #1a3a6e;
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.8rem; /* Reduced from default */
+    word-wrap: break-word; /* Prevent text overflow */
+}
+
+/* Mobile adjustments for User Manual Title */
+@media (max-width: 768px) {
+    .user-manual-title {
+        font-size: 1.5rem; /* Smaller on mobile */
+    }
+}
+
+@media (max-width: 480px) {
+    .user-manual-title {
+        font-size: 1.3rem; /* Even smaller on very small screens */
+    }
+}
+
+@media (min-width: 1200px) {
+    .user-manual-title {
+        font-size: 2rem; /* Slightly larger on large screens */
+    }
+}
 
         /* 8. Footer */
         footer {
@@ -409,6 +461,7 @@
             color: #ddd;
             text-decoration: none;
             transition: color 0.3s;
+            word-break: break-word; /* Prevent email overflow */
         }
         
         .footer-column a:hover {
@@ -422,6 +475,7 @@
             text-decoration: none;
             margin-bottom: 5px;
             transition: color 0.3s;
+            word-break: break-word; /* Prevent email overflow */
         }
 
         .contact-link:hover {
@@ -518,6 +572,64 @@
             
             /* Mobile Policy Content */
             .policy-content { margin: 20px; padding: 20px; width: auto; }
+            
+            /* Mobile User Manual Headings */
+            .user-manual-content h3 { 
+                font-size: 1.1rem; /* Smaller on mobile */
+                padding-bottom: 5px;
+            }
+            .user-manual-content h4 { 
+                font-size: 1rem; /* Smaller on mobile */
+            }
+        }
+        
+        /* Extra Small Mobile */
+        @media (max-width: 480px) {
+            .hero-container, .expertise-container, .journey-container, .administrators-container, .footer-container {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+            
+            .expertise-item {
+                flex: 0 0 220px; /* Slightly smaller for very small screens */
+                padding: 20px;
+            }
+            
+            .administrator-image {
+                width: 180px;
+                height: 180px;
+            }
+            
+            .client-item, .project-item {
+                font-size: 0.8rem;
+                padding: 8px 15px;
+            }
+            
+            /* Extra Small Mobile User Manual Headings */
+            .user-manual-content h3 { 
+                font-size: 1rem; /* Even smaller on very small screens */
+                padding-bottom: 4px;
+                margin-top: 15px;
+            }
+            .user-manual-content h4 { 
+                font-size: 0.9rem; /* Even smaller on very small screens */
+                margin-top: 12px;
+            }
+        }
+        
+        /* Large Screens */
+        @media (min-width: 1200px) {
+            .hero-container, .expertise-container, .journey-container, .administrators-container, .footer-container {
+                max-width: 1400px;
+            }
+            
+            /* Large Screen User Manual Headings */
+            .user-manual-content h3 { 
+                font-size: 1.4rem; /* Slightly larger on large screens */
+            }
+            .user-manual-content h4 { 
+                font-size: 1.2rem; /* Slightly larger on large screens */
+            }
         }
     </style>
 </head>
@@ -620,40 +732,40 @@
     </section>
 
     <!-- Our Journey Section -->
-    <section id="journey" class="journey">
-        <div class="section-title" style="text-align: center; margin-bottom: 30px;">
-            <h2 style="font-family: 'Playfair Display', serif; color: #1a3a6e; font-size: 2.5rem;">Our Journey Since 2015</h2>
-        </div>
-        <div class="journey-container">
-            <div class="clients-section" style="margin-bottom: 40px;">
-                <h3 style="color: #333; border-bottom: 2px solid #f0c14b; display: inline-block; padding-bottom: 5px;">Our Prestigious Clients</h3>
-                <div class="clients-grid">
-                    <div class="client-item">Toyota</div>
-                    <div class="client-item">Asian Paints</div>
-                    <div class="client-item">Hyatt Centric</div>
-                    <div class="client-item">Cisco</div>
-                    <div class="client-item">Bosch</div>
-                    <div class="client-item">Kia Motors</div>
-                    <div class="client-item">TVS</div>
-                    <div class="client-item">Swiggy Instamart</div>
-                    <div class="client-item">Amazon</div>
-                </div>
-            </div>
-            
-            <div class="projects-section">
-                <h3 style="color: #333; border-bottom: 2px solid #f0c14b; display: inline-block; padding-bottom: 5px;">Major Commercial Projects</h3>
-                <div class="projects-grid">
-                    <div class="project-item">Phoenix Mall of Asia</div>
-                    <div class="project-item">Forum Mall</div>
-                    <div class="project-item">Mantri Mall</div>
-                    <div class="project-item">Shobha Mall</div>
-                    <div class="project-item">M5 Mall</div>
-                    <div class="project-item">Galeria Mall</div>
-                    <div class="project-item">Orion Mall</div>
-                </div>
+<section id="journey" class="journey">
+    <div class="section-title" style="text-align: center; margin-bottom: 30px;">
+        <h2 style="font-family: 'Playfair Display', serif; color: #1a3a6e; font-size: 2.5rem;">Our Journey Since 2015</h2>
+    </div>
+    <div class="journey-container">
+        <div class="clients-section" style="margin-bottom: 40px; text-align: center;">
+            <h3 style="color: #333; border-bottom: 2px solid #f0c14b; display: inline-block; padding-bottom: 5px; margin: 0 auto;">Our Prestigious Clients</h3>
+            <div class="clients-grid">
+                <div class="client-item">Toyota</div>
+                <div class="client-item">Asian Paints</div>
+                <div class="client-item">Hyatt Centric</div>
+                <div class="client-item">Cisco</div>
+                <div class="client-item">Bosch</div>
+                <div class="client-item">Kia Motors</div>
+                <div class="client-item">TVS</div>
+                <div class="client-item">Swiggy Instamart</div>
+                <div class="client-item">Amazon</div>
             </div>
         </div>
-    </section>
+        
+        <div class="projects-section" style="text-align: center;">
+            <h3 style="color: #333; border-bottom: 2px solid #f0c14b; display: inline-block; padding-bottom: 5px; margin: 0 auto;">Major Commercial Projects</h3>
+            <div class="projects-grid">
+                <div class="project-item">Phoenix Mall of Asia</div>
+                <div class="project-item">Forum Mall</div>
+                <div class="project-item">Mantri Mall</div>
+                <div class="project-item">Shobha Mall</div>
+                <div class="project-item">M5 Mall</div>
+                <div class="project-item">Galeria Mall</div>
+                <div class="project-item">Orion Mall</div>
+            </div>
+        </div>
+    </div>
+</section>
 
     <!-- Board of Administrators Section -->
     <section id="administrators" class="administrators">
@@ -703,7 +815,7 @@
         </div>
         <div class="user-manual-container">
             <div class="user-manual-content">
-                <h2 style="color: #1a3a6e; text-align: center; margin-bottom: 20px;">THE NATIONAL SCAFFOLDING (Aluminium)</h2>
+               <h2 class="user-manual-title">THE NATIONAL SCAFFOLDING (Aluminium)</h2>
                 
                 <h3>Overview</h3>
                 <p>This manual provides detailed guidance on safe use, assembly, maintenance, and care of aluminium scaffolding systems supplied by The National Scaffoldings. Please read and follow all sections carefully before operating or assembling your scaffolding.</p>
@@ -904,11 +1016,10 @@
 
 <li style="margin-bottom: 15px;">
     <i class="fas fa-envelope" style="color:#f0c14b; margin-right: 10px;"></i>
-    <div style="display: inline-block;">
-        <!-- CHANGED: Uses specific Gmail Compose URL -->
-        <a href="https://mail.google.com/mail/?view=cm&fs=1&to=sales@thenationalscaffolding.com" class="contact-link">sales@thenationalscaffolding.com</a>
-        <a href="https://mail.google.com/mail/?view=cm&fs=1&to=support@thenationalscaffolding.com" class="contact-link">support@thenationalscaffolding.com</a>
-        <a href="https://mail.google.com/mail/?view=cm&fs=1&to=marketing@thenationalscaffolding.com" class="contact-link">marketing@thenationalscaffolding.com</a>
+    <div style="display: inline-block; max-width: calc(100% - 35px);">
+        <a href="https://mail.google.com/mail/?view=cm&fs=1&to=sales@thenationalscaffolding.com" class="contact-link" style="font-size: 0.75rem; line-height: 1.4; display: inline-block; margin-right: 5px; white-space: nowrap;">sales@thenationalscaffolding.com</a>
+        <a href="https://mail.google.com/mail/?view=cm&fs=1&to=support@thenationalscaffolding.com" class="contact-link" style="font-size: 0.75rem; line-height: 1.4; display: inline-block; margin-right: 5px; white-space: nowrap;">support@thenationalscaffolding.com</a>
+        <a href="https://mail.google.com/mail/?view=cm&fs=1&to=marketing@thenationalscaffolding.com" class="contact-link" style="font-size: 0.75rem; line-height: 1.4; display: inline-block; white-space: nowrap;">marketing@thenationalscaffolding.com</a>
     </div>
 </li>
                             </ul>
