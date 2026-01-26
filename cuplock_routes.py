@@ -712,7 +712,7 @@ def vertical_product_page(product_id):
         if not sizes:
             current_app.logger.warning(f"No sizes found for vertical product {product_id}")
             flash('This product has no sizes configured. Please contact support.', 'warning')
-            return redirect(url_for('products'))
+            return redirect(url_for('debug_products'))
 
         # Validate and clean sizes data
         valid_sizes = []
@@ -740,7 +740,7 @@ def vertical_product_page(product_id):
         if not valid_sizes:
             current_app.logger.error(f"No valid sizes for product {product_id}")
             flash('This product is not properly configured.', 'error')
-            return redirect(url_for('products'))
+            return redirect(url_for('debug_products'))
         
         if not has_valid_prices:
             flash('⚠️ This product has no prices configured. Please contact admin.', 'warning')
@@ -773,7 +773,7 @@ def vertical_product_page(product_id):
     except Exception as e:
         current_app.logger.error(f"Vertical product error: {e}", exc_info=True)
         flash('Error loading product. Please try again.', 'error')
-        return redirect(url_for('products'))
+        return redirect(url_for('debug_products'))
 
 
 @cuplock_bp.route('/product/ledger/<int:product_id>')
@@ -802,40 +802,39 @@ def ledger_product_page(product_id):
 # ===========================
 # API ENDPOINTS
 # ===========================
-@cuplock_bp.route('/cuplock/api/vertical/size/<int:size_id>/cups', methods=['GET'])
-def get_cups_by_size(size_id):
-    """API endpoint to fetch cup options for a specific vertical size"""
+@cuplock_bp.route('/cuplock/api/vertical/product/<int:product_id>/sizes')
+def api_vertical_sizes(product_id):
+    """API endpoint to get sizes for a vertical cuplock product"""
     try:
-        cups = CuplockVerticalCup.query.filter_by(vertical_size_id=size_id).all()
+        from models import CuplockVerticalSize
         
-        cup_list = []
-        for cup in cups:
-            # ✅ Use the helper function that already handles all edge cases!
-            image_url = get_image_url(cup.cup_image_url) if cup.cup_image_url else 'images/no-image.png'
-            
-            cup_list.append({
-                'id': cup.id,
-                'size_id': cup.vertical_size_id,
-                'cup_count': cup.cup_count,
-                'price': float(cup.buy_price) if cup.buy_price else 0,  # Return as 'price'
-                'image_url': image_url
+        sizes = CuplockVerticalSize.query.filter_by(
+            product_id=product_id,
+            is_active=True
+        ).order_by(CuplockVerticalSize.display_order.asc(), CuplockVerticalSize.size_label.asc()).all()
+        
+        size_data = []
+        for size in sizes:
+            size_data.append({
+                'id': size.id,
+                'size_label': size.size_label,
+                'weight': float(size.weight) if size.weight else 0,
+                'buy_price': float(size.buy_price) if size.buy_price else 0,
+                'rent_price': float(size.rent_price) if size.rent_price else 0,
+                'deposit': float(size.deposit) if size.deposit else 0
             })
-        
-        logger.info(f"✅ Loaded {len(cup_list)} cups for size {size_id}")
         
         return jsonify({
             'success': True,
-            'cups': cup_list
+            'sizes': size_data
         })
-        
     except Exception as e:
-        logger.error(f"❌ Error fetching cups: {str(e)}", exc_info=True)
+        logger.error(f"Error fetching vertical sizes: {e}")
         return jsonify({
             'success': False,
-            'message': str(e),
-            'cups': []
+            'message': 'Error fetching sizes'
         }), 500
-
+ 
 
 @cuplock_bp.route('/admin/api/ledger/<int:product_id>/sizes')
 def admin_api_ledger_sizes(product_id):
@@ -858,7 +857,7 @@ def admin_api_ledger_sizes(product_id):
 
 
 @cuplock_bp.route('/admin/api/vertical/<int:product_id>/sizes')
-def api_vertical_sizes(product_id):
+def api_admin_vertical_sizes(product_id):
     """Return all vertical cuplock sizes for frontend JS."""
     try:
         product = Product.query.get_or_404(product_id)

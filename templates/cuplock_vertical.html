@@ -435,18 +435,13 @@
     <!-- Header & Image -->
     <h1>Vertical Cuplock: {{ product.name }}</h1>
     
-    <div class="product-image">
-        {% if product.display_image_url %}
-            {% set first_image = product.display_image_url.split(',')[0].strip() %}
-            
-            {# Use the get_image_url function to handle both S3 and local images #}
-            {% set img_src = get_image_url(first_image) %}
-            
-            <img src="{{ img_src }}" alt="{{ product.name }}">
-        {% else %}
-            <span style="font-size: 3rem; color: #ccc;">🔗 No Image</span>
-        {% endif %}
-    </div>
+   <div class="product-image">
+    {% if product.display_image_url %}
+        <img src="{{ url_for('static', filename=product.display_image_url) }}">
+    {% else %}
+        <span style="font-size: 3rem; color: #ccc;">🔗 No Image</span>
+    {% endif %}
+</div>
 
     <!-- Available Sizes Info -->
     <div class="info-box">
@@ -536,6 +531,79 @@ let currentSizeBuyPrice = 0;
 // ============================================
 // LOAD SIZES
 // ============================================
+// function loadSizes() {
+//     try {
+//         console.log('🔄 loadSizes() called');
+        
+//         const sizeSelect = document.getElementById('sizeSelect');
+        
+//         if (!sizeSelect) {
+//             console.error('❌ Size select element not found');
+//             return;
+//         }
+        
+//         // Show loading
+//         sizeSelect.innerHTML = '<option value="">Loading sizes...</option>';
+        
+//         // Fetch sizes
+//         fetch('/cuplock/api/vertical/product/' + PRODUCT_ID + '/sizes')
+//             .then(function(response) {
+//                 if (!response.ok) throw new Error('Network response was not ok');
+//                 return response.json();
+//             })
+//             .then(function(data) {
+//                 console.log('✅ Sizes loaded:', data);
+                
+//                 sizeSelect.innerHTML = '<option value="">-- Select Size --</option>';
+                
+//                 if (!data.success || !data.sizes || data.sizes.length === 0) {
+//                     sizeSelect.innerHTML += '<option value="" disabled>No sizes available</option>';
+//                     return;
+//                 }
+                
+//                 data.sizes.forEach(function(size) {
+//                     const option = document.createElement('option');
+//                     option.value = size.id;
+//                     option.textContent = size.size_label;
+//                     option.setAttribute('data-label', size.size_label);
+//                     option.setAttribute('data-buy', size.buy_price);
+//                     option.setAttribute('data-rent', size.rent_price);
+//                     option.setAttribute('data-deposit', size.deposit);
+                    
+//                     sizeSelect.appendChild(option);
+//                 });
+//             })
+//             .catch(function(error) {
+//                 console.error('❌ Error loading sizes:', error);
+//                 sizeSelect.innerHTML = '<option value="" disabled>Error loading sizes</option>';
+                
+//                 // Add fallback sizes for testing
+//                 const fallbackSizes = [
+//                     { id: 'fallback-1', size_label: '1m', buy_price: 500, rent_price: 50, deposit: 100 },
+//                     { id: 'fallback-2', size_label: '1.5m', buy_price: 750, rent_price: 75, deposit: 150 },
+//                     { id: 'fallback-3', size_label: '2m', buy_price: 1000, rent_price: 100, deposit: 200 }
+//                 ];
+                
+//                 fallbackSizes.forEach(function(size) {
+//                     const option = document.createElement('option');
+//                     option.value = size.id;
+//                     option.textContent = size.size_label;
+//                     option.setAttribute('data-label', size.size_label);
+//                     option.setAttribute('data-buy', size.buy_price);
+//                     option.setAttribute('data-rent', size.rent_price);
+//                     option.setAttribute('data-deposit', size.deposit);
+                    
+//                     sizeSelect.appendChild(option);
+//                 });
+                
+//                 console.log('🔄 Using fallback sizes');
+//             });
+//     } catch (error) {
+//         console.error('❌ Error in loadSizes:', error);
+//     }
+// }
+
+// Update the loadSizes function
 function loadSizes() {
     try {
         console.log('🔄 loadSizes() called');
@@ -581,27 +649,6 @@ function loadSizes() {
             .catch(function(error) {
                 console.error('❌ Error loading sizes:', error);
                 sizeSelect.innerHTML = '<option value="" disabled>Error loading sizes</option>';
-                
-                // Add fallback sizes for testing
-                const fallbackSizes = [
-                    { id: 'fallback-1', size_label: '1m', buy_price: 500, rent_price: 50, deposit: 100 },
-                    { id: 'fallback-2', size_label: '1.5m', buy_price: 750, rent_price: 75, deposit: 150 },
-                    { id: 'fallback-3', size_label: '2m', buy_price: 1000, rent_price: 100, deposit: 200 }
-                ];
-                
-                fallbackSizes.forEach(function(size) {
-                    const option = document.createElement('option');
-                    option.value = size.id;
-                    option.textContent = size.size_label;
-                    option.setAttribute('data-label', size.size_label);
-                    option.setAttribute('data-buy', size.buy_price);
-                    option.setAttribute('data-rent', size.rent_price);
-                    option.setAttribute('data-deposit', size.deposit);
-                    
-                    sizeSelect.appendChild(option);
-                });
-                
-                console.log('🔄 Using fallback sizes');
             });
     } catch (error) {
         console.error('❌ Error in loadSizes:', error);

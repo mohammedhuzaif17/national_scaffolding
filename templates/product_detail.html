@@ -350,7 +350,7 @@
                         <div class="gallery-main-container">
                             {% for img_url in valid_images %}
                                 <div class="gallery-main-image {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}">
-                                    <img src="{{ url_for('static', filename=img_url) }}"
+                                    <img src="{{ url_for('static', filename=product.image_url) }}">
                                          alt="{{ product.name }} - Image {{ loop.index }}"
                                          loading="lazy"
                                          onclick="openModal({{ loop.index0 }})">
@@ -370,7 +370,8 @@
                     {% if valid_images|length > 1 %}
                         <div class="gallery-thumbnails">
                             {% for img_url in valid_images %}
-                                <img src="{{ url_for('static', filename=img_url) }}"
+                                <img src="{{ url_for('static', filename=product.image_url) }}">
+
                                      class="gallery-thumbnail {% if loop.first %}active{% endif %}"
                                      onclick="setMainImage({{ loop.index0 }})">
                             {% endfor %}

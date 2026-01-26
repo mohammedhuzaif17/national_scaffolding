@@ -18,7 +18,10 @@
     <div class="content-row">
         <!-- Left Column: Product Image -->
         <div class="product-image-col">
-            <img src="{{ url_for('static', filename=product.display_image_url) }}"
+            <img src="{{ url_for('static', filename=product.image_url) }}">
+
+
+
                  class="product-image"
                  alt="{{ product.name }}"
                  onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}'">

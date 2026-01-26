@@ -24,7 +24,7 @@
             <div class="product-card">
                 <div class="product-image">
                     {% if product.display_image_url and product.display_image_url != 'images/no-image.png' %}
-                        <img src="{{ url_for('static', filename=product.display_image_url) }}" alt="{{ product.name }}" onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}'">
+                        <img src="{{ url_for('static', filename=product.image_url) }}" alt="{{ product.name }}" onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}'">
                     {% else %}
                         <div class="placeholder-image">🔗</div>
                     {% endif %}
@@ -32,11 +32,30 @@
 
                 <div class="product-info">
                     <h3 class="product-name">{{ product.name }}</h3>
+                    
                     <p class="description">
                         {{ product.description or 'Professional Cuplock Vertical System' }}
                     </p>
+                    
+                    <!-- MULTIPLE SIZES AND PRICES -->
+                    {% if product.sizes %}
+                    <div class="sizes-container">
+                        <h4 class="sizes-title">Available Sizes & Prices:</h4>
+                        <div class="sizes-list">
+                            {% for size in product.sizes %}
+                            <div class="size-option">
+                                <div class="size-details">
+                                    <span class="size-label">📏 {{ size.height or size.dimension }}</span>
+                                    <span class="size-price">₹{{ size.price }}</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
                     <div class="product-footer">
-                        <a href="{{ url_for('cuplock_vertical_product', product_id=product.id) }}" class="btn btn-primary">
+                        <a href="{{ url_for('cuplock.vertical_product_page', product_id=product.id) }}" class="btn btn-primary">
                             View & Buy →
                         </a>
                     </div>
@@ -64,7 +83,7 @@
             <div class="product-card">
                 <div class="product-image">
                     {% if product.display_image_url and product.display_image_url != 'images/no-image.png' %}
-                        <img src="{{ url_for('static', filename=product.display_image_url) }}" alt="{{ product.name }}" onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}'">
+                        <img src="{{ url_for('static', filename=product.image_url) }}" alt="{{ product.name }}" onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}'">
                     {% else %}
                         <div class="placeholder-image">📏</div>
                     {% endif %}
@@ -72,11 +91,30 @@
 
                 <div class="product-info">
                     <h3 class="product-name">{{ product.name }}</h3>
+                    
                     <p class="description">
                         {{ product.description or 'Professional Cuplock Ledger System' }}
                     </p>
+                    
+                    <!-- MULTIPLE SIZES AND PRICES -->
+                    {% if product.sizes %}
+                    <div class="sizes-container">
+                        <h4 class="sizes-title">Available Sizes & Prices:</h4>
+                        <div class="sizes-list">
+                            {% for size in product.sizes %}
+                            <div class="size-option">
+                                <div class="size-details">
+                                    <span class="size-label">📏 {{ size.length or size.dimension }}</span>
+                                    <span class="size-price">₹{{ size.price }}</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
                     <div class="product-footer">
-                        <a href="{{ url_for('cuplock_ledger_product', product_id=product.id) }}" class="btn btn-primary">
+                        <a href="{{ url_for('cuplock.ledger_product_page', product_id=product.id) }}" class="btn btn-primary">
                             View & Buy →
                         </a>
                     </div>
@@ -117,13 +155,13 @@
         background-color: #f8f9fa;
         color: #333;
         line-height: 1.6;
-        padding-bottom: 80px; /* Space for scrolling */
+        padding-bottom: 80px;
     }
 
     /* ===== MAIN CONTAINER ===== */
     .cuplock-shop-container {
         width: 100%;
-        max-width: 1200px; /* Reasonable desktop max width */
+        max-width: 1200px;
         margin: 0 auto;
         padding: 2rem;
     }
@@ -138,7 +176,7 @@
 
     .shop-header h1 {
         font-size: 2.5rem;
-        color: #002855; /* Royal Blue */
+        color: #002855;
         margin-bottom: 0.5rem;
         font-weight: 700;
     }
@@ -177,7 +215,6 @@
     /* ===== PRODUCT GRID ===== */
     .products-grid {
         display: grid;
-        /* Desktop: Responsive columns based on width */
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         gap: 2.5rem;
         margin-bottom: 2rem;
@@ -192,19 +229,19 @@
         box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         transition: all 0.3s ease;
         display: flex;
-        flex-direction: column; /* Stacks content vertically: Image top, Info middle, Button bottom */
+        flex-direction: column;
         height: 100%;
     }
 
     .product-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        border-color: #d4af37; /* Gold border on hover */
+        border-color: #d4af37;
     }
 
     .product-image {
         width: 100%;
-        height: 250px; /* Fixed height for consistency */
+        height: 250px;
         background: #f8f9fa;
         display: flex;
         align-items: center;
@@ -236,16 +273,71 @@
     .product-name {
         color: #002855;
         font-size: 1.4rem;
-        margin-bottom: 0.5rem;
+        margin-bottom: 1rem;
         font-weight: 700;
     }
 
     .description {
         color: #555;
         font-size: 1rem;
-        margin-bottom: 2rem;
-        flex-grow: 1;
+        margin-bottom: 1.5rem;
         line-height: 1.5;
+    }
+
+    /* ===== SIZES CONTAINER ===== */
+    .sizes-container {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid #e0e0e0;
+    }
+
+    .sizes-title {
+        color: #002855;
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .sizes-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .size-option {
+        background: white;
+        border-radius: 6px;
+        border: 1px solid #e0e0e0;
+        transition: all 0.2s ease;
+    }
+
+    .size-option:hover {
+        border-color: #d4af37;
+        transform: translateX(3px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .size-details {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
+    }
+
+    .size-label {
+        color: #333;
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+
+    .size-price {
+        color: #d4af37;
+        font-weight: 700;
+        font-size: 1.1rem;
     }
 
     .product-footer {
@@ -270,7 +362,7 @@
     .btn-primary {
         background: linear-gradient(135deg, #002855, #004080);
         color: white;
-        width: 100%; /* Full width of the container */
+        width: 100%;
     }
 
     .btn-primary:hover {
@@ -332,70 +424,90 @@
 
     /* ===== MOBILE RESPONSIVE DESIGN ===== */
     @media (max-width: 768px) {
-        /* 1. Container Adjustments: Full width on mobile */
         .cuplock-shop-container {
             width: 100% !important;
             max-width: 100% !important;
             margin: 0 auto;
-            padding: 1rem; /* Slightly less padding on mobile */
+            padding: 1rem;
         }
 
-        /* 2. Header Adjustments */
         .shop-header {
             margin-bottom: 2rem;
             padding-bottom: 1.5rem;
         }
 
         .shop-header h1 {
-            font-size: 1.8rem; /* Smaller title on mobile */
+            font-size: 1.8rem;
         }
 
-        /* 3. Grid Layout: Single Column on Mobile */
         .products-grid {
             display: grid;
-            grid-template-columns: 1fr; /* Force single column stack */
-            gap: 1.5rem; /* Reduced gap */
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
             margin-bottom: 2rem;
         }
 
-        /* 4. Product Card Adjustments */
         .product-card {
-            height: auto; /* Auto height based on content */
+            height: auto;
         }
 
         .product-image {
-            height: 200px; /* Slightly shorter image on mobile */
+            height: 200px;
         }
 
         .product-info {
-            padding: 1.5rem; /* Less padding */
+            padding: 1.5rem;
         }
 
         .product-name {
-            font-size: 1.2rem; /* Smaller font */
-            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+            margin-bottom: 0.75rem;
         }
 
         .description {
             font-size: 0.95rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
             line-height: 1.4;
         }
 
-        /* 5. Button Full Width */
+        .sizes-container {
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .sizes-title {
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .sizes-list {
+            gap: 0.4rem;
+        }
+
+        .size-details {
+            padding: 0.6rem 0.75rem;
+        }
+
+        .size-label {
+            font-size: 0.9rem;
+        }
+
+        .size-price {
+            font-size: 1rem;
+        }
+
         .btn, .btn-primary, .btn-success, .btn-large {
-            width: 100% !important; /* Force full width for touch */
-            padding: 0.9rem 1rem; /* Taller buttons */
+            width: 100% !important;
+            padding: 0.9rem 1rem;
             font-size: 1rem;
             justify-content: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         .btn-large {
-            max-width: 100%; /* Remove constraint on mobile */
+            max-width: 100%;
         }
 
-        /* 6. CTA Adjustments */
         .cta-section {
             padding: 2rem;
             margin-top: 2rem;

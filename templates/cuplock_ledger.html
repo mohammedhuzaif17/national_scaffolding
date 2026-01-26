@@ -336,7 +336,9 @@
                 {% if valid_images|length > 0 %}
                     <div class="product-detail-gallery">
                         <div class="gallery-main-image">
-                            <img src="{{ url_for('static', filename=valid_images[0]) }}"
+                            <img src="{{ url_for('static', filename=product.image_url) }}">
+
+
                                  alt="{{ product.name }}"
                                  loading="lazy"
                                  onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}'">

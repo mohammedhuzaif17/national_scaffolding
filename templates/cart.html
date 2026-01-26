@@ -385,7 +385,8 @@
             <div class="cart-item-image-container">
                 {% if item.image_url %}
                     {% set first_image = item.image_url.split(',')[0].strip() %}
-                    <img src="{{ url_for('static', filename=first_image) }}"
+                    <img src="{{ url_for('static', filename=product.image_url) }}">
+
                          class="cart-item-image"
                          alt="{{ item.product_name }}">
                 {% else %}

@@ -39,101 +39,30 @@ import os
 # Load environment variables from .env file
 load_dotenv()
 
+from sqlalchemy import text
+
 def ensure_columns_exist():
-    """Add nullable columns if PostgreSQL schema is missing them."""
+    db_uri = str(db.engine.url)
+
+    # ✅ Only run for PostgreSQL
+    if not db_uri.startswith("postgresql"):
+        print("Skipping ensure_columns_exist() (not PostgreSQL)")
+        return
+
     with db.engine.connect() as conn:
-        # Add is_active to products table
         conn.execute(text("""
-            DO $$             BEGIN
+            DO $$
+            BEGIN
                 IF NOT EXISTS (
                     SELECT 1 FROM information_schema.columns
                     WHERE table_name='products' AND column_name='is_active'
                 ) THEN
                     ALTER TABLE products ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
-                    RAISE NOTICE 'Added is_active column to products table';
-                END IF;
-            END $$;
-        """))
-        conn.commit()
-        
-        # Add cuplock_type to products table
-        conn.execute(text("""
-            DO $$             BEGIN
-                IF NOT EXISTS (
-                    SELECT 1 FROM information_schema.columns
-                    WHERE table_name='products' AND column_name='cuplock_type'
-                ) THEN
-                    ALTER TABLE products ADD COLUMN cuplock_type VARCHAR(50);
-                    RAISE NOTICE 'Added cuplock_type column to products table';
                 END IF;
             END $$;
         """))
         conn.commit()
 
-        # Add is_active to cuplock_ledger_sizes table
-        conn.execute(text("""
-            DO $$             BEGIN
-                IF NOT EXISTS (
-                    SELECT 1 FROM information_schema.columns
-                    WHERE table_name='cuplock_ledger_sizes' AND column_name='is_active'
-                ) THEN
-                    ALTER TABLE cuplock_ledger_sizes ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
-                    RAISE NOTICE 'Added is_active column to cuplock_ledger_sizes table';
-                END IF;
-            END $$;
-        """))
-        conn.commit()
-
-        # Add columns to cuplock_vertical_sizes table
-        conn.execute(text("""
-            DO $$             BEGIN
-                -- weight column
-                IF NOT EXISTS (
-                    SELECT 1 FROM information_schema.columns
-                    WHERE table_name='cuplock_vertical_sizes' AND column_name='weight'
-                ) THEN
-                    ALTER TABLE cuplock_vertical_sizes ADD COLUMN weight NUMERIC(10,2);
-                    RAISE NOTICE 'Added weight column to cuplock_vertical_sizes table';
-                END IF;
-
-                -- buy_price column
-                IF NOT EXISTS (
-                    SELECT 1 FROM information_schema.columns
-                    WHERE table_name='cuplock_vertical_sizes' AND column_name='buy_price'
-                ) THEN
-                    ALTER TABLE cuplock_vertical_sizes ADD COLUMN buy_price NUMERIC(10,2);
-                    RAISE NOTICE 'Added buy_price column to cuplock_vertical_sizes table';
-                END IF;
-
-                -- rent_price column
-                IF NOT EXISTS (
-                    SELECT 1 FROM information_schema.columns
-                    WHERE table_name='cuplock_vertical_sizes' AND column_name='rent_price'
-                ) THEN
-                    ALTER TABLE cuplock_vertical_sizes ADD COLUMN rent_price NUMERIC(10,2);
-                    RAISE NOTICE 'Added rent_price column to cuplock_vertical_sizes table';
-                END IF;
-
-                -- deposit column
-                IF NOT EXISTS (
-                    SELECT 1 FROM information_schema.columns
-                    WHERE table_name='cuplock_vertical_sizes' AND column_name='deposit'
-                ) THEN
-                    ALTER TABLE cuplock_vertical_sizes ADD COLUMN deposit NUMERIC(10,2);
-                    RAISE NOTICE 'Added deposit column to cuplock_vertical_sizes table';
-                END IF;
-
-                -- is_active column
-                IF NOT EXISTS (
-                    SELECT 1 FROM information_schema.columns
-                    WHERE table_name='cuplock_vertical_sizes' AND column_name='is_active'
-                ) THEN
-                    ALTER TABLE cuplock_vertical_sizes ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
-                    RAISE NOTICE 'Added is_active column to cuplock_vertical_sizes table';
-                END IF;
-            END $$;
-        """))
-        conn.commit()
 
 def indian_format(number):
     x = str(int(number))
@@ -167,13 +96,18 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_PERMANENT'] = True
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7) # FIX APPLIED
 
-db_user = os.environ.get('DB_USER', 'cresttechnocrat')
-db_password = os.environ.get('DB_PASSWORD', 'syedzubairarbaazkhan123Ert678')
-db_host = os.environ.get('DB_HOST', 'thenationalscaffolding.cofeca2iwshi.us-east-1.rds.amazonaws.com')
-db_port = os.environ.get('DB_PORT', '5432')
-db_name = os.environ.get('DB_NAME', 'national_scaffolding')
+mysql_dialect = os.environ["MYSQL_DIALECT"]
+mysql_user = os.environ["MYSQL_USER"]
+mysql_password = os.environ["MYSQL_PASSWORD"]
+mysql_host = os.environ["MYSQL_HOST"]
+mysql_port = os.environ["MYSQL_PORT"]
+mysql_db = os.environ["MYSQL_DB"]
 
-app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}'
+app.config["SQLALCHEMY_DATABASE_URI"] = (
+    f"{mysql_dialect}://{mysql_user}:{mysql_password}@{mysql_host}:{mysql_port}/{mysql_db}"
+)
+
+    
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'pool_pre_ping': True,
@@ -719,7 +653,7 @@ def product_detail(product_id):
             db.session.rollback()
         app.logger.error(f"Error in product_detail: {e}", exc_info=True)
         flash('Error loading product details. Please try again.', 'error')
-        return render_template('product_detail.html', product=None)
+        return redirect(url_for('cuplock.vertical_product_page', product_id=product_id))
         
 @app.before_request
 def before_request():
@@ -1062,38 +996,8 @@ def national_scaffoldings():
 # ==========================================
 # FIXED: cuplock_shop route
 # ==========================================
-@app.route('/cuplock/api/vertical/product/<int:product_id>/sizes')
-def api_vertical_sizes(product_id):
-    """API endpoint to get sizes for a vertical cuplock product"""
-    try:
-        from models import CuplockVerticalSize
-        
-        sizes = CuplockVerticalSize.query.filter_by(
-            product_id=product_id,
-            is_active=True
-        ).order_by(CuplockVerticalSize.display_order.asc(), CuplockVerticalSize.size_label.asc()).all()
-        
-        size_data = []
-        for size in sizes:
-            size_data.append({
-                'id': size.id,
-                'size_label': size.size_label,
-                'weight': float(size.weight) if size.weight else 0,
-                'buy_price': float(size.buy_price) if size.buy_price else 0,
-                'rent_price': float(size.rent_price) if size.rent_price else 0,
-                'deposit': float(size.deposit) if size.deposit else 0
-            })
-        
-        return jsonify({
-            'success': True,
-            'sizes': size_data
-        })
-    except Exception as e:
-        app.logger.error(f"Error fetching vertical sizes: {e}")
-        return jsonify({
-            'success': False,
-            'message': 'Error fetching sizes'
-        }), 500
+
+
         
 @app.route('/cuplock-shop')
 def cuplock_shop():
