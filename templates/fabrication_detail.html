@@ -13,42 +13,67 @@
         <div class="gallery-section">
             <div class="product-detail-gallery">
                 <div class="gallery-main-container">
-                    {% set valid_images = product.image_url.split(',').map(s=>s.strip()).filter(s=>s) %}
-                    {% for img_url in valid_images %}
-                        <div class="gallery-main-image {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}">
-                            <img src="{{ url_for('static', filename=img_url) }}"
-                                 alt="{{ product.name }}"
-                                 loading="lazy">
+                    {% if product.image_url %}
+                        {% set image_list = product.image_url.split(',') %}
+                        {% for img_url in image_list %}
+                            {% set clean_url = img_url.strip() %}
+                            {% if clean_url %}
+                                <div class="gallery-main-image {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}">
+                                    <img src="{{ url_for('static', filename=clean_url) }}"
+                                         alt="{{ product.name }}"
+                                         loading="lazy"
+                                         onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/no-image.png') }}';">
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <div class="no-image-box">
+                            <p style="font-size: 2rem; color: #ffa500;">📷</p>
+                            <p>No Image Available</p>
                         </div>
-                    {% endfor %}
+                    {% endif %}
                 </div>
                 
-                {% if valid_images|length > 1 %}
-                    <div class="gallery-counter">
-                        <span id="currentImageNum">1</span> / {{ valid_images|length }}
-                    </div>
-                    <button class="gallery-navigation gallery-prev" id="galleryPrev">‹</button>
-                    <button class="gallery-navigation gallery-next" id="galleryNext">›</button>
+                {% if product.image_url %}
+                    {% set image_list = product.image_url.split(',') %}
+                    {% set valid_images = [] %}
+                    {% for img in image_list %}
+                        {% if img.strip() %}
+                            {% set _ = valid_images.append(img.strip()) %}
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if valid_images|length > 1 %}
+                        <div class="gallery-counter">
+                            <span id="currentImageNum">1</span> / {{ valid_images|length }}
+                        </div>
+                        <button class="gallery-navigation gallery-prev" id="galleryPrev">‹</button>
+                        <button class="gallery-navigation gallery-next" id="galleryNext">›</button>
+                    {% endif %}
                 {% endif %}
             </div>
 
             <!-- Thumbnails List -->
-            {% if valid_images|length > 1 %}
-                <div class="gallery-thumbnails">
-                    {% for img_url in valid_images %}
-                        <img src="{{ url_for('static', filename=img_url) }}"
-                             class="gallery-thumbnail {% if loop.first %}active{% endif %}"
-                             onclick="setMainImage({{ loop.index0 }})"
-                             alt="Thumbnail {{ loop.index0 }}">
-                    {% endfor %}
-                </div>
-            {% endif %}
-
-            {% if not product.image_url or valid_images|length == 0 %}
-                <div class="no-image-box">
-                    <p style="font-size: 2rem; color: #ffa500;">📷</p>
-                    <p>No Image Available</p>
-                </div>
+            {% if product.image_url %}
+                {% set image_list = product.image_url.split(',') %}
+                {% set valid_images = [] %}
+                {% for img in image_list %}
+                    {% if img.strip() %}
+                        {% set _ = valid_images.append(img.strip()) %}
+                    {% endif %}
+                {% endfor %}
+                
+                {% if valid_images|length > 1 %}
+                    <div class="gallery-thumbnails">
+                        {% for img_url in valid_images %}
+                            <img src="{{ url_for('static', filename=img_url) }}"
+                                 class="gallery-thumbnail {% if loop.first %}active{% endif %}"
+                                 onclick="setMainImage({{ loop.index0 }})"
+                                 alt="Thumbnail {{ loop.index0 }}"
+                                 onerror="this.style.display='none';">
+                        {% endfor %}
+                    </div>
+                {% endif %}
             {% endif %}
         </div>
 
@@ -57,11 +82,13 @@
             <!-- Product Header -->
             <div class="product-header">
                 <h1 class="page-title">{{ product.name }}</h1>
-                <p class="product-meta">{{ product.category|title if product.category else 'N/A' }}</p>
+                <p class="product-meta">{{ product.category|title if product.category else 'Fabrication' }}</p>
             </div>
 
             <!-- Description -->
+            {% if product.description %}
             <p class="product-description">{{ product.description }}</p>
+            {% endif %}
 
             <!-- Customization Section -->
             <div class="customization-section">
@@ -138,15 +165,15 @@ let galleryImages = [];
 let totalImages = 0;
 let currentIndex = 0;
 
-function buildImageUrl(relativePath) {
-    if (!relativePath) return '';
-    return '{{ url_for("static", filename="__PLACEHOLDER__") }}'.replace('__PLACEHOLDER__', relativePath);
-}
-
+// Build image URLs properly
 {% if product.image_url %}
     const rawImages = `{{ product.image_url }}`.split(',');
-    galleryImages = rawImages.map(s => s.trim()).filter(s => s !== '').map(url => buildImageUrl(url));
+    galleryImages = rawImages
+        .map(s => s.trim())
+        .filter(s => s !== '')
+        .map(url => '{{ url_for("static", filename="") }}' + url);
     totalImages = galleryImages.length;
+    console.log('Loaded images:', galleryImages);
 {% endif %}
 
 const prevBtn = document.getElementById('galleryPrev');
@@ -154,6 +181,8 @@ const nextBtn = document.getElementById('galleryNext');
 const counterEl = document.getElementById('currentImageNum');
 
 function setActiveImage(index) {
+    if (totalImages === 0) return;
+    
     index = Math.max(0, Math.min(index, totalImages - 1));
     const mainItems = document.querySelectorAll('.gallery-main-image');
     const thumbs = document.querySelectorAll('.gallery-thumbnail');
@@ -230,7 +259,7 @@ let basePrice = {{ product.price | default(0) | float }};
 window.updateFabricationPrice = function() {
     const quantity = parseInt(document.getElementById('quantity').value);
     const total = basePrice * quantity;
-    document.getElementById('final_price_display').textContent = '₹' + total.toFixed(2);
+    document.getElementById('final_price_display').textContent = '₹' + basePrice.toFixed(2);
     document.getElementById('final_total_display').textContent = '₹' + total.toFixed(2);
 };
 
@@ -295,21 +324,21 @@ window.showToast = function(message) {
 // Initialize pricing on load
 updateFabricationPrice();
 </script>
-{% endblock %}
 
 <style>
-    /* ===== CSS VARIABLES ===== */
+    /* Keep your existing styles - they're good */
+    /* I'm including the complete styles for reference */
+    
     :root {
         --brand-900: #001d3d;
         --brand-700: #002855;
-        --accent: #ffd966; /* Gold */
+        --accent: #ffd966;
         --muted: #666;
         --bg-light: #f8f9fa;
         --bg-white: #ffffff;
         --border-color: #e0e0e0;
     }
 
-    /* ===== GLOBAL RESETS ===== */
     * {
         box-sizing: border-box;
         margin: 0;
@@ -319,31 +348,27 @@ updateFabricationPrice();
     body {
         font-family: 'Inter', sans-serif;
         margin: 0;
-        padding-bottom: 60px; /* Space for scrolling past navbar */
+        padding-bottom: 60px;
         background-color: var(--bg-light);
         color: #333;
-        overflow-x: hidden; /* Prevents horizontal scrolling */
+        overflow-x: hidden;
     }
 
-    /* ===== MAIN CONTAINER ===== */
     .glass-container {
         width: 100%;
-        max-width: 1100px; /* Reasonable width for desktop */
+        max-width: 1100px;
         margin: 0 auto;
         padding: 1.5rem;
-        overflow-x: hidden; /* Ensure no scroll */
+        overflow-x: hidden;
     }
 
-    /* ===== DETAIL GRID (Core Layout) ===== */
     .detail-grid {
         display: grid;
-        /* Desktop: 2 Columns */
         grid-template-columns: 1fr 1fr;
         gap: 2rem;
         align-items: start;
     }
 
-    /* ===== GALLERY SECTION (Left Column) ===== */
     .gallery-section {
         display: flex;
         flex-direction: column;
@@ -353,8 +378,6 @@ updateFabricationPrice();
     .product-detail-gallery {
         position: relative;
         width: 100%;
-        /* Desktop: Fixed height */
-        /* Mobile: Reduced height */
         height: 400px;
         overflow: hidden;
         border-radius: 10px;
@@ -368,7 +391,6 @@ updateFabricationPrice();
         position: relative;
     }
 
-    /* Main Image */
     .gallery-main-image {
         position: absolute;
         inset: 0;
@@ -394,7 +416,6 @@ updateFabricationPrice();
         display: block;
     }
 
-    /* Gallery Navigation */
     .gallery-counter {
         position: absolute;
         bottom: 1rem;
@@ -423,16 +444,14 @@ updateFabricationPrice();
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        font-size: 24px; /* Large touch target */
+        font-size: 24px;
     }
+    
     .gallery-prev { left: 12px; }
     .gallery-next { right: 12px; }
-    .gallery-navigation.single-image { display: none !important; }
 
-    /* Thumbnails */
     .gallery-thumbnails {
         display: grid;
-        /* Desktop: Multi-column grid */
         grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
         gap: 10px;
         margin-top: 1rem;
@@ -440,12 +459,11 @@ updateFabricationPrice();
 
     .gallery-thumbnail {
         width: 100%;
-        padding-top: 100%; /* Aspect ratio 1:1 container */
+        aspect-ratio: 1/1;
         border: 3px solid transparent;
         border-radius: 6px;
         cursor: pointer;
-        position: relative;
-        overflow: hidden;
+        object-fit: cover;
         background: var(--bg-white);
         transition: all 0.2s ease;
     }
@@ -456,20 +474,23 @@ updateFabricationPrice();
     }
 
     .gallery-thumbnail.active {
-        border-color: var(--brand-900); /* Dark Blue Active State */
-        box-shadow: 0 0 0 0 4px var(--brand-900);
+        border-color: var(--brand-900);
+        box-shadow: 0 0 0 4px var(--brand-900);
     }
 
-    /* No Image Box */
     .no-image-box {
         background: rgba(255,255,255,0.1);
         padding: 3rem 1rem;
         border-radius: 8px;
         text-align: center;
         border: 2px dashed #ccc;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
     }
 
-    /* ===== INFO & FORM SECTION (Right Column) ===== */
     .product-header {
         margin-bottom: 2rem;
         text-align: center;
@@ -498,7 +519,6 @@ updateFabricationPrice();
         margin-bottom: 2rem;
     }
 
-    /* Customization Section */
     .customization-section {
         background: var(--bg-white);
         padding: 2rem;
@@ -514,7 +534,6 @@ updateFabricationPrice();
         font-weight: 700;
     }
 
-    /* Form Groups */
     .form-group {
         margin-bottom: 1.5rem;
         width: 100%;
@@ -528,14 +547,13 @@ updateFabricationPrice();
         font-size: 1rem;
     }
 
-    /* Responsive Inputs */
     select {
         width: 100%;
-        padding: 14px 16px; /* Large touch target */
+        padding: 14px 16px;
         border: 2px solid #ddd;
         border-radius: 8px;
         background-color: var(--bg-white);
-        font-size: 16px !important; /* 16px prevents iOS auto-zoom */
+        font-size: 16px !important;
         font-family: inherit;
         color: #333;
         -webkit-appearance: none;
@@ -549,7 +567,6 @@ updateFabricationPrice();
         box-shadow: 0 0 0 4px rgba(0, 40, 85, 0.15);
     }
 
-    /* Price Display */
     .price-display {
         background: var(--bg-light);
         padding: 2rem;
@@ -573,7 +590,7 @@ updateFabricationPrice();
     }
 
     .product-note {
-        background: rgba(255, 217, 102, 0.1); /* Light Orange */
+        background: rgba(255, 217, 102, 0.1);
         border-left: 4px solid var(--accent);
         padding: 1rem 1.5rem;
         border-radius: 8px;
@@ -581,14 +598,13 @@ updateFabricationPrice();
         font-weight: 600;
     }
 
-    /* Buttons */
     .button-section {
         margin-top: 2rem;
         padding-top: 2rem;
         border-top: 2px solid var(--border-color);
     }
 
-    .btn-wrapper {
+    .button-wrapper {
         display: flex;
         justify-content: center;
     }
@@ -634,7 +650,6 @@ updateFabricationPrice();
         padding: 1rem 2.5rem;
     }
 
-    /* Admin Alert */
     .admin-alert {
         background: #f8d7da;
         border-left: 4px solid #dc3545;
@@ -644,7 +659,6 @@ updateFabricationPrice();
         text-align: center;
     }
 
-    /* ===== MODAL ===== */
     .modal-overlay {
         position: fixed;
         inset: 0;
@@ -662,7 +676,7 @@ updateFabricationPrice();
     .modal-content {
         position: relative;
         width: 95%;
-        max-width: 1200px; /* Modal width */
+        max-width: 1200px;
         max-height: 95vh;
         display: flex;
         flex-direction: column;
@@ -707,7 +721,6 @@ updateFabricationPrice();
     .modal-prev { left: 12px; }
     .modal-next { right: 12px; }
 
-    /* ===== TOAST ===== */
     .toast-notification {
         position: fixed;
         bottom: 30px;
@@ -720,7 +733,7 @@ updateFabricationPrice();
         z-index: 4000;
         opacity: 0;
         transition: all 0.3s ease;
-        width: 90%;
+        max-width: 90%;
         text-align: center;
     }
 
@@ -729,7 +742,6 @@ updateFabricationPrice();
         opacity: 1;
     }
 
-    /* ===== MOBILE RESPONSIVE DESIGN ===== */
     @media (max-width: 768px) {
         .glass-container {
             width: 100%;
@@ -738,34 +750,23 @@ updateFabricationPrice();
             margin: 0 auto;
         }
 
-        /* 1. Stack Layout on Mobile */
         .detail-grid {
             display: grid;
-            grid-template-columns: 1fr !important; /* Force single column stack */
+            grid-template-columns: 1fr !important;
             gap: 1.5rem;
             align-items: stretch;
         }
 
-        /* 2. Adjust Gallery Height on Mobile */
         .product-detail-gallery {
-            height: 300px !important; /* Reduced height for mobile screens */
+            height: 300px !important;
         }
 
         .gallery-thumbnails {
             display: grid !important;
-            grid-template-columns: 1fr !important; /* Stack thumbnails vertically */
-            gap: 1rem;
-            margin-top: 1rem;
+            grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)) !important;
+            gap: 0.5rem;
         }
 
-        .gallery-thumbnail {
-            width: 100% !important;
-            padding-top: 100%;
-            height: auto;
-            aspect-ratio: 1/1; /* Maintain square shape */
-        }
-
-        /* 3. Form Adjustments */
         .page-title {
             font-size: 1.5rem;
             text-align: center;
@@ -777,32 +778,24 @@ updateFabricationPrice();
             margin-top: 1rem;
         }
 
-        /* 4. Full Width Buttons */
         .btn, .btn-primary, .btn-secondary {
-            width: 100% !important; /* Force full width for tapping */
-            padding: 0.9rem 2rem; /* Adjust height */
+            width: 100% !important;
+            padding: 0.9rem 2rem;
             font-size: 1rem;
             justify-content: center;
         }
 
-        /* 5. Modal Adjustments */
         .modal-content {
-            width: 95% !important; /* Nearly full screen width */
+            width: 95% !important;
             padding: 0;
         }
 
-        .modal-image-wrap {
-            height: 0; /* Remove height constraint for wrap */
-            padding-bottom: 0;
-        }
-
         .modal-close, .modal-nav {
-            width: 50px; /* Larger touch target */
+            width: 50px;
             height: 50px;
             font-size: 20px;
         }
 
-        /* 6. Gallery Nav Positioning */
         .gallery-counter {
             bottom: 0.5rem;
             right: 0.5rem;
@@ -814,11 +807,9 @@ updateFabricationPrice();
             font-size: 22px;
         }
 
-        /* 7. Gallery Buttons Positioning */
         .gallery-prev { left: 8px; }
         .gallery-next { right: 8px; }
 
-        /* 8. Typography Scaling */
         .total-row {
             font-size: 1.2rem;
         }
@@ -840,7 +831,6 @@ updateFabricationPrice();
             padding: 0.75rem;
         }
 
-        /* 9. Button Section Wrapper */
         .button-section {
             padding-top: 1.5rem;
         }
@@ -851,3 +841,4 @@ updateFabricationPrice();
         }
     }
 </style>
+{% endblock %}

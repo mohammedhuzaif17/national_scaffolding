@@ -3,8 +3,41 @@ from werkzeug.utils import secure_filename
 from flask import current_app
 import logging
 
-# Configure logging
+# Set up logger
 logger = logging.getLogger(__name__)
+
+def get_image_url(image_path):
+    """
+    Convert database image path to proper URL for templates
+    Handles both single images and comma-separated multiple images
+    """
+    if not image_path:
+        return '/static/images/no-image.png'
+    
+    # Handle multiple images - return first one
+    if ',' in image_path:
+        image_path = image_path.split(',')[0].strip()
+    
+    image_path = image_path.strip()
+    
+    # If already a full URL (http/https), return as is
+    if image_path.startswith('http://') or image_path.startswith('https://'):
+        return image_path
+    
+    # If already starts with /static/, return as is
+    if image_path.startswith('/static/'):
+        return image_path
+    
+    # Remove any leading slashes
+    image_path = image_path.lstrip('/')
+    
+    # Remove 'static/' if it exists at the beginning
+    if image_path.startswith('static/'):
+        image_path = image_path[7:]  # Remove 'static/'
+    
+    # Return proper URL path
+    return f"/static/{image_path}"
+
 
 def upload_to_s3(file, filename, folder='uploads'):
     """
@@ -19,12 +52,13 @@ def upload_to_s3(file, filename, folder='uploads'):
         filepath = os.path.join(upload_folder, filename)
         file.save(filepath)
         
-        # Return relative path for database storage
+        # Return relative path for database storage (without 'static/')
         return f"uploads/{filename}"
         
     except Exception as e:
         logger.error(f"Error saving file locally: {e}")
         return None
+
 
 def delete_from_s3(file_path):
     """
@@ -32,10 +66,16 @@ def delete_from_s3(file_path):
     (Function name kept as delete_from_s3 for compatibility)
     """
     try:
+        if not file_path:
+            return False
+            
+        # Convert database path to filesystem path
         if file_path.startswith('uploads/'):
             full_path = os.path.join('static', file_path)
         elif file_path.startswith('/static/'):
             full_path = file_path[1:]  # Remove leading /
+        elif file_path.startswith('static/'):
+            full_path = file_path
         else:
             full_path = file_path
         
@@ -51,20 +91,6 @@ def delete_from_s3(file_path):
         logger.error(f"Error deleting local file: {e}")
         return False
 
-def get_image_url(image_path):
-    """
-    Get URL for image (local storage version)
-    """
-    if not image_path or image_path == 'images/no-image.png':
-        return '/static/images/no-image.png'
-    
-    if image_path.startswith('http'):
-        return image_path
-    
-    if image_path.startswith('/'):
-        return image_path
-    
-    return f"/static/{image_path}"
 
 def validate_s3_config():
     """
@@ -74,6 +100,7 @@ def validate_s3_config():
         'status': 'success',
         'message': 'Using local storage configuration'
     }
+
 
 def migrate_local_to_s3(local_path, s3_folder='uploads'):
     """

@@ -8,7 +8,7 @@
    RESET & BASE STYLES
    ========================================= */
 * {
-    box-sizing: border-box; /* Critical for mobile width calculations */
+    box-sizing: border-box;
 }
 
 .product-gallery {
@@ -135,7 +135,7 @@
 
 .product-image-container {
     width: 100%;
-    height: 260px; /* Desktop height */
+    height: 260px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -247,7 +247,7 @@
     display: block;
     margin: 0 auto;
     max-width: 100%;
-    padding: 20px; /* Desktop padding */
+    padding: 20px;
 }
 
 .page-header {
@@ -357,10 +357,8 @@
     margin-bottom: 1rem;
     letter-spacing: 2px;
     text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9);
-
-    color: #d4af37; /* GOLDEN COLOR */
+    color: #d4af37;
 }
-
 
 .hero-content h3 {
     font-size: 1.3rem;
@@ -407,8 +405,6 @@
 /* =========================================
    RESPONSIVE MOBILE CSS
    ========================================= */
-
-/* Tablets and Small Desktops */
 @media (max-width: 768px) {
     .page-container {
         padding: 15px;
@@ -416,7 +412,7 @@
 
     .hero-section {
         min-height: 400px;
-        background-attachment: scroll; /* Fixed bg often janky on mobile */
+        background-attachment: scroll;
         padding: 40px 15px;
         margin-bottom: 20px;
     }
@@ -431,23 +427,20 @@
     }
 }
 
-/* Mobile Phones */
 @media (max-width: 480px) {
     .page-container {
-        padding: 10px; /* Reduce padding for more width */
+        padding: 10px;
     }
 
     .page-title {
         font-size: 1.8rem;
     }
 
-    /* Force single column for cleaner look */
     .products-grid {
         grid-template-columns: 1fr;
         gap: 1.5rem;
     }
 
-    /* Reduce image height on mobile to save vertical space */
     .product-image-container {
         height: 200px; 
         padding: 10px;
@@ -469,8 +462,6 @@
         font-size: 1.5rem;
     }
 
-    /* STACK BUTTONS ON MOBILE */
-    /* This prevents squishing and makes buttons easier to tap */
     .product-actions {
         flex-direction: column;
         gap: 10px;
@@ -479,11 +470,10 @@
 
     .product-actions .btn {
         width: 100%;
-        padding: 14px; /* Larger touch target */
+        padding: 14px;
         font-size: 1rem;
     }
 
-    /* Floating Cart Button adjustments */
     .view-cart-btn {
         bottom: 15px;
         right: 15px;
@@ -493,7 +483,6 @@
     }
 }
 
-/* Very Small Screens (iPhone SE, etc) */
 @media (max-width: 360px) {
     .hero-content {
         padding: 15px;
@@ -509,7 +498,7 @@
 }
 </style>
 
-<!-- HERO SECTION WITH BACKGROUND IMAGE -->
+<!-- HERO SECTION -->
 <div class="hero-section">
     <div class="hero-content">
         <h1>The National Scaffolding</h1>
@@ -529,9 +518,6 @@
         </button>
     </div>
     
-    <!-- FABRICATION CATEGORY FILTERS (Commented out in original, kept here) -->
-    <!-- <div class="category-buttons">...</div> -->
-    
     <div class="products-grid">
         {% for product in products %}
         <div class="product-card">
@@ -542,10 +528,11 @@
 
                 {% if product.image_url %}
                     {% set images = product.image_url.split(',') %}
-                    <img src="{{ url_for('static', filename=images[0].strip()) }}"
+                    {% set first_image = images[0].strip() %}
+                    <img src="{{ url_for('static', filename=first_image) }}"
                          class="product-image"
                          alt="{{ product.name }}"
-                         onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}'">
+                         onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/no-image.png') }}';">
                 {% else %}
                     <div class="product-image-placeholder">📦</div>
                 {% endif %}

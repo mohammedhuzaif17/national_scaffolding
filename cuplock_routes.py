@@ -68,11 +68,11 @@ LEDGER_SIZES = {
 VERTICAL_SIZES = ['1m', '1.5m', '2m', '2.5m', '3m']
 
 VERTICAL_CUP_OPTIONS = {
-    '1m': [1, 2],
-    '1.5m': [2, 3],
-    '2m': [2, 3, 4],
-    '2.5m': [2, 3, 4],
-    '3m': [3, 4, 6],
+    '1M x 1M': [1, 2],
+    '1.5M x 1.5M': [2, 3],
+    '2M x 2M': [2, 3, 4],
+    '2.5M x 2.5M': [2, 3, 4],
+    '3M x 3M': [3, 4, 6],
 }
 
 # ===========================
@@ -802,7 +802,7 @@ def ledger_product_page(product_id):
 # ===========================
 # API ENDPOINTS
 # ===========================
-@cuplock_bp.route('/cuplock/api/vertical/product/<int:product_id>/sizes')
+@cuplock_bp.route('/api/vertical/product/<int:product_id>/sizes')
 def api_vertical_sizes(product_id):
     """API endpoint to get sizes for a vertical cuplock product"""
     try:
@@ -884,3 +884,44 @@ def api_admin_vertical_sizes(product_id):
     except Exception as e:
         logger.error(f"Error loading vertical sizes API: {e}")
         return jsonify({"error": True, "message": str(e)}), 500
+
+
+# ===========================
+# API ENDPOINT FOR CUPS
+# ===========================
+@cuplock_bp.route('/api/vertical/size/<int:size_id>/cups')
+def api_vertical_size_cups(size_id):
+    """Get cup options for a specific vertical size"""
+    try:
+        from models import CuplockVerticalSize, CuplockVerticalCup
+        
+        size = CuplockVerticalSize.query.get_or_404(size_id)
+        
+        # Query actual cup records from database for this size
+        cups = CuplockVerticalCup.query.filter_by(
+            vertical_size_id=size_id
+        ).order_by(CuplockVerticalCup.cup_count).all()
+        
+        cups_data = []
+        if cups:
+            # Return actual cup records with prices from database
+            for cup in cups:
+                cups_data.append({
+                    'id': cup.id,
+                    'cup_count': cup.cup_count,
+                    'price': float(cup.buy_price or 0),
+                    'rent_price': float(cup.rent_price or 0),
+                    'deposit': float(cup.deposit_amount or 0)
+                })
+        
+        return jsonify({
+            'success': True,
+            'size_label': size.size_label,
+            'cups': cups_data
+        })
+    except Exception as e:
+        logger.error(f"Error fetching cups for size {size_id}: {e}")
+        return jsonify({
+            'success': False,
+            'message': 'Error fetching cup options'
+        }), 404

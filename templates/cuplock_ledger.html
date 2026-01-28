@@ -336,12 +336,16 @@
                 {% if valid_images|length > 0 %}
                     <div class="product-detail-gallery">
                         <div class="gallery-main-image">
-                            <img src="{{ url_for('static', filename=product.image_url) }}">
-
-
+                            {% set first_image = valid_images[0].lstrip('/') %}
+                            {% if first_image.startswith('static/') %}
+                                {% set img_path = '/static/' + first_image[7:] %}
+                            {% else %}
+                                {% set img_path = '/static/' + first_image %}
+                            {% endif %}
+                            <img src="{{ img_path }}"
                                  alt="{{ product.name }}"
                                  loading="lazy"
-                                 onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}'">
+                                 onerror="this.src='/static/images/no-image.png';">
                         </div>
                     </div>
                 {% else %}

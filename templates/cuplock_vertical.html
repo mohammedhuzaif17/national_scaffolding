@@ -4,7 +4,7 @@
 
 {% block content %}
 <style>
-    /* ===== GLOBAL RESETS ===== */
+    /* Keep all your existing styles - they're good */
     * {
         box-sizing: border-box;
         margin: 0;
@@ -15,36 +15,33 @@
         font-family: 'Poppins', sans-serif;
         background-color: #f8f9fa;
         color: #333;
-        padding-bottom: 60px; /* Space for scrolling */
+        padding-bottom: 60px;
     }
 
-    /* ===== MAIN CONTAINER ===== */
     .product-container {
         width: 100%;
-        max-width: 900px; /* Reasonable width for desktop */
+        max-width: 900px;
         margin: 20px auto;
         padding: 20px;
         background: white;
         border-radius: 12px;
         box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        overflow-x: hidden; /* Prevents horizontal scroll */
+        overflow-x: hidden;
     }
 
-    /* ===== HEADER & IMAGE ===== */
     h1 {
         font-size: 2rem;
-        color: #1e3a8a; /* Royal Blue */
+        color: #1e3a8a;
         margin-bottom: 1.5rem;
         font-weight: 700;
     }
 
-    /* Image Container - Centered and Responsive */
     .product-image {
         width: 100%;
         display: flex;
         justify-content: center;
         align-items: center;
-        margin: 0 auto 30px auto; /* Margin on desktop */
+        margin: 0 auto 30px auto;
         overflow: hidden;
         background: #f9f9f9;
         border-radius: 8px;
@@ -61,9 +58,8 @@
         border-radius: 4px;
     }
 
-    /* ===== INFO BOX (Sizes) ===== */
     .info-box {
-        background: #e3f2fd; /* Light Blue */
+        background: #e3f2fd;
         border-left: 5px solid #1976d2;
         padding: 1.5rem;
         border-radius: 8px;
@@ -91,7 +87,6 @@
         font-size: 0.95rem;
     }
 
-    /* ===== PURCHASE TYPE (Radio Buttons) ===== */
     .purchase-type-section {
         margin-bottom: 2rem;
         padding: 1.5rem;
@@ -105,10 +100,9 @@
         font-weight: 600;
         margin-bottom: 0;
         padding: 0;
-        display: block; /* Stacks labels on mobile */
+        display: block;
     }
 
-    /* Custom Radio Group */
     .radio-group {
         display: flex;
         gap: 2rem;
@@ -133,7 +127,7 @@
         background: white;
         cursor: pointer;
         transition: all 0.2s ease;
-        width: 100%; /* Full width label for tap target */
+        width: 100%;
         font-weight: 600;
         color: #444;
     }
@@ -150,7 +144,6 @@
         box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);
     }
 
-    /* Custom Radio Dot */
     .radio-group label::before {
         content: '';
         width: 20px;
@@ -168,7 +161,6 @@
         box-shadow: inset 0 0 0 4px rgba(0,0,0,0.3);
     }
 
-    /* ===== FORM GROUPS ===== */
     .form-group {
         margin-bottom: 1.5rem;
     }
@@ -181,13 +173,12 @@
         font-size: 1rem;
     }
 
-    /* Mobile Critical Styles for Inputs */
     .form-group select, .form-group input {
         width: 100%;
-        padding: 14px 16px; /* Comfortable padding */
+        padding: 14px 16px;
         border: 2px solid #ddd;
-        border-radius: 8px; /* Softer corners */
-        font-size: 16px !important; /* 16px prevents iOS auto-zoom */
+        border-radius: 8px;
+        font-size: 16px !important;
         background-color: #fff;
         font-family: inherit;
         color: #333;
@@ -201,10 +192,8 @@
         box-shadow: 0 0 0 4px rgba(30, 58, 138, 0.15);
     }
 
-    /* ===== CUP OPTIONS GRID ===== */
     .cup-options-grid {
         display: grid;
-        /* Desktop: Responsive columns based on width */
         grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
         gap: 1.5rem;
         margin-bottom: 2rem;
@@ -255,15 +244,14 @@
     }
 
     .cup-options-grid .empty-msg {
-        grid-column: 1 / -1; /* Span all columns */
+        grid-column: 1 / -1;
         padding: 2rem;
         color: #999;
         font-style: italic;
     }
 
-    /* ===== ADD CUP FORM ===== */
     .add-cup-form {
-        background: #fff3cd; /* Light Orange */
+        background: #fff3cd;
         border: 1px solid #ffecb5;
         border-radius: 8px;
         padding: 1.5rem;
@@ -283,7 +271,6 @@
         margin-bottom: 1rem;
     }
 
-    /* ===== PRICE DISPLAY ===== */
     .price-display {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
@@ -311,7 +298,6 @@
         font-size: 1.5rem;
     }
 
-    /* ===== BUTTONS ===== */
     .btn {
         border: none;
         border-radius: 10px;
@@ -344,7 +330,6 @@
         opacity: 0.7;
     }
 
-    /* ===== LOADING SPINNER ===== */
     .loading-spinner {
         display: inline-block;
         width: 20px;
@@ -359,12 +344,11 @@
         to { transform: rotate(360deg); }
     }
 
-    /* ===== MOBILE RESPONSIVE DESIGN ===== */
     @media (max-width: 768px) {
         .product-container {
-            width: 100%; /* Full width on mobile */
+            width: 100%;
             margin: 0 auto;
-            padding: 15px 1rem; /* Less padding */
+            padding: 15px 1rem;
         }
 
         h1 {
@@ -372,42 +356,38 @@
         }
 
         .product-image {
-            margin: 0 auto 20px auto; /* Adjust margin */
+            margin: 0 auto 20px auto;
             padding: 15px;
             min-height: 150px;
         }
 
-        /* Stack Purchase Type Vertically */
         .radio-group {
             flex-direction: column;
             gap: 1rem;
         }
 
         .radio-group label {
-            width: 100%; /* Full width radio buttons */
-            padding: 1rem; /* Taller touch target */
+            width: 100%;
+            padding: 1rem;
         }
 
-        /* Stack Form Groups */
         .form-row {
-            flex-direction: column; /* Stack inputs vertically */
+            flex-direction: column;
             gap: 1rem;
             align-items: stretch;
         }
 
-        /* Force Single Column Cup Grid */
         .cup-options-grid {
             display: grid !important;
-            grid-template-columns: 1fr !important; /* Single column on mobile */
+            grid-template-columns: 1fr !important;
             gap: 1rem;
         }
 
         .cup-option-card {
-            width: 100%; /* Full width card */
-            min-height: 60px; /* Allow content to fit */
+            width: 100%;
+            min-height: 60px;
         }
 
-        /* Stack Price Display Rows */
         .price-row {
             flex-direction: column;
             align-items: flex-start;
@@ -423,9 +403,8 @@
             padding-top: 0.5rem;
         }
 
-        /* Adjust Button */
         .btn-warning {
-            padding: 1rem 2rem; /* Taller button */
+            padding: 1rem 2rem;
             font-size: 1rem;
         }
     }
@@ -435,33 +414,41 @@
     <!-- Header & Image -->
     <h1>Vertical Cuplock: {{ product.name }}</h1>
     
-   <div class="product-image">
-    {% if product.display_image_url %}
-        <img src="{{ url_for('static', filename=product.display_image_url) }}">
-    {% else %}
-        <span style="font-size: 3rem; color: #ccc;">🔗 No Image</span>
-    {% endif %}
-</div>
+    <div class="product-image">
+        {% if product.image_url %}
+            {% set first_image = product.image_url.split(',')[0].strip().lstrip('/') %}
+            {% if first_image.startswith('static/') %}
+                {% set img_path = '/static/' + first_image[7:] %}
+            {% else %}
+                {% set img_path = '/static/' + first_image %}
+            {% endif %}
+            <img src="{{ img_path }}"
+                 alt="{{ product.name }}"
+                 onerror="this.onerror=null; this.src='/static/images/no-image.png';">
+        {% else %}
+            <span style="font-size: 3rem; color: #ccc;">🔗 No Image</span>
+        {% endif %}
+    </div>
 
     <!-- Available Sizes Info -->
     <div class="info-box">
-        <strong>💡 Available Sizes:</strong> 1m, 1.5m, 2m, 2.5m, 3m, 3.5m, 4m, 4.5m, 5m, 5.5m, 6m
+        <strong>💡 Available Sizes:</strong>
+        <p>Select from: 1m, 1.5m, 2m, 2.5m, 3m, 3.5m, 4m, 4.5m, 5m, 5.5m, 6m</p>
         <ul>
-            <li><strong>Cup Options by Size:</strong> 1m: 1 or 2 cups, 1.5m: 2 or 3 cups, etc.</li>
+            <li><strong>Cup Options:</strong> Each size has multiple cup configurations available</li>
+            <li><strong>Buy:</strong> One-time purchase (includes cup price)</li>
+            <li><strong>Rent:</strong> Daily rental rate with refundable deposit</li>
         </ul>
     </div>
 
     <!-- Purchase Type Section -->
     <div class="purchase-type-section">
         <div class="radio-group">
-            <label>
-                <input type="radio" name="purchaseType" value="buy" checked onchange="updatePurchaseType()">
-                Buy (One-time Payment)
-            </label>
-            <label>
-                <input type="radio" name="purchaseType" value="rent" onchange="updatePurchaseType()">
-                Rent (Per Day)
-            </label>
+            <input type="radio" id="buyOption" name="purchaseType" value="buy" checked onchange="updatePurchaseType()">
+            <label for="buyOption">Buy (One-time Payment)</label>
+            
+            <input type="radio" id="rentOption" name="purchaseType" value="rent" onchange="updatePurchaseType()">
+            <label for="rentOption">Rent (Per Day)</label>
         </div>
     </div>
 
@@ -470,14 +457,12 @@
         <label for="sizeSelect">Select Size *</label>
         <select id="sizeSelect" onchange="loadCups()">
             <option value="">-- Select Size --</option>
-            <!-- Sizes will be loaded via JavaScript -->
         </select>
     </div>
 
     <!-- Cup Options Grid -->
     <div id="cupSection" class="cup-options-grid">
-        <p style="color:#666; margin-bottom: 0.5rem;">Please select a size first</p>
-        <!-- Loaded via JS -->
+        <p style="color:#666; padding: 2rem; text-align:center;">Please select a size first</p>
     </div>
 
     <!-- Quantity -->
@@ -513,13 +498,8 @@
 <script>
 console.log('🔵 Vertical Cuplock page loaded');
 
-// ============================================
-// GLOBALS
-// ============================================
 const PRODUCT_ID = {{ product.id }};
-// Note: Logic relies on Size Prices being the total unit price. 
-// If size.buy_price is only an increment, add PRODUCT_BASE_PRICE to the calculation.
-const PRODUCT_BASE_PRICE = {{ product.price|default(0) }}; 
+const PRODUCT_BASE_PRICE = {{ product.price|default(0) }};
 
 let selectedCupPrice = 0;
 let rentPrice = 0;
@@ -528,100 +508,23 @@ let selectedSizeLabel = null;
 let selectedCupId = null;
 let currentSizeBuyPrice = 0;
 
-// ============================================
-// LOAD SIZES
-// ============================================
-// function loadSizes() {
-//     try {
-//         console.log('🔄 loadSizes() called');
-        
-//         const sizeSelect = document.getElementById('sizeSelect');
-        
-//         if (!sizeSelect) {
-//             console.error('❌ Size select element not found');
-//             return;
-//         }
-        
-//         // Show loading
-//         sizeSelect.innerHTML = '<option value="">Loading sizes...</option>';
-        
-//         // Fetch sizes
-//         fetch('/cuplock/api/vertical/product/' + PRODUCT_ID + '/sizes')
-//             .then(function(response) {
-//                 if (!response.ok) throw new Error('Network response was not ok');
-//                 return response.json();
-//             })
-//             .then(function(data) {
-//                 console.log('✅ Sizes loaded:', data);
-                
-//                 sizeSelect.innerHTML = '<option value="">-- Select Size --</option>';
-                
-//                 if (!data.success || !data.sizes || data.sizes.length === 0) {
-//                     sizeSelect.innerHTML += '<option value="" disabled>No sizes available</option>';
-//                     return;
-//                 }
-                
-//                 data.sizes.forEach(function(size) {
-//                     const option = document.createElement('option');
-//                     option.value = size.id;
-//                     option.textContent = size.size_label;
-//                     option.setAttribute('data-label', size.size_label);
-//                     option.setAttribute('data-buy', size.buy_price);
-//                     option.setAttribute('data-rent', size.rent_price);
-//                     option.setAttribute('data-deposit', size.deposit);
-                    
-//                     sizeSelect.appendChild(option);
-//                 });
-//             })
-//             .catch(function(error) {
-//                 console.error('❌ Error loading sizes:', error);
-//                 sizeSelect.innerHTML = '<option value="" disabled>Error loading sizes</option>';
-                
-//                 // Add fallback sizes for testing
-//                 const fallbackSizes = [
-//                     { id: 'fallback-1', size_label: '1m', buy_price: 500, rent_price: 50, deposit: 100 },
-//                     { id: 'fallback-2', size_label: '1.5m', buy_price: 750, rent_price: 75, deposit: 150 },
-//                     { id: 'fallback-3', size_label: '2m', buy_price: 1000, rent_price: 100, deposit: 200 }
-//                 ];
-                
-//                 fallbackSizes.forEach(function(size) {
-//                     const option = document.createElement('option');
-//                     option.value = size.id;
-//                     option.textContent = size.size_label;
-//                     option.setAttribute('data-label', size.size_label);
-//                     option.setAttribute('data-buy', size.buy_price);
-//                     option.setAttribute('data-rent', size.rent_price);
-//                     option.setAttribute('data-deposit', size.deposit);
-                    
-//                     sizeSelect.appendChild(option);
-//                 });
-                
-//                 console.log('🔄 Using fallback sizes');
-//             });
-//     } catch (error) {
-//         console.error('❌ Error in loadSizes:', error);
-//     }
-// }
-
-// Update the loadSizes function
 function loadSizes() {
     try {
-        console.log('🔄 loadSizes() called');
+        console.log('🔄 Loading sizes...');
         
         const sizeSelect = document.getElementById('sizeSelect');
-        
         if (!sizeSelect) {
-            console.error('❌ Size select element not found');
+            console.error('❌ Size select not found');
             return;
         }
         
-        // Show loading
         sizeSelect.innerHTML = '<option value="">Loading sizes...</option>';
         
-        // Fetch sizes
         fetch('/cuplock/api/vertical/product/' + PRODUCT_ID + '/sizes')
             .then(function(response) {
-                if (!response.ok) throw new Error('Network response was not ok');
+                if (!response.ok) {
+                    throw new Error('Failed to load sizes: ' + response.status);
+                }
                 return response.json();
             })
             .then(function(data) {
@@ -631,6 +534,7 @@ function loadSizes() {
                 
                 if (!data.success || !data.sizes || data.sizes.length === 0) {
                     sizeSelect.innerHTML += '<option value="" disabled>No sizes available</option>';
+                    console.warn('⚠️ No sizes returned from API');
                     return;
                 }
                 
@@ -642,56 +546,36 @@ function loadSizes() {
                     option.setAttribute('data-buy', size.buy_price);
                     option.setAttribute('data-rent', size.rent_price);
                     option.setAttribute('data-deposit', size.deposit);
-                    
                     sizeSelect.appendChild(option);
                 });
+                
+                console.log('✅ Added', data.sizes.length, 'sizes to dropdown');
             })
             .catch(function(error) {
                 console.error('❌ Error loading sizes:', error);
-                sizeSelect.innerHTML = '<option value="" disabled>Error loading sizes</option>';
+                sizeSelect.innerHTML = '<option value="" disabled>Error loading sizes. Please refresh.</option>';
             });
     } catch (error) {
         console.error('❌ Error in loadSizes:', error);
     }
 }
 
-// ============================================
-// PURCHASE TYPE
-// ============================================
 function updatePurchaseType() {
     try {
-        console.log('🔄 Purchase type changed');
-        
-        const purchaseTypeRadios = document.querySelectorAll('input[name="purchaseType"]');
+        const isBuy = document.getElementById('buyOption').checked;
         const cupSection = document.getElementById('cupSection');
         
-        if (!purchaseTypeRadios || !cupSection) {
-            console.error('❌ Required elements not found');
-            return;
-        }
+        console.log('📊 Purchase type:', isBuy ? 'buy' : 'rent');
         
-        let isBuySelected = false;
-        purchaseTypeRadios.forEach(function(radio) {
-            if (radio.checked && radio.value === 'buy') {
-                isBuySelected = true;
-            }
-        });
+        cupSection.style.display = isBuy ? 'grid' : 'none';
         
-        console.log('📊 Buy selected:', isBuySelected);
-        
-        // Show/hide cup section
-        cupSection.style.display = isBuySelected ? 'block' : 'none';
-        
-        // Reset cup selection when switching to rent
-        if (!isBuySelected) {
+        if (!isBuy) {
             selectedCupPrice = 0;
             selectedCupId = null;
             const cards = document.querySelectorAll('.cup-option-card');
-            if (cards.length > 0) {
-                cards.forEach(function(card) {
-                    card.classList.remove('selected');
-                });
-            }
+            cards.forEach(function(card) {
+                card.classList.remove('selected');
+            });
         }
         
         updatePrice();
@@ -700,12 +584,9 @@ function updatePurchaseType() {
     }
 }
 
-// ============================================
-// LOAD CUP OPTIONS
-// ============================================
 function loadCups() {
     try {
-        console.log('🔄 loadCups() called');
+        console.log('🔄 Loading cups...');
         
         const sizeSelect = document.getElementById('sizeSelect');
         const container = document.getElementById('cupSection');
@@ -716,29 +597,22 @@ function loadCups() {
         }
         
         const selectedIndex = sizeSelect.selectedIndex;
-        if (selectedIndex <= 0) { // 0 is usually "Select Size..." placeholder
-             // User selected the placeholder or nothing
-             selectedCupPrice = 0;
-             selectedCupId = null;
-             selectedSizeLabel = null;
-             container.innerHTML = '<p style="color:#666; text-align:center; padding: 2rem;">Please select a size first</p>';
-             updatePrice();
-             return;
+        if (selectedIndex <= 0) {
+            selectedCupPrice = 0;
+            selectedCupId = null;
+            selectedSizeLabel = null;
+            container.innerHTML = '<p style="color:#666; text-align:center; padding: 2rem;">Please select a size first</p>';
+            updatePrice();
+            return;
         }
 
         const selectedOption = sizeSelect.options[selectedIndex];
-        
         const sizeId = selectedOption.value;
         selectedSizeLabel = selectedOption.getAttribute('data-label') || '';
 
-        // Get prices from data attributes
-        const rentValue = selectedOption.getAttribute('data-rent');
-        const depositValue = selectedOption.getAttribute('data-deposit');
-        const buyValue = selectedOption.getAttribute('data-buy');
-        
-        rentPrice = rentValue ? parseFloat(rentValue) : 0;
-        depositPrice = depositValue ? parseFloat(depositValue) : 0;
-        currentSizeBuyPrice = buyValue ? parseFloat(buyValue) : 0;
+        rentPrice = parseFloat(selectedOption.getAttribute('data-rent')) || 0;
+        depositPrice = parseFloat(selectedOption.getAttribute('data-deposit')) || 0;
+        currentSizeBuyPrice = parseFloat(selectedOption.getAttribute('data-buy')) || 0;
 
         console.log('📊 Size selected:', {
             label: selectedSizeLabel,
@@ -747,13 +621,11 @@ function loadCups() {
             deposit: depositPrice
         });
 
-        // Show loading
-        container.innerHTML = '<p>Loading cup options...</p>';
+        container.innerHTML = '<p style="text-align:center;">Loading cup options...</p>';
 
-        // Fetch cups
         fetch('/cuplock/api/vertical/size/' + encodeURIComponent(sizeId) + '/cups')
             .then(function(response) {
-                if (!response.ok) throw new Error('Network response was not ok');
+                if (!response.ok) throw new Error('Failed to load cups');
                 return response.json();
             })
             .then(function(data) {
@@ -776,7 +648,8 @@ function loadCups() {
                     const cupPrice = c.price || 0;
                     const cupCount = c.cup_count || 0;
 
-                    card.textContent = cupCount + (cupCount === 1 ? ' Cup' : ' Cups');
+                    card.innerHTML = '<div>' + cupCount + (cupCount === 1 ? ' Cup' : ' Cups') + '</div>' +
+                                   '<div style="font-size:0.9rem; color:#666; margin-top:0.5rem;">+₹' + cupPrice.toFixed(2) + '</div>';
                     card.dataset.price = cupPrice;
                     card.dataset.cupId = c.id;
 
@@ -801,29 +674,7 @@ function loadCups() {
             })
             .catch(function(error) {
                 console.error('❌ Error loading cups:', error);
-                container.innerHTML = '<p style="color: red; text-align:center;">Error loading cups. Please try again.</p>';
-                
-                // Add a fallback option for testing
-                const fallbackCard = document.createElement('div');
-                fallbackCard.className = 'cup-option-card';
-                fallbackCard.textContent = '1 Cup';
-                fallbackCard.dataset.price = '100'; // Default price
-                fallbackCard.dataset.cupId = 'fallback-1';
-                
-                fallbackCard.addEventListener('click', function() {
-                    selectedCupPrice = parseFloat(this.dataset.price);
-                    selectedCupId = this.dataset.cupId;
-                    
-                    document.querySelectorAll('.cup-option-card').forEach(function(el) {
-                        el.classList.remove('selected');
-                    });
-                    fallbackCard.classList.add('selected');
-                    
-                    updatePrice();
-                });
-                
-                container.innerHTML = '<p style="color: orange; text-align:center;">Using fallback cup option</p>';
-                container.appendChild(fallbackCard);
+                container.innerHTML = '<p style="color: red; text-align:center; padding:2rem;">Error loading cups. Please try again.</p>';
                 updatePrice();
             });
     } catch (error) {
@@ -831,29 +682,17 @@ function loadCups() {
     }
 }
 
-// ============================================
-// UPDATE PRICE
-// ============================================
 function updatePrice() {
     try {
         const qtyInput = document.getElementById('quantity');
-        const purchaseTypeRadios = document.querySelectorAll('input[name="purchaseType"]');
-        
         const qty = qtyInput ? (parseInt(qtyInput.value) || 1) : 1;
         
-        let type = 'buy';
-        if (purchaseTypeRadios) {
-            purchaseTypeRadios.forEach(function(radio) {
-                if (radio.checked && radio.value === 'rent') {
-                    type = 'rent';
-                }
-            });
-        }
-
+        const isBuy = document.getElementById('buyOption').checked;
+        
         let unit = 0;
         let deposit = 0;
 
-        if (type === 'buy') {
+        if (isBuy) {
             unit = currentSizeBuyPrice + selectedCupPrice;
         } else {
             unit = rentPrice;
@@ -863,14 +702,13 @@ function updatePrice() {
         const total = (unit * qty) + (deposit * qty);
 
         console.log('💰 Price calculated:', {
-            type: type,
+            type: isBuy ? 'buy' : 'rent',
             unit: unit,
             deposit: deposit,
             qty: qty,
             total: total
         });
 
-        // Update display
         const unitPriceEl = document.getElementById('unitPrice');
         const depositAmountEl = document.getElementById('depositAmount');
         const totalPriceEl = document.getElementById('totalPrice');
@@ -880,39 +718,26 @@ function updatePrice() {
         if (depositAmountEl) depositAmountEl.innerText = '₹' + deposit.toFixed(2);
         if (totalPriceEl) totalPriceEl.innerText = '₹' + total.toFixed(2);
         if (depositRowEl) {
-            depositRowEl.style.display = (type === 'rent' && deposit > 0) ? 'flex' : 'none';
+            depositRowEl.style.display = (!isBuy && deposit > 0) ? 'flex' : 'none';
         }
     } catch (error) {
         console.error('❌ Error in updatePrice:', error);
     }
 }
 
-// ============================================
-// ADD TO CART
-// ============================================
 function addToCart() {
     try {
         const qtyInput = document.getElementById('quantity');
-        const purchaseTypeRadios = document.querySelectorAll('input[name="purchaseType"]');
-        
         const qty = qtyInput ? (parseInt(qtyInput.value) || 1) : 1;
-        
-        let type = 'buy';
-        if (purchaseTypeRadios) {
-            purchaseTypeRadios.forEach(function(radio) {
-                if (radio.checked && radio.value === 'rent') {
-                    type = 'rent';
-                }
-            });
-        }
+        const isBuy = document.getElementById('buyOption').checked;
+        const type = isBuy ? 'buy' : 'rent';
 
-        // Validation
         if (!selectedSizeLabel) {
             alert("⚠️ Please select a size");
             return;
         }
 
-        if (type === 'buy' && !selectedCupId) {
+        if (isBuy && !selectedCupId) {
             alert("⚠️ Please select a cup configuration");
             return;
         }
@@ -966,8 +791,9 @@ function addToCart() {
     }
 }
 
-// Initialize the page
+// Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('📄 Page ready, loading sizes...');
     loadSizes();
     updatePurchaseType();
 });

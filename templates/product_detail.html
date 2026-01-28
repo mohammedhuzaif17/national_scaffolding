@@ -11,7 +11,6 @@
     --muted: #666;
 }
 
-/* Ensure box-sizing includes padding/border in width calculations */
 * { box-sizing: border-box; }
 
 .glass-container {
@@ -29,7 +28,6 @@
     align-items: start;
 }
 
-/* Tablet & Mobile Layout */
 @media (max-width: 900px) {
     .glass-container { padding: 15px; }
     .detail-grid { grid-template-columns: 1fr; gap: 2rem; }
@@ -86,7 +84,6 @@
     margin-top: 14px;
     overflow-x: auto;
     padding-bottom: 6px;
-    /* Hide scrollbar for cleaner look */
     -ms-overflow-style: none; 
     scrollbar-width: none; 
 }
@@ -187,12 +184,12 @@
 
 .form-group select { 
     width:100%; 
-    padding: 12px 14px; /* Increased touch target */
+    padding: 12px 14px;
     border-radius:8px; 
     border:1px solid #e6e9ee;
     background-color: #fff;
-    font-size: 16px; /* CRITICAL: Prevents iOS zoom */
-    appearance: none; /* Removes default arrow for custom styling */
+    font-size: 16px;
+    appearance: none;
     background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
     background-repeat: no-repeat;
     background-position: right 1rem center;
@@ -203,7 +200,7 @@
     background: linear-gradient(135deg,var(--brand-700),var(--brand-900));
     color: white;
     border: none;
-    padding: 14px; /* Increased touch target */
+    padding: 14px;
     border-radius: 10px;
     font-weight: 800;
     width: 100%;
@@ -227,13 +224,13 @@
 
 .toast-notification {
     position: fixed;
-    bottom: 30px; /* Moved up slightly */
+    bottom: 30px;
     left: 50%;
     transform: translateX(-50%) translateY(100px);
     background-color: rgba(0,0,0,0.9);
     color: white;
     padding: 14px 24px;
-    border-radius: 50px; /* Pill shape */
+    border-radius: 50px;
     z-index: 2000;
     opacity: 0;
     transition: all .28s ease;
@@ -301,9 +298,6 @@
 .modal-prev { left: 12px; }
 .modal-next { right: 12px; }
 
-/* =========================================
-   RESPONSIVE MOBILE STYLES
-   ========================================= */
 @media (max-width: 768px) {
     .product-detail-gallery { height: 350px; }
     .gallery-navigation { width: 40px; height: 40px; font-size: 20px; }
@@ -313,20 +307,11 @@
 
 @media (max-width: 480px) {
     .glass-container { padding: 10px; }
-    
     .page-title { font-size: 1.4rem; }
-    
-    /* Significantly reduce gallery height on phones */
     .product-detail-gallery { height: 260px; }
-    
-    /* Smaller thumbnails */
     .gallery-thumbnail { width: 60px; height: 60px; }
     .gallery-thumbnails { gap: 8px; }
-    
-    /* Adjust buttons */
     .btn-primary { font-size: 1rem; padding: 12px; }
-    
-    /* Ensure modal nav is touchable */
     .modal-nav { width: 48px; height: 48px; }
     .modal-close { width: 40px; height: 40px; top: 10px; right: 10px; }
 }
@@ -339,26 +324,30 @@
         <!-- Gallery Section -->
         <div>
             {% if product.image_url %}
-                {% set valid_images = product.image_url
-                    .split(',')
-                    | map('trim')
-                    | reject('equalto', '')
-                    | list %}
+                {% set image_list = product.image_url.split(',') %}
+                {% set valid_images = [] %}
+                {% for img in image_list %}
+                    {% set clean_img = img.strip() %}
+                    {% if clean_img %}
+                        {% set _ = valid_images.append(clean_img) %}
+                    {% endif %}
+                {% endfor %}
 
                 {% if valid_images|length > 0 %}
                     <div class="product-detail-gallery">
                         <div class="gallery-main-container">
                             {% for img_url in valid_images %}
                                 <div class="gallery-main-image {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}">
-                                    <img src="{{ url_for('static', filename=product.image_url) }}">
+                                    <img src="{{ url_for('static', filename=img_url) }}"
                                          alt="{{ product.name }} - Image {{ loop.index }}"
                                          loading="lazy"
-                                         onclick="openModal({{ loop.index0 }})">
+                                         onclick="openModal({{ loop.index0 }})"
+                                         onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/no-image.png') }}';">
                                 </div>
                             {% endfor %}
                         </div>
 
-                        {% if valid_images|length >1 %}
+                        {% if valid_images|length > 1 %}
                             <div class="gallery-counter">
                                 <span id="currentImageNum">1</span> / {{ valid_images|length }}
                             </div>
@@ -370,10 +359,11 @@
                     {% if valid_images|length > 1 %}
                         <div class="gallery-thumbnails">
                             {% for img_url in valid_images %}
-                                <img src="{{ url_for('static', filename=product.image_url) }}">
-
+                                <img src="{{ url_for('static', filename=img_url) }}"
                                      class="gallery-thumbnail {% if loop.first %}active{% endif %}"
-                                     onclick="setMainImage({{ loop.index0 }})">
+                                     onclick="setMainImage({{ loop.index0 }})"
+                                     alt="Thumbnail {{ loop.index }}"
+                                     onerror="this.style.display='none';">
                             {% endfor %}
                         </div>
                     {% endif %}
@@ -395,7 +385,9 @@
         <div>
             <h1 class="page-title">{{ product.name }}</h1>
             <p class="product-meta">{{ product.category|title if product.category else 'N/A' }}</p>
+            {% if product.description %}
             <p class="product-description">{{ product.description }}</p>
+            {% endif %}
 
             <!-- Product details and pricing -->
             {% if product.category == 'aluminium' %}
@@ -504,7 +496,7 @@
                     {% endif %}
                 </div>
             
-            {% elif product.product_type == 'fabrication' %}
+            {% elif product.product_type == 'fabrication' or product.category == 'custom' %}
                 <div class="customization-section">
                     <h3 style="color: var(--accent); margin-bottom: 8px;">Product Details</h3>
                     <p style="color: #000; margin-bottom: 1rem;">High-quality fabrication product for your construction needs.</p>
@@ -558,277 +550,228 @@
 {% block scripts %}
 <script>
 // ============================================
-// GENERIC PRODUCT PRICING LOGIC
-// Only runs for: aluminium, h-frames, accessories, fabrication
-// Does NOT run for cuplock ledger products
+// GALLERY LOGIC
 // ============================================
+let galleryImages = [];
+let totalImages = 0;
+let currentIndex = 0;
 
-// Check product type BEFORE any code runs
-const _category = '{{ product.category }}';
-const _productType = '{{ product.product_type | lower }}';
-const _cuplockType = '{{ product.cuplock_type | lower if product.cuplock_type else "" }}';
+function buildImageUrl(relativePath) {
+    if (!relativePath) return '';
+    return '{{ url_for("static", filename="") }}' + relativePath;
+}
 
-// ⛔ CRITICAL: If this is a cuplock ledger, STOP IMMEDIATELY
-if (_category === 'cuplock' && _cuplockType === 'ledger') {
-    console.log('⏭️ Cuplock ledger detected - skipping ALL generic product logic');
-    console.log('⚠️ This page should NOT load for ledger products!');
+{% if product.image_url %}
+    const rawImages = `{{ product.image_url }}`.split(',');
+    galleryImages = rawImages.map(s => s.trim()).filter(s => s !== '').map(url => buildImageUrl(url));
+    totalImages = galleryImages.length;
+{% endif %}
+
+const prevBtn = document.getElementById('galleryPrev');
+const nextBtn = document.getElementById('galleryNext');
+const counterEl = document.getElementById('currentImageNum');
+
+function setActiveImage(index) {
+    if (totalImages === 0) return;
+    index = Math.max(0, Math.min(index, totalImages - 1));
+    const mainItems = document.querySelectorAll('.gallery-main-image');
+    const thumbs = document.querySelectorAll('.gallery-thumbnail');
+
+    if (mainItems[currentIndex]) mainItems[currentIndex].classList.remove('active');
+    if (thumbs[currentIndex]) thumbs[currentIndex].classList.remove('active');
+
+    currentIndex = index;
+
+    if (mainItems[currentIndex]) mainItems[currentIndex].classList.add('active');
+    if (thumbs[currentIndex]) thumbs[currentIndex].classList.add('active');
+    if (counterEl) counterEl.textContent = (currentIndex + 1);
+}
+
+window.setMainImage = function(i) {
+    setActiveImage(parseInt(i));
+};
+
+function prevImage() { if (totalImages >1) setActiveImage((currentIndex - 1 + totalImages) % totalImages); }
+function nextImage() { if (totalImages >1) setActiveImage((currentIndex + 1) % totalImages); }
+
+if (prevBtn) prevBtn.addEventListener('click', prevImage);
+if (nextBtn) nextBtn.addEventListener('click', nextImage);
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') prevImage();
+    if (e.key === 'ArrowRight') nextImage();
+    if (e.key === 'Escape') closeModal();
+});
+
+// ============================================
+// MODAL LOGIC
+// ============================================
+const modal = document.getElementById('imageModal');
+const modalImg = document.getElementById('modalImage');
+
+window.openModal = function(index) {
+    if (!galleryImages || galleryImages.length === 0) return;
+    index = Math.max(0, Math.min(index, galleryImages.length - 1));
+    modal.classList.add('show');
+    modalImg.src = galleryImages[index];
+    modalCurrentIndex = index;
+};
+
+window.closeModal = function() {
+    modal.classList.remove('show');
+    modalImg.src = '';
+};
+
+let modalCurrentIndex = 0;
+window.modalPrev = function() {
+    if (!galleryImages || galleryImages.length <=1) return;
+    modalCurrentIndex = (modalCurrentIndex - 1 + galleryImages.length) % galleryImages.length;
+    modalImg.src = galleryImages[modalCurrentIndex];
+};
+
+window.modalNext = function() {
+    if (!galleryImages || galleryImages.length <=1) return;
+    modalCurrentIndex = (modalCurrentIndex + 1) % galleryImages.length;
+    modalImg.src = galleryImages[modalCurrentIndex];
+};
+
+modal.addEventListener('click', function(e) {
+    if (e.target === modal) closeModal();
+});
+
+// ============================================
+// PRICING LOGIC
+// ============================================
+let basePrice = {{ product.price | default(0) | float }};
+let rentPrice = {{ product.rent_price | default(0) | float }};
+let depositAmount = {{ product.deposit_amount | default(0) | float }};
+
+// Fabrication pricing
+window.updateFabricationPrice = function() {
+    const quantity = parseInt(document.getElementById('quantity').value);
+    const total = basePrice * quantity;
+    document.getElementById('final_price_display').textContent = '₹' + total.toFixed(2);
+};
+
+// Aluminium pricing
+window.updateAluminiumPrice = function() {
+    const quantity = parseInt(document.getElementById('quantity').value);
+    const purchaseType = document.getElementById('purchase_type').value;
+    const unit = purchaseType === 'rent' ? rentPrice : basePrice;
+    const total = unit * quantity;
+    document.getElementById('final_price_display').textContent = '₹' + total.toFixed(2);
+
+    const depositDisplay = document.getElementById('deposit_display');
+    if (purchaseType === 'rent' && depositAmount > 0) {
+        depositDisplay.style.display = 'block';
+        document.getElementById('deposit_amount').textContent = '₹' + (depositAmount * quantity).toFixed(2);
+    } else {
+        depositDisplay.style.display = 'none';
+    }
+};
+
+// Generic pricing
+window.updatePrice = function() {
+    const quantityEl = document.getElementById('quantity');
+    const purchaseTypeEl = document.getElementById('purchase_type');
+
+    if (!quantityEl || !purchaseTypeEl) return;
+
+    const quantity = parseInt(quantityEl.value) ||1;
+    const purchaseType = purchaseTypeEl.value;
+
+    const unitPrice = purchaseType === 'rent' ? rentPrice : basePrice;
+    const total = unitPrice * quantity;
+
+    const priceEl = document.getElementById('final_price_display');
+    if (priceEl) {
+        priceEl.textContent = '₹' + total.toFixed(2);
+    }
+
+    const depositDisplay = document.getElementById('deposit_display');
+    const depositAmountEl = document.getElementById('deposit_amount');
+
+    if (purchaseType === 'rent' && depositAmount > 0 && depositDisplay && depositAmountEl) {
+        depositDisplay.style.display = 'block';
+        depositAmountEl.textContent = '₹' + (depositAmount * quantity).toFixed(2);
+    } else if (depositDisplay) {
+        depositDisplay.style.display = 'none';
+    }
+};
+
+// ============================================
+// ADD TO CART
+// ============================================
+window.addToCartCustom = function() {
+    const btn = document.getElementById('addToCartBtn');
+    if (!btn) return;
+    btn.disabled = true;
+    btn.innerHTML = 'Adding...';
+
+    const qty = parseInt(document.getElementById('quantity').value);
+    const purchaseTypeEl = document.getElementById('purchase_type');
+    const purchaseType = purchaseTypeEl ? purchaseTypeEl.value : 'buy';
     
-    // Optionally: redirect to correct page if someone lands here by mistake
-    // window.location.href = '/product/ledger/{{ product.id }}';
-    
-} else {
-    console.log('✅ Loading generic product pricing for:', _category, _cuplockType || _productType);
-    
-    // Run all generic product code in its own scope
-    (() => {
-        const category = _category;
-        const productType = _productType;
-        const cuplockType = _cuplockType;
+    let customization = { 
+        product_type: 'fabrication', 
+        quantity: qty 
+    };
 
-        // ===========================================
-        // GALLERY LOGIC (safe for all products)
-        // ===========================================
-        let galleryImages = [];
-        let totalImages = 0;
-        let currentIndex = 0;
+    const payload = {
+        product_id: {{ product.id }},
+        quantity: qty,
+        customization: customization
+    };
 
-        function buildImageUrl(relativePath) {
-            if (!relativePath) return '';
-            return '{{ url_for("static", filename="__PLACEHOLDER__") }}'.replace('__PLACEHOLDER__', relativePath);
+    fetch("{{ url_for('add_to_cart') }}", {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(async res => {
+        const json = await res.json().catch(()=>({ success:false, message:'Invalid JSON' }));
+        if (!res.ok) {
+            showToast('❌ ' + (json.message || `Server error ${res.status}`));
+            btn.disabled = false;
+            btn.innerHTML = '🛒 Add to Cart';
+            return;
         }
-
-        {% if product.image_url %}
-            const rawImages = `{{ product.image_url }}`.split(',');
-            galleryImages = rawImages.map(s => s.trim()).filter(s => s !== '').map(url => buildImageUrl(url));
-            totalImages = galleryImages.length;
-        {% endif %}
-
-        const prevBtn = document.getElementById('galleryPrev');
-        const nextBtn = document.getElementById('galleryNext');
-        const counterEl = document.getElementById('currentImageNum');
-
-        function setActiveImage(index) {
-            index = Math.max(0, Math.min(index, totalImages - 1));
-            const mainItems = document.querySelectorAll('.gallery-main-image');
-            const thumbs = document.querySelectorAll('.gallery-thumbnail');
-
-            if (mainItems[currentIndex]) mainItems[currentIndex].classList.remove('active');
-            if (thumbs[currentIndex]) thumbs[currentIndex].classList.remove('active');
-
-            currentIndex = index;
-
-            if (mainItems[currentIndex]) mainItems[currentIndex].classList.add('active');
-            if (thumbs[currentIndex]) thumbs[currentIndex].classList.add('active');
-            if (counterEl) counterEl.textContent = (currentIndex + 1);
-        }
-
-        window.setMainImage = function(i) {
-            setActiveImage(parseInt(i));
-        };
-
-        function prevImage() { if (totalImages >1) setActiveImage((currentIndex - 1 + totalImages) % totalImages); }
-        function nextImage() { if (totalImages >1) setActiveImage((currentIndex + 1) % totalImages); }
-
-        if (prevBtn) prevBtn.addEventListener('click', prevImage);
-        if (nextBtn) nextBtn.addEventListener('click', nextImage);
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft') prevImage();
-            if (e.key === 'ArrowRight') nextImage();
-            if (e.key === 'Escape') closeModal();
-        });
-
-        // ===========================================
-        // MODAL LOGIC
-        // ===========================================
-        const modal = document.getElementById('imageModal');
-        const modalImg = document.getElementById('modalImage');
-
-        window.openModal = function(index) {
-            if (!galleryImages || galleryImages.length === 0) return;
-            index = Math.max(0, Math.min(index, galleryImages.length - 1));
-            modal.classList.add('show');
-            modalImg.src = galleryImages[index];
-            modalCurrentIndex = index;
-        };
-
-        window.closeModal = function() {
-            modal.classList.remove('show');
-            modalImg.src = '';
-        };
-
-        let modalCurrentIndex = 0;
-        window.modalPrev = function() {
-            if (!galleryImages || galleryImages.length <=1) return;
-            modalCurrentIndex = (modalCurrentIndex - 1 + galleryImages.length) % galleryImages.length;
-            modalImg.src = galleryImages[modalCurrentIndex];
-        };
-
-        window.modalNext = function() {
-            if (!galleryImages || galleryImages.length <=1) return;
-            modalCurrentIndex = (modalCurrentIndex + 1) % galleryImages.length;
-            modalImg.src = galleryImages[modalCurrentIndex];
-        };
-
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) closeModal();
-        });
-
-        // ===========================================
-        // PRICING LOGIC (Generic Products Only)
-        // ===========================================
-        let basePrice = {{ product.price | default(0) | float }};
-        let rentPrice = {{ product.rent_price | default(0) | float }};
-        let depositAmount = {{ product.deposit_amount | default(0) | float }};
-
-        const cuplockPrices = {{ cuplock_prices | tojson | default('[]') }};
-
-        // Fabrication pricing
-        window.updateFabricationPrice = function() {
-            const quantity = parseInt(document.getElementById('quantity').value);
-            const total = basePrice * quantity;
-            document.getElementById('final_price_display').textContent = '₹' + total.toFixed(2);
-        };
-
-        // Aluminium pricing
-        window.updateAluminiumPrice = function() {
-            const quantity = parseInt(document.getElementById('quantity').value);
-            const purchaseType = document.getElementById('purchase_type').value;
-            const unit = purchaseType === 'rent' ? rentPrice : basePrice;
-            const total = unit * quantity;
-            document.getElementById('final_price_display').textContent = '₹' + total.toFixed(2);
-
-            const depositDisplay = document.getElementById('deposit_display');
-            if (purchaseType === 'rent' && depositAmount > 0) {
-                depositDisplay.style.display = 'block';
-                document.getElementById('deposit_amount').textContent = '₹' + (depositAmount * quantity).toFixed(2);
-            } else {
-                depositDisplay.style.display = 'none';
-            }
-        };
-
-        // Generic pricing (h-frames, accessories, non-ledger cuplock)
-        window.updatePrice = function() {
-            const quantityEl = document.getElementById('quantity');
-            const purchaseTypeEl = document.getElementById('purchase_type');
-
-            if (!quantityEl || !purchaseTypeEl) return;
-
-            const quantity = parseInt(quantityEl.value) ||1;
-            const purchaseType = purchaseTypeEl.value;
-
-            // Single source of truth (admin-defined)
-            const unitPrice = purchaseType === 'rent' ? rentPrice : basePrice;
-            const total = unitPrice * quantity;
-
-            // Update total price
-            const priceEl = document.getElementById('final_price_display');
-            if (priceEl) {
-                priceEl.textContent = '₹' + total.toFixed(2);
-            }
-
-            // Deposit handling
-            const depositDisplay = document.getElementById('deposit_display');
-            const depositAmountEl = document.getElementById('deposit_amount');
-
-            if (purchaseType === 'rent' && depositAmount > 0 && depositDisplay && depositAmountEl) {
-                depositDisplay.style.display = 'block';
-                depositAmountEl.textContent = '₹' + (depositAmount * quantity).toFixed(2);
-            } else if (depositDisplay) {
-                depositDisplay.style.display = 'none';
-            }
-        };
-
-        // ===========================================
-        // ADD TO CART
-        // ===========================================
-        window.addToCartCustom = function() {
-            const btn = document.getElementById('addToCartBtn');
-            if (!btn) return;
-            btn.disabled = true;
-            btn.innerHTML = 'Adding...';
-
-            const qty = parseInt(document.getElementById('quantity').value);
-            const purchaseType = document.getElementById('purchase_type') ? document.getElementById('purchase_type').value : 'buy';
-            
-            let customization = { quantity: qty };
-            
-            if (category === 'aluminium') {
-                customization = { purchase_type: purchaseType, quantity: qty };
-            } else if (category === 'h-frames' || category === 'accessories') {
-                customization = { purchase_type: purchaseType, quantity: qty };
-            } else if (category === 'cuplock' && cuplockPrices.length > 0) {
-                customization = {
-                    product_type: 'cuplock',
-                    purchase_type: purchaseType,
-                    size_label: cuplockPrices[0].size_label,
-                    quantity: qty
-                };
-            } else if (productType === 'fabrication') {
-                customization = { 
-                    product_type: 'fabrication', 
-                    quantity: qty 
-                };
-            }
-
-            const payload = {
-                product_id: {{ product.id }},
-                quantity: qty,
-                customization: customization
-            };
-
-            fetch("{{ url_for('add_to_cart') }}", {
-                method: 'POST',
-                credentials: 'same-origin',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-            .then(async res => {
-                const json = await res.json().catch(()=>({ success:false, message:'Invalid JSON' }));
-                if (!res.ok) {
-                    showToast('❌ ' + (json.message || `Server error ${res.status}`));
-                    btn.disabled = false;
-                    btn.innerHTML = '🛒 Add to Cart';
-                    return;
-                }
-                if (json.success) {
-                    showToast('✓ Added to cart!');
-                    setTimeout(() => { window.location.href = '/cart'; }, 700);
-                } else {
-                    showToast('❌ ' + (json.message || 'Failed'));
-                    btn.disabled = false;
-                    btn.innerHTML = '🛒 Add to Cart';
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                showToast('❌ Network error');
-                btn.disabled = false;
-                btn.innerHTML = '🛒 Add to Cart';
-            });
-        };
-
-        window.showToast = function(message) {
-            const t = document.getElementById('toast');
-            if (!t) return;
-            t.textContent = message;
-            t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 3000);
-        };
-
-        // ===========================================
-        // INITIALIZE PRICING ON LOAD
-        // ===========================================
-        if (productType === 'fabrication') {
-            updateFabricationPrice();
-        } else if (category === 'aluminium') {
-            updateAluminiumPrice();
+        if (json.success) {
+            showToast('✓ Added to cart!');
+            setTimeout(() => { window.location.href = '/cart'; }, 700);
         } else {
-            updatePrice();
+            showToast('❌ ' + (json.message || 'Failed'));
+            btn.disabled = false;
+            btn.innerHTML = '🛒 Add to Cart';
         }
+    })
+    .catch(err => {
+        console.error(err);
+        showToast('❌ Network error');
+        btn.disabled = false;
+        btn.innerHTML = '🛒 Add to Cart';
+    });
+};
 
-        console.log('✅ Generic product pricing initialized');
-    })();
+window.showToast = function(message) {
+    const t = document.getElementById('toast');
+    if (!t) return;
+    t.textContent = message;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+};
+
+// Initialize pricing on load
+const category = '{{ product.category }}';
+const productType = '{{ product.product_type | lower }}';
+
+if (productType === 'fabrication' || category === 'custom') {
+    updateFabricationPrice();
+} else if (category === 'aluminium') {
+    updateAluminiumPrice();
+} else {
+    updatePrice();
 }
 </script>
 {% endblock %}

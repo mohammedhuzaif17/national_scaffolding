@@ -51,7 +51,7 @@
                         <i class="fas fa-check-circle"></i> Verify OTP
                     </button>
                     
-                    <button type="button" class="btn btn-secondary" id="resend-btn">
+                    <button type="button" class="btn btn-secondary" id="resend-btn" onclick="resendOTP()">
                         <i class="fas fa-redo"></i> Resend OTP
                     </button>
                 </div>
@@ -65,8 +65,9 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
-<!-- Scripts -->
+{% block scripts %}
 <script>
 // Countdown timer
 {% if time_remaining %}
@@ -159,6 +160,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+{% endblock %}
 
 <style>
     /* ===== GLOBAL RESETS ===== */
