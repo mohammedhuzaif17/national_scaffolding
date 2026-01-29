@@ -1665,11 +1665,12 @@ def admin_fabrication():
             flash('OTP verification required', 'error')
             return redirect(url_for('admin_login'))
 
-        # ✅ ONLY TRUE FABRICATION CATEGORIES
+        # ✅ ONLY TRUE FABRICATION CATEGORIES - EXCLUDE CUPLOCK
         fabrication_only_categories = ['steel', 'custom', 'parts', 'fabrication', 'fabrications']
         
         products = Product.query.filter(
             Product.category.in_(fabrication_only_categories),
+            Product.product_type != 'Cuplock',
             Product.is_active == True
         ).order_by(Product.id.desc()).all()
 
@@ -1699,17 +1700,53 @@ def admin_orders():
         if session.get('user_type') != 'admin':
             return redirect(url_for('dashboard'))
         
-        admin_username = current_user.username
-        if admin_username == 'admin_scaffolding':
-            orders = db.session.query(Order).join(OrderItem).join(Product).filter(Product.product_type == 'scaffolding').distinct().order_by(Order.order_date.desc()).all()
-        elif admin_username == 'admin_fabrication':
-            orders = db.session.query(Order).join(OrderItem).join(Product).filter(Product.product_type == 'fabrication').distinct().order_by(Order.order_date.desc()).all()
-        else:
-            orders = Order.query.order_by(Order.order_date.desc()).all()
+        panel_type = session.get('panel_type')
+        app.logger.info(f"Admin Orders - Panel Type: {panel_type}")
         
-        return render_template('admin_orders.html', orders=orders)
+        # ✅ FIX: Get ALL orders, then filter on the Python side
+        all_orders = Order.query.order_by(Order.order_date.desc()).all()
+        
+        filtered_orders = []
+        
+        if panel_type == 'scaffolding':
+            scaffolding_categories = ['aluminium', 'h-frames', 'cuplock', 'accessories', 'vertical']
+            
+            for order in all_orders:
+                # Check if order contains ANY scaffolding product
+                has_scaffolding = False
+                for item in order.items:
+                    product = Product.query.get(item.product_id)
+                    if product and product.category in scaffolding_categories:
+                        has_scaffolding = True
+                        break
+                
+                if has_scaffolding:
+                    filtered_orders.append(order)
+                    
+        elif panel_type == 'fabrication':
+            fabrication_categories = ['steel', 'custom', 'parts', 'fabrication', 'fabrications']
+            
+            for order in all_orders:
+                # Check if order contains ANY fabrication product
+                has_fabrication = False
+                for item in order.items:
+                    product = Product.query.get(item.product_id)
+                    if product and product.category in fabrication_categories:
+                        has_fabrication = True
+                        break
+                
+                if has_fabrication:
+                    filtered_orders.append(order)
+        else:
+            # Fallback: show all orders
+            filtered_orders = all_orders
+        
+        app.logger.info(f"Total orders found: {len(filtered_orders)}")
+        
+        return render_template('admin_orders.html', orders=filtered_orders)
+        
     except Exception as e:
-        app.logger.error(f"Admin orders error: {e}")
+        app.logger.error(f"Admin orders error: {e}", exc_info=True)
         return render_template('admin_orders.html', orders=[])
 
 @app.route('/admin_analytics')
@@ -1719,7 +1756,24 @@ def admin_analytics():
         if session.get('user_type') != 'admin':
             return redirect(url_for('dashboard'))
         
-        orders = Order.query.all()
+        panel_type = session.get('panel_type')
+        
+        # Filter orders based on admin panel type
+        if panel_type == 'scaffolding':
+            # Scaffolding admin: Orders containing scaffolding products
+            scaffolding_categories = ['aluminium', 'h-frames', 'cuplock', 'accessories', 'vertical']
+            orders = db.session.query(Order).join(OrderItem).join(Product).filter(
+                Product.category.in_(scaffolding_categories)
+            ).distinct().all()
+        elif panel_type == 'fabrication':
+            # Fabrication admin: Orders containing fabrication products
+            fabrication_categories = ['steel', 'custom', 'parts', 'fabrication', 'fabrications']
+            orders = db.session.query(Order).join(OrderItem).join(Product).filter(
+                Product.category.in_(fabrication_categories)
+            ).distinct().all()
+        else:
+            orders = Order.query.all()
+        
         monthly_data = {}
         yearly_data = {}
         category_data = {}

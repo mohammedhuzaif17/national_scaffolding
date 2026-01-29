@@ -32,9 +32,6 @@
         <button class="btn btn-action-transactions" onclick="window.location.href='{{ url_for('admin_orders') }}'">
             📋 View All Transactions
         </button>
-        <button class="btn btn-action-analytics" onclick="window.location.href='{{ url_for('admin_analytics') }}'">
-            📊 Business Analytics
-        </button>
         <button class="btn btn-action-logout" onclick="window.location.href='{{ url_for('admin_logout') }}'">
             🚪 Logout
         </button>
@@ -154,10 +151,11 @@
                 <div class="form-group">
                     <label for="productCategory">Category</label>
                     <select id="productCategory" required>
-                        <option value="steel">Steel</option>
+                        <option value="">-- Select Category --</option>
                         <option value="aluminium">Aluminium</option>
-                        <option value="custom">Custom Fabrication</option>
-                        <option value="parts">Parts & Components</option>
+                        <option value="hframes">H-Frames</option>
+                        <option value="cuplock">Cuplock</option>
+                        <option value="accessories">Accessories</option>
                     </select>
                 </div>
                 

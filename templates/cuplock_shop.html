@@ -23,8 +23,8 @@
             {% for product in vertical_products %}
             <div class="product-card">
                 <div class="product-image">
-                    {% if product.display_image_url and product.display_image_url != 'images/no-image.png' %}
-                        <img src="{{ url_for('static', filename=product.display_image_url) }}" alt="{{ product.name }}" onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}'">
+                    {% if product.display_image_url and product.display_image_url != '/static/images/no-image.png' %}
+                        <img src="{{ product.display_image_url }}" alt="{{ product.name }}" onerror="this.src='/static/images/no-image.png'">
                     {% else %}
                         <div class="placeholder-image">🔗</div>
                     {% endif %}
@@ -36,7 +36,7 @@
                         {{ product.description or 'Professional Cuplock Vertical System' }}
                     </p>
                     <div class="product-footer">
-                        <a href="{{ url_for('cuplock_vertical_product', product_id=product.id) }}" class="btn btn-primary">
+                        <a href="{{ url_for('cuplock.vertical_product_page', product_id=product.id) }}" class="btn btn-primary">
                             View & Buy →
                         </a>
                     </div>
@@ -63,8 +63,8 @@
             {% for product in ledger_products %}
             <div class="product-card">
                 <div class="product-image">
-                    {% if product.display_image_url and product.display_image_url != 'images/no-image.png' %}
-                        <img src="{{ url_for('static', filename=product.display_image_url) }}" alt="{{ product.name }}" onerror="this.src='{{ url_for('static', filename='images/no-image.png') }}'">
+                    {% if product.display_image_url and product.display_image_url != '/static/images/no-image.png' %}
+                        <img src="{{ product.display_image_url }}" alt="{{ product.name }}" onerror="this.src='/static/images/no-image.png'">
                     {% else %}
                         <div class="placeholder-image">📏</div>
                     {% endif %}
@@ -76,7 +76,7 @@
                         {{ product.description or 'Professional Cuplock Ledger System' }}
                     </p>
                     <div class="product-footer">
-                        <a href="{{ url_for('cuplock_ledger_product', product_id=product.id) }}" class="btn btn-primary">
+                        <a href="{{ url_for('cuplock.ledger_product_page', product_id=product.id) }}" class="btn btn-primary">
                             View & Buy →
                         </a>
                     </div>

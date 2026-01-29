@@ -3,20 +3,17 @@
 {% block title %}Admin - Orders{% endblock %}
 
 {% block content %}
-<!-- Clean Wrapper (Removed aggressive inline styles) -->
+<!-- Clean Wrapper -->
 <div class="orders-wrapper">
     <!-- Header Section -->
     <div class="top-nav">
-        <button class="btn btn-secondary" onclick="window.location.href='{{ url_for('admin_scaffoldings') }}'">
+        <button class="btn btn-secondary" onclick="window.location.href='{% if session.get('panel_type') == 'scaffolding' %}{{ url_for('admin_scaffoldings') }}{% else %}{{ url_for('admin_fabrication') }}{% endif %}'">
             ← Back to Admin Panel
         </button>
         <h1 class="page-title">📋 All Transactions & Orders</h1>
         <div class="header-actions">
-            <button class="btn btn-primary" onclick="window.location.href='{{ url_for('admin_scaffoldings') }}'">
-                <span class="btn-icon">📦</span> <span class="btn-text">Scaffolding Products</span>
-            </button>
-            <button class="btn btn-primary" onclick="window.location.href='{{ url_for('admin_analytics') }}'">
-                <span class="btn-icon">📊</span> <span class="btn-text">Business Analytics</span>
+            <button class="btn btn-primary" onclick="window.location.href='{% if session.get('panel_type') == 'scaffolding' %}{{ url_for('admin_scaffoldings') }}{% else %}{{ url_for('admin_fabrication') }}{% endif %}'">
+                <span class="btn-icon">📦</span> <span class="btn-text">{% if session.get('panel_type') == 'scaffolding' %}Scaffolding Products{% else %}Fabrication Products{% endif %}</span>
             </button>
             <button class="btn btn-danger" onclick="window.location.href='{{ url_for('admin_logout') }}'">
                 <span class="btn-icon">🚪</span> <span class="btn-text">Logout</span>
@@ -51,7 +48,7 @@
             <select id="statusFilter" class="filter-select" onchange="filterOrders()">
                 <option value="all">All Orders</option>
                 <option value="pending_verification">Pending Verification</option>
-                <option value="approved">Approved</option>
+                <!-- <option value="approved">Approved</option> -->
                 <option value="rejected">Rejected</option>
                 <option value="completed">Completed</option>
             </select>
@@ -63,15 +60,21 @@
     
     <!-- Orders List -->
     <div class="orders-container">
+        {% if orders|length == 0 %}
+        <div style="text-align: center; padding: 3rem; background: white; border-radius: 10px;">
+            <p style="font-size: 1.2rem; color: #666;">No orders found for this admin panel.</p>
+        </div>
+        {% endif %}
+        
         {% for order in orders %}
-        <div class="order-card" data-status="{{ order.status }}" data-transaction-id="{{ order.transaction_id }}">
+        <div class="order-card" data-status="{{ order.status }}" data-transaction-id="{{ order.transaction_id }}" data-order-id="{{ order.id }}">
             <!-- Order Header -->
             <div class="order-header">
                 <div class="header-left">
                     <div class="order-id">#{{ order.id }}</div>
-                    <div class="order-date">{{ order.order_date.strftime('%d %b %Y') }}</div>
+                    <div class="order-date">{{ order.order_date.strftime('%d %b %Y, %I:%M %p') }}</div>
                 </div>
-                <div class="order-status status-{{ order.status }}">
+                <div class="order-status status-{{ order.status.replace('_', '-') }}">
                     {{ order.status.replace('_', ' ').title() }}
                 </div>
             </div>
@@ -105,7 +108,6 @@
                 <!-- Order Items Table -->
                 <div class="items-section">
                     <h4>Order Items</h4>
-                    <!-- WRAPPED IN RESPONSIVE DIV -->
                     <div class="table-responsive-wrapper">
                         <table class="item-table">
                             <thead>
@@ -147,38 +149,24 @@
                 </div>
                 
                 <div class="meta-section">
-                    {% if order.payment_time %}
-                    <div class="meta-info">
-                        <span class="meta-label">Payment Time:</span>
-                        <span class="meta-value">{{ order.payment_time.strftime('%I:%M %p') }}</span>
-                    </div>
-                    {% endif %}
                     <div class="meta-info">
                         <span class="meta-label">Transaction ID:</span>
-                        <span class="transaction-id">{{ order.transaction_id }}</span>
+                        <span class="meta-value">{{ order.transaction_id }}</span>
                     </div>
                 </div>
                 
                 <div class="actions-section">
                     {% if order.status == 'pending_verification' %}
-                    <button class="btn btn-success" onclick="verifyPayment({{ order.id }}, '{{ order.transaction_id }}')">
+                    <button class="btn btn-success" onclick="verifyPayment({{ order.id }}, '{{ order.transaction_id }}', {{ order.total_price }})">
                         Verify Payment
                     </button>
                     <button class="btn btn-danger" onclick="rejectPayment({{ order.id }}, '{{ order.transaction_id }}')">
                         Reject
                     </button>
-                    {% endif %}
-                    
-                    {% if order.status == 'approved' and not order.amount_paid %}
-                    <button class="btn btn-primary" onclick="confirmPayment({{ order.id }}, '{{ order.transaction_id }}')">
-                        Confirm Payment
-                    </button>
-                    {% endif %}
-                    
-                    {% if order.status == 'approved' and order.amount_paid %}
-                    <button class="btn btn-warning" onclick="completeOrder({{ order.id }}, '{{ order.transaction_id }}')">
-                        Complete Order
-                    </button>
+                    {% elif order.status == 'completed' %}
+                    <span class="badge badge-success">✓ Completed</span>
+                    {% elif order.status == 'rejected' %}
+                    <span class="badge badge-danger">✗ Rejected</span>
                     {% endif %}
                     
                     <button class="btn btn-secondary" onclick="viewOrderDetails({{ order.id }})">
@@ -192,65 +180,6 @@
 </div>
 
 <script>
-// AGGRESSIVE FULL WIDTH ENFORCEMENT (Kept from your code)
-function enforceFullWidth() {
-    const elementsToOverride = [
-        document.querySelector('.glass-container'),
-        document.querySelector('.container'),
-        document.querySelector('.container-fluid'),
-        document.querySelector('.main'),
-        document.querySelector('section'),
-        document.querySelector('.content-wrapper'),
-        document.querySelector('.body'),
-        document.querySelector('.html')
-    ];
-    
-    elementsToOverride.forEach(element => {
-        if (element) {
-            element.style.setProperty('max-width', '100vw', 'important');
-            element.style.setProperty('width', '100vw', 'important');
-            element.style.setProperty('margin-left', '0', 'important');
-            element.style.setProperty('margin-right', '0', 'important');
-            element.style.setProperty('padding-left', '0', 'important');
-            element.style.setProperty('padding-right', '0', 'important');
-            element.style.setProperty('position', 'relative', 'important');
-            element.style.setProperty('left', '0', 'important');
-            element.style.setProperty('transform', 'none', 'important');
-        }
-    });
-}
-
-// AGGRESSIVE BACKGROUND SLIDER REMOVAL
-function removeBackgroundSlider() {
-    const sliderSelectors = [
-        '.hero-section',
-        '.slider',
-        '.background-slider',
-        '.carousel',
-        '.owl-carousel',
-        '.swiper-container',
-        '.slick-slider',
-        '.flexslider'
-    ];
-    
-    sliderSelectors.forEach(selector => {
-        const elements = document.querySelectorAll(selector);
-        elements.forEach(element => {
-            element.style.setProperty('display', 'none', 'important');
-            element.style.setProperty('visibility', 'hidden', 'important');
-            element.style.setProperty('height', '0', 'important');
-            element.style.setProperty('width', '0', 'important');
-            element.style.setProperty('overflow', 'hidden', 'important');
-            element.style.setProperty('position', 'absolute', 'important');
-            element.style.setProperty('top', '-9999px', 'important');
-            element.style.setProperty('left', '-9999px', 'important');
-            if (element.parentNode) {
-                element.parentNode.removeChild(element);
-            }
-        });
-    });
-}
-
 function filterOrders() {
     const statusFilter = document.getElementById('statusFilter').value;
     const searchBox = document.getElementById('searchBox').value.toLowerCase();
@@ -259,12 +188,14 @@ function filterOrders() {
     orderCards.forEach(card => {
         const status = card.getAttribute('data-status');
         const transactionId = card.getAttribute('data-transaction-id').toLowerCase();
-        const customerName = card.querySelector('.value').textContent.toLowerCase();
+        const orderId = card.getAttribute('data-order-id');
+        const customerName = card.querySelector('.customer-section .value').textContent.toLowerCase();
         
         const statusMatch = statusFilter === 'all' || status === statusFilter;
         const searchMatch = searchBox === '' || 
                           transactionId.includes(searchBox) || 
-                          customerName.includes(searchBox);
+                          customerName.includes(searchBox) ||
+                          orderId.includes(searchBox);
         
         if (statusMatch && searchMatch) {
             card.style.display = 'flex';
@@ -274,8 +205,9 @@ function filterOrders() {
     });
 }
 
-function verifyPayment(orderId, transactionId) {
-    const amountPaid = prompt(`Enter the amount paid for Order #${orderId}:`, '');
+function verifyPayment(orderId, transactionId, orderTotal) {
+    const amountPaid = prompt(`Enter the EXACT amount paid for Order #${orderId}:\n\nOrder Total: ₹${orderTotal.toFixed(2)}`, orderTotal.toFixed(2));
+    
     if (amountPaid === null) {
         return; 
     }
@@ -304,7 +236,7 @@ function verifyPayment(orderId, transactionId) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('✅ Payment verified successfully!');
+                alert('✅ ' + data.message);
                 location.reload();
             } else {
                 alert('❌ Error: ' + (data.message || 'Failed to verify payment'));
@@ -318,20 +250,27 @@ function verifyPayment(orderId, transactionId) {
 }
 
 function rejectPayment(orderId, transactionId) {
-    if (confirm(`Are you sure you want to reject payment for Order #${orderId} with Transaction ID ${transactionId}?`)) {
+    const reason = prompt(`Enter reason for rejecting Order #${orderId}:`, 'Payment verification failed');
+    
+    if (reason === null) {
+        return;
+    }
+    
+    if (confirm(`Are you sure you want to reject Order #${orderId}?`)) {
         fetch('/verify_payment/' + orderId, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                action: 'reject'
+                action: 'reject',
+                reason: reason
             })
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('✅ Payment rejected successfully!');
+                alert('✅ ' + data.message);
                 location.reload();
             } else {
                 alert('❌ Error: ' + (data.message || 'Failed to reject payment'));
@@ -344,87 +283,9 @@ function rejectPayment(orderId, transactionId) {
     }
 }
 
-function confirmPayment(orderId, transactionId) {
-    const amount = prompt(`Enter the payment amount received for Order #${orderId}:`);
-    if (!amount) return;
-    
-    const amountPaid = parseFloat(amount);
-    if (isNaN(amountPaid) || amountPaid <= 0) {
-        alert('Please enter a valid amount');
-        return;
-    }
-    
-    fetch('/verify_payment/' + orderId, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            action: 'confirm',
-            amount_paid: amountPaid
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('✅ Payment confirmed successfully!');
-            location.reload();
-        } else {
-            alert('❌ Error: ' + (data.message || 'Failed to confirm payment'));
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('❌ An error occurred while confirming payment');
-    });
-}
-
-function completeOrder(orderId, transactionId) {
-    if (confirm(`Are you sure you want to mark Order #${orderId} as completed?`)) {
-        fetch('/admin/complete_order/' + orderId, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('✅ Order completed successfully!');
-                location.reload();
-            } else {
-                alert('❌ Error: ' + (data.message || 'Failed to complete order'));
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('❌ An error occurred while completing order');
-        });
-    }
-}
-
 function viewOrderDetails(orderId) {
     window.location.href = '/order_details/' + orderId;
 }
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🎯 Admin Orders page loaded');
-    enforceFullWidth();
-    removeBackgroundSlider();
-});
-
-// Re-enforce on window resize
-window.addEventListener('resize', function() {
-    enforceFullWidth();
-    removeBackgroundSlider();
-});
-
-// Extra enforcement after a delay
-setTimeout(function() {
-    enforceFullWidth();
-    removeBackgroundSlider();
-}, 500);
 </script>
 
 <style>
@@ -434,24 +295,22 @@ setTimeout(function() {
     }
 
     body {
-        overflow-x: hidden; /* Prevents horizontal scrolling */
+        overflow-x: hidden;
         background-color: #f4f6f8;
         color: #333;
         font-family: sans-serif;
     }
 
-    /* Main Container */
     .orders-wrapper {
         width: 100%;
-        max-width: 1400px; /* Reasonable max width for desktop */
+        max-width: 1400px;
         margin: 0 auto;
         padding: 1.5rem;
     }
 
-    /* Header & Navigation */
     .top-nav {
         display: flex;
-        flex-wrap: wrap; /* Wraps on mobile */
+        flex-wrap: wrap;
         justify-content: space-between;
         align-items: center;
         gap: 1rem;
@@ -460,7 +319,7 @@ setTimeout(function() {
 
     .page-title {
         font-size: 1.5rem;
-        color: #ffd966; /* Gold */
+        color: #ffd966;
         font-weight: 700;
         margin: 0;
         flex: 1;
@@ -470,10 +329,9 @@ setTimeout(function() {
         display: flex;
         gap: 1rem;
         align-items: center;
-        flex-wrap: wrap; /* Stack buttons on mobile if needed */
+        flex-wrap: wrap;
     }
 
-    /* Summary Statistics Grid */
     .summary-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -503,7 +361,6 @@ setTimeout(function() {
         font-weight: 700;
     }
 
-    /* Filter Bar */
     .filter-bar {
         background: white;
         padding: 1rem;
@@ -536,7 +393,6 @@ setTimeout(function() {
         border-radius: 5px;
     }
 
-    /* Order Cards */
     .orders-container {
         display: flex;
         flex-direction: column;
@@ -547,13 +403,12 @@ setTimeout(function() {
         background: white;
         border-radius: 10px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        overflow: hidden; /* Important for rounded corners */
+        overflow: hidden;
         display: flex;
         flex-direction: column;
         border-left: 5px solid transparent;
     }
 
-    /* Color code left border based on status */
     .order-card[data-status="pending_verification"] { border-left-color: #ffc107; }
     .order-card[data-status="approved"] { border-left-color: #28a745; }
     .order-card[data-status="rejected"] { border-left-color: #dc3545; }
@@ -598,7 +453,7 @@ setTimeout(function() {
         color: white;
     }
 
-    .status-pending { background-color: #ffc107; }
+    .status-pending-verification { background-color: #ffc107; color: #000; }
     .status-approved { background-color: #28a745; }
     .status-rejected { background-color: #dc3545; }
     .status-completed { background-color: #007bff; }
@@ -607,7 +462,6 @@ setTimeout(function() {
         padding: 1.5rem;
     }
 
-    /* Customer Section */
     .customer-section h4, .items-section h4 {
         font-size: 1.1rem;
         color: #333;
@@ -642,10 +496,9 @@ setTimeout(function() {
         color: #333;
     }
 
-    /* Table Responsive Wrapper - THE MOBILE FIX */
     .table-responsive-wrapper {
         width: 100%;
-        overflow-x: auto; /* Allows table to scroll on mobile */
+        overflow-x: auto;
         -webkit-overflow-scrolling: touch;
         border-radius: 8px;
         border: 1px solid #eee;
@@ -653,7 +506,7 @@ setTimeout(function() {
 
     .item-table {
         width: 100%;
-        min-width: 600px; /* Ensures columns don't squish too much */
+        min-width: 600px;
         border-collapse: collapse;
     }
 
@@ -672,7 +525,6 @@ setTimeout(function() {
         color: #333;
     }
 
-    /* Order Footer */
     .order-footer {
         background-color: #fcfcfc;
         padding: 1.5rem;
@@ -681,6 +533,7 @@ setTimeout(function() {
         justify-content: space-between;
         align-items: flex-start;
         gap: 2rem;
+        flex-wrap: wrap;
     }
 
     .totals-section {
@@ -738,7 +591,6 @@ setTimeout(function() {
         align-items: center;
     }
 
-    /* Buttons */
     .btn {
         border: none;
         border-radius: 6px;
@@ -783,121 +635,52 @@ setTimeout(function() {
         color: white;
     }
 
-    /* Mobile Adjustments for Buttons */
-    .btn-icon {
-        display: none; /* Hide icon on mobile to save space */
+    .badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
     }
 
-    .btn-text {
-        display: block; /* Ensure text is visible */
+    .badge-success {
+        background: #d4edda;
+        color: #155724;
     }
 
-    /* ===== MOBILE RESPONSIVE FIXES ===== */
+    .badge-danger {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
     @media (max-width: 768px) {
         .orders-wrapper {
             padding: 1rem;
         }
 
-        /* Stack Header */
         .top-nav {
             flex-direction: column;
             align-items: stretch;
-            gap: 1rem;
         }
 
-        .header-actions {
-            width: 100%;
-            flex-wrap: wrap;
-            justify-content: space-between;
-        }
-
-        .page-title {
-            text-align: center;
-            margin-bottom: 1rem;
-        }
-
-        /* Stack Stats Grid */
         .summary-grid {
-            grid-template-columns: 1fr; /* Single column */
-            gap: 1rem;
+            grid-template-columns: 1fr;
         }
 
-        /* Adjust Order Card */
-        .order-card {
-            border-radius: 0; /* Remove radius on mobile for cleaner look */
-        }
-
-        .order-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0.5rem;
-            text-align: center;
-        }
-
-        .order-status {
-            width: fit-content;
-            margin: 0 auto;
-        }
-
-        /* Stack Info Grid */
-        .info-grid {
-            grid-template-columns: 1fr; /* Stack vertically */
-            gap: 0.5rem;
-        }
-
-        .info-item .label {
-            margin-bottom: 0.5rem;
-        }
-
-        /* Stack Footer */
         .order-footer {
             flex-direction: column;
-            align-items: stretch;
-            gap: 1.5rem;
-        }
-
-        .totals-section {
-            width: 100%;
-            margin-bottom: 0;
         }
 
         .meta-section {
-            width: 100%;
             text-align: left;
-            align-items: flex-start;
         }
 
-        .meta-info {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0.5rem;
-            width: 100%;
-        }
-
-        /* Stack Actions */
         .actions-section {
-            flex-direction: column; /* Stack buttons vertically */
             width: 100%;
-            gap: 0.75rem;
         }
 
         .btn {
-            width: 100%; /* Full width buttons for touch */
-            padding: 0.8rem 1rem; /* Taller buttons */
+            width: 100%;
             justify-content: center;
-            font-size: 1rem;
-        }
-
-        /* Adjust table header */
-        .item-table th {
-            font-size: 0.8rem;
-            padding: 0.6rem;
-            white-space: normal; /* Allow wrapping for smaller screens */
-        }
-
-        .item-table td {
-            padding: 0.6rem;
-            font-size: 0.9rem;
         }
     }
 </style>

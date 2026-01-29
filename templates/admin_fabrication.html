@@ -8,16 +8,15 @@
 <div class="fabrication-wrapper">
     <!-- Header Section -->
     <div class="top-header">
-        <button class="btn btn-analytic" onclick="window.location.href='{{ url_for('admin_analytics') }}'">
-            <i class="icon">📊</i> <span>Business Analytics</span>
-        </button>
-        
         <div class="header-actions">
             <button class="btn btn-transactions" onclick="window.location.href='{{ url_for('admin_orders') }}'">
                 <span>📋 View All Transactions</span>
             </button>
             <button class="btn btn-scaffolding" onclick="window.location.href='{{ url_for('admin_scaffoldings') }}'">
                 <span>📦 Scaffolding Products</span>
+            </button>
+            <button class="btn btn-logout" onclick="window.location.href='{{ url_for('admin_logout') }}'">
+                <span>🚪 Logout</span>
             </button>
         </div>
     </div>
@@ -130,10 +129,11 @@
                 <div class="form-group">
                     <label for="productCategory">Category</label>
                     <select id="productCategory" required>
+                        <option value="">-- Select Category --</option>
                         <option value="steel">Steel</option>
-                        <option value="aluminium">Aluminium</option>
                         <option value="custom">Custom Fabrication</option>
                         <option value="parts">Parts & Components</option>
+                        <option value="fabrication">Fabrication</option>
                     </select>
                 </div>
                 
