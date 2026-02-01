@@ -23,20 +23,28 @@ def get_image_url(image_path):
     # If already a full URL (http/https), return as is
     if image_path.startswith('http://') or image_path.startswith('https://'):
         return image_path
-    
-    # If already starts with /static/, return as is
-    if image_path.startswith('/static/'):
-        return image_path
-    
-    # Remove any leading slashes
-    image_path = image_path.lstrip('/')
-    
-    # Remove 'static/' if it exists at the beginning
-    if image_path.startswith('static/'):
-        image_path = image_path[7:]  # Remove 'static/'
-    
-    # Return proper URL path
-    return f"/static/{image_path}"
+
+    # Normalize path to a filesystem-relative path under static/
+    normalized = image_path.strip()
+
+    # If it already starts with /static/, remove the leading slash for FS check
+    if normalized.startswith('/static/'):
+        fs_path = normalized[1:]
+    elif normalized.startswith('static/'):
+        fs_path = normalized
+    else:
+        fs_path = os.path.join('static', normalized)
+
+    # If the file exists on disk, return a URL path; else return no-image
+    if os.path.exists(fs_path):
+        # Ensure URL starts with /static/
+        if fs_path.startswith('static/'):
+            return '/' + fs_path
+        else:
+            return '/' + fs_path.replace('\\', '/')
+    else:
+        logger.warning(f"Image not found on disk: {fs_path}; falling back to no-image.png")
+        return '/static/images/no-image.png'
 
 
 def upload_to_s3(file, filename, folder='uploads'):

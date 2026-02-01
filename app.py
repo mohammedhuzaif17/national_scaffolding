@@ -27,7 +27,7 @@ import uuid
 from PIL import Image
 from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError, OperationalError
-from sqlalchemy import text
+from sqlalchemy import text, func
 from models import Product
 # Import Cuplock blueprint
 from cuplock_routes import cuplock_bp
@@ -101,19 +101,24 @@ app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_PERMANENT'] = True
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7) # FIX APPLIED
+# Configure database URL: prefer PostgreSQL from .env (`DATABASE_URL` or `POSTGRES_URL`)
+db_url = os.environ.get('DATABASE_URL') or os.environ.get('POSTGRES_URL') or None
+if db_url:
+    # Normalize common PostgreSQL URL forms for SQLAlchemy + psycopg2
+    normalized = db_url
+    if normalized.startswith('postgres://'):
+        normalized = normalized.replace('postgres://', 'postgresql+psycopg2://', 1)
+    elif normalized.startswith('postgresql://') and 'psycopg2' not in normalized:
+        normalized = normalized.replace('postgresql://', 'postgresql+psycopg2://', 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = normalized
+    app.logger.info('Using DATABASE_URL from environment')
+else:
+    # Fallback to local SQLite only if no DB URL is provided. This will not migrate
+    # or connect to your existing PostgreSQL data — set `DATABASE_URL` in .env to keep data.
+    app.logger.warning('DATABASE_URL not set; falling back to local sqlite:///database.db')
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 
-mysql_dialect = os.environ["MYSQL_DIALECT"]
-mysql_user = os.environ["MYSQL_USER"]
-mysql_password = os.environ["MYSQL_PASSWORD"]
-mysql_host = os.environ["MYSQL_HOST"]
-mysql_port = os.environ["MYSQL_PORT"]
-mysql_db = os.environ["MYSQL_DB"]
 
-app.config["SQLALCHEMY_DATABASE_URI"] = (
-    f"{mysql_dialect}://{mysql_user}:{mysql_password}@{mysql_host}:{mysql_port}/{mysql_db}"
-)
-
-    
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'pool_pre_ping': True,
@@ -126,6 +131,32 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg', 'tiff', 'ico', 'jfif', 'pjpeg', 'pjp', 'avif', 'heic', 'heif'}
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+# Ensure images folder exists and placeholder default exists to avoid 404s
+images_dir = os.path.join(app.static_folder, 'images')
+os.makedirs(images_dir, exist_ok=True)
+default_placeholder = os.path.join(images_dir, 'default_cuplock.jpg')
+no_image_path = os.path.join(images_dir, 'no-image.png')
+try:
+    if not os.path.exists(default_placeholder):
+        if os.path.exists(no_image_path):
+            # Copy existing no-image.png as default placeholder
+            from shutil import copyfile
+            copyfile(no_image_path, default_placeholder)
+            app.logger.info('Created default_cuplock.jpg from no-image.png')
+        else:
+            # Create a tiny placeholder if PIL available
+            try:
+                from PIL import Image, ImageDraw, ImageFont
+                img = Image.new('RGB', (800, 600), color=(240, 240, 240))
+                draw = ImageDraw.Draw(img)
+                draw.text((20, 20), 'No Image Available', fill=(100, 100, 100))
+                img.save(default_placeholder, 'JPEG')
+                app.logger.info('Generated default_cuplock.jpg placeholder')
+            except Exception:
+                app.logger.warning('Could not create default_cuplock.jpg placeholder')
+except Exception as e:
+    app.logger.error(f'Error ensuring default placeholder: {e}')
 
 app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
 app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
@@ -986,13 +1017,14 @@ def national_scaffoldings():
 
     scaffolding_categories = ['aluminium', 'h-frames', 'cuplock', 'accessories']
 
+    # Use case-insensitive matching for category values stored with different casing
     query = Product.query.filter(
         Product.is_active == True,
-        Product.category.in_(scaffolding_categories)
+        func.lower(Product.category).in_(scaffolding_categories)
     )
 
     if category != 'all':
-        query = query.filter(Product.category == category)
+        query = query.filter(func.lower(Product.category) == category)
 
     products = query.all()
 
@@ -1052,17 +1084,18 @@ def cuplock_shop():
     """Display all cuplock products"""
     try:
         # Get vertical products
-        vertical_products = Product.query.filter_by(
-            category='cuplock',
-            cuplock_type='vertical',
-            is_active=True
+        # Case-insensitive queries so database values like 'Cuplock' still match
+        vertical_products = Product.query.filter(
+            func.lower(Product.category) == 'cuplock',
+            func.lower(Product.cuplock_type) == 'vertical',
+            Product.is_active == True
         ).all()
-        
+
         # Get ledger products
-        ledger_products = Product.query.filter_by(
-            category='cuplock',
-            cuplock_type='ledger',
-            is_active=True
+        ledger_products = Product.query.filter(
+            func.lower(Product.category) == 'cuplock',
+            func.lower(Product.cuplock_type) == 'ledger',
+            Product.is_active == True
         ).all()
         
         # ✅ Process images with local filesystem support
