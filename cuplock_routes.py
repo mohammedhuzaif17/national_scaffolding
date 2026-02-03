@@ -152,7 +152,58 @@ def vertical_create():
             db.session.add(product)
             db.session.commit()
 
-            flash('✅ Vertical Cuplock product created! Now add sizes and cup configurations.', 'success')
+            # ✅ Process sizes from form
+            try:
+                sizes_data = request.form.to_dict(flat=False)
+                size_index = 0
+                
+                while True:
+                    size_label_key = f'sizes[{size_index}][label]'
+                    if size_label_key not in sizes_data:
+                        break
+                    
+                    size_label = sizes_data.get(size_label_key, [None])[0]
+                    if not size_label:
+                        size_index += 1
+                        continue
+                    
+                    def safe_float(key):
+                        try:
+                            val = sizes_data.get(key, [None])[0]
+                            return float(val) if val else 0.0
+                        except (ValueError, TypeError):
+                            return 0.0
+                    
+                    buy_price = safe_float(f'sizes[{size_index}][buy_price]')
+                    rent_price = safe_float(f'sizes[{size_index}][rent_price]')
+                    deposit = safe_float(f'sizes[{size_index}][deposit]')
+                    weight = safe_float(f'sizes[{size_index}][weight]')
+                    
+                    # ✅ Only create size if at least one price is set
+                    if buy_price > 0 or rent_price > 0:
+                        new_size = CuplockVerticalSize(
+                            product_id=product.id,
+                            size_label=size_label,
+                            buy_price=buy_price,
+                            rent_price=rent_price,
+                            deposit=deposit,
+                            weight=weight,
+                            is_active=True
+                        )
+                        db.session.add(new_size)
+                        logger.info(f"Added size {size_label} to product {product.id}")
+                    
+                    size_index += 1
+                
+                db.session.commit()
+                logger.info(f"Successfully created product {product.id} with sizes")
+                
+            except Exception as e:
+                logger.warning(f"Error processing sizes during creation: {e}")
+                # Don't fail the entire product creation, just warn
+                flash(f'Product created but sizes import had issues: {str(e)}', 'warning')
+
+            flash('✅ Vertical Cuplock product created successfully!', 'success')
             
             # ✅ FIX: Redirect to ADMIN edit page, not user product page
             return redirect(url_for('cuplock.vertical_edit', product_id=product.id))

@@ -39,17 +39,44 @@
             </div>
 
             <div class="form-section">
-                <h3>Available Sizes</h3>
-                <p class="form-help">Add the sizes that will be available for this vertical product (e.g., 1m, 1.5m, 2m, 2.5m, 3m)</p>
+                <h3>Available Sizes & Cup Options</h3>
+                <p class="form-help">Add sizes with pricing and cup configurations. You can edit these later if needed.</p>
                 
                 <div id="sizes-container">
-                    <div class="size-input-group">
-                        <input type="text" name="sizes[]" placeholder="e.g., 1m" class="form-control">
-                        <button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove()">✕ Remove</button>
+                    <!-- Default size entry -->
+                    <div class="size-entry" data-size-index="0">
+                        <div class="size-group">
+                            <h4 style="margin-top: 0; color: #333;">Size 1</h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Size Label (e.g., 1m, 1.5m) *</label>
+                                    <input type="text" name="sizes[0][label]" placeholder="e.g., 1m" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Buy Price (₹)</label>
+                                    <input type="number" name="sizes[0][buy_price]" step="0.01" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label>Rent Price (₹/day)</label>
+                                    <input type="number" name="sizes[0][rent_price]" step="0.01" class="form-control">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Deposit (₹)</label>
+                                    <input type="number" name="sizes[0][deposit]" step="0.01" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label>Weight (kg)</label>
+                                    <input type="number" name="sizes[0][weight]" step="0.01" class="form-control">
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-danger" onclick="this.closest('.size-entry').remove(); reindexSizes();">✕ Remove Size</button>
+                        </div>
                     </div>
                 </div>
 
-                <button type="button" class="btn btn-sm btn-secondary" onclick="addSizeField()">+ Add Size</button>
+                <button type="button" class="btn btn-sm btn-secondary" onclick="addSizeEntry()">+ Add Another Size</button>
             </div>
 
             <div class="form-actions">
@@ -62,15 +89,63 @@
 
 <!-- Logic for adding size fields -->
 <script>
-function addSizeField() {
+function addSizeEntry() {
     const container = document.getElementById('sizes-container');
+    const count = container.children.length;
+    
     const div = document.createElement('div');
-    div.className = 'size-input-group';
+    div.className = 'size-entry';
+    div.setAttribute('data-size-index', count);
+    
     div.innerHTML = `
-        <input type="text" name="sizes[]" placeholder="e.g., 1m" class="form-control">
-        <button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove()">✕ Remove</button>
+        <div class="size-group">
+            <h4 style="margin-top: 0; color: #333;">Size ${count + 1}</h4>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Size Label (e.g., 1m, 1.5m) *</label>
+                    <input type="text" name="sizes[${count}][label]" placeholder="e.g., 1m" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Buy Price (₹)</label>
+                    <input type="number" name="sizes[${count}][buy_price]" step="0.01" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Rent Price (₹/day)</label>
+                    <input type="number" name="sizes[${count}][rent_price]" step="0.01" class="form-control">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Deposit (₹)</label>
+                    <input type="number" name="sizes[${count}][deposit]" step="0.01" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Weight (kg)</label>
+                    <input type="number" name="sizes[${count}][weight]" step="0.01" class="form-control">
+                </div>
+            </div>
+            <button type="button" class="btn btn-sm btn-danger" onclick="this.closest('.size-entry').remove(); reindexSizes();">✕ Remove Size</button>
+        </div>
     `;
+    
     container.appendChild(div);
+}
+
+function reindexSizes() {
+    const container = document.getElementById('sizes-container');
+    Array.from(container.children).forEach((entry, index) => {
+        entry.setAttribute('data-size-index', index);
+        // Update all input names
+        const inputs = entry.querySelectorAll('input');
+        inputs.forEach(input => {
+            const name = input.getAttribute('name');
+            if (name && name.startsWith('sizes[')) {
+                input.setAttribute('name', name.replace(/sizes\[\d+\]/, `sizes[${index}]`));
+            }
+        });
+        // Update size number in title
+        entry.querySelector('h4').textContent = `Size ${index + 1}`;
+    });
 }
 </script>
 

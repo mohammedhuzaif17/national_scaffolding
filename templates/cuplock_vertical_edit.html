@@ -29,12 +29,19 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="image">Product Image</label>
-                    <input type="file" id="image" name="image" accept="image/*" placeholder="Upload product image">
+                    <label for="images">Product Image (Upload new to replace)</label>
+                    <input type="file" id="images" name="images" accept="image/*" multiple placeholder="Upload product image">
                     <div style="margin-top: 1rem; padding: 1rem; background: #f9f9f9; border-radius: 4px;">
                         <p style="margin: 0 0 0.5rem 0; color: #666; font-size: 0.9rem;">Current image:</p>
                         {% if product.image_url %}
-                            <img src="{{ url_for('static', filename=product.image_url) }}"
+                            {% set first_image = product.image_url.split(',')[0].strip().lstrip('/') %}
+                            {% if first_image.startswith('static/') %}
+                                {% set img_path = '/static/' + first_image[7:] %}
+                            {% else %}
+                                {% set img_path = '/static/' + first_image %}
+                            {% endif %}
+                            <img src="{{ img_path }}"
+                                 onerror="this.src='/static/images/no-image.png';"
                                  style="max-width: 200px; max-height: 200px; object-fit: contain; border-radius: 4px;">
                         {% else %}
                             <span style="color: #999; font-style: italic; font-size: 0.8rem;">No image uploaded</span>
@@ -105,7 +112,7 @@
                                 <select name="cup_count" class="form-control" required>
                                     <option value="">-- Choose --</option>
                                     {% for i in range(1, 7) %}
-                                    <option value="{{ i }}">{{ i }} {{ i == 1 ? 'Cup' : 'Cups' }}</option>
+                                    <option value="{{ i }}">{{ i }} {{ 'Cup' if i == 1 else 'Cups' }}</option>
                                     {% endfor %}
                                 </select>
                             </div>

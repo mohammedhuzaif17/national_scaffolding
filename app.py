@@ -1743,31 +1743,33 @@ def admin_orders():
         
         if panel_type == 'scaffolding':
             scaffolding_categories = ['aluminium', 'h-frames', 'cuplock', 'accessories', 'vertical']
-            
+            scaffolding_set = {c.lower() for c in scaffolding_categories}
+
             for order in all_orders:
-                # Check if order contains ANY scaffolding product
+                # Check if order contains ANY scaffolding product (case-insensitive)
                 has_scaffolding = False
                 for item in order.items:
                     product = Product.query.get(item.product_id)
-                    if product and product.category in scaffolding_categories:
+                    if product and (product.category or '').lower() in scaffolding_set:
                         has_scaffolding = True
                         break
-                
+
                 if has_scaffolding:
                     filtered_orders.append(order)
                     
         elif panel_type == 'fabrication':
             fabrication_categories = ['steel', 'custom', 'parts', 'fabrication', 'fabrications']
-            
+            fabrication_set = {c.lower() for c in fabrication_categories}
+
             for order in all_orders:
-                # Check if order contains ANY fabrication product
+                # Check if order contains ANY fabrication product (case-insensitive)
                 has_fabrication = False
                 for item in order.items:
                     product = Product.query.get(item.product_id)
-                    if product and product.category in fabrication_categories:
+                    if product and (product.category or '').lower() in fabrication_set:
                         has_fabrication = True
                         break
-                
+
                 if has_fabrication:
                     filtered_orders.append(order)
         else:

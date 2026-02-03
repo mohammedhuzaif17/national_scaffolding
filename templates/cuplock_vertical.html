@@ -415,18 +415,22 @@
     <h1>Vertical Cuplock: {{ product.name }}</h1>
     
     <div class="product-image">
-        {% if product.image_url %}
-            {% set first_image = product.image_url.split(',')[0].strip().lstrip('/') %}
-            {% if first_image.startswith('static/') %}
-                {% set img_path = '/static/' + first_image[7:] %}
+        {% if product.display_image_url or product.image_url %}
+            {% if product.display_image_url %}
+                {% set img_path = '/static/' + product.display_image_url %}
             {% else %}
-                {% set img_path = '/static/' + first_image %}
+                {% set first_image = product.image_url.split(',')[0].strip().lstrip('/') %}
+                {% if first_image.startswith('static/') %}
+                    {% set img_path = '/static/' + first_image[7:] %}
+                {% else %}
+                    {% set img_path = '/static/' + first_image %}
+                {% endif %}
             {% endif %}
             <img src="{{ img_path }}"
                  alt="{{ product.name }}"
-                 onerror="this.onerror=null; this.src='/static/images/no-image.png';">
+                 onerror="this.src='/static/images/no-image.png';">
         {% else %}
-            <span style="font-size: 3rem; color: #ccc;">🔗 No Image</span>
+            <img src="/static/images/no-image.png" alt="No image available">
         {% endif %}
     </div>
 
