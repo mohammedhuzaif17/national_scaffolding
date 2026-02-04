@@ -10,6 +10,7 @@ import base64
 from utils import get_image_url
 
 
+
 import random
 from flask import abort
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -275,6 +276,7 @@ def send_admin_otp(admin_id):
     from models import AdminOTP
     
     otp = random.randint(100000, 999999)
+    otp_str = str(otp)
     
     # Delete old OTPs for this admin
     AdminOTP.query.filter_by(admin_id=admin_id).delete()
@@ -282,7 +284,7 @@ def send_admin_otp(admin_id):
     # Create new OTP entry
     otp_entry = AdminOTP(
         admin_id=admin_id,
-        otp_hash=generate_password_hash(str(otp)),
+        otp_hash=generate_password_hash(otp_str),
         expires_at=datetime.utcnow() + timedelta(minutes=5),
         attempts=0
     )
@@ -303,6 +305,10 @@ def send_admin_otp(admin_id):
         )
         mail.send(msg)
         app.logger.info(f"OTP sent successfully to {admin_email}")
+        
+        # Log OTP in development mode for debugging
+        if os.getenv('FLASK_ENV') == 'development':
+            app.logger.info(f"[DEV MODE] OTP for testing: {otp_str}")
     except Exception as e:
         app.logger.error(f"Failed to send OTP email: {e}")
         raise
@@ -370,76 +376,7 @@ def admin_login():
     
     return render_template('admin_login.html')
 
-@app.route('/admin_otp', methods=['GET', 'POST'])
-def admin_otp():
-    """Handle OTP verification"""
-    from models import AdminOTP
-    
-    admin_id = session.get('otp_admin_id')
-    if not admin_id:
-        flash('Session expired. Please login again.', 'error')
-        return redirect(url_for('admin_login'))
-    
-    admin = Admin.query.get(admin_id)
-    if not admin:
-        flash('Invalid session', 'error')
-        return redirect(url_for('admin_login'))
-    
-    otp_entry = AdminOTP.query.filter_by(admin_id=admin_id).first()
-    
-    if request.method == 'POST':
-        otp = request.form.get('otp', '').strip()
-        
-        # Check if OTP entry exists and is not expired
-        if not otp_entry or otp_entry.expires_at < datetime.utcnow():
-            if otp_entry:
-                db.session.delete(otp_entry)
-                db.session.commit()
-            flash('OTP expired. Please login again.', 'error')
-            return redirect(url_for('admin_login'))
-        
-        # Check attempts
-        if otp_entry.attempts >= 3:
-            db.session.delete(otp_entry)
-            db.session.commit()
-            flash('Too many failed attempts. Please login again.', 'error')
-            return redirect(url_for('admin_login'))
-        
-        # Verify OTP
-        if not check_password_hash(otp_entry.otp_hash, otp):
-            otp_entry.attempts += 1
-            db.session.commit()
-            remaining = 3 - otp_entry.attempts
-            flash(f'Invalid OTP. {remaining} attempts remaining.', 'error')
-            return render_template('admin_otp.html', admin=admin)
-        
-        # OTP SUCCESS
-        login_user(admin)
-        session['user_type'] = 'admin'
-        session['otp_verified'] = True
-        session['panel_type'] = admin.panel_type
-        session.permanent = True
-        
-        # Delete used OTP
-        db.session.delete(otp_entry)
-        db.session.commit()
-        
-        app.logger.info(f"Admin {admin.username} logged in successfully with OTP")
-        
-        # Redirect to appropriate panel
-        if admin.panel_type == 'scaffolding':
-            return redirect(url_for('admin_scaffoldings'))
-        else:
-            return redirect(url_for('admin_fabrication'))
-    
-    # Calculate time remaining
-    time_remaining = None
-    if otp_entry:
-        time_remaining = int((otp_entry.expires_at - datetime.utcnow()).total_seconds())
-        if time_remaining < 0:
-            time_remaining = 0
-    
-    return render_template('admin_otp.html', admin=admin, time_remaining=time_remaining)
+
 
 @app.route('/admin_resend_otp', methods=['POST'])
 def admin_resend_otp():
@@ -1547,41 +1484,7 @@ def admin_complete_order(order_id):
         app.logger.error(f"Admin complete order error: {e}")
         db.session.rollback()
         return jsonify({'success': False, 'message': 'Error completing order'}), 500
-    
-@app.route('/admin_scaffoldings')
-@login_required
-def admin_scaffoldings():
-    try:
-        # ✅ CHECK USER TYPE AND PANEL TYPE ONLY (NOT OTP YET)
-        # OTP check is done during login flow, not here
-        if session.get('user_type') != 'admin':
-            flash('Admin access required', 'error')
-            return redirect(url_for('admin_login'))
-        
-        if session.get('panel_type') != 'scaffolding':
-            flash('Access denied. Wrong admin panel.', 'error')
-            return redirect(url_for('admin_login'))
-        
-        # ✅ NOW CHECK OTP VERIFICATION
-        if session.get('otp_verified') != True:
-            flash('OTP verification required', 'error')
-            return redirect(url_for('admin_login'))
 
-        # ✅ SHOW ONLY ACTIVE NON-FABRICATION PRODUCTS
-        products = Product.query.filter(
-            Product.product_type != 'fabrication',
-            Product.is_active == True
-        ).order_by(Product.id.desc()).all()
-
-        return render_template(
-            'admin_scaffoldings.html',
-            products=products
-        )
-
-    except Exception as e:
-        app.logger.error(f"Admin scaffoldings error: {e}", exc_info=True)
-        flash('An error occurred. Please try again.', 'error')
-        return redirect(url_for('admin_login'))
 
 @app.route('/admin/product/<int:product_id>/edit', methods=['GET', 'POST'])
 @login_required
@@ -1726,6 +1629,143 @@ def admin_fabrication():
         flash('An error occurred. Please try again.', 'error')
         return redirect(url_for('admin_login'))
 
+
+
+@app.route('/admin_otp', methods=['GET', 'POST'])
+def admin_otp():
+    """Handle OTP verification"""
+    from models import AdminOTP
+    
+    admin_id = session.get('otp_admin_id')
+    if not admin_id:
+        flash('Session expired. Please login again.', 'error')
+        return redirect(url_for('admin_login'))
+    
+    # CRITICAL FIX: Refresh admin from DB to ensure valid session
+    admin = Admin.query.get(admin_id)
+    if not admin:
+        flash('Invalid session', 'error')
+        return redirect(url_for('admin_login'))
+    
+    # Refresh the session to prevent detached instance errors
+    db.session.refresh(admin)
+    
+    otp_entry = AdminOTP.query.filter_by(admin_id=admin_id).first()
+    
+    if request.method == 'POST':
+        otp = request.form.get('otp', '').strip()
+        
+        # Check if OTP entry exists and is not expired
+        if not otp_entry or otp_entry.expires_at < datetime.utcnow():
+            if otp_entry:
+                db.session.delete(otp_entry)
+                db.session.commit()
+            flash('OTP expired. Please login again.', 'error')
+            return redirect(url_for('admin_login'))
+        
+        # Check attempts
+        if otp_entry.attempts >= 3:
+            db.session.delete(otp_entry)
+            db.session.commit()
+            flash('Too many failed attempts. Please login again.', 'error')
+            return redirect(url_for('admin_login'))
+        
+        # Verify OTP
+        if not check_password_hash(otp_entry.otp_hash, otp):
+            otp_entry.attempts += 1
+            db.session.commit()
+            remaining = 3 - otp_entry.attempts
+            flash(f'Invalid OTP. {remaining} attempts remaining.', 'error')
+            return render_template('admin_otp.html', admin=admin)
+        
+        # OTP SUCCESS
+        login_user(admin)
+        session['user_type'] = 'admin'
+        session['otp_verified'] = True
+        # Ensure panel_type is set from the DB, not just session
+        session['panel_type'] = admin.panel_type
+        session.permanent = True
+        
+        # Delete used OTP
+        db.session.delete(otp_entry)
+        db.session.commit()
+        
+        app.logger.info(f"Admin {admin.username} logged in successfully via OTP")
+        
+        # Redirect to appropriate panel
+        if admin.panel_type == 'scaffolding':
+            return redirect(url_for('admin_scaffoldings'))
+        else:
+            return redirect(url_for('admin_fabrication'))
+    
+    # Calculate time remaining
+    time_remaining = None
+    if otp_entry:
+        time_remaining = int((otp_entry.expires_at - datetime.utcnow()).total_seconds())
+        if time_remaining < 0:
+            time_remaining = 0
+    
+    return render_template('admin_otp.html', admin=admin, time_remaining=time_remaining)
+# REPLACE YOUR admin_scaffoldings FUNCTION WITH THIS ONE:
+@app.route('/admin_scaffoldings')
+@login_required
+def admin_scaffoldings():
+    try:
+        # ✅ CHECK USER TYPE
+        if session.get('user_type') != 'admin':
+            flash('Admin access required', 'error')
+            return redirect(url_for('admin_login'))
+
+        # ✅ CHECK PANEL TYPE
+        if session.get('panel_type') != 'scaffolding':
+            flash('Access denied. Wrong admin panel.', 'error')
+            return redirect(url_for('admin_login'))
+
+        # ✅ CHECK OTP
+        if session.get('otp_verified') is not True:
+            flash('OTP verification required', 'error')
+            return redirect(url_for('admin_login'))
+
+        # ✅ SCAFFOLDING PRODUCTS ONLY
+        scaffolding_categories = ['aluminium', 'h-frames', 'cuplock', 'accessories']
+
+        products = Product.query.filter(
+            Product.category.in_(scaffolding_categories),
+            Product.is_active == True
+        ).order_by(Product.id.desc()).all()
+
+        # ✅ Process products for safe display
+        for product in products:
+            # Ensure price is valid
+            try:
+                product.price = float(product.price) if product.price else 0.0
+            except (ValueError, TypeError):
+                product.price = 0.0
+            
+            # ✅ FIX: Ensure description is not None
+            if product.description is None:
+                product.description = ''
+            
+            # Set display image URL
+            try:
+                product.display_image_url = get_image_url(product.image_url)
+            except Exception as img_err:
+                app.logger.error(f"Error setting image for product {product.id}: {img_err}")
+                product.display_image_url = '/static/images/no-image.png'
+
+        return render_template(
+            'admin_scaffoldings.html',
+            products=products
+        )
+
+    except Exception as e:
+        app.logger.error(
+            f"Critical Error in admin_scaffoldings: {e}",
+            exc_info=True
+        )
+        flash('An error occurred loading the dashboard. Please try again.', 'error')
+        return redirect(url_for('admin_login'))
+    
 @app.route('/admin_orders')
 @login_required
 def admin_orders():
@@ -1736,9 +1776,8 @@ def admin_orders():
         panel_type = session.get('panel_type')
         app.logger.info(f"Admin Orders - Panel Type: {panel_type}")
         
-        # ✅ FIX: Get ALL orders, then filter on the Python side
+        # Get ALL orders first
         all_orders = Order.query.order_by(Order.order_date.desc()).all()
-        
         filtered_orders = []
         
         if panel_type == 'scaffolding':
@@ -1746,6 +1785,16 @@ def admin_orders():
             scaffolding_set = {c.lower() for c in scaffolding_categories}
 
             for order in all_orders:
+                # FIX: Always show pending orders regardless of items (Safety check)
+                if order.status == 'pending_verification':
+                    filtered_orders.append(order)
+                    continue
+
+                if not order.items:
+                    # Show empty orders (maybe manual entry)
+                    filtered_orders.append(order)
+                    continue
+                
                 # Check if order contains ANY scaffolding product (case-insensitive)
                 has_scaffolding = False
                 for item in order.items:
@@ -1762,6 +1811,15 @@ def admin_orders():
             fabrication_set = {c.lower() for c in fabrication_categories}
 
             for order in all_orders:
+                # FIX: Always show pending orders regardless of items
+                if order.status == 'pending_verification':
+                    filtered_orders.append(order)
+                    continue
+
+                if not order.items:
+                    filtered_orders.append(order)
+                    continue
+                
                 # Check if order contains ANY fabrication product (case-insensitive)
                 has_fabrication = False
                 for item in order.items:
@@ -1776,13 +1834,15 @@ def admin_orders():
             # Fallback: show all orders
             filtered_orders = all_orders
         
-        app.logger.info(f"Total orders found: {len(filtered_orders)}")
+        app.logger.info(f"Total orders found for {panel_type}: {len(filtered_orders)}")
         
         return render_template('admin_orders.html', orders=filtered_orders)
         
     except Exception as e:
         app.logger.error(f"Admin orders error: {e}", exc_info=True)
         return render_template('admin_orders.html', orders=[])
+
+
 
 @app.route('/admin_analytics')
 @login_required
@@ -3188,6 +3248,31 @@ def order_details(order_id):
     except Exception as e:
         app.logger.error(f"Order details error: {e}")
         return redirect(url_for('admin_orders'))
+
+
+def verify_admin_otp(admin_id, entered_otp):
+    from models import AdminOTP
+
+    otp_entry = AdminOTP.query.filter_by(admin_id=admin_id).first()
+
+    if not otp_entry:
+        return False, "OTP not found"
+
+    # Check expiry
+    if otp_entry.expires_at < datetime.utcnow():
+        return False, "OTP expired"
+
+    # Verify OTP hash
+    if not check_password_hash(otp_entry.otp_hash, str(entered_otp).strip()):
+        otp_entry.attempts += 1
+        db.session.commit()
+        return False, "Invalid OTP"
+
+    # OTP correct → delete it
+    db.session.delete(otp_entry)
+    db.session.commit()
+
+    return True, "OTP verified"
 
 @app.route('/verify_payment/<int:order_id>', methods=['POST'])
 @login_required

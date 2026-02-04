@@ -48,7 +48,6 @@
             <select id="statusFilter" class="filter-select" onchange="filterOrders()">
                 <option value="all">All Orders</option>
                 <option value="pending_verification">Pending Verification</option>
-                <!-- <option value="approved">Approved</option> -->
                 <option value="rejected">Rejected</option>
                 <option value="completed">Completed</option>
             </select>
@@ -86,7 +85,7 @@
                     <div class="info-grid">
                         <div class="info-item">
                             <span class="label">Name:</span>
-                            <span class="value">{{ order.user.full_name or order.user.username }}</span>
+                            <span class="value" id="customer-name-{{ order.id }}">{{ order.user.full_name or order.user.username }}</span>
                         </div>
                         <div class="info-item">
                             <span class="label">Email:</span>
@@ -189,7 +188,10 @@ function filterOrders() {
         const status = card.getAttribute('data-status');
         const transactionId = card.getAttribute('data-transaction-id').toLowerCase();
         const orderId = card.getAttribute('data-order-id');
-        const customerName = card.querySelector('.customer-section .value').textContent.toLowerCase();
+        
+        // FIX: Select specifically by ID to avoid getting email/address instead of name
+        const customerNameEl = card.querySelector('span[id^="customer-name-"]');
+        const customerName = customerNameEl ? customerNameEl.textContent.toLowerCase() : '';
         
         const statusMatch = statusFilter === 'all' || status === statusFilter;
         const searchMatch = searchBox === '' || 

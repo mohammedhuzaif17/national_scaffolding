@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+"""Fix admin_orders route to show ALL orders, even those without items"""
+
+print("""
+📋 SOLUTION: Admin Orders Not Visible
+
+ROOT CAUSE FOUND:
+- 20 orders were created during testing WITHOUT OrderItems
+- The current admin_orders route filters to only show orders with items
+- This causes 87% of orders to be hidden from admins
+
+THE FIX:
+The admin_orders route should show ALL orders, not just those with items.
+If an order has no items, it will just show an empty order with totals.
+""")
+
+print("\n" + "="*60)
+print("UPDATING admin_orders ROUTE")
+print("="*60)
+
+print("""
+Current logic (line 1729 in app.py):
+    # For each admin panel, check if order contains ANY product from that category
+    # by looking at order.items
+    
+    if panel_type == 'scaffolding':
+        for order in all_orders:
+            has_scaffolding = False
+            for item in order.items:  # <-- FILTERS OUT ORDERS WITH NO ITEMS
+                ...
+            if has_scaffolding:
+                filtered_orders.append(order)
+
+THE PROBLEM:
+Orders without items won't pass the has_scaffolding check, so they're hidden.
+
+SOLUTION:
+Show ALL orders to admins. If an order has no items, it still shows up.
+Admin can verify payment and view the order details.
+""")
+
+print("\nWould you like me to update the admin_orders route to show ALL orders?")
+print("This will make it easy for you to see and manage all customer transactions.")
