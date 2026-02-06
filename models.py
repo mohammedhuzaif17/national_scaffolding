@@ -24,7 +24,6 @@ class User(UserMixin, db.Model):
     orders = db.relationship(
         'Order',
         backref='user',
-        lazy=True,
         cascade='all, delete-orphan'
     )
 
@@ -38,7 +37,7 @@ class Admin(UserMixin, db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), nullable=False)
-    password_hash = db.Column(db.String(255), nullable=False)  # plain password
+    password_hash = db.Column(db.String(255), nullable=False)  # plain text
     panel_type = db.Column(db.String(50), nullable=False)
 
     __table_args__ = (
@@ -46,7 +45,6 @@ class Admin(UserMixin, db.Model):
     )
 
     def check_password(self, password):
-        # ⚠️ PLAIN TEXT CHECK (AS YOU REQUESTED)
         return self.password_hash == password
 
 
@@ -58,13 +56,13 @@ class AdminOTP(db.Model):
     __tablename__ = 'admin_otps'
 
     id = db.Column(db.Integer, primary_key=True)
-    admin_id = db.Column(db.Integer, db.ForeignKey('admins.id'), nullable=False)
+    admin_id = db.Column(db.Integer, db.ForeignKey('admins.id', ondelete='CASCADE'), nullable=False)
     otp_hash = db.Column(db.String(255), nullable=False)
     expires_at = db.Column(db.DateTime, nullable=False)
     attempts = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    admin = db.relationship('Admin', backref='otps', lazy=True)
+    admin = db.relationship('Admin', backref='otps')
 
 
 # ===========================
@@ -85,28 +83,25 @@ class Product(db.Model):
     deposit_amount = db.Column(db.Numeric(10, 2))
     image_url = db.Column(db.String(500))
     weight_per_unit = db.Column(db.Numeric(10, 2))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     cuplock_type = db.Column(db.String(50))
     is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     vertical_sizes = db.relationship(
         'CuplockVerticalSize',
         backref='product',
-        lazy=True,
         cascade='all, delete-orphan'
     )
 
     ledger_sizes = db.relationship(
         'CuplockLedgerSize',
         backref='product',
-        lazy=True,
         cascade='all, delete-orphan'
     )
 
     order_items = db.relationship(
         'OrderItem',
         backref='product',
-        lazy=True,
         cascade='all, delete-orphan'
     )
 
@@ -116,10 +111,15 @@ class Product(db.Model):
 # ===========================
 
 class CuplockVerticalSize(db.Model):
-    __tablename__name__ = 'cuplock_vertical_sizes'
+    __tablename__ = 'cuplock_vertical_sizes'
 
     id = db.Column(db.Integer, primary_key=True)
-    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
+    product_id = db.Column(
+        db.Integer,
+        db.ForeignKey('products.id', ondelete='CASCADE'),
+        nullable=False
+    )
+
     size_label = db.Column(db.String(50), nullable=False)
     weight = db.Column(db.Numeric(10, 2))
     buy_price = db.Column(db.Numeric(10, 2))
@@ -148,7 +148,12 @@ class CuplockLedgerSize(db.Model):
     __tablename__ = 'cuplock_ledger_sizes'
 
     id = db.Column(db.Integer, primary_key=True)
-    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
+    product_id = db.Column(
+        db.Integer,
+        db.ForeignKey('products.id', ondelete='CASCADE'),
+        nullable=False
+    )
+
     size_label = db.Column(db.String(50), nullable=False)
     weight_kg = db.Column(db.Numeric(10, 2))
     buy_price = db.Column(db.Numeric(10, 2))
@@ -173,9 +178,10 @@ class CuplockVerticalCup(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     vertical_size_id = db.Column(
         db.Integer,
-        db.ForeignKey('cuplock_vertical_sizes.id'),
+        db.ForeignKey('cuplock_vertical_sizes.id', ondelete='CASCADE'),
         nullable=False
     )
+
     cup_count = db.Column(db.Integer, nullable=False)
     cup_image_url = db.Column(db.String(255))
     weight_kg = db.Column(db.Numeric(10, 2))
@@ -200,7 +206,12 @@ class Order(db.Model):
     __tablename__ = 'orders'
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id', ondelete='CASCADE'),
+        nullable=False
+    )
+
     total_price = db.Column(db.Numeric(10, 2), nullable=False)
     order_date = db.Column(db.DateTime, default=datetime.utcnow)
     status = db.Column(db.String(50), default='pending_verification')
@@ -211,7 +222,6 @@ class Order(db.Model):
     items = db.relationship(
         'OrderItem',
         backref='order',
-        lazy=True,
         cascade='all, delete-orphan'
     )
 
@@ -224,8 +234,18 @@ class OrderItem(db.Model):
     __tablename__ = 'order_items'
 
     id = db.Column(db.Integer, primary_key=True)
-    order_id = db.Column(db.Integer, db.ForeignKey('orders.id'), nullable=False)
-    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
+    order_id = db.Column(
+        db.Integer,
+        db.ForeignKey('orders.id', ondelete='CASCADE'),
+        nullable=False
+    )
+
+    product_id = db.Column(
+        db.Integer,
+        db.ForeignKey('products.id', ondelete='CASCADE'),
+        nullable=False
+    )
+
     product_name = db.Column(db.String(200), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     price = db.Column(db.Numeric(10, 2), nullable=False)
