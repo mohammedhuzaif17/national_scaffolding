@@ -1842,25 +1842,7 @@ def admin_orders():
         app.logger.error(f"Admin orders error: {e}", exc_info=True)
         return render_template('admin_orders.html', orders=[])
 
-@app.route('/_fix_admin_password')
-def fix_admin_password():
-    from werkzeug.security import generate_password_hash
-    from models import Admin
-    from app import db
 
-    password = "admin123"
-    hashed = generate_password_hash(password)
-
-    admins = Admin.query.all()
-    for admin in admins:
-        admin.password_hash = hashed
-
-    db.session.commit()
-    return {
-        "status": "success",
-        "password": password,
-        "hash": hashed
-    }
 
 
 @app.route('/admin_analytics')
