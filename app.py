@@ -945,76 +945,326 @@ def switch_admin_panel(panel_type):
         app.logger.error(f"Switch admin panel error: {e}")
         return redirect(url_for('dashboard'))
 
-# ==========================================
-# FIXED: national_scaffoldings route
-# ==========================================
+# ========================================== 
+# COMPLETE AND FIXED: national_scaffoldings route
+# ========================================== 
 @app.route('/national_scaffoldings')
 def national_scaffoldings():
-    category = request.args.get('category', 'all')
-
-    scaffolding_categories = ['aluminium', 'h-frames', 'cuplock', 'accessories']
-
-    # Use case-insensitive matching for category values stored with different casing
-    query = Product.query.filter(
-        Product.is_active == True,
-        func.lower(Product.category).in_(scaffolding_categories)
-    )
-
-    if category != 'all':
-        query = query.filter(func.lower(Product.category) == category)
-
-    products = query.all()
-
-    for product in products:
-        # ✅ FIXED: Process image URL for display
-        if product.image_url:
-            # Get the first image if multiple
-            image_urls = [url.strip() for url in product.image_url.split(',') if url.strip()]
-            if image_urls:
-                # Use get_image_url to process the path
-                product.display_image_url = get_image_url(image_urls[0])
-            else:
-                product.display_image_url = '/static/images/no-image.png'
-        else:
-            product.display_image_url = '/static/images/no-image.png'
-
-        # Handle vertical cuplock pricing
-        if product.category == 'cuplock' and product.cuplock_type == 'vertical':
-            from models import CuplockVerticalSize
-            min_size = CuplockVerticalSize.query.filter_by(
-                product_id=product.id,
-                is_active=True
-            ).order_by(CuplockVerticalSize.buy_price.asc()).first()
-
-            product.display_price = min_size.buy_price if min_size and min_size.buy_price else 0
-
-        # Handle ledger pricing - FIXED
-        elif product.category == 'cuplock' and product.cuplock_type == 'ledger':
-            from models import CuplockLedgerSize
-            min_size = CuplockLedgerSize.query.filter_by(
-                product_id=product.id,
-                is_active=True
-            ).order_by(CuplockLedgerSize.buy_price.asc()).first()
-
-            # Check if min_size exists and has a valid buy_price
-            if min_size and min_size.buy_price and min_size.buy_price > 0:
-                product.display_price = min_size.buy_price
-            else:
-                # If no valid size found, try to get any size with a price
-                any_size = CuplockLedgerSize.query.filter_by(
-                    product_id=product.id,
-                    is_active=True
-                ).filter(CuplockLedgerSize.buy_price > 0).first()
+    """
+    National Scaffoldings product listing page
+    Displays all scaffolding products with proper error handling
+    """
+    try:
+        # Get category filter from query params
+        category = request.args.get('category', 'all')
+        
+        # Define scaffolding categories
+        scaffolding_categories = ['aluminium', 'h-frames', 'cuplock', 'accessories']
+        
+        # Build base query with error handling
+        try:
+            query = Product.query.filter(Product.is_active == True)
+            
+            # Filter by scaffolding categories (case-insensitive)
+            query = query.filter(
+                func.lower(Product.category).in_([c.lower() for c in scaffolding_categories])
+            )
+            
+            # Apply specific category filter if not 'all'
+            if category != 'all' and category:
+                query = query.filter(func.lower(Product.category) == category.lower())
+            
+            # Execute query
+            products = query.all()
+            
+            app.logger.info(f"✅ Loaded {len(products)} scaffolding products for category: {category}")
+            
+        except Exception as query_error:
+            app.logger.error(f"❌ Query error in national_scaffoldings: {query_error}", exc_info=True)
+            # Return empty list on query error
+            products = []
+            flash('Error loading products. Please try again.', 'error')
+        
+        # Process each product with individual error handling
+        for product in products:
+            try:
+                # =========================== 
+                # 1. PROCESS IMAGE URL
+                # =========================== 
+                if product.image_url:
+                    # Split comma-separated URLs
+                    image_urls = [url.strip() for url in product.image_url.split(',') if url.strip()]
+                    if image_urls:
+                        try:
+                            # Use get_image_url utility to process the first image
+                            product.display_image_url = get_image_url(image_urls[0])
+                        except Exception as img_error:
+                            app.logger.error(f"Error processing image for product {product.id}: {img_error}")
+                            product.display_image_url = '/static/images/no-image.png'
+                    else:
+                        product.display_image_url = '/static/images/no-image.png'
+                else:
+                    product.display_image_url = '/static/images/no-image.png'
                 
-                product.display_price = any_size.buy_price if any_size else 0
-        else:
-            # For other products, use the product price
-            product.display_price = product.price if product.price else 0
-
-    return render_template(
-        'national_scaffoldings.html',
-        products=products
-    )
+                # =========================== 
+                # 2. CALCULATE DISPLAY PRICE
+                # =========================== 
+                # Handle VERTICAL CUPLOCK pricing
+                if product.category == 'cuplock' and product.cuplock_type == 'vertical':
+                    try:
+                        from models import CuplockVerticalSize
+                        
+                        # Get the minimum priced size
+                        min_size = CuplockVerticalSize.query.filter_by(
+                            product_id=product.id,
+                            is_active=True
+                        ).order_by(CuplockVerticalSize.buy_price.asc()).first()
+                        
+                        if min_size and min_size.buy_price:
+                            product.display_price = float(min_size.buy_price)
+                        else:
+                            product.display_price = 0
+                            
+                    except Exception as vertical_error:
+                        app.logger.error(f"Error loading vertical cuplock size for product {product.id}: {vertical_error}")
+                        product.display_price = 0
+                
+                # Handle LEDGER CUPLOCK pricing
+                elif product.category == 'cuplock' and product.cuplock_type == 'ledger':
+                    try:
+                        from models import CuplockLedgerSize
+                        
+                        # Get the minimum priced size
+                        min_size = CuplockLedgerSize.query.filter_by(
+                            product_id=product.id,
+                            is_active=True
+                        ).order_by(CuplockLedgerSize.buy_price.asc()).first()
+                        
+                        if min_size and min_size.buy_price and min_size.buy_price > 0:
+                            product.display_price = float(min_size.buy_price)
+                        else:
+                            # Fallback: try to get any size with a valid price
+                            any_size = CuplockLedgerSize.query.filter_by(
+                                product_id=product.id,
+                                is_active=True
+                            ).filter(CuplockLedgerSize.buy_price > 0).first()
+                            
+                            product.display_price = float(any_size.buy_price) if any_size else 0
+                            
+                    except Exception as ledger_error:
+                        app.logger.error(f"Error loading ledger cuplock size for product {product.id}: {ledger_error}")
+                        product.display_price = 0
+                
+                # Handle OTHER PRODUCTS (aluminium, h-frames, accessories)
+                else:
+                    try:
+                        product.display_price = float(product.price) if product.price else 0
+                    except (ValueError, TypeError):
+                        app.logger.error(f"Invalid price for product {product.id}")
+                        product.display_price = 0
+                
+                # =========================== 
+                # 3. ENSURE DESCRIPTION IS NOT NULL
+                # =========================== 
+                if product.description is None:
+                    product.description = ''
+                    
+            except Exception as product_error:
+                # Log error but continue processing other products
+                app.logger.error(
+                    f"Error processing product {product.id} ({product.name}): {product_error}",
+                    exc_info=True
+                )
+                # Set safe defaults
+                product.display_image_url = '/static/images/no-image.png'
+                product.display_price = 0
+                product.description = ''
+        
+        # =========================== 
+        # 4. RENDER TEMPLATE
+        # =========================== 
+        return render_template(
+            'national_scaffoldings.html',
+            products=products,
+            category=category
+        )
+        
+    except Exception as e:
+        # Critical error handler
+        app.logger.error(
+            f"❌ CRITICAL ERROR in national_scaffoldings route: {e}",
+            exc_info=True
+        )
+        
+        # Try to render template with empty products
+        try:
+            flash('An error occurred while loading products. Please try again.', 'error')
+            return render_template(
+                'national_scaffoldings.html',
+                products=[],
+                category='all'
+            )
+        except Exception:
+            # FIX APPLIED HERE: Added the missing except block
+            pass
+    """
+    National Scaffoldings product listing page
+    Displays all scaffolding products with proper error handling
+    """
+    try:
+        # Get category filter from query params
+        category = request.args.get('category', 'all')
+        
+        # Define scaffolding categories
+        scaffolding_categories = ['aluminium', 'h-frames', 'cuplock', 'accessories']
+        
+        # Build base query with error handling
+        try:
+            query = Product.query.filter(Product.is_active == True)
+            
+            # Filter by scaffolding categories (case-insensitive)
+            query = query.filter(
+                func.lower(Product.category).in_([c.lower() for c in scaffolding_categories])
+            )
+            
+            # Apply specific category filter if not 'all'
+            if category != 'all' and category:
+                query = query.filter(func.lower(Product.category) == category.lower())
+            
+            # Execute query
+            products = query.all()
+            
+            app.logger.info(f"✅ Loaded {len(products)} scaffolding products for category: {category}")
+            
+        except Exception as query_error:
+            app.logger.error(f"❌ Query error in national_scaffoldings: {query_error}", exc_info=True)
+            # Return empty list on query error
+            products = []
+            flash('Error loading products. Please try again.', 'error')
+        
+        # Process each product with individual error handling
+        for product in products:
+            try:
+                # =========================== 
+                # 1. PROCESS IMAGE URL
+                # =========================== 
+                if product.image_url:
+                    # Split comma-separated URLs
+                    image_urls = [url.strip() for url in product.image_url.split(',') if url.strip()]
+                    if image_urls:
+                        try:
+                            # Use get_image_url utility to process the first image
+                            product.display_image_url = get_image_url(image_urls[0])
+                        except Exception as img_error:
+                            app.logger.error(f"Error processing image for product {product.id}: {img_error}")
+                            product.display_image_url = '/static/images/no-image.png'
+                    else:
+                        product.display_image_url = '/static/images/no-image.png'
+                else:
+                    product.display_image_url = '/static/images/no-image.png'
+                
+                # =========================== 
+                # 2. CALCULATE DISPLAY PRICE
+                # =========================== 
+                # Handle VERTICAL CUPLOCK pricing
+                if product.category == 'cuplock' and product.cuplock_type == 'vertical':
+                    try:
+                        from models import CuplockVerticalSize
+                        
+                        # Get the minimum priced size
+                        min_size = CuplockVerticalSize.query.filter_by(
+                            product_id=product.id,
+                            is_active=True
+                        ).order_by(CuplockVerticalSize.buy_price.asc()).first()
+                        
+                        if min_size and min_size.buy_price:
+                            product.display_price = float(min_size.buy_price)
+                        else:
+                            product.display_price = 0
+                            
+                    except Exception as vertical_error:
+                        app.logger.error(f"Error loading vertical cuplock size for product {product.id}: {vertical_error}")
+                        product.display_price = 0
+                
+                # Handle LEDGER CUPLOCK pricing
+                elif product.category == 'cuplock' and product.cuplock_type == 'ledger':
+                    try:
+                        from models import CuplockLedgerSize
+                        
+                        # Get the minimum priced size
+                        min_size = CuplockLedgerSize.query.filter_by(
+                            product_id=product.id,
+                            is_active=True
+                        ).order_by(CuplockLedgerSize.buy_price.asc()).first()
+                        
+                        if min_size and min_size.buy_price and min_size.buy_price > 0:
+                            product.display_price = float(min_size.buy_price)
+                        else:
+                            # Fallback: try to get any size with a valid price
+                            any_size = CuplockLedgerSize.query.filter_by(
+                                product_id=product.id,
+                                is_active=True
+                            ).filter(CuplockLedgerSize.buy_price > 0).first()
+                            
+                            product.display_price = float(any_size.buy_price) if any_size else 0
+                            
+                    except Exception as ledger_error:
+                        app.logger.error(f"Error loading ledger cuplock size for product {product.id}: {ledger_error}")
+                        product.display_price = 0
+                
+                # Handle OTHER PRODUCTS (aluminium, h-frames, accessories)
+                else:
+                    try:
+                        product.display_price = float(product.price) if product.price else 0
+                    except (ValueError, TypeError):
+                        app.logger.error(f"Invalid price for product {product.id}")
+                        product.display_price = 0
+                
+                # =========================== 
+                # 3. ENSURE DESCRIPTION IS NOT NULL
+                # =========================== 
+                if product.description is None:
+                    product.description = ''
+                    
+            except Exception as product_error:
+                # Log error but continue processing other products
+                app.logger.error(
+                    f"Error processing product {product.id} ({product.name}): {product_error}",
+                    exc_info=True
+                )
+                # Set safe defaults
+                product.display_image_url = '/static/images/no-image.png'
+                product.display_price = 0
+                product.description = ''
+        
+        # =========================== 
+        # 4. RENDER TEMPLATE
+        # =========================== 
+        return render_template(
+            'national_scaffoldings.html',
+            products=products,
+            category=category
+        )
+        
+    except Exception as e:
+        # Critical error handler
+        app.logger.error(
+            f"❌ CRITICAL ERROR in national_scaffoldings route: {e}",
+            exc_info=True
+        )
+        
+        # Try to render template with empty products
+        try:
+            flash('An error occurred while loading products. Please try again.', 'error')
+            return render_template(
+                'national_scaffoldings.html',
+                products=[],
+                category='all'
+            )
+        except Exception as render_error:
+            # Last resort fallback
+            app.logger.error(f"❌ Could not render template: {render_error}", exc_info=True)
+            return "An error occurred while loading the page. Please try again later.", 500
         
 @app.route('/cuplock-shop')
 def cuplock_shop():
@@ -2315,6 +2565,347 @@ def fabrications():
 # Replace your fabrication_detail route in app.py with this fixed version:
 
 # Replace the duplicate function with this one
+# ============================================================================
+# ADD THESE ROUTES TO YOUR app.py FILE
+# Place them after your existing routes, before if __name__ == '__main__':
+# ============================================================================
+
+# ============================================================================
+# DEBUG ROUTE: Check vertical product sizes
+# ============================================================================
+# ============================================================================
+# COMPLETE FIX FOR VERTICAL CUPLOCK PRODUCT 162
+# Add these routes to your app.py file (before if __name__ == '__main__':)
+# ============================================================================
+
+import traceback
+
+# Route 1: Debug - Check what sizes exist
+@app.route('/debug/vertical_product/<int:product_id>')
+def debug_vertical_product(product_id):
+    """Debug vertical cuplock product and its sizes"""
+    try:
+        from models import Product, CuplockVerticalSize
+        
+        product = Product.query.get_or_404(product_id)
+        
+        # Get all sizes for this product
+        sizes = CuplockVerticalSize.query.filter_by(product_id=product_id).all()
+        
+        debug_info = {
+            'product_id': product.id,
+            'product_name': product.name,
+            'category': product.category,
+            'cuplock_type': product.cuplock_type,
+            'is_active': product.is_active,
+            'total_sizes': len(sizes),
+            'sizes': []
+        }
+        
+        for size in sizes:
+            debug_info['sizes'].append({
+                'id': size.id,
+                'size_label': size.size_label,
+                'buy_price': float(size.buy_price or 0),
+                'rent_price': float(size.rent_price or 0),
+                'deposit': float(size.deposit or 0),
+                'is_active': size.is_active
+            })
+        
+        return jsonify(debug_info)
+        
+    except Exception as e:
+        return jsonify({
+            'error': str(e),
+            'traceback': traceback.format_exc()
+        })
+
+
+# Route 2: Auto-Fix - Add default sizes to product 162
+@app.route('/fix/vertical_product_162')
+def fix_vertical_product_162():
+    """Add default sizes for vertical product 162"""
+    try:
+        from models import Product, CuplockVerticalSize
+        
+        # Check if product exists
+        product = Product.query.get(162)
+        if not product:
+            return jsonify({
+                'success': False,
+                'message': 'Product 162 not found in database'
+            })
+        
+        # Check if sizes already exist
+        existing_sizes = CuplockVerticalSize.query.filter_by(product_id=162).all()
+        if existing_sizes:
+            return jsonify({
+                'success': False, 
+                'message': f'Product already has {len(existing_sizes)} sizes configured',
+                'existing_sizes': [
+                    {
+                        'id': s.id,
+                        'label': s.size_label,
+                        'buy_price': float(s.buy_price or 0),
+                        'rent_price': float(s.rent_price or 0),
+                        'deposit': float(s.deposit or 0),
+                        'is_active': s.is_active
+                    } for s in existing_sizes
+                ]
+            })
+        
+        # Define default sizes to add
+        default_sizes = [
+            {
+                'size_label': '0.5 Meter',
+                'buy_price': 500.00,
+                'rent_price': 50.00,
+                'deposit': 100.00
+            },
+            {
+                'size_label': '1.0 Meter',
+                'buy_price': 800.00,
+                'rent_price': 80.00,
+                'deposit': 150.00
+            },
+            {
+                'size_label': '1.5 Meter',
+                'buy_price': 1200.00,
+                'rent_price': 120.00,
+                'deposit': 200.00
+            },
+            {
+                'size_label': '2.0 Meter',
+                'buy_price': 1500.00,
+                'rent_price': 150.00,
+                'deposit': 250.00
+            },
+            {
+                'size_label': '2.5 Meter',
+                'buy_price': 1800.00,
+                'rent_price': 180.00,
+                'deposit': 300.00
+            },
+            {
+                'size_label': '3.0 Meter',
+                'buy_price': 2100.00,
+                'rent_price': 210.00,
+                'deposit': 350.00
+            }
+        ]
+        
+        # Add sizes to database
+        added_sizes = []
+        for size_data in default_sizes:
+            new_size = CuplockVerticalSize(
+                product_id=162,
+                size_label=size_data['size_label'],
+                buy_price=size_data['buy_price'],
+                rent_price=size_data['rent_price'],
+                deposit=size_data['deposit'],
+                is_active=True
+            )
+            db.session.add(new_size)
+            added_sizes.append(size_data)
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': f'✅ Successfully added {len(default_sizes)} sizes for product 162: {product.name}',
+            'sizes_added': added_sizes,
+            'next_steps': [
+                '1. Refresh the cuplock products page',
+                '2. Click on the vertical product',
+                '3. You should now see the product details with sizes!',
+                '4. Visit /admin_scaffoldings to edit these sizes if needed'
+            ]
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f"Error fixing vertical product 162: {e}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'message': f'Error: {str(e)}',
+            'traceback': traceback.format_exc()
+        })
+
+
+# Route 3: Generic fix for any vertical product
+@app.route('/fix/vertical_product/<int:product_id>')
+def fix_vertical_product_generic(product_id):
+    """Add default sizes for any vertical product"""
+    try:
+        from models import Product, CuplockVerticalSize
+        
+        product = Product.query.get_or_404(product_id)
+        
+        # Verify it's a vertical cuplock product
+        if product.category != 'cuplock' or product.cuplock_type != 'vertical':
+            return jsonify({
+                'success': False,
+                'message': f'Product {product_id} is not a vertical cuplock product'
+            })
+        
+        # Check existing sizes
+        existing_sizes = CuplockVerticalSize.query.filter_by(product_id=product_id).all()
+        if existing_sizes:
+            return jsonify({
+                'success': False,
+                'message': f'Product already has {len(existing_sizes)} sizes',
+                'sizes': [s.size_label for s in existing_sizes]
+            })
+        
+        # Add default sizes
+        default_sizes = [
+            {'size_label': '0.5 Meter', 'buy_price': 500.00, 'rent_price': 50.00, 'deposit': 100.00},
+            {'size_label': '1.0 Meter', 'buy_price': 800.00, 'rent_price': 80.00, 'deposit': 150.00},
+            {'size_label': '1.5 Meter', 'buy_price': 1200.00, 'rent_price': 120.00, 'deposit': 200.00},
+            {'size_label': '2.0 Meter', 'buy_price': 1500.00, 'rent_price': 150.00, 'deposit': 250.00},
+            {'size_label': '2.5 Meter', 'buy_price': 1800.00, 'rent_price': 180.00, 'deposit': 300.00},
+            {'size_label': '3.0 Meter', 'buy_price': 2100.00, 'rent_price': 210.00, 'deposit': 350.00}
+        ]
+        
+        for size_data in default_sizes:
+            new_size = CuplockVerticalSize(
+                product_id=product_id,
+                size_label=size_data['size_label'],
+                buy_price=size_data['buy_price'],
+                rent_price=size_data['rent_price'],
+                deposit=size_data['deposit'],
+                is_active=True
+            )
+            db.session.add(new_size)
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': f'✅ Added {len(default_sizes)} sizes for {product.name}',
+            'sizes_added': [s['size_label'] for s in default_sizes]
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)})
+
+    """Debug vertical cuplock product and its sizes"""
+    try:
+        from models import Product, CuplockVerticalSize
+        
+        product = Product.query.get_or_404(product_id)
+        
+        # Get all sizes for this product
+        sizes = CuplockVerticalSize.query.filter_by(product_id=product_id).all()
+        
+        debug_info = {
+            'product_id': product.id,
+            'product_name': product.name,
+            'category': product.category,
+            'cuplock_type': product.cuplock_type,
+            'is_active': product.is_active,
+            'total_sizes': len(sizes),
+            'sizes': []
+        }
+        
+        for size in sizes:
+            debug_info['sizes'].append({
+                'id': size.id,
+                'size_label': size.size_label,
+                'buy_price': float(size.buy_price or 0),
+                'rent_price': float(size.rent_price or 0),
+                'deposit': float(size.deposit or 0),
+                'is_active': size.is_active
+            })
+        
+        return jsonify(debug_info)
+        
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+
+# ============================================================================
+# FIX ROUTE: Add default sizes for vertical product 162
+# ============================================================================
+
+    """Add default sizes for vertical product 162 - NO LOGIN REQUIRED FOR TESTING"""
+    try:
+        from models import Product, CuplockVerticalSize
+        
+        product = Product.query.get(162)
+        if not product:
+            return jsonify({'success': False, 'message': 'Product 162 not found'})
+        
+        # Check if sizes already exist
+        existing_sizes = CuplockVerticalSize.query.filter_by(product_id=162).all()
+        if existing_sizes:
+            return jsonify({
+                'success': False, 
+                'message': f'Product already has {len(existing_sizes)} sizes configured',
+                'existing_sizes': [
+                    {
+                        'id': s.id,
+                        'label': s.size_label,
+                        'buy_price': float(s.buy_price or 0),
+                        'rent_price': float(s.rent_price or 0),
+                        'deposit': float(s.deposit or 0)
+                    } for s in existing_sizes
+                ]
+            })
+        
+        # Add default sizes
+        default_sizes = [
+            {
+                'size_label': '0.5m',
+                'buy_price': 500.00,
+                'rent_price': 50.00,
+                'deposit': 100.00
+            },
+            {
+                'size_label': '1.0m',
+                'buy_price': 800.00,
+                'rent_price': 80.00,
+                'deposit': 150.00
+            },
+            {
+                'size_label': '1.5m',
+                'buy_price': 1200.00,
+                'rent_price': 120.00,
+                'deposit': 200.00
+            },
+            {
+                'size_label': '2.0m',
+                'buy_price': 1500.00,
+                'rent_price': 150.00,
+                'deposit': 250.00
+            }
+        ]
+        
+        for size_data in default_sizes:
+            new_size = CuplockVerticalSize(
+                product_id=162,
+                size_label=size_data['size_label'],
+                buy_price=size_data['buy_price'],
+                rent_price=size_data['rent_price'],
+                deposit=size_data['deposit'],
+                is_active=True
+            )
+            db.session.add(new_size)
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': f'✅ Added {len(default_sizes)} default sizes for product 162',
+            'sizes_added': default_sizes,
+            'next_step': 'Now visit /product/162 to see the product page'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f"Error fixing vertical product 162: {e}", exc_info=True)
+        return jsonify({'success': False, 'message': str(e)})
 @app.route('/fix_fabrication_categories')
 def fix_fabrication_categories():
     """Fix products that should be fabrication"""
