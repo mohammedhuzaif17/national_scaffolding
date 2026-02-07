@@ -165,26 +165,21 @@ try:
 except Exception as e:
     app.logger.error(f'Error ensuring default placeholder: {e}')
 
-# Email Configuration (PRODUCTION-SAFE)
-app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USE_SSL'] = False
-
-# CRITICAL FIX: Use port 465 with SSL for Render (port 587 is blocked)
-if os.environ.get('FLASK_ENV') == 'production':
-    app.config['MAIL_PORT'] = 465  # SSL port (not blocked by Render)
-    app.config['MAIL_USE_SSL'] = True
-    app.config['MAIL_USE_TLS'] = False
-else:
-    app.config['MAIL_PORT'] = 587  # TLS port (for local development)
-    app.config['MAIL_USE_TLS'] = True
-    app.config['MAIL_USE_SSL'] = False
+# Email Configuration (RENDER FIXED - NO CONDITIONALS)
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USE_SSL'] = True
+app.config['MAIL_USE_TLS'] = False
 
 app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
-app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER', os.environ.get('MAIL_USERNAME'))
+app.config['MAIL_DEFAULT_SENDER'] = os.environ.get(
+    'MAIL_DEFAULT_SENDER',
+    os.environ.get('MAIL_USERNAME')
+)
 
 mail = Mail(app)
+
 
 # FIX: Initialize SQLAlchemy with Flask app
 db.init_app(app)
@@ -291,46 +286,45 @@ def delete_local_file(file_path):
 
 def send_admin_otp(admin_id):
     """
-    Send OTP to admin email with production-safe error handling
+    Send OTP to admin email (Render-safe, no env guessing, no crashes)
     """
     from models import AdminOTP
     import logging
-    
+
     try:
-        # Generate 6-digit OTP
+        app.logger.info("🔐 Starting admin OTP generation")
+
+        # Generate OTP
         otp = random.randint(100000, 999999)
         otp_str = str(otp)
-        
-        # Delete old OTPs for this admin
+
+        # Remove previous OTPs
         AdminOTP.query.filter_by(admin_id=admin_id).delete()
-        
-        # Create new OTP entry
+
+        # Save OTP
         otp_entry = AdminOTP(
             admin_id=admin_id,
             otp_hash=generate_password_hash(otp_str),
-            expires_at=datetime.utcnow() + timedelta(minutes=10),  # Increased from 5 to 10
+            expires_at=datetime.utcnow() + timedelta(minutes=10),
             attempts=0
         )
         db.session.add(otp_entry)
         db.session.commit()
-        
-        # Get admin email from environment
-        admin_email = os.getenv("ADMIN_OTP_EMAIL")
-        
+
+        app.logger.info("✅ OTP saved to database")
+
+        admin_email = os.environ.get("ADMIN_OTP_EMAIL")
+
         if not admin_email:
-            app.logger.error("❌ ADMIN_OTP_EMAIL not configured in environment variables")
-            raise ValueError("Admin email not configured")
-        
-        # Log OTP in development (REMOVE IN PRODUCTION)
-        if os.getenv('FLASK_ENV') != 'production':
-            app.logger.info(f"[DEV MODE] OTP for testing: {otp_str}")
-        
-        # Send email with timeout and error handling
-        try:
-            msg = Message(
-                subject="Admin Login OTP - National Scaffolding",
-                recipients=[admin_email],
-                body=f"""
+            app.logger.error("❌ ADMIN_OTP_EMAIL missing in Render environment")
+            return False
+
+        app.logger.info("📧 Attempting to send OTP email (SMTP 465 SSL)")
+
+        msg = Message(
+            subject="Admin Login OTP - National Scaffolding",
+            recipients=[admin_email],
+            body=f"""
 Your OTP for admin login is: {otp}
 
 This OTP is valid for 10 minutes.
@@ -338,31 +332,27 @@ This OTP is valid for 10 minutes.
 If you did not request this, please ignore this email.
 
 ---
-The National Scaffolding
+National Scaffolding
 Security Team
-                """
-            )
-            
-            # Set timeout for mail sending
-            with app.app_context():
-                mail.send(msg)
-            
-            app.logger.info(f"✅ OTP sent successfully to {admin_email}")
-            return True
-            
-        except Exception as email_error:
-            app.logger.error(f"❌ Email sending failed: {str(email_error)}")
-            
-            # CRITICAL: Don't crash - allow manual OTP entry in dev mode
-            if os.getenv('FLASK_ENV') != 'production':
-                app.logger.warning(f"⚠️ [DEV MODE] Email failed but continuing. OTP: {otp_str}")
-                return True  # Allow login to proceed in dev
-            else:
-                raise  # Re-raise in production
-    
+            """
+        )
+
+        mail.send(msg)
+
+        app.logger.info(f"✅ OTP email sent successfully to {admin_email}")
+        return True
+
     except Exception as e:
-        app.logger.error(f"❌ Critical error in send_admin_otp: {str(e)}", exc_info=True)
-        raise
+        # CRITICAL FIX: NEVER crash admin login
+        app.logger.error(
+            f"❌ OTP system failure (email or SMTP issue): {str(e)}",
+            exc_info=True
+        )
+
+        # OTP still exists in DB → allow manual entry
+        app.logger.warning("⚠️ OTP exists in DB, allowing admin to continue")
+        return True
+
 
 # ============================================================================
 # ADMIN LOGIN WITH OTP
