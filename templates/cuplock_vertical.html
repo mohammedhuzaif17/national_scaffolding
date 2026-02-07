@@ -415,23 +415,9 @@
     <h1>Vertical Cuplock: {{ product.name }}</h1>
     
     <div class="product-image">
-        {% if product.display_image_url or product.image_url %}
-            {% if product.display_image_url %}
-                {% set img_path = '/static/' + product.display_image_url %}
-            {% else %}
-                {% set first_image = product.image_url.split(',')[0].strip().lstrip('/') %}
-                {% if first_image.startswith('static/') %}
-                    {% set img_path = '/static/' + first_image[7:] %}
-                {% else %}
-                    {% set img_path = '/static/' + first_image %}
-                {% endif %}
-            {% endif %}
-            <img src="{{ img_path }}"
-                 alt="{{ product.name }}"
-                 onerror="this.src='/static/images/no-image.png';">
-        {% else %}
-            <img src="/static/images/no-image.png" alt="No image available">
-        {% endif %}
+            <div class="product-image">
+        <img src="{{ single_image_url }}" alt="{{ product.name }}" onerror="this.src='/static/images/no-image.png';">
+    </div>
     </div>
 
     <!-- Available Sizes Info -->
@@ -588,6 +574,11 @@ function updatePurchaseType() {
     }
 }
 
+// ============================================================================
+// FIXED loadCups() FUNCTION for cuplock_vertical.html
+// Replace your existing loadCups function with this:
+// ============================================================================
+
 function loadCups() {
     try {
         console.log('🔄 Loading cups...');
@@ -619,6 +610,7 @@ function loadCups() {
         currentSizeBuyPrice = parseFloat(selectedOption.getAttribute('data-buy')) || 0;
 
         console.log('📊 Size selected:', {
+            sizeId: sizeId,
             label: selectedSizeLabel,
             buy: currentSizeBuyPrice,
             rent: rentPrice,
@@ -627,9 +619,24 @@ function loadCups() {
 
         container.innerHTML = '<p style="text-align:center;">Loading cup options...</p>';
 
-        fetch('/cuplock/api/vertical/size/' + encodeURIComponent(sizeId) + '/cups')
+        // ✅ FIXED: Proper URL construction with error handling
+        const cupsUrl = '/cuplock/api/vertical/size/' + encodeURIComponent(sizeId) + '/cups';
+        console.log('🌐 Fetching cups from:', cupsUrl);
+
+        fetch(cupsUrl)
             .then(function(response) {
-                if (!response.ok) throw new Error('Failed to load cups');
+                console.log('📡 Response status:', response.status);
+                
+                // ✅ Handle different response codes
+                if (response.status === 404) {
+                    console.error('❌ 404 Error: Cups endpoint not found');
+                    throw new Error('Cups endpoint not found. Please check cuplock_routes.py');
+                }
+                
+                if (!response.ok) {
+                    throw new Error('HTTP error ' + response.status);
+                }
+                
                 return response.json();
             })
             .then(function(data) {
@@ -639,12 +646,21 @@ function loadCups() {
                 selectedCupPrice = 0;
                 selectedCupId = null;
 
-                if (!data.success || !data.cups || data.cups.length === 0) {
+                // ✅ Check if response is successful
+                if (!data.success) {
+                    container.innerHTML = '<p style="color:#ff6b6b; text-align:center; padding: 2rem;">Error loading cups: ' + (data.message || 'Unknown error') + '</p>';
+                    updatePrice();
+                    return;
+                }
+
+                // ✅ Check if cups array exists and has items
+                if (!data.cups || data.cups.length === 0) {
                     container.innerHTML = '<p style="color:#666; text-align:center; padding: 2rem;">No cup options available for this size.</p>';
                     updatePrice();
                     return;
                 }
 
+                // ✅ Create cup cards
                 data.cups.forEach(function(c) {
                     const card = document.createElement('div');
                     card.className = 'cup-option-card';
@@ -678,13 +694,50 @@ function loadCups() {
             })
             .catch(function(error) {
                 console.error('❌ Error loading cups:', error);
-                container.innerHTML = '<p style="color: red; text-align:center; padding:2rem;">Error loading cups. Please try again.</p>';
+                
+                // ✅ User-friendly error message
+                let errorMsg = 'Error loading cups. ';
+                
+                if (error.message.includes('404') || error.message.includes('not found')) {
+                    errorMsg += 'Please check if the cups API route exists in cuplock_routes.py';
+                } else if (error.message.includes('Failed to fetch')) {
+                    errorMsg += 'Network error. Please check if server is running.';
+                } else {
+                    errorMsg += error.message;
+                }
+                
+                container.innerHTML = '<p style="color: red; text-align:center; padding:2rem;">' + errorMsg + '</p>';
                 updatePrice();
             });
     } catch (error) {
         console.error('❌ Error in loadCups:', error);
     }
 }
+
+
+// ============================================================================
+// DEBUGGING TIPS:
+// ============================================================================
+
+// 1. Open browser console (F12)
+// 2. Select a size from dropdown
+// 3. Watch console logs:
+//    - "Loading cups..." should appear
+//    - "Fetching cups from: /cuplock/api/vertical/size/XX/cups" should show
+//    - "Response status: 200" or "404" will tell you if route exists
+//    - "Cups loaded: {success: true, cups: [...]}" if successful
+
+// 4. If you see 404:
+//    - Check cuplock_routes.py has the api_vertical_size_cups route
+//    - Check app.py has: app.register_blueprint(cuplock_bp, url_prefix='/cuplock')
+//    - Restart Flask server
+
+// 5. If you see 200 but no cups:
+//    - Check the console log to see what data was returned
+//    - Visit: http://127.0.0.1:5001/cuplock/debug/vertical/size/YOUR_SIZE_ID/cups
+//    - This will show if cups exist in database
+
+// ============================================================================
 
 function updatePrice() {
     try {
