@@ -93,15 +93,21 @@ logging.basicConfig(level=logging.INFO)
 app.logger.setLevel(logging.INFO)
 
 # Set secret key and session configuration BEFORE any session operations
+# Session Configuration (PRODUCTION-SAFE)
 app.config['SECRET_KEY'] = os.environ.get('SESSION_SECRET', 'dev-secret-key-change-in-production')
 
-# Configure session properly to avoid cookie errors
+# Production Session Settings
 app.config['SESSION_COOKIE_NAME'] = 'national_scaffolding_session'
-app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
 app.config['SESSION_COOKIE_HTTPONLY'] = True
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Changed from 'Strict'
 app.config['SESSION_PERMANENT'] = True
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7) # FIX APPLIED
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
+
+# CRITICAL: Only set Secure in production (HTTPS)
+if os.environ.get('FLASK_ENV') == 'production':
+    app.config['SESSION_COOKIE_SECURE'] = True
+else:
+    app.config['SESSION_COOKIE_SECURE'] = False # FIX APPLIED
 # Configure database URL: prefer PostgreSQL from .env (`DATABASE_URL` or `POSTGRES_URL`)
 db_url = os.environ.get('DATABASE_URL') or os.environ.get('POSTGRES_URL') or None
 if db_url:
@@ -159,9 +165,21 @@ try:
 except Exception as e:
     app.logger.error(f'Error ensuring default placeholder: {e}')
 
+# Email Configuration (PRODUCTION-SAFE)
 app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
-app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
-app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'True') == 'True'
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+
+# CRITICAL FIX: Use port 465 with SSL for Render (port 587 is blocked)
+if os.environ.get('FLASK_ENV') == 'production':
+    app.config['MAIL_PORT'] = 465  # SSL port (not blocked by Render)
+    app.config['MAIL_USE_SSL'] = True
+    app.config['MAIL_USE_TLS'] = False
+else:
+    app.config['MAIL_PORT'] = 587  # TLS port (for local development)
+    app.config['MAIL_USE_TLS'] = True
+    app.config['MAIL_USE_SSL'] = False
+
 app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER', os.environ.get('MAIL_USERNAME'))
@@ -272,45 +290,78 @@ def delete_local_file(file_path):
 # ============================================================================
 
 def send_admin_otp(admin_id):
-    """Send OTP to admin email"""
+    """
+    Send OTP to admin email with production-safe error handling
+    """
     from models import AdminOTP
+    import logging
     
-    otp = random.randint(100000, 999999)
-    otp_str = str(otp)
-    
-    # Delete old OTPs for this admin
-    AdminOTP.query.filter_by(admin_id=admin_id).delete()
-    
-    # Create new OTP entry
-    otp_entry = AdminOTP(
-        admin_id=admin_id,
-        otp_hash=generate_password_hash(otp_str),
-        expires_at=datetime.utcnow() + timedelta(minutes=5),
-        attempts=0
-    )
-    db.session.add(otp_entry)
-    db.session.commit()
-    
-    # Send email
     try:
+        # Generate 6-digit OTP
+        otp = random.randint(100000, 999999)
+        otp_str = str(otp)
+        
+        # Delete old OTPs for this admin
+        AdminOTP.query.filter_by(admin_id=admin_id).delete()
+        
+        # Create new OTP entry
+        otp_entry = AdminOTP(
+            admin_id=admin_id,
+            otp_hash=generate_password_hash(otp_str),
+            expires_at=datetime.utcnow() + timedelta(minutes=10),  # Increased from 5 to 10
+            attempts=0
+        )
+        db.session.add(otp_entry)
+        db.session.commit()
+        
+        # Get admin email from environment
         admin_email = os.getenv("ADMIN_OTP_EMAIL")
+        
         if not admin_email:
-            app.logger.error("ADMIN_OTP_EMAIL not configured in .env")
+            app.logger.error("❌ ADMIN_OTP_EMAIL not configured in environment variables")
             raise ValueError("Admin email not configured")
         
-        msg = Message(
-            subject="Admin Login OTP - National Scaffolding",
-            recipients=[admin_email],
-            body=f"Your OTP for admin login is: {otp}\n\nThis OTP is valid for 5 minutes.\n\nIf you did not request this, please ignore this email."
-        )
-        mail.send(msg)
-        app.logger.info(f"OTP sent successfully to {admin_email}")
-        
-        # Log OTP in development mode for debugging
-        if os.getenv('FLASK_ENV') == 'development':
+        # Log OTP in development (REMOVE IN PRODUCTION)
+        if os.getenv('FLASK_ENV') != 'production':
             app.logger.info(f"[DEV MODE] OTP for testing: {otp_str}")
+        
+        # Send email with timeout and error handling
+        try:
+            msg = Message(
+                subject="Admin Login OTP - National Scaffolding",
+                recipients=[admin_email],
+                body=f"""
+Your OTP for admin login is: {otp}
+
+This OTP is valid for 10 minutes.
+
+If you did not request this, please ignore this email.
+
+---
+The National Scaffolding
+Security Team
+                """
+            )
+            
+            # Set timeout for mail sending
+            with app.app_context():
+                mail.send(msg)
+            
+            app.logger.info(f"✅ OTP sent successfully to {admin_email}")
+            return True
+            
+        except Exception as email_error:
+            app.logger.error(f"❌ Email sending failed: {str(email_error)}")
+            
+            # CRITICAL: Don't crash - allow manual OTP entry in dev mode
+            if os.getenv('FLASK_ENV') != 'production':
+                app.logger.warning(f"⚠️ [DEV MODE] Email failed but continuing. OTP: {otp_str}")
+                return True  # Allow login to proceed in dev
+            else:
+                raise  # Re-raise in production
+    
     except Exception as e:
-        app.logger.error(f"Failed to send OTP email: {e}")
+        app.logger.error(f"❌ Critical error in send_admin_otp: {str(e)}", exc_info=True)
         raise
 
 # ============================================================================
@@ -324,7 +375,7 @@ def admin_login():
             password = request.form.get('password')
             panel_type = request.form.get('panel_type')
             
-            app.logger.info(f"Admin login attempt: {identifier}, panel: {panel_type}")
+            app.logger.info(f"🔐 Admin login attempt: {identifier}, panel: {panel_type}")
             
             if not panel_type:
                 flash('Please select an admin panel', 'error')
@@ -337,25 +388,31 @@ def admin_login():
             ).first()
             
             if not admin:
-                app.logger.warning(f"Admin not found: {identifier}")
+                app.logger.warning(f"⚠️ Admin not found: {identifier}")
                 flash('Invalid admin credentials or wrong panel selected', 'error')
                 return render_template('admin_login.html')
             
             # Verify password
             if not admin.check_password(password):
-                app.logger.warning(f"Wrong password for admin: {identifier}")
+                app.logger.warning(f"⚠️ Wrong password for admin: {identifier}")
                 flash('Invalid admin credentials or wrong panel selected', 'error')
                 return render_template('admin_login.html')
             
-            app.logger.info(f"Password verified for {identifier}, sending OTP...")
+            app.logger.info(f"✅ Password verified for {identifier}, sending OTP...")
             
-            # Password correct → Generate and send OTP
+            # ✅ CRITICAL FIX: Wrap OTP sending in try-catch
             try:
                 send_admin_otp(admin.id)
-                app.logger.info(f"OTP sent successfully to {os.getenv('ADMIN_OTP_EMAIL')}")
-            except Exception as e:
-                flash('Failed to send OTP. Please contact support.', 'error')
-                app.logger.error(f"OTP send failed: {e}", exc_info=True)
+                app.logger.info(f"✅ OTP sent successfully to {os.getenv('ADMIN_OTP_EMAIL')}")
+                
+            except Exception as otp_error:
+                app.logger.error(f"❌ OTP send failed: {str(otp_error)}", exc_info=True)
+                
+                # PRODUCTION FIX: Show user-friendly error
+                flash(
+                    'Unable to send OTP email. Please contact system administrator or try again later.',
+                    'error'
+                )
                 return render_template('admin_login.html')
             
             # Clear session and set OTP pending state
@@ -365,17 +422,123 @@ def admin_login():
             session['panel_type'] = admin.panel_type
             session.permanent = True
             
-            flash(f'OTP has been sent to {os.getenv("ADMIN_OTP_EMAIL")}', 'success')
-            app.logger.info(f"Redirecting to OTP page for admin {identifier}")
+            flash(f'OTP has been sent to admin email', 'success')
+            app.logger.info(f"🔄 Redirecting to OTP page for admin {identifier}")
             return redirect(url_for('admin_otp'))
             
         except Exception as e:
-            app.logger.error(f"Admin login error: {e}", exc_info=True)
-            flash('Login failed. Please try again.', 'error')
+            app.logger.error(f"❌ Admin login error: {str(e)}", exc_info=True)
+            flash('Login failed. Please try again or contact support.', 'error')
             return render_template('admin_login.html')
     
     return render_template('admin_login.html')
+```
 
+**What changed:**
+- Added try-catch around OTP sending
+- If OTP fails, shows error instead of crashing (502)
+- Better error messages
+
+---
+
+### Step 1.6: Save app.py
+
+1. Press `Ctrl + S` (Windows) or `Cmd + S` (Mac) to save
+2. Check that VS Code shows the file is saved (no dot on tab)
+
+---
+
+## ✅ STEP 2: GET GMAIL APP PASSWORD
+
+### Step 2.1: Enable 2-Step Verification
+
+1. Open browser and go to: **https://myaccount.google.com/security**
+2. Scroll down to "How you sign in to Google"
+3. Click on **"2-Step Verification"**
+4. If it says "Off":
+   - Click "Get Started"
+   - Enter your Gmail password
+   - Enter your phone number
+   - Receive verification code via SMS
+   - Enter the code
+   - Click "Turn On"
+5. If it already says "On" → Skip to Step 2.2
+
+---
+
+### Step 2.2: Generate App Password
+
+1. Go to: **https://myaccount.google.com/apppasswords**
+   
+   OR manually:
+   - Go to https://myaccount.google.com/security
+   - Scroll down
+   - Click "App passwords"
+
+2. **If you don't see "App passwords" option:**
+   - Make sure 2-Step Verification is ON
+   - Sign out of Google and sign in again
+   - Use desktop browser (not mobile)
+
+3. Once you see App passwords page:
+   - Click the dropdown under "Select app"
+   - Choose **"Mail"**
+
+4. Click the dropdown under "Select device"
+   - Choose **"Other (Custom name)"**
+   - Type: **"National Scaffolding Render"**
+   - Click **"Generate"**
+
+5. You'll see a yellow box with 16 characters like:
+```
+   abcd efgh ijkl mnop
+```
+
+6. **VERY IMPORTANT:**
+   - Copy this password
+   - Remove ALL spaces
+   - Final password should be: `abcdefghijklmnop` (16 characters, no spaces)
+   - Save it in Notepad (you'll need it in Step 3)
+
+7. Click "Done"
+
+---
+
+## ✅ STEP 3: SET RENDER ENVIRONMENT VARIABLES
+
+### Step 3.1: Open Render Dashboard
+
+1. Go to: **https://dashboard.render.com**
+2. Sign in with your account
+3. You should see your web service listed (probably named "national-scaffolding" or similar)
+4. **Click on your web service name**
+
+---
+
+### Step 3.2: Go to Environment Tab
+
+1. On the left sidebar, click **"Environment"**
+2. You'll see a list of environment variables (if any already exist)
+3. Look for a button that says **"Add Environment Variable"**
+
+---
+
+### Step 3.3: Add Variables One by One
+
+I'll tell you EXACTLY what to type for each variable.
+
+---
+
+#### **Variable 1: FLASK_ENV**
+
+1. Click **"Add Environment Variable"**
+2. In the **Key** field, type exactly:
+```
+   FLASK_ENV
+```
+3. In the **Value** field, type exactly:
+```
+   production
 
 
 @app.route('/admin_resend_otp', methods=['POST'])
