@@ -286,9 +286,10 @@ def delete_local_file(file_path):
 
 def send_admin_otp(admin_id):
     """
-    Send OTP to admin email (Render-safe, no env guessing, no crashes)
+    Send OTP to admin email - ASYNC to prevent Gunicorn worker timeout
     """
     from models import AdminOTP
+    import threading
     import logging
 
     try:
@@ -317,14 +318,19 @@ def send_admin_otp(admin_id):
 
         if not admin_email:
             app.logger.error("❌ ADMIN_OTP_EMAIL missing in Render environment")
-            return False
+            return True  # Still allow login (OTP in DB)
 
-        app.logger.info("📧 Attempting to send OTP email (SMTP 465 SSL)")
-
-        msg = Message(
-            subject="Admin Login OTP - National Scaffolding",
-            recipients=[admin_email],
-            body=f"""
+        # ✅ CRITICAL FIX: Send email in background thread
+        def send_email_async():
+            """Background thread for email sending"""
+            with app.app_context():
+                try:
+                    app.logger.info("📧 Sending OTP email in background thread...")
+                    
+                    msg = Message(
+                        subject="Admin Login OTP - National Scaffolding",
+                        recipients=[admin_email],
+                        body=f"""
 Your OTP for admin login is: {otp}
 
 This OTP is valid for 10 minutes.
@@ -334,25 +340,34 @@ If you did not request this, please ignore this email.
 ---
 National Scaffolding
 Security Team
-            """
-        )
+                        """
+                    )
 
-        mail.send(msg)
+                    # Set timeout to prevent hanging
+                    import socket
+                    original_timeout = socket.getdefaulttimeout()
+                    socket.setdefaulttimeout(10)  # 10 second timeout
+                    
+                    try:
+                        mail.send(msg)
+                        app.logger.info(f"✅ OTP email sent successfully to {admin_email}")
+                    finally:
+                        socket.setdefaulttimeout(original_timeout)
+                        
+                except Exception as email_error:
+                    app.logger.error(f"❌ Background email send failed: {email_error}")
 
-        app.logger.info(f"✅ OTP email sent successfully to {admin_email}")
+        # Start background thread
+        email_thread = threading.Thread(target=send_email_async, daemon=True)
+        email_thread.start()
+        
+        app.logger.info("⚡ Email thread started, returning immediately")
         return True
 
     except Exception as e:
-        # CRITICAL FIX: NEVER crash admin login
-        app.logger.error(
-            f"❌ OTP system failure (email or SMTP issue): {str(e)}",
-            exc_info=True
-        )
-
+        app.logger.error(f"❌ OTP generation error: {str(e)}", exc_info=True)
         # OTP still exists in DB → allow manual entry
-        app.logger.warning("⚠️ OTP exists in DB, allowing admin to continue")
         return True
-
 
 # ============================================================================
 # ADMIN LOGIN WITH OTP
