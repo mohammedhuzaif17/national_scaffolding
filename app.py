@@ -39,7 +39,8 @@ import uuid
 import os
 
 from flask import send_from_directory
-
+import sib_api_v3_sdk
+from sib_api_v3_sdk.rest import ApiException
 
 
 # Load environment variables from .env file
@@ -286,23 +287,23 @@ def delete_local_file(file_path):
 
 def send_admin_otp(admin_id):
     """
-    Send OTP to admin email - ASYNC to prevent Gunicorn worker timeout
+    Send OTP using Brevo API (Works on Render!)
     """
     from models import AdminOTP
-    import threading
     import logging
+    import sib_api_v3_sdk
+    from sib_api_v3_sdk.rest import ApiException
 
     try:
-        app.logger.info("🔐 Starting admin OTP generation")
+        app.logger.info("🔐 Starting admin OTP generation (Brevo)")
 
-        # Generate OTP
+        # 1. Generate OTP
         otp = random.randint(100000, 999999)
         otp_str = str(otp)
 
-        # Remove previous OTPs
+        # 2. Save OTP to Database
         AdminOTP.query.filter_by(admin_id=admin_id).delete()
 
-        # Save OTP
         otp_entry = AdminOTP(
             admin_id=admin_id,
             otp_hash=generate_password_hash(otp_str),
@@ -314,58 +315,63 @@ def send_admin_otp(admin_id):
 
         app.logger.info("✅ OTP saved to database")
 
-        admin_email = os.environ.get("ADMIN_OTP_EMAIL")
-
-        if not admin_email:
-            app.logger.error("❌ ADMIN_OTP_EMAIL missing in Render environment")
-            return True  # Still allow login (OTP in DB)
-
-        # ✅ CRITICAL FIX: Send email in background thread
-        def send_email_async():
-            """Background thread for email sending"""
-            with app.app_context():
-                try:
-                    app.logger.info("📧 Sending OTP email in background thread...")
-                    
-                    msg = Message(
-                        subject="Admin Login OTP - National Scaffolding",
-                        recipients=[admin_email],
-                        body=f"""
-Your OTP for admin login is: {otp}
-
-This OTP is valid for 10 minutes.
-
-If you did not request this, please ignore this email.
-
----
-National Scaffolding
-Security Team
-                        """
-                    )
-
-                    # Set timeout to prevent hanging
-                    import socket
-                    original_timeout = socket.getdefaulttimeout()
-                    socket.setdefaulttimeout(10)  # 10 second timeout
-                    
-                    try:
-                        mail.send(msg)
-                        app.logger.info(f"✅ OTP email sent successfully to {admin_email}")
-                    finally:
-                        socket.setdefaulttimeout(original_timeout)
-                        
-                except Exception as email_error:
-                    app.logger.error(f"❌ Background email send failed: {email_error}")
-
-        # Start background thread
-        email_thread = threading.Thread(target=send_email_async, daemon=True)
-        email_thread.start()
+        # 3. Configure Brevo
+        # This grabs the key you added to Render Environment Variables
+        api_key = os.environ.get("BREVO_API_KEY")
         
-        app.logger.info("⚡ Email thread started, returning immediately")
-        return True
+        if not api_key:
+            app.logger.error("❌ BREVO_API_KEY not found in Environment")
+            # We return True so login doesn't crash even if email fails
+            return True
+
+        configuration = sib_api_v3_sdk.Configuration()
+        configuration.api_key['api-key'] = api_key
+
+        api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
+
+        # 4. Prepare Email
+        subject = "Admin Login OTP - Parivar Kalyan Card"
+        
+        # This MUST be the email you verified in Brevo
+        sender = {"name": "Parivar Kalyan Card", "email": "cresttechnocrat@gmail.com"}
+        
+        # Where to send the OTP (Your admin email)
+        to = [{"email": os.environ.get("ADMIN_OTP_EMAIL", "cresttechnocrat@gmail.com"), "name": "Admin"}]
+        
+        html_content = f"""
+        <h2 style="color: #d4af37;">Your OTP Code</h2>
+        <p>Hello,</p>
+        <p>Your One-Time Password (OTP) for admin login is:</p>
+        <h1 style="font-size: 3rem; letter-spacing: 5px; color: #333;">{otp}</h1>
+        <p>This OTP is valid for 10 minutes.</p>
+        <p>If you did not request this, please ignore this email.</p>
+        <br>
+        <p><strong>Parivar Kalyan Card Team</strong></p>
+        """
+
+        # 5. Send Email
+        send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
+            to=to,
+            html_content=html_content,
+            sender=sender,
+            subject=subject
+        )
+
+        try:
+            api_response = api_instance.send_transac_email(send_smtp_email)
+            app.logger.info(f"✅ Brevo Email Sent! MessageID: {api_response.message_id}")
+            return True
+        except ApiException as e:
+            app.logger.error(f"❌ Brevo Exception when sending email: {e}")
+            # Return True to allow login even if email fails (dev mode safety)
+            return True
 
     except Exception as e:
-        app.logger.error(f"❌ OTP generation error: {str(e)}", exc_info=True)
+        # CRITICAL: NEVER crash admin login
+        app.logger.error(
+            f"❌ Brevo OTP system failure: {str(e)}",
+            exc_info=True
+        )
         # OTP still exists in DB → allow manual entry
         return True
 
