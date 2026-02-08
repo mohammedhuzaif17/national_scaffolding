@@ -183,12 +183,16 @@ class Order(db.Model):
     transaction_id = db.Column(db.String(100))
     amount_paid = db.Column(db.Numeric(10, 2))
     order_date = db.Column(db.DateTime, default=datetime.utcnow)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    # REMOVED: created_at column - it doesn't exist in your database
+    
+    # Add relationship to load items
+    items = db.relationship('OrderItem', backref='order', lazy='select', cascade='all, delete-orphan')
+    user = db.relationship('User', backref='orders', lazy='select')
 
 
-# ===========================
-# ORDER ITEMS
-# ===========================
+# ============================================================================
+# ALSO CHECK: Make sure your OrderItem class has the customization column
+# ============================================================================
 
 class OrderItem(db.Model):
     __tablename__ = 'order_items'
@@ -207,6 +211,5 @@ class OrderItem(db.Model):
     product_name = db.Column(db.String(200))
     quantity = db.Column(db.Integer, nullable=False)
     price = db.Column(db.Numeric(10, 2))
-    customization = db.Column(db.JSON)
-
+    customization = db.Column(db.JSON)  # Make sure this line exists
     

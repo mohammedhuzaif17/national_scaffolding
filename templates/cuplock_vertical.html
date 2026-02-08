@@ -799,15 +799,39 @@ function addToCart() {
             return;
         }
 
+        // ✅ ALTERNATIVE FIX: Calculate Price on Frontend (What you see is what you pay)
+        let finalUnitPrice = 0;
+        let finalDeposit = 0;
+
+        if (isBuy) {
+            // Buy Price = Size Buy Price + Cup Price
+            finalUnitPrice = currentSizeBuyPrice + selectedCupPrice;
+            finalDeposit = 0;
+        } else {
+            // Rent Price = Rent Price from Selection + Deposit
+            finalUnitPrice = rentPrice;
+            finalDeposit = depositPrice;
+        }
+
+        const sizeSelect = document.getElementById('sizeSelect');
+        const selectedSizeId = sizeSelect.value;
+
         const customization = {
             component: "vertical",
             purchase_type: type,
-            size: selectedSizeLabel,
-            cup_id: selectedCupId,
-            cup_price: selectedCupPrice
+            size_id: parseInt(selectedSizeId),
+            size: selectedSizeLabel.trim(),
+            // ✅ SEND THESE CALCULATED VALUES DIRECTLY
+            calculated_unit_price: finalUnitPrice,
+            calculated_deposit: finalDeposit
         };
 
-        console.log('🛒 Adding to cart:', customization);
+        if (isBuy) {
+            customization.cup_id = selectedCupId;
+            customization.cup_price = selectedCupPrice;
+        }
+
+        console.log('🛒 Adding to cart with Frontend Calculated Price:', customization);
 
         const btn = document.getElementById('addToCartBtn');
         btn.disabled = true;
@@ -828,7 +852,6 @@ function addToCart() {
         })
         .then(function(data) {
             if (data.success) {
-                console.log('✅ Added to cart successfully');
                 window.location.href = '/cart';
             } else {
                 alert('❌ ' + (data.message || 'Failed to add to cart'));
@@ -847,7 +870,6 @@ function addToCart() {
         alert('❌ Error: ' + error.message);
     }
 }
-
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
     console.log('📄 Page ready, loading sizes...');

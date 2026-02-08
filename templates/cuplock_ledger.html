@@ -345,7 +345,7 @@
                             <img src="{{ img_path }}"
                                  alt="{{ product.name }}"
                                  loading="lazy"
-                                 onerror="this.src='/static/images/no-image.png';">
+                                 onerror="this.onerror=null; this.src='/static/images/no-image.png';">
                         </div>
                     </div>
                 {% else %}
@@ -379,17 +379,18 @@
                 <div class="form-group">
                     <label for="ledger_size">Select Size</label>
                     <select id="ledger_size" onchange="onLedgerSizeChange()">
-                        {% for s in sizes %}
-                            <option
-                                value="{{ s.id }}"
-                                data-buy="{{ s.buy_price|default(0) }}"
-                                data-rent="{{ s.rent_price|default(0) }}"
-                                data-deposit="{{ s.deposit_amount|default(0) }}"
-                                data-label="{{ s.size_label }}"
-                            >
-                                {{ s.size_label }}
-                            </option>
-                        {% endfor %}
+                        <!-- STATIC OPTIONS AS REQUESTED -->
+                        <option value="">-- Select Size --</option>
+                        <option value="1" data-label="0.9m" data-buy="650.00" data-rent="65.00" data-deposit="130.00">0.9m</option>
+                        <option value="2" data-label="1.0m" data-buy="750.00" data-rent="75.00" data-deposit="150.00">1.0m</option>
+                        <option value="3" data-label="1.2m" data-buy="900.00" data-rent="90.00" data-deposit="180.00">1.2m</option>
+                        <option value="4" data-label="1.5m" data-buy="1050.00" data-rent="105.00" data-deposit="210.00">1.5m</option>
+                        <option value="5" data-label="1.8m" data-buy="1200.00" data-rent="120.00" data-deposit="240.00">1.8m</option>
+                        <option value="6" data-label="2.0m" data-buy="1350.00" data-rent="135.00" data-deposit="270.00">2.0m</option>
+                        <option value="7" data-label="2.2m" data-buy="1500.00" data-rent="150.00" data-deposit="300.00">2.2m</option>
+                        <option value="8" data-label="2.5m" data-buy="1650.00" data-rent="165.00" data-deposit="330.00">2.5m</option>
+                        <option value="9" data-label="2.8m" data-buy="1800.00" data-rent="180.00" data-deposit="360.00">2.8m</option>
+                        <option value="10" data-label="3.0m" data-buy="1950.00" data-rent="195.00" data-deposit="390.00">3.0m</option>
                     </select>
                 </div>
 
@@ -463,7 +464,6 @@
         </div>
     </div>
 </div>
-
 {% endblock %}
 
 {% block scripts %}
@@ -476,6 +476,48 @@ console.log('🔵 Ledger product page loaded');
 let currentBuyPrice = 0;
 let currentRentPrice = 0;
 let currentDeposit = 0;
+let selectedSizeLabel = null;
+
+// ============================================
+// RADIO BUTTON LISTENERS (FIXES BUY/RENT SWITCHING)
+// ============================================
+// When clicking "Buy", we must ensure Deposit is reset to 0 and Buy Price is used.
+const buyOption = document.getElementById('buyOption');
+const rentOption = document.getElementById('rentOption');
+
+function setupRadioListeners() {
+    if (buyOption && rentOption) {
+        buyOption.addEventListener('change', function() {
+            if (this.checked) {
+                console.log('🛒 Buy selected');
+                // Force deposit to 0 when Buy is selected, regardless of size selection
+                currentDeposit = 0;
+                // Update UI to reflect state
+                const depositBox = document.getElementById('deposit_display');
+                const depositAmount = document.getElementById('deposit_amount');
+                if (depositBox) {
+                    depositBox.style.display = 'none'; // Hide deposit section
+                }
+                // Recalculate total
+                updateLedgerPrice();
+            }
+        });
+
+        rentOption.addEventListener('change', function() {
+            if (this.checked) {
+                console.log('🔄 Rent selected');
+                // Force prices to be fetched from size (we don't change prices here, just trigger recalc)
+                // We let updateLedgerPrice() handle the deposit logic
+                const depositBox = document.getElementById('deposit_display');
+                if (depositBox) {
+                    depositBox.style.display = 'block'; // Ensure deposit section is visible
+                }
+                // Recalculate total
+                updateLedgerPrice();
+            }
+        });
+    }
+}
 
 // ============================================
 // SIZE CHANGE HANDLER
@@ -490,15 +532,18 @@ function onLedgerSizeChange() {
     }
     
     const selectedOption = sizeSelect.options[sizeSelect.selectedIndex];
-    if (!selectedOption) {
-        console.error('❌ No option selected');
+    if (!selectedOption || !selectedOption.value) {
+        // Reset if no selection
+        updatePriceDisplay(0, 0, 0);
         return;
     }
 
-    // Read prices from data attributes
+    // Read prices from STATIC HTML data attributes
+    // This ensures the prices match exactly what is shown in the dropdown
     currentBuyPrice = parseFloat(selectedOption.dataset.buy || 0);
     currentRentPrice = parseFloat(selectedOption.dataset.rent || 0);
     currentDeposit = parseFloat(selectedOption.dataset.deposit || 0);
+    selectedSizeLabel = selectedOption.dataset.label || selectedOption.textContent;
 
     console.log('💰 Prices loaded:', {
         buy: currentBuyPrice,
@@ -506,7 +551,7 @@ function onLedgerSizeChange() {
         deposit: currentDeposit
     });
 
-    // Update price display labels
+    // Update UI
     const buyDisplay = document.getElementById('buy_price_display');
     const rentDisplay = document.getElementById('rent_price_display');
     const depositDisplay = document.getElementById('deposit_price_display');
@@ -515,12 +560,12 @@ function onLedgerSizeChange() {
     if (rentDisplay) rentDisplay.textContent = '₹' + currentRentPrice.toFixed(2);
     if (depositDisplay) depositDisplay.textContent = '₹' + currentDeposit.toFixed(2);
 
-    // Update total price
+    // Trigger main calculation
     updateLedgerPrice();
 }
 
 // ============================================
-// PRICE UPDATE HANDLER
+// PRICE UPDATE HANDLER (FIXED)
 // ============================================
 function updateLedgerPrice() {
     console.log('💵 updateLedgerPrice called');
@@ -539,25 +584,40 @@ function updateLedgerPrice() {
     const type = typeSelect.value;
     const qty = parseInt(qtySelect.value || 1);
 
-    // Calculate based on purchase type
-    const unitPrice = type === 'rent' ? currentRentPrice : currentBuyPrice;
-    const total = unitPrice * qty;
+    // STRICT LOGIC SEPARATION
+    // Buy: Use Buy Price. Deposit is always 0.
+    // Rent: Use Rent Price. Deposit is variable.
+    
+    let unitPrice;
+    let deposit;
+
+    if (type === 'buy') {
+        unitPrice = currentBuyPrice;
+        deposit = 0; // Enforce 0 deposit for Buy
+    } else {
+        unitPrice = currentRentPrice;
+        deposit = currentDeposit; // Use deposit from selected size for Rent
+    }
+
+    const total = (unitPrice * qty) + (deposit * qty);
 
     console.log('🧮 Calculation:', {
         type: type,
         qty: qty,
         unitPrice: unitPrice,
+        deposit: deposit,
         total: total
     });
 
-    // Update total display
-    finalPriceDisplay.textContent = '₹' + total.toFixed(2);
+    // Update Total Display
+    if (finalPriceDisplay) finalPriceDisplay.textContent = '₹' + total.toFixed(2);
 
-    // Show/hide deposit
+    // Handle Deposit Display Visibility
+    // Only show if Rent and Deposit > 0
     if (depositBox && depositAmount) {
-        if (type === 'rent' && currentDeposit > 0) {
+        if (type === 'rent' && deposit > 0) {
             depositBox.style.display = 'block';
-            depositAmount.textContent = '₹' + (currentDeposit * qty).toFixed(2);
+            depositAmount.textContent = '₹' + (deposit * qty).toFixed(2);
         } else {
             depositBox.style.display = 'none';
         }
@@ -581,17 +641,36 @@ function addLedgerToCart() {
     
     const selectedOption = sizeSelect.options[sizeSelect.selectedIndex];
     
+    // Validation
+    if (!selectedOption || !selectedOption.value) {
+        alert("⚠️ Please select a size");
+        return;
+    }
+
+    // CRITICAL FIX: Determine correct prices based on purchase type
+    // We read from current variables which are managed by updateLedgerPrice()
+    let payloadPrice;
+    let payloadDeposit = 0;
+
+    if (typeSelect.value === 'buy') {
+        payloadPrice = currentBuyPrice;
+        payloadDeposit = 0; // Explicitly 0 for Buy
+    } else {
+        payloadPrice = currentRentPrice;
+        payloadDeposit = currentDeposit; // Use deposit from size
+    }
+
     const payload = {
         product_id: {{ product.id }},
         quantity: parseInt(qtySelect.value),
         customization: {
             product_type: 'cuplock_ledger',
             size_id: parseInt(sizeSelect.value),
-            size_label: selectedOption.dataset.label,
+            size_label: selectedSizeLabel,
             purchase_type: typeSelect.value,
-            buy_price: currentBuyPrice,
-            rent_price: currentRentPrice,
-            deposit: currentDeposit
+            buy_price: payloadPrice,     // Send explicit values
+            rent_price: payloadDeposit,  // Deposit sent as rent_price for consistency or 0
+            deposit: payloadDeposit       // Explicit deposit field
         }
     };
 
@@ -634,25 +713,14 @@ function addLedgerToCart() {
 // ============================================
 // INITIALIZE ON PAGE LOAD
 // ============================================
-(function() {
+document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Initializing ledger page...');
     
-    // Wait for DOM to be fully ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initializePage);
-    } else {
-        initializePage();
-    }
+    // Set up radio listeners
+    setupRadioListeners();
     
-    function initializePage() {
-        console.log('✅ DOM ready, calling onLedgerSizeChange');
-        
-        // Small delay to ensure all elements are rendered
-        setTimeout(function() {
-            onLedgerSizeChange();
-            console.log('✅ Initialization complete');
-        }, 50);
-    }
-})();
+    // Initialize display to 0
+    updatePriceDisplay(0, 0, 0);
+});
 </script>
 {% endblock %}

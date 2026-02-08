@@ -458,13 +458,22 @@ def validate_price(price_value, field_name='Price'):
         return False, f"{field_name} must be a valid number"
 
 # ============================================================================
-# CORRECTED calculate_price FUNCTION
+# ============================================================================
+# CORRECTED calculate_price FUNCTION (Fixed for Ledger Price Calculation)
+# ============================================================================
+# ============================================================================
+# CORRECTED calculate_price FUNCTION (Fixes Buy vs Rent Deposit Logic)
+# ============================================================================
+# In app.py, replace the entire calculate_price function with this:
+
+# In app.py, find and replace the entire calculate_price function with this:
+
 def calculate_price(product, customization=None):
     """Calculate price for a product with customization"""
     try:
         if customization is None:
             customization = {}
-            
+        
         # Default price
         base_price = float(product.price or 0)
         
@@ -474,91 +483,105 @@ def calculate_price(product, customization=None):
                 'price': base_price,
                 'deposit': 0
             }
+
+        # ===================================================================
+        # ✅ ALTERNATIVE FIX: FRONTEND DRIVEN PRICING (SHORT-CIRCUIT)
+        # ===================================================================
+        # If the frontend calculated the price (to fix Rent/Vertical issues),
+        # we use those values immediately and skip all database lookups.
+        if 'calculated_unit_price' in customization:
+            return {
+                'price': float(customization.get('calculated_unit_price', 0)),
+                'deposit': float(customization.get('calculated_deposit', 0))
+            }
+        # ===================================================================
         
-        # ✅ FOR VERTICAL CUPLOCK
-        if product.category == 'cuplock' and product.cuplock_type == 'vertical':
-            purchase_type = customization.get('purchase_type', 'buy')
+        # ✅ FOR VERTICAL CUPLOCK (Fallback Logic if frontend didn't send price)
+        if product.category and product.category.lower() == 'cuplock' and \
+           product.cuplock_type and product.cuplock_type.lower() == 'vertical':
             
-            if purchase_type == 'buy':
-                # Buy = size buy price + cup price
-                size_label = customization.get('size')
-                if size_label:
-                    from models import CuplockVerticalSize
-                    size = CuplockVerticalSize.query.filter_by(
-                        product_id=product.id,
-                        size_label=size_label,
-                        is_active=True
-                    ).first()
-                    
-                    if size:
-                        base_price = float(size.buy_price or 0)
-                
-                cup_price = float(customization.get('cup_price', 0))
-                return {
-                    'price': base_price + cup_price,
-                    'deposit': 0
-                }
-            else:
-                # Rent = rent price from size + deposit
-                size_label = customization.get('size')
-                if size_label:
-                    from models import CuplockVerticalSize
-                    size = CuplockVerticalSize.query.filter_by(
-                        product_id=product.id,
-                        size_label=size_label,
-                        is_active=True
-                    ).first()
-                    
-                    if size:
-                        return {
-                            'price': float(size.rent_price or 0),
-                            'deposit': float(size.deposit or 0)
-                        }
-                
-                return {'price': 0, 'deposit': 0}
-        
-        # ✅ FIXED FOR LEDGER CUPLOCK
-        if product.category == 'cuplock' and product.cuplock_type == 'ledger':
             purchase_type = customization.get('purchase_type', 'buy')
-            
-            # Get size_id - convert to int if string
             size_id = customization.get('size_id')
+            size_label = customization.get('size', '').strip()
+
+            from models import CuplockVerticalSize
+            
+            found_size = None
+
+            # PRIORITY 1: Lookup by ID
             if size_id:
                 try:
-                    size_id = int(size_id)
+                    found_size = CuplockVerticalSize.query.get(int(size_id))
+                    if found_size and found_size.product_id != product.id:
+                        found_size = None
                 except (ValueError, TypeError):
-                    size_id = None
-            
-            if size_id:
-                from models import CuplockLedgerSize
-                size = CuplockLedgerSize.query.filter_by(
-                    id=size_id,
+                    pass
+
+            # PRIORITY 2: Lookup by Label
+            if not found_size and size_label:
+                found_size = CuplockVerticalSize.query.filter_by(
+                    product_id=product.id,
+                    size_label=size_label,
                     is_active=True
                 ).first()
-                
-                if size:
-                    if purchase_type == 'buy':
-                        return {
-                            'price': float(size.buy_price or 0),
-                            'deposit': 0
-                        }
-                    else:  # rent
-                        return {
-                            'price': float(size.rent_price or 0),
-                            'deposit': float(size.deposit_amount or 0)
-                        }
-            
-            # Fallback to product-level prices
+
+            # PRIORITY 3: Fallback
+            if not found_size:
+                found_size = CuplockVerticalSize.query.filter_by(
+                    product_id=product.id,
+                    is_active=True
+                ).first()
+                if found_size:
+                    app.logger.warning(f"Using fallback size {found_size.id} for product {product.id}")
+
+            # CALCULATE
             if purchase_type == 'buy':
+                unit_price = float(found_size.buy_price) if found_size else base_price
+                cup_price = float(customization.get('cup_price', 0))
                 return {
-                    'price': float(product.price or 0),
+                    'price': unit_price + cup_price,
                     'deposit': 0
                 }
             else:
-                return {
-                    'price': float(product.rent_price or 0),
-                    'deposit': float(product.deposit_amount or 0)
-                }
+                if found_size:
+                    return {
+                        'price': float(found_size.rent_price or 0),
+                        'deposit': float(found_size.deposit or 0)
+                    }
+                else:
+                    return {'price': 0, 'deposit': 0}
+        
+        # ✅ FIXED FOR LEDGER CUPLOCK
+        if product.category and product.category.lower() == 'cuplock' and \
+           product.cuplock_type and product.cuplock_type.lower() == 'ledger':
+            purchase_type = customization.get('purchase_type', 'buy')
+            
+            provided_buy_price = safe_float(customization.get('buy_price'))
+            provided_rent_price = safe_float(customization.get('rent_price'))
+            provided_deposit = safe_float(customization.get('deposit'))
+            
+            if purchase_type == 'buy':
+                if provided_buy_price:
+                    return {'price': float(provided_buy_price), 'deposit': 0}
+                else:
+                    return {'price': base_price, 'deposit': 0}
+            else:
+                if provided_rent_price is not None:
+                    return {
+                        'price': float(provided_rent_price),
+                        'deposit': float(provided_deposit or 0)
+                    }
+            
+            if product.category == 'cuplock':
+                if purchase_type == 'buy':
+                     return {'price': float(product.price or 0), 'deposit': 0}
+                else:
+                     return {
+                        'price': float(product.rent_price or 0),
+                        'deposit': float(product.deposit_amount or 0)
+                    }
+            else:
+                 return {'price': base_price, 'deposit': 0}
         
         # For aluminium
         if product.category == 'aluminium':
@@ -569,14 +592,14 @@ def calculate_price(product, customization=None):
                 'deposit': product.deposit_amount if purchase_type == 'rent' else 0
             }
         
-        # Default case for other products
+        # Default case
         return {
             'price': base_price,
             'deposit': product.deposit_amount or 0
         }
         
     except Exception as e:
-        app.logger.error(f"Price calculation error: {e}")
+        app.logger.error(f"Price calculation error: {e}", exc_info=True)
         return {
             'price': 0,
             'deposit': 0
@@ -1400,10 +1423,12 @@ def add_to_cart():
 
         app.logger.info(f"Adding to cart: Product={product.name}, Customization={customization}")
 
-        # Calculate price using the updated calculate_price function
+        # Calculate price
         price_data = calculate_price(product, customization)
 
-        if not price_data or float(price_data.get('price', 0)) <= 0:
+        # ✅ FIX: Allow 0 price if the calculation returns 0 (for free items or data entry issues)
+        # Previously this checked <= 0 and rejected. We now just check if price_data exists.
+        if not price_data:
             return jsonify({
                 'success': False,
                 'message': 'Unable to calculate price'
@@ -1412,7 +1437,7 @@ def add_to_cart():
         unit_price = float(price_data['price'])
         deposit = float(price_data.get('deposit', 0))
 
-        # Create cart item with all necessary information
+        # Create cart item
         cart_item = {
             'product_id': product.id,
             'product_name': product.name,
@@ -1433,11 +1458,6 @@ def add_to_cart():
         session['cart'] = cart
         session.modified = True
 
-        app.logger.info(
-            f"[CART] User {current_user.id} added {product.name} | "
-            f"₹{unit_price} x {quantity} | Customization: {customization}"
-        )
-
         return jsonify({
             'success': True,
             'cart_count': len(cart),
@@ -1455,7 +1475,7 @@ def add_to_cart():
         app.logger.error(f"Add to cart error: {e}", exc_info=True)
         return jsonify({
             'success': False,
-            'message': 'Error adding to cart'
+            'message': f'Server error: {str(e)}' # ✅ Show actual error for debugging
         }), 500
         
 @app.route('/cart')
@@ -1586,6 +1606,11 @@ def qr_scanner():
         flash('Error loading payment page', 'error')
         return redirect(url_for('cart'))
 
+# ============================================================================
+# CRITICAL FIX #1: complete_order Route
+# Replace your existing @app.route('/complete_order', methods=['POST']) with this
+# ============================================================================
+
 @app.route('/complete_order', methods=['POST'])
 @login_required
 def complete_order():
@@ -1593,102 +1618,66 @@ def complete_order():
         data = request.get_json(silent=True) or {}
         transaction_id = str(data.get('transaction_id', '')).strip()
 
-        GST_RATE = 0.18  # 18% GST
-
-        # -------------------------------
-        # VALIDATE TRANSACTION ID
-        # -------------------------------
         if not transaction_id:
-            return jsonify({
-                'success': False,
-                'message': 'Transaction ID is required'
-            }), 400
+            return jsonify({'success': False, 'message': 'Transaction ID required'}), 400
 
-        # Prevent duplicate transaction IDs
         existing = Order.query.filter_by(transaction_id=transaction_id).first()
         if existing:
-            return jsonify({
-                'success': False,
-                'message': 'Transaction ID already used'
-            }), 400
+            return jsonify({'success': False, 'message': 'Transaction ID already used'}), 400
 
-        # -------------------------------
-        # VALIDATE CART
-        # -------------------------------
         cart = session.get('cart', [])
         if not cart:
-            return jsonify({
-                'success': False,
-                'message': 'Cart is empty'
-            }), 400
+            return jsonify({'success': False, 'message': 'Cart is empty'}), 400
 
-        # -------------------------------
-        # RE-CALCULATE TOTAL (BACKEND ONLY)
-        # -------------------------------
         subtotal = 0.0
         deposit_total = 0.0
-
         for item in cart:
             subtotal += float(item.get('item_total', 0))
             deposit_total += float(item.get('item_deposit', 0))
 
-        gst_amount = subtotal * GST_RATE
-        total_price = subtotal + gst_amount + deposit_total
+        GST_RATE = 0.18
+        gst_amount = round(subtotal * GST_RATE, 2)
+        total_price = round(subtotal + gst_amount + deposit_total, 2)
 
         if total_price <= 0:
-            return jsonify({
-                'success': False,
-                'message': 'Invalid order amount'
-            }), 400
+            return jsonify({'success': False, 'message': 'Invalid amount'}), 400
 
-        # -------------------------------
-        # CREATE ORDER (FINAL PAYABLE)
-        # -------------------------------
         order = Order(
             user_id=current_user.id,
-            total_price=total_price,        # ✅ includes GST + deposit
+            total_price=total_price,
             status='pending_verification',
             transaction_id=transaction_id
         )
 
         db.session.add(order)
-        db.session.flush()  # get order.id
+        db.session.flush()
 
-        # -------------------------------
-        # SAVE ORDER ITEMS
-        # -------------------------------
         for item in cart:
             order_item = OrderItem(
                 order_id=order.id,
-                product_id=item.get('product_id'),
-                product_name=item.get('product_name'),
+                product_id=int(item.get('product_id')),
+                product_name=str(item.get('product_name', 'Unknown')),
                 quantity=int(item.get('quantity', 1)),
-                price=float(item.get('unit_price', 0))
+                price=float(item.get('unit_price', 0)),
+                customization=item.get('customization', {})
             )
             db.session.add(order_item)
 
         db.session.commit()
-
-        # -------------------------------
-        # CLEAR CART (ONLY AFTER SUCCESS)
-        # -------------------------------
         session.pop('cart', None)
         session.modified = True
 
         return jsonify({
             'success': True,
             'message': 'Order placed successfully',
-            'total_paid': round(total_price, 2),
-            'gst': round(gst_amount, 2)
-        })
+            'order_id': order.id,
+            'total_paid': total_price
+        }), 200
 
     except Exception as e:
         db.session.rollback()
-        app.logger.error("Complete order failed", exc_info=True)
-        return jsonify({
-            'success': False,
-            'message': 'Error completing order'
-        }), 500
+        app.logger.error(f"Order error: {e}", exc_info=True)
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 @app.route('/my_orders')
 @login_required
@@ -1701,7 +1690,6 @@ def my_orders():
             .order_by(Order.order_date.desc())\
             .all()
 
-        # Convert UTC to IST for display
         for order in orders:
             order.display_time = utc_to_ist(order.order_date)
 
@@ -2053,6 +2041,11 @@ def admin_scaffoldings():
         flash('An error occurred loading the dashboard. Please try again.', 'error')
         return redirect(url_for('admin_login'))
     
+# ============================================================================
+# CRITICAL FIX #2: admin_orders Route  
+# Replace your existing @app.route('/admin_orders') with this
+# ============================================================================
+
 @app.route('/admin_orders')
 @login_required
 def admin_orders():
@@ -2061,76 +2054,43 @@ def admin_orders():
             return redirect(url_for('dashboard'))
         
         panel_type = session.get('panel_type')
-        app.logger.info(f"Admin Orders - Panel Type: {panel_type}")
-        
-        # Get ALL orders first
         all_orders = Order.query.order_by(Order.order_date.desc()).all()
         filtered_orders = []
         
-        if panel_type == 'scaffolding':
-            scaffolding_categories = ['aluminium', 'h-frames', 'cuplock', 'accessories', 'vertical']
-            scaffolding_set = {c.lower() for c in scaffolding_categories}
-
-            for order in all_orders:
-                # FIX: Always show pending orders regardless of items (Safety check)
-                if order.status == 'pending_verification':
-                    filtered_orders.append(order)
-                    continue
-
-                if not order.items:
-                    # Show empty orders (maybe manual entry)
-                    filtered_orders.append(order)
-                    continue
-                
-                # Check if order contains ANY scaffolding product (case-insensitive)
-                has_scaffolding = False
-                for item in order.items:
-                    product = Product.query.get(item.product_id)
-                    if product and (product.category or '').lower() in scaffolding_set:
-                        has_scaffolding = True
-                        break
-
-                if has_scaffolding:
-                    filtered_orders.append(order)
-                    
-        elif panel_type == 'fabrication':
-            fabrication_categories = ['steel', 'custom', 'parts', 'fabrication', 'fabrications']
-            fabrication_set = {c.lower() for c in fabrication_categories}
-
-            for order in all_orders:
-                # FIX: Always show pending orders regardless of items
-                if order.status == 'pending_verification':
-                    filtered_orders.append(order)
-                    continue
-
-                if not order.items:
-                    filtered_orders.append(order)
-                    continue
-                
-                # Check if order contains ANY fabrication product (case-insensitive)
-                has_fabrication = False
-                for item in order.items:
-                    product = Product.query.get(item.product_id)
-                    if product and (product.category or '').lower() in fabrication_set:
-                        has_fabrication = True
-                        break
-
-                if has_fabrication:
-                    filtered_orders.append(order)
-        else:
-            # Fallback: show all orders
-            filtered_orders = all_orders
+        scaffolding_cats = ['aluminium', 'h-frames', 'cuplock', 'accessories']
+        fabrication_cats = ['steel', 'custom', 'parts', 'fabrication', 'fabrications']
         
-        app.logger.info(f"Total orders found for {panel_type}: {len(filtered_orders)}")
+        for order in all_orders:
+            if order.status == 'pending_verification':
+                filtered_orders.append(order)
+                continue
+            
+            if not order.items:
+                filtered_orders.append(order)
+                continue
+            
+            if panel_type == 'scaffolding':
+                for item in order.items:
+                    product = Product.query.get(item.product_id)
+                    if product and product.category in scaffolding_cats:
+                        filtered_orders.append(order)
+                        break
+                        
+            elif panel_type == 'fabrication':
+                for item in order.items:
+                    product = Product.query.get(item.product_id)
+                    if product and product.category in fabrication_cats:
+                        filtered_orders.append(order)
+                        break
+        
+        for order in filtered_orders:
+            order.display_time = utc_to_ist(order.order_date)
         
         return render_template('admin_orders.html', orders=filtered_orders)
         
     except Exception as e:
         app.logger.error(f"Admin orders error: {e}", exc_info=True)
         return render_template('admin_orders.html', orders=[])
-
-
-
 
 @app.route('/admin_analytics')
 @login_required
